@@ -139,18 +139,18 @@ export default function HomePage() {
               className={styles.categoryCard}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
+              <div className={styles.saleBadge}>Sale</div>
               <div className={styles.categoryImageWrapper}>
                 <Image 
                   src={category.image_url} 
                   alt={category.name}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 160px"
+                  width={320}
+                  height={320}
                   className={styles.categoryImage}
                 />
               </div>
               <div className={styles.categoryInfo}>
                 <h3 className={styles.categoryName}>{category.name}</h3>
-                <span className={styles.categoryLink}>View Collection <ArrowRight size={16} /></span>
               </div>
             </Link>
           ))}
@@ -173,18 +173,18 @@ export default function HomePage() {
               className={styles.categoryCard}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
+              <div className={styles.saleBadge}>Sale</div>
               <div className={styles.categoryImageWrapper}>
                 <Image 
                   src={category.image_url} 
                   alt={category.name}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 160px"
+                  width={320}
+                  height={320}
                   className={styles.categoryImage}
                 />
               </div>
               <div className={styles.categoryInfo}>
                 <h3 className={styles.categoryName}>{category.name}</h3>
-                <span className={styles.categoryLink}>View Collection <ArrowRight size={16} /></span>
               </div>
             </Link>
           ))}

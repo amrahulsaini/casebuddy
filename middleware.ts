@@ -18,11 +18,9 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
   
-  // Handle subdomain routing for /editor
-  if (hostname.startsWith('casetool.') && pathname === '/editor') {
-    const url = request.nextUrl.clone();
-    url.pathname = '/editor';
-    return NextResponse.rewrite(url);
+  // Allow /editor and /editor/api routes without rewriting
+  if (pathname.startsWith('/editor')) {
+    return NextResponse.next();
   }
   
   // Check authentication for casetool routes
@@ -46,7 +44,7 @@ export function middleware(request: NextRequest) {
     
     if (url.pathname === '/') {
       url.pathname = '/casetool';
-    } else {
+    } else if (!url.pathname.startsWith('/editor')) {
       url.pathname = `/casetool${url.pathname}`;
     }
     

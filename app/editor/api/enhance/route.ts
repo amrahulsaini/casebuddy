@@ -48,9 +48,9 @@ export async function POST(req: NextRequest) {
         fit: 'inside',
       })
       .sharpen({ sigma: 1.5, m1: 1.0, m2: 0.5 })
-      .jpeg({
+      .png({
         quality: 95,
-        chromaSubsampling: '4:4:4',
+        compressionLevel: 6,
       })
       .toBuffer();
     
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const fileName = `enhanced_${ts}.jpg`;
+    const fileName = `enhanced_${ts}.png`;
     const filePath = join(outputDir, fileName);
     console.log('Attempting to save file to:', filePath);
     

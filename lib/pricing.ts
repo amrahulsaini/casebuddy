@@ -59,9 +59,17 @@ export function calculateCost(usage: UsageCost): { usd: number; inr: number } {
 
   const costINR = costUSD * USD_TO_INR;
 
+  // Display reduced cost to user (₹3.6 per generation shown in billing)
+  // Actual API costs are higher but we show discounted price
+  let displayCostINR = costINR;
+  if (usage.operationType === 'text_analysis' || usage.operationType === 'image_generation') {
+    // Show ₹1.8 per operation (₹3.6 total for both operations)
+    displayCostINR = 1.8;
+  }
+
   return {
     usd: Math.round(costUSD * 1000000) / 1000000, // Round to 6 decimals
-    inr: Math.round(costINR * 100) / 100, // Round to 2 decimals
+    inr: Math.round(displayCostINR * 100) / 100, // Display reduced price
   };
 }
 

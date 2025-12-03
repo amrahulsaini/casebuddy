@@ -412,6 +412,13 @@ export default function ToolPage() {
             </Link>
           </div>
           <div className={styles.navSection}>
+            <div className={styles.navSectionTitle}>Account</div>
+            <Link href="/casetool/billing" className={styles.navLink} onClick={() => setSidebarOpen(false)}>
+              <Zap size={20} />
+              <span>Usage & Billing</span>
+            </Link>
+          </div>
+          <div className={styles.navSection}>
             <div className={styles.navSectionTitle}>Resources</div>
             <Link href="/templates" className={styles.navLink} onClick={() => setSidebarOpen(false)}>
               <Grid size={20} />

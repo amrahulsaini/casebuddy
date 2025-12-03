@@ -15,6 +15,7 @@ import {
   ANGLE_DESCRIPTIONS,
 } from '@/lib/gemini';
 import { StreamWriter } from '@/lib/stream-helpers';
+import { logAPIUsage } from '@/lib/pricing';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const TEXT_MODEL = process.env.TEXT_MODEL || 'gemini-2.0-flash';
@@ -118,6 +119,17 @@ export async function POST(request: NextRequest) {
             parsed.final_generation_prompt ||
             `Ultra realistic Amazon-style product photos of ${phoneModel} fully inserted in the exact same phone case as the reference image.`;
 
+          // Log text analysis API usage
+          if (userId) {
+            await logAPIUsage(userId, logId, {
+              modelName: TEXT_MODEL,
+              operationType: 'text_analysis',
+              inputImages: 1,
+              outputImages: 0,
+              outputTokens: rawText.length / 4, // Rough estimate: 1 token ≈ 4 chars
+            });
+          }
+
           // Send analysis to UI
           writer.send('data_log', 'Analysis + master prompt ready', 40, {
             phone_model_description: phoneDesc,
@@ -209,6 +221,16 @@ export async function POST(request: NextRequest) {
 
           const generationTime = ((Date.now() - startTime) / 1000).toFixed(2);
           const imageUrl = `/output/${fileName}`;
+
+          // Log image generation API usage
+          if (userId && logId) {
+            await logAPIUsage(userId, logId, {
+              modelName: IMAGE_MODEL,
+              operationType: 'image_generation',
+              inputImages: 1,
+              outputImages: 1,
+            });
+          }
 
           // Update log with success
           if (logId) {

@@ -3,6 +3,8 @@ import sharp from 'sharp';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
+import { cookies } from 'next/headers';
+import { logAPIUsage } from '@/lib/pricing';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -86,6 +88,19 @@ export async function POST(req: NextRequest) {
     } catch (writeError: any) {
       console.error('Failed to write file:', writeError);
       throw new Error(`Cannot write file: ${writeError.message}`);
+    }
+
+    // Log 4K enhancement API usage
+    const cookieStore = await cookies();
+    const userId = cookieStore.get('casetool_user_id')?.value;
+    if (userId) {
+      // Note: No generation_log_id available in editor route, so pass null
+      await logAPIUsage(parseInt(userId), null, {
+        modelName: 'gemini-3-pro-image-preview',
+        operationType: 'image_enhancement',
+        inputImages: 1,
+        outputImages: 1,
+      });
     }
 
     return new Response(

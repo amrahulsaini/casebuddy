@@ -86,18 +86,43 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
-          <div className={styles.heroIcon}>
-            <Sparkles size={48} className={styles.sparkleIcon} />
+          <div className={styles.heroStats}>
+            <div className={styles.statItem}>
+              <Sparkles size={32} />
+              <div>
+                <div className={styles.statNumber}>10K+</div>
+                <div className={styles.statLabel}>Happy Customers</div>
+              </div>
+            </div>
+            <div className={styles.statItem}>
+              <Package size={32} />
+              <div>
+                <div className={styles.statNumber}>500+</div>
+                <div className={styles.statLabel}>Unique Designs</div>
+              </div>
+            </div>
+            <div className={styles.statItem}>
+              <Zap size={32} />
+              <div>
+                <div className={styles.statNumber}>24hrs</div>
+                <div className={styles.statLabel}>Fast Delivery</div>
+              </div>
+            </div>
           </div>
           <h1 className={styles.heroTitle}>
-            Premium Custom Phone Cases
+            Design Your Dream Phone Case
           </h1>
           <p className={styles.heroSubtitle}>
-            Protect your phone with style. Browse our exclusive collection of designer cases.
+            Premium quality • Unique designs • Express yourself
           </p>
-          <Link href="/shop" className={styles.heroButton}>
-            Shop Now <ArrowRight size={20} className={styles.arrowIcon} />
-          </Link>
+          <div className={styles.heroCTA}>
+            <Link href="/shop" className={styles.heroButton}>
+              Explore Collection <ArrowRight size={20} />
+            </Link>
+            <Link href="/templates" className={styles.heroButtonSecondary}>
+              <Sparkles size={18} /> Custom Design
+            </Link>
+          </div>
         </div>
         <div className={styles.heroBackground}></div>
       </section>

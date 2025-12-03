@@ -130,7 +130,7 @@
 /* ===== Hero Section ===== */
 .hero {
   position: relative;
-  min-height: 80vh;
+  min-height: 60vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -159,7 +159,7 @@
   position: relative;
   z-index: 10;
   text-align: center;
-  max-width: 900px;
+  max-width: 1000px;
   padding: 2rem;
   animation: fadeInUp 1s ease-out;
 }
@@ -175,30 +175,57 @@
   }
 }
 
-.heroIcon {
-  margin-bottom: 2rem;
-  animation: pulse 2s ease-in-out infinite;
+.heroStats {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
 }
 
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.1); opacity: 0.8; }
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: #fff;
+  animation: fadeInUp 1s ease-out;
 }
 
-.sparkleIcon {
+.statItem:nth-child(1) { animation-delay: 0.1s; opacity: 0; animation-fill-mode: forwards; }
+.statItem:nth-child(2) { animation-delay: 0.2s; opacity: 0; animation-fill-mode: forwards; }
+.statItem:nth-child(3) { animation-delay: 0.3s; opacity: 0; animation-fill-mode: forwards; }
+
+.statItem svg {
   color: #ff9500;
-  filter: drop-shadow(0 0 10px rgba(255, 149, 0, 0.5));
+  flex-shrink: 0;
+}
+
+.statNumber {
+  font-size: 1.8rem;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 0.3rem;
+  background: linear-gradient(135deg, #ff6b00 0%, #ff9500 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.statLabel {
+  font-size: 0.85rem;
+  color: #aaa;
+  font-weight: 500;
 }
 
 .heroTitle {
-  font-size: 4rem;
+  font-size: 3.5rem;
   font-weight: 900;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   background: linear-gradient(135deg, #ff6b00 0%, #ff9500 50%, #ffd700 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  line-height: 1.2;
+  line-height: 1.1;
   animation: shimmer 3s ease-in-out infinite;
   background-size: 200% auto;
 }
@@ -210,11 +237,20 @@
 }
 
 .heroSubtitle {
-  font-size: 1.4rem;
-  color: #ccc;
-  margin-bottom: 3rem;
+  font-size: 1.1rem;
+  color: #bbb;
+  margin-bottom: 2.5rem;
   line-height: 1.6;
   animation: fadeInUp 1s ease-out 0.2s both;
+  font-weight: 500;
+}
+
+.heroCTA {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .heroButton {
@@ -223,12 +259,12 @@
   gap: 0.8rem;
   background: linear-gradient(135deg, #ff6b00 0%, #ff9500 100%);
   color: #fff;
-  padding: 1.3rem 3.5rem;
-  border-radius: 14px;
+  padding: 1rem 2.5rem;
+  border-radius: 50px;
   text-decoration: none;
   font-weight: 700;
-  font-size: 1.2rem;
-  box-shadow: 0 10px 30px rgba(255, 107, 0, 0.4);
+  font-size: 1.05rem;
+  box-shadow: 0 8px 24px rgba(255, 107, 0, 0.4);
   transition: all 0.3s ease;
   animation: fadeInUp 1s ease-out 0.4s both;
   position: relative;
@@ -251,16 +287,30 @@
 }
 
 .heroButton:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 12px 32px rgba(255, 107, 0, 0.5);
+}
+
+.heroButtonSecondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: transparent;
+  color: #fff;
+  padding: 1rem 2.5rem;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.05rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+  animation: fadeInUp 1s ease-out 0.5s both;
+}
+
+.heroButtonSecondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #ff9500;
   transform: translateY(-3px);
-  box-shadow: 0 15px 40px rgba(255, 107, 0, 0.5);
-}
-
-.arrowIcon {
-  transition: transform 0.3s ease;
-}
-
-.heroButton:hover .arrowIcon {
-  transform: translateX(5px);
 }
 
 /* ===== Features Bar ===== */
@@ -1077,13 +1127,33 @@
     font-size: 0.85rem;
   }
   
-  .heroTitle {
-    font-size: 1.8rem;
+  .hero {
+    min-height: 50vh;
   }
   
-  .heroButton {
-    padding: 1rem 2rem;
+  .heroStats {
+    gap: 2rem;
+  }
+  
+  .statNumber {
+    font-size: 1.5rem;
+  }
+  
+  .statLabel {
+    font-size: 0.75rem;
+  }
+  
+  .heroTitle {
+    font-size: 2rem;
+  }
+  
+  .heroSubtitle {
     font-size: 1rem;
+  }
+  
+  .heroButton, .heroButtonSecondary {
+    padding: 0.9rem 2rem;
+    font-size: 0.95rem;
   }
   
   .features {

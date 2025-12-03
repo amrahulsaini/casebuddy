@@ -935,27 +935,10 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
-.actionBtn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, var(--primary-orange) 0%, var(--dark-orange) 100%);
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-.actionBtn:hover::before {
-  opacity: 1;
-}
-
 .actionBtn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(255, 107, 53, 0.4);
-}
-
-.actionBtn > * {
-  position: relative;
-  z-index: 1;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  filter: brightness(1.1);
 }
 
 .actionBtnSecondary {
@@ -1026,27 +1009,10 @@
   overflow: hidden;
 }
 
-.feedbackBtnYes::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-.feedbackBtnYes:hover::before {
-  opacity: 1;
-}
-
 .feedbackBtnYes:hover {
   transform: translateY(-3px) scale(1.05);
   box-shadow: 0 8px 24px rgba(16, 185, 129, 0.5);
-}
-
-.feedbackBtnYes > * {
-  position: relative;
-  z-index: 1;
+  filter: brightness(1.1);
 }
 
 .feedbackBtnNo {
@@ -1070,27 +1036,10 @@
   overflow: hidden;
 }
 
-.feedbackBtnNo::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-.feedbackBtnNo:hover::before {
-  opacity: 1;
-}
-
 .feedbackBtnNo:hover {
   transform: translateY(-3px) scale(1.05);
   box-shadow: 0 8px 24px rgba(239, 68, 68, 0.5);
-}
-
-.feedbackBtnNo > * {
-  position: relative;
-  z-index: 1;
+  filter: brightness(1.1);
 }
 
 .actionButtons {

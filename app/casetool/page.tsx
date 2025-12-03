@@ -21,7 +21,8 @@ import {
   X,
   Image as ImageIcon,
   Grid,
-  LogOut
+  LogOut,
+  Maximize2
 } from 'lucide-react';
 
 interface GeneratedImage {
@@ -58,6 +59,10 @@ export default function ToolPage() {
   const [cropImageUrl, setCropImageUrl] = useState<string | null>(null);
   const cropImageRef = useRef<HTMLImageElement>(null);
   const [cropper, setCropper] = useState<any>(null);
+
+  // Fullscreen modal state
+  const [fullscreenModalOpen, setFullscreenModalOpen] = useState(false);
+  const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null);
 
   // Initialize cropper when modal opens
   useEffect(() => {
@@ -391,6 +396,16 @@ export default function ToolPage() {
     }, 'image/png');
   };
 
+  const handleFullscreen = (url: string) => {
+    setFullscreenImageUrl(url);
+    setFullscreenModalOpen(true);
+  };
+
+  const closeFullscreenModal = () => {
+    setFullscreenModalOpen(false);
+    setFullscreenImageUrl(null);
+  };
+
   return (
     <div className={styles.container}>
       {/* Sidebar */}
@@ -612,6 +627,13 @@ export default function ToolPage() {
                     <>
                       <div className={styles.mockupImageContainer}>
                         <img src={img.url} alt={img.title} className={styles.mockupImage} />
+                        <button 
+                          onClick={() => handleFullscreen(img.url)} 
+                          className={styles.fullscreenButton}
+                          title="View fullscreen"
+                        >
+                          <Maximize2 size={20} />
+                        </button>
                       </div>
                       <div className={styles.mockupCardFooter}>
                         {!img.logId || !feedbackGiven.has(img.logId) ? (
@@ -790,6 +812,21 @@ export default function ToolPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Fullscreen Modal */}
+      {fullscreenModalOpen && fullscreenImageUrl && (
+        <div className={styles.fullscreenModal} onClick={closeFullscreenModal}>
+          <button className={styles.fullscreenCloseButton} onClick={closeFullscreenModal}>
+            <X size={32} />
+          </button>
+          <img 
+            src={fullscreenImageUrl} 
+            alt="Fullscreen view" 
+            className={styles.fullscreenImage}
+            onClick={(e) => e.stopPropagation()}
+          />
         </div>
       )}
     </div>

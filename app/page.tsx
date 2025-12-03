@@ -61,7 +61,7 @@ export default function HomePage() {
   return (
     <div className={styles.container}>
       {/* Announcement Banner */}
-      <div className={styles.announcementBar}>
+      <div className={`${styles.announcementBar} ${!headerVisible ? styles.hidden : ''}`}>
         <div className={styles.marquee}>
           <div className={styles.marqueeContent}>
             <span><Gift size={16} /> First Time Order? Get FREE SHIPPING with code: CASEBUDDY100</span>

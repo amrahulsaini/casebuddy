@@ -124,13 +124,7 @@ CREATE TABLE IF NOT EXISTS order_items (
   INDEX idx_product (product_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Sample category data structure (client should add their own)
--- This is just an example structure, not copied content
-INSERT INTO categories (name, slug, description, sort_order) VALUES
-('Phone Cases', 'phone-cases', 'Protective cases for all phone models', 1),
-('iPhone Cases', 'iphone-cases', 'Cases for iPhone models', 2),
-('Samsung Cases', 'samsung-cases', 'Cases for Samsung models', 3),
-('Custom Cases', 'custom-cases', 'Design your own custom cases', 4);
+-- No sample data - all categories will be added via seeding script
 
 -- Admin users table (for managing products)
 CREATE TABLE IF NOT EXISTS admin_users (

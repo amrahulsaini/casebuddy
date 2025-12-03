@@ -13,11 +13,13 @@
     "@google/generative-ai": "^0.24.1",
     "cropperjs": "^1.6.2",
     "lucide-react": "^0.555.0",
+    "mysql2": "^3.11.5",
     "next": "16.0.4",
     "rahul": "^0.0.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "sharp": "^0.33.5"
+    "sharp": "^0.33.5",
+    "uuid": "^11.0.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

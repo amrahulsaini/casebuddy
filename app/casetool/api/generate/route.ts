@@ -7,6 +7,8 @@ import { NextRequest } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
+import { v4 as uuidv4 } from 'uuid';
+import pool from '@/lib/db';
 import {
   callGemini,
   buildAnalysisPrompt,
@@ -22,6 +24,9 @@ export async function POST(request: NextRequest) {
   const stream = new ReadableStream({
     async start(controller) {
       const writer = new StreamWriter(controller);
+      const sessionId = uuidv4();
+      const startTime = Date.now();
+      let logId: number | null = null;
 
       try {
         if (!GEMINI_API_KEY) {
@@ -36,6 +41,13 @@ export async function POST(request: NextRequest) {
         if (!caseImage) {
           throw new Error('Image upload failed');
         }
+
+        // Create initial log entry
+        const [result]: any = await pool.execute(
+          'INSERT INTO generation_logs (session_id, phone_model, original_image_name, status) VALUES (?, ?, ?, ?)',
+          [sessionId, phoneModel, caseImage.name, 'generating']
+        );
+        logId = result.insertId;
 
         // 1. Read uploaded image
         writer.send('status', 'Processing upload...', 10);
@@ -185,14 +197,32 @@ export async function POST(request: NextRequest) {
           const filePath = join(outputDir, fileName);
           await writeFile(filePath, Buffer.from(genB64, 'base64'));
 
+          const generationTime = ((Date.now() - startTime) / 1000).toFixed(2);
+
+          // Update log with success
+          if (logId) {
+            await pool.execute(
+              'UPDATE generation_logs SET generated_image_url = ?, ai_prompt = ?, generation_time = ?, status = ? WHERE id = ?',
+              [`/output/${fileName}`, finalPrompt, generationTime, 'completed', logId]
+            );
+          }
+
           writer.send('image_result', `Mockup image ready`, 90, {
             url: `/output/${fileName}`,
             title: `Phone Case Mockup – 5 angles collage`,
+            logId: logId,
           });
 
         writer.send('done', 'All tasks completed successfully!', 100);
         controller.close();
       } catch (error: any) {
+        // Update log with failure
+        if (logId) {
+          await pool.execute(
+            'UPDATE generation_logs SET status = ?, feedback_note = ? WHERE id = ?',
+            ['failed', error.message, logId]
+          );
+        }
         writer.send('error', error.message || 'An error occurred', 0);
         controller.close();
       }

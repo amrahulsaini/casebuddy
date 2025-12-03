@@ -6,11 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed:categories": "tsx scripts/seed-categories.ts",
+    "db:main:create": "mysql -u root -p -e \"CREATE DATABASE IF NOT EXISTS case_main; CREATE USER IF NOT EXISTS 'case_main'@'localhost' IDENTIFIED BY 'main'; GRANT ALL PRIVILEGES ON case_main.* TO 'case_main'@'localhost'; FLUSH PRIVILEGES;\"",
+    "db:main:schema": "mysql -u case_main -p case_main < database/case_main_schema.sql"
   },
   "dependencies": {
     "@google/genai": "^1.30.0",
     "@google/generative-ai": "^0.24.1",
+    "axios": "^1.13.2",
     "cropperjs": "^1.6.2",
     "lucide-react": "^0.555.0",
     "mysql2": "^3.11.5",
@@ -19,6 +23,7 @@
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "sharp": "^0.33.5",
+    "tsx": "^4.21.0",
     "uuid": "^11.0.3"
   },
   "devDependencies": {

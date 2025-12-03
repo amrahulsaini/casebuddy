@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'casebuddy.co.in',
       },
+      {
+        protocol: 'https',
+        hostname: 'atcasa.co.in',
+      },
     ],
   },
   // Ensure proper URL handling

@@ -333,6 +333,26 @@
   animation: sectionFadeIn 1s ease-out 0.3s forwards;
 }
 
+.sectionAltFullWidth {
+  padding: 6rem 0;
+  width: 100%;
+  background: #f9f9f9;
+  opacity: 0;
+  animation: sectionFadeIn 1s ease-out 0.3s forwards;
+}
+
+.sectionAltFullWidth .sectionHeader {
+  padding: 0 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.sectionAltFullWidth .categoryGrid {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  padding: 0 2rem;
+}
+
 @keyframes sectionFadeIn {
   from {
     opacity: 0;

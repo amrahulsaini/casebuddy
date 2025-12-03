@@ -179,7 +179,7 @@ export default function HomePage() {
       </section>
 
       {/* Section 2: Our Categories */}
-      <section className={styles.sectionAlt}>
+      <section className={styles.sectionAltFullWidth}>
         <div className={styles.sectionHeader}>
           <div className={styles.floralDecor}>🌺</div>
           <h2 className={styles.sectionTitle}>Our Categories</h2>

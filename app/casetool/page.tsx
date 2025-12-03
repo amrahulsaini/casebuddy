@@ -2,6 +2,7 @@
 
 import { useState, FormEvent, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import styles from './page.module.css';
 import 'cropperjs/dist/cropper.css';
 import { 
@@ -349,7 +350,9 @@ export default function ToolPage() {
       <div className={`${styles.sidebarOverlay} ${sidebarOpen ? styles.sidebarOpen : ''}`}>
         <div className={styles.sidebarHeader}>
           <div className={styles.sidebarLogo}>
-            <div className={styles.sidebarLogoIcon}>CB</div>
+            <div className={styles.sidebarLogoIcon}>
+              <Image src="/favicon.ico" alt="CaseBuddy" width={32} height={32} />
+            </div>
             <span className={styles.sidebarLogoText}>CaseBuddy</span>
           </div>
           <button className={styles.closeButton} onClick={() => setSidebarOpen(false)}>
@@ -402,7 +405,7 @@ export default function ToolPage() {
         <header className={styles.header}>
         <div className={styles.logo}>
           <div className={styles.logoIcon}>
-            <Smartphone size={24} />
+            <Image src="/favicon.ico" alt="CaseBuddy" width={24} height={24} />
           </div>
           <span className={styles.logoText}>CaseBuddy</span>
         </div>

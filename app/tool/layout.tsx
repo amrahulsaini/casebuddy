@@ -1,0 +1,14 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'AI Phone Case Mockup Studio',
+  description: 'Generate professional phone case mockups with AI',
+};
+
+export default function ToolLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return children;
+}

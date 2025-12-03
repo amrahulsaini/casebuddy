@@ -2,7 +2,7 @@ import axios from 'axios';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
-import caseMainPool from './db-main';
+import caseMainPool from '../lib/db-main';
 
 interface Category {
   name: string;

@@ -13,11 +13,8 @@ export async function GET(request: NextRequest) {
         generated_image_url,
         generation_time,
         status,
-        user_feedback,
-        feedback_note,
         created_at
       FROM generation_logs
-      WHERE status = 'completed'
       ORDER BY created_at DESC
       LIMIT 100`
     );

@@ -22,7 +22,7 @@ Tracks every API operation with detailed cost information:
 Stores current pricing rates for each model:
 - Gemini 2.0 Flash: $0.10/input image, $0.40/1M output tokens
 - Gemini 2.5 Flash Image: $0.30/input image, $0.039/output image
-- Gemini 3 Pro Image: $0.0011/input image, $0.24/4K output image
+- Gemini 3 Pro Image: $2.00/input image, $0.134/1K-2K output image, $0.24/4K output image
 - USD to INR conversion rate: 83.5
 
 #### `user_billing_summary` (VIEW)
@@ -137,9 +137,9 @@ Added "Usage & Billing" link to sidebar navigation:
 ### Enhancement Flow (1 API call)
 1. **4K Upscaling:**
    - Model: gemini-3-pro-image-preview
-   - Input: 1 image ($0.0011)
+   - Input: 1 image ($2.00)
    - Output: 1 4K image ($0.24)
-   - Total: $0.2411 (₹20.13)
+   - Total: $2.24 (₹187.04)
 
 ## User Workflow
 
@@ -193,18 +193,18 @@ mysql -u root -p < database/add-pricing-tracking.sql
 
 ### Light Usage (10 generations/month)
 - 10 generations × $0.44 = $4.40 (₹367.40)
-- 5 enhancements × $0.24 = $1.20 (₹100.20)
-- **Monthly Total: $5.60 (₹467.60)**
+- 5 enhancements × $2.24 = $11.20 (₹935.20)
+- **Monthly Total: $15.60 (₹1,302.60)**
 
 ### Medium Usage (50 generations/month)
 - 50 generations × $0.44 = $22.00 (₹1,837.00)
-- 25 enhancements × $0.24 = $6.00 (₹501.00)
-- **Monthly Total: $28.00 (₹2,338.00)**
+- 25 enhancements × $2.24 = $56.00 (₹4,676.00)
+- **Monthly Total: $78.00 (₹6,513.00)**
 
 ### Heavy Usage (200 generations/month)
 - 200 generations × $0.44 = $88.00 (₹7,348.00)
-- 100 enhancements × $0.24 = $24.00 (₹2,004.00)
-- **Monthly Total: $112.00 (₹9,352.00)**
+- 100 enhancements × $2.24 = $224.00 (₹18,704.00)
+- **Monthly Total: $312.00 (₹26,052.00)**
 
 ## Future Enhancements
 

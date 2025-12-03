@@ -44,7 +44,7 @@ INSERT INTO pricing_config (
 ) VALUES 
   ('gemini-2.0-flash', 0.10, 0.40, 0.039, 0.039),
   ('gemini-2.5-flash-image', 0.30, 0.00, 0.039, 0.039),
-  ('gemini-3-pro-image-preview', 0.0011, 12.00, 0.134, 0.24)
+  ('gemini-3-pro-image-preview', 2.00, 12.00, 0.134, 0.24)
 ON DUPLICATE KEY UPDATE
   input_image_price = VALUES(input_image_price),
   output_text_price_per_1m = VALUES(output_text_price_per_1m),

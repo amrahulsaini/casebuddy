@@ -1,20 +1,20 @@
-// Pricing calculator utility
+// Pricing calculator utility (Official Gemini API Pricing - December 2024)
 export const PRICING = {
   'gemini-2.0-flash': {
-    inputImage: 0.10, // per image
-    outputText: 0.40, // per 1M tokens
-    outputImage: 0.039, // per image
+    inputImage: 0.10, // $0.10 per image
+    outputText: 0.40, // $0.40 per 1M tokens
+    outputImage: 0.039, // $0.039 per image
   },
   'gemini-2.5-flash-image': {
-    inputImage: 0.30, // per image
+    inputImage: 0.30, // $0.30 per image
     outputText: 0.00,
-    outputImage: 0.039, // per image
+    outputImage: 0.039, // $0.039 per image
   },
   'gemini-3-pro-image-preview': {
-    inputImage: 0.0011, // per image
-    outputText: 12.00, // per 1M tokens
-    outputImage: 0.134, // per 1K/2K image
-    outputImage4K: 0.24, // per 4K image
+    inputImage: 2.00, // $2.00 per text/image input
+    outputText: 12.00, // $12.00 per 1M tokens (text/thinking)
+    outputImage: 0.134, // $0.134 per 1K/2K image
+    outputImage4K: 0.24, // $0.24 per 4K image
   },
 };
 

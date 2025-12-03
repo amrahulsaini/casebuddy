@@ -33,6 +33,10 @@ export async function POST(request: NextRequest) {
           throw new Error('API Key not configured');
         }
 
+        // Get user ID from cookie
+        const userIdCookie = request.cookies.get('casetool_user_id');
+        const userId = userIdCookie ? parseInt(userIdCookie.value) : null;
+
         const formData = await request.formData();
         const phoneModel = (formData.get('phone_model') as string) || 'Unknown Model';
         const caseImage = formData.get('case_image') as File;
@@ -42,10 +46,10 @@ export async function POST(request: NextRequest) {
           throw new Error('Image upload failed');
         }
 
-        // Create initial log entry
+        // Create initial log entry with user_id
         const [result]: any = await pool.execute(
-          'INSERT INTO generation_logs (session_id, phone_model, original_image_name, status) VALUES (?, ?, ?, ?)',
-          [sessionId, phoneModel, caseImage.name, 'generating']
+          'INSERT INTO generation_logs (session_id, user_id, phone_model, original_image_name, status) VALUES (?, ?, ?, ?, ?)',
+          [sessionId, userId, phoneModel, caseImage.name, 'generating']
         );
         logId = result.insertId;
 

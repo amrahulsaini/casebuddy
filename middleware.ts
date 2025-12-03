@@ -8,8 +8,13 @@ export function middleware(request: NextRequest) {
   // Check if accessing /casetool routes (including subdomain)
   const isCasetoolRoute = pathname.startsWith('/casetool') || hostname.startsWith('casetool.');
   
-  // Allow auth API and login page without authentication
-  if (pathname === '/casetool/api/auth' || pathname === '/casetool/login') {
+  // Allow auth, user API, login and email pages without checks
+  if (
+    pathname === '/casetool/api/auth' || 
+    pathname === '/casetool/api/user' ||
+    pathname === '/casetool/login' ||
+    pathname === '/casetool/email'
+  ) {
     if (hostname.startsWith('casetool.') && !pathname.startsWith('/casetool')) {
       const url = request.nextUrl.clone();
       url.pathname = `/casetool${pathname}`;
@@ -31,6 +36,17 @@ export function middleware(request: NextRequest) {
       const url = request.nextUrl.clone();
       url.pathname = '/casetool/login';
       return NextResponse.redirect(url);
+    }
+
+    // Check if user has email set (skip for email page itself)
+    if (pathname !== '/casetool/email') {
+      const userIdCookie = request.cookies.get('casetool_user_id');
+      
+      if (!userIdCookie) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/casetool/email';
+        return NextResponse.redirect(url);
+      }
     }
   }
   

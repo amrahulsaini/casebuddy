@@ -3,8 +3,11 @@ import pool from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    const [rows] = await pool.execute(
-      `SELECT 
+    // Get user ID from cookie
+    const userIdCookie = request.cookies.get('casetool_user_id');
+    const userId = userIdCookie ? parseInt(userIdCookie.value) : null;
+
+    let query = `SELECT 
         id,
         session_id,
         phone_model,
@@ -14,10 +17,19 @@ export async function GET(request: NextRequest) {
         generation_time,
         status,
         created_at
-      FROM generation_logs
-      ORDER BY created_at DESC
-      LIMIT 100`
-    );
+      FROM generation_logs`;
+    
+    const params: any[] = [];
+
+    // Filter by user if logged in
+    if (userId) {
+      query += ` WHERE user_id = ?`;
+      params.push(userId);
+    }
+
+    query += ` ORDER BY created_at DESC LIMIT 100`;
+
+    const [rows] = await pool.execute(query, params);
 
     return NextResponse.json({
       success: true,

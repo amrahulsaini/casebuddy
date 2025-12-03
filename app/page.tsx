@@ -16,6 +16,9 @@ interface Category {
 export default function HomePage() {
   const [categories, setCategories] = useState<{ custom: Category[], regular: Category[] }>({ custom: [], regular: [] });
   const [loading, setLoading] = useState(true);
+  const [scrollY, setScrollY] = useState(0);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [headerVisible, setHeaderVisible] = useState(true);
 
   useEffect(() => {
     fetch('/api/categories')
@@ -24,7 +27,26 @@ export default function HomePage() {
         setCategories(data);
         setLoading(false);
       });
-  }, []);
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setHeaderVisible(false);
+      } else {
+        setHeaderVisible(true);
+      }
+      
+      setScrollY(currentScrollY);
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [lastScrollY]);
 
   if (loading) {
     return (
@@ -53,7 +75,7 @@ export default function HomePage() {
       </div>
 
       {/* Header */}
-      <header className={styles.header}>
+      <header className={`${styles.header} ${scrollY > 50 ? styles.scrolled : ''} ${!headerVisible ? styles.hidden : ''}`}>
         <nav className={styles.nav}>
           <Link href="/" className={styles.logo}>
             <Image src="/casebuddy-logo.png" alt="CaseBuddy" width={180} height={50} className={styles.logoImg} priority />
@@ -160,6 +182,27 @@ export default function HomePage() {
             {customDesignedCases.map((category, index) => (
               <Link 
                 key={category.id}
+                href={`/shop/${category.slug}`}
+                className={styles.horizontalCard}
+              >
+                <div className={styles.horizontalImageWrapper}>
+                  <Image 
+                    src={category.image_url} 
+                    alt={category.name}
+                    width={280}
+                    height={380}
+                    className={styles.horizontalImage}
+                    loading="lazy"
+                  />
+                </div>
+                <div className={styles.horizontalInfo}>
+                  <h3 className={styles.horizontalName}>{category.name}</h3>
+                </div>
+              </Link>
+            ))}
+            {customDesignedCases.map((category, index) => (
+              <Link 
+                key={`duplicate-${category.id}`}
                 href={`/shop/${category.slug}`}
                 className={styles.horizontalCard}
               >

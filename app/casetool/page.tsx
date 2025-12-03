@@ -2,7 +2,7 @@
 
 import { useState, FormEvent, useRef } from 'react';
 import Image from 'next/image';
-import styles from './page-new.module.css';
+import styles from './page.module.css';
 import { 
   Sparkles, 
   Upload, 

@@ -311,6 +311,19 @@
   animation: sectionFadeIn 1s ease-out forwards;
 }
 
+.sectionFullWidth {
+  padding: 6rem 0;
+  width: 100%;
+  opacity: 0;
+  animation: sectionFadeIn 1s ease-out forwards;
+}
+
+.sectionFullWidth .sectionHeader {
+  padding: 0 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
 .sectionAlt {
   padding: 6rem 2rem;
   max-width: 1400px;
@@ -388,6 +401,8 @@
   overflow: hidden;
   padding: 2rem 0;
   position: relative;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
 }
 
 .scrollContent {

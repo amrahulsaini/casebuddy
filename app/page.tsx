@@ -123,7 +123,7 @@ export default function HomePage() {
       </section>
 
       {/* Section 1: Our Custom Designed Cases */}
-      <section className={styles.section}>
+      <section className={styles.sectionFullWidth}>
         <div className={styles.sectionHeader}>
           <div className={styles.floralDecor}>🌸</div>
           <h2 className={styles.sectionTitle}>Our Custom Designed Cases</h2>

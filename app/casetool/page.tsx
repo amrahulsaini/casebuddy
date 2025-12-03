@@ -303,6 +303,7 @@ export default function ToolPage() {
     setIsError(false);
     setFeedbackGiven(false);
     setCurrentLogId(null);
+    setImages([]); // Clear previous images
 
     // Create new FormData with the saved prompt
     const newFormData = new FormData();

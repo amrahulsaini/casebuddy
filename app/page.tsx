@@ -1,6 +1,9 @@
+'use client';
 import Link from 'next/link';
 import Image from 'next/image';
-import caseMainPool from '@/lib/db-main';
+import { Sparkles, ShieldCheck, Truck, Gift, Star, TrendingUp, Zap, ArrowRight, Package, Headphones, ShoppingCart, User, Menu, Heart, Instagram, Facebook, Twitter, Mail, Phone, MapPin } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import styles from './home.module.css';
 
 interface Category {
   id: number;
@@ -10,160 +13,147 @@ interface Category {
   sort_order: number;
 }
 
-async function getCategories() {
-  try {
-    const [rows] = await caseMainPool.execute<any[]>(
-      'SELECT id, name, slug, image_url, sort_order FROM categories WHERE is_active = TRUE ORDER BY sort_order ASC'
-    );
-    return rows as Category[];
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-    return [];
-  }
-}
+export default function HomePage() {
+  const [categories, setCategories] = useState<{ custom: Category[], regular: Category[] }>({ custom: [], regular: [] });
+  const [loading, setLoading] = useState(true);
 
-export default async function HomePage() {
-  const allCategories = await getCategories();
-  const customDesignedCases = allCategories.slice(0, 8);
-  const ourCategories = allCategories.slice(8);
+  useEffect(() => {
+    fetch('/api/categories')
+      .then(res => res.json())
+      .then(data => {
+        setCategories(data);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loader}></div>
+      </div>
+    );
+  }
+
+  const { custom: customDesignedCases, regular: ourCategories } = categories;
 
   return (
-    <div style={{ minHeight: '100vh', fontFamily: "'Sora', sans-serif", background: '#fff' }}>
+    <div className={styles.container}>
+      {/* Announcement Banner */}
+      <div className={styles.announcementBar}>
+        <div className={styles.marquee}>
+          <div className={styles.marqueeContent}>
+            <span><Gift size={16} /> First Time Order? Get FREE SHIPPING with code: CASEBUDDY100</span>
+            <span><Star size={16} /> Buy 2 Get 10% OFF • Buy 3 Get 20% OFF</span>
+            <span><Truck size={16} /> Express Delivery Available • Track Your Order</span>
+            <span><ShieldCheck size={16} /> Premium Quality Cases • 30-Day Money Back</span>
+            <span><Gift size={16} /> First Time Order? Get FREE SHIPPING with code: CASEBUDDY100</span>
+            <span><Star size={16} /> Buy 2 Get 10% OFF • Buy 3 Get 20% OFF</span>
+          </div>
+        </div>
+      </div>
+
       {/* Header */}
-      <header style={{ 
-        background: '#000', 
-        color: '#fff', 
-        padding: '1rem 2rem',
-        borderBottom: '3px solid #ff6b00',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100
-      }}>
-        <nav style={{ 
-          maxWidth: '1400px', 
-          margin: '0 auto',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <Link href="/" style={{ textDecoration: 'none' }}>
-            <h1 style={{ 
-              margin: 0, 
-              fontSize: '1.8rem',
-              background: 'linear-gradient(135deg, #ff6b00 0%, #ff9500 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              fontWeight: 700
-            }}>
-              CaseBuddy
-            </h1>
+      <header className={styles.header}>
+        <nav className={styles.nav}>
+          <Link href="/" className={styles.logo}>
+            <Image src="/favicon.ico" alt="CaseBuddy" width={40} height={40} className={styles.logoImg} />
+            <span className={styles.logoText}>CaseBuddy</span>
           </Link>
-          <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-            <Link href="/" style={{ color: '#fff', textDecoration: 'none', fontWeight: 500 }}>Home</Link>
-            <Link href="/shop" style={{ color: '#fff', textDecoration: 'none', fontWeight: 500 }}>Shop</Link>
-            <Link 
-              href="https://casetool.casebuddy.co.in" 
-              style={{ 
-                background: 'linear-gradient(135deg, #ff6b00 0%, #ff9500 100%)',
-                color: '#fff',
-                padding: '0.5rem 1.5rem',
-                borderRadius: '8px',
-                textDecoration: 'none',
-                fontWeight: 600
-              }}
-            >
-              AI Tool
-            </Link>
+          <div className={styles.navLinks}>
+            <Link href="/" className={styles.navLink}>Home</Link>
+            <Link href="/shop" className={styles.navLink}>Shop</Link>
+            <Link href="/templates" className={styles.navLink}>Templates</Link>
+            <Link href="/about" className={styles.navLink}>About</Link>
+            <Link href="/contact" className={styles.navLink}>Contact</Link>
+          </div>
+          <div className={styles.navActions}>
+            <button className={styles.iconButton}>
+              <Heart size={22} />
+            </button>
+            <button className={styles.iconButton}>
+              <ShoppingCart size={22} />
+              <span className={styles.cartBadge}>0</span>
+            </button>
+            <button className={styles.iconButton}>
+              <User size={22} />
+            </button>
+            <button className={styles.mobileMenu}>
+              <Menu size={24} />
+            </button>
           </div>
         </nav>
       </header>
 
       {/* Hero Section */}
-      <section style={{
-        background: 'linear-gradient(135deg, #000 0%, #1a1a1a 100%)',
-        color: '#fff',
-        padding: '5rem 2rem',
-        textAlign: 'center'
-      }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-          <h2 style={{ 
-            fontSize: '3.5rem', 
-            marginBottom: '1.5rem',
-            background: 'linear-gradient(135deg, #ff6b00 0%, #ff9500 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            fontWeight: 700,
-            lineHeight: 1.2
-          }}>
+      <section className={styles.hero}>
+        <div className={styles.heroContent}>
+          <div className={styles.heroIcon}>
+            <Sparkles size={48} className={styles.sparkleIcon} />
+          </div>
+          <h1 className={styles.heroTitle}>
             Premium Custom Phone Cases
-          </h2>
-          <p style={{ fontSize: '1.3rem', marginBottom: '2.5rem', color: '#ccc', lineHeight: 1.6 }}>
+          </h1>
+          <p className={styles.heroSubtitle}>
             Protect your phone with style. Browse our exclusive collection of designer cases.
           </p>
-          <Link 
-            href="/shop" 
-            style={{
-              display: 'inline-block',
-              background: 'linear-gradient(135deg, #ff6b00 0%, #ff9500 100%)',
-              color: '#fff',
-              padding: '1.2rem 3rem',
-              borderRadius: '12px',
-              textDecoration: 'none',
-              fontWeight: 700,
-              fontSize: '1.2rem',
-              boxShadow: '0 8px 24px rgba(255, 107, 0, 0.3)',
-              transition: 'transform 0.2s'
-            }}
-          >
-            Shop Now →
+          <Link href="/shop" className={styles.heroButton}>
+            Shop Now <ArrowRight size={20} className={styles.arrowIcon} />
           </Link>
+        </div>
+        <div className={styles.heroBackground}></div>
+      </section>
+
+      {/* Features Bar */}
+      <section className={styles.features}>
+        <div className={styles.feature}>
+          <Truck size={24} className={styles.featureIcon} />
+          <span>Free Shipping</span>
+        </div>
+        <div className={styles.feature}>
+          <ShieldCheck size={24} className={styles.featureIcon} />
+          <span>Money Back Guarantee</span>
+        </div>
+        <div className={styles.feature}>
+          <Zap size={24} className={styles.featureIcon} />
+          <span>Fast Delivery</span>
+        </div>
+        <div className={styles.feature}>
+          <Headphones size={24} className={styles.featureIcon} />
+          <span>24/7 Support</span>
         </div>
       </section>
 
       {/* Section 1: Our Custom Designed Cases */}
-      <section style={{ padding: '5rem 2rem', maxWidth: '1400px', margin: '0 auto' }}>
-        <h3 style={{ 
-          fontSize: '2.5rem', 
-          textAlign: 'center', 
-          marginBottom: '3rem',
-          fontWeight: 700,
-          color: '#000'
-        }}>
-          Our Custom Designed Cases
-        </h3>
+      <section className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <TrendingUp size={32} className={styles.sectionIcon} />
+          <h2 className={styles.sectionTitle}>Our Custom Designed Cases</h2>
+          <p className={styles.sectionSubtitle}>Exclusive designs you won't find anywhere else</p>
+        </div>
         
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-          gap: '2rem'
-        }}>
-          {customDesignedCases.map((category) => (
+        <div className={styles.categoryGrid}>
+          {customDesignedCases.map((category, index) => (
             <Link 
               key={category.id}
               href={`/shop/${category.slug}`}
-              style={{
-                display: 'block',
-                background: '#fff',
-                borderRadius: '16px',
-                overflow: 'hidden',
-                textDecoration: 'none',
-                color: '#000',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                transition: 'all 0.3s ease'
-              }}
+              className={styles.categoryCard}
+              style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div style={{ position: 'relative', width: '100%', height: '280px', overflow: 'hidden' }}>
+              <div className={styles.categoryImageWrapper}>
                 <Image 
                   src={category.image_url} 
                   alt={category.name}
                   fill
-                  style={{ objectFit: 'cover' }}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className={styles.categoryImage}
                 />
+                <div className={styles.categoryOverlay}>
+                  <Package size={32} className={styles.overlayIcon} />
+                </div>
               </div>
-              <div style={{ padding: '1.5rem', textAlign: 'center' }}>
-                <h4 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600 }}>{category.name}</h4>
+              <div className={styles.categoryInfo}>
+                <h3 className={styles.categoryName}>{category.name}</h3>
+                <span className={styles.categoryLink}>View Collection <ArrowRight size={16} /></span>
               </div>
             </Link>
           ))}
@@ -171,96 +161,206 @@ export default async function HomePage() {
       </section>
 
       {/* Section 2: Our Categories */}
-      <section style={{ padding: '5rem 2rem', maxWidth: '1400px', margin: '0 auto', background: '#f9f9f9' }}>
-        <h3 style={{ 
-          fontSize: '2.5rem', 
-          textAlign: 'center', 
-          marginBottom: '3rem',
-          fontWeight: 700,
-          color: '#000'
-        }}>
-          Our Categories
-        </h3>
+      <section className={styles.sectionAlt}>
+        <div className={styles.sectionHeader}>
+          <Star size={32} className={styles.sectionIcon} />
+          <h2 className={styles.sectionTitle}>Our Categories</h2>
+          <p className={styles.sectionSubtitle}>Find the perfect case for your device</p>
+        </div>
         
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-          gap: '2rem'
-        }}>
-          {ourCategories.map((category) => (
+        <div className={styles.categoryGrid}>
+          {ourCategories.map((category, index) => (
             <Link 
               key={category.id}
               href={`/shop/${category.slug}`}
-              style={{
-                display: 'block',
-                background: '#fff',
-                borderRadius: '16px',
-                overflow: 'hidden',
-                textDecoration: 'none',
-                color: '#000',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                transition: 'all 0.3s ease'
-              }}
+              className={styles.categoryCard}
+              style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div style={{ position: 'relative', width: '100%', height: '280px', overflow: 'hidden' }}>
+              <div className={styles.categoryImageWrapper}>
                 <Image 
                   src={category.image_url} 
                   alt={category.name}
                   fill
-                  style={{ objectFit: 'cover' }}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className={styles.categoryImage}
                 />
+                <div className={styles.categoryOverlay}>
+                  <Package size={32} className={styles.overlayIcon} />
+                </div>
               </div>
-              <div style={{ padding: '1.5rem', textAlign: 'center' }}>
-                <h4 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600 }}>{category.name}</h4>
+              <div className={styles.categoryInfo}>
+                <h3 className={styles.categoryName}>{category.name}</h3>
+                <span className={styles.categoryLink}>View Collection <ArrowRight size={16} /></span>
               </div>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* AI Tool CTA */}
-      <section style={{
-        background: 'linear-gradient(135deg, #ff6b00 0%, #ff9500 100%)',
-        color: '#fff',
-        padding: '4rem 2rem',
-        textAlign: 'center'
-      }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-          <h3 style={{ fontSize: '2.5rem', marginBottom: '1rem', fontWeight: 700 }}>
-            Need Custom Mockups?
-          </h3>
-          <p style={{ fontSize: '1.2rem', marginBottom: '2rem', opacity: 0.95 }}>
-            Use our AI-powered tool to generate professional case mockups instantly
+      {/* Testimonials Section */}
+      <section className={styles.testimonials}>
+        <div className={styles.sectionHeader}>
+          <Star size={32} className={styles.sectionIcon} />
+          <h2 className={styles.sectionTitle}>What Our Customers Say</h2>
+          <p className={styles.sectionSubtitle}>Join thousands of happy customers</p>
+        </div>
+        
+        <div className={styles.testimonialGrid}>
+          <div className={styles.testimonialCard}>
+            <div className={styles.stars}>
+              <Star size={18} fill="#ff6b00" color="#ff6b00" />
+              <Star size={18} fill="#ff6b00" color="#ff6b00" />
+              <Star size={18} fill="#ff6b00" color="#ff6b00" />
+              <Star size={18} fill="#ff6b00" color="#ff6b00" />
+              <Star size={18} fill="#ff6b00" color="#ff6b00" />
+            </div>
+            <p className={styles.testimonialText}>
+              "Amazing quality! The print is crystal clear and the case fits perfectly. Best purchase I've made this year!"
+            </p>
+            <div className={styles.testimonialAuthor}>
+              <div className={styles.authorAvatar}>RK</div>
+              <div>
+                <div className={styles.authorName}>Rahul Kumar</div>
+                <div className={styles.authorTitle}>Verified Buyer</div>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.testimonialCard}>
+            <div className={styles.stars}>
+              <Star size={18} fill="#ff6b00" color="#ff6b00" />
+              <Star size={18} fill="#ff6b00" color="#ff6b00" />
+              <Star size={18} fill="#ff6b00" color="#ff6b00" />
+              <Star size={18} fill="#ff6b00" color="#ff6b00" />
+              <Star size={18} fill="#ff6b00" color="#ff6b00" />
+            </div>
+            <p className={styles.testimonialText}>
+              "Fast delivery and excellent packaging. The custom design looks exactly like the preview. Highly recommend!"
+            </p>
+            <div className={styles.testimonialAuthor}>
+              <div className={styles.authorAvatar}>PS</div>
+              <div>
+                <div className={styles.authorName}>Priya Sharma</div>
+                <div className={styles.authorTitle}>Verified Buyer</div>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.testimonialCard}>
+            <div className={styles.stars}>
+              <Star size={18} fill="#ff6b00" color="#ff6b00" />
+              <Star size={18} fill="#ff6b00" color="#ff6b00" />
+              <Star size={18} fill="#ff6b00" color="#ff6b00" />
+              <Star size={18} fill="#ff6b00" color="#ff6b00" />
+              <Star size={18} fill="#ff6b00" color="#ff6b00" />
+            </div>
+            <p className={styles.testimonialText}>
+              "Best phone case website! Great designs, affordable prices, and the quality is top-notch. Will order again!"
+            </p>
+            <div className={styles.testimonialAuthor}>
+              <div className={styles.authorAvatar}>AS</div>
+              <div>
+                <div className={styles.authorName}>Amit Singh</div>
+                <div className={styles.authorTitle}>Verified Buyer</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter Section */}
+      <section className={styles.newsletter}>
+        <div className={styles.newsletterContent}>
+          <Mail size={48} className={styles.newsletterIcon} />
+          <h3 className={styles.newsletterTitle}>Stay Updated</h3>
+          <p className={styles.newsletterText}>
+            Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.
           </p>
-          <Link 
-            href="https://casetool.casebuddy.co.in"
-            style={{
-              display: 'inline-block',
-              background: '#fff',
-              color: '#ff6b00',
-              padding: '1.2rem 3rem',
-              borderRadius: '12px',
-              textDecoration: 'none',
-              fontWeight: 700,
-              fontSize: '1.2rem',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
-            }}
-          >
-            Try AI Tool Free →
-          </Link>
+          <form className={styles.newsletterForm}>
+            <input 
+              type="email" 
+              placeholder="Enter your email" 
+              className={styles.newsletterInput}
+            />
+            <button type="submit" className={styles.newsletterButton}>
+              Subscribe <ArrowRight size={18} />
+            </button>
+          </form>
         </div>
       </section>
 
       {/* Footer */}
-      <footer style={{
-        background: '#000',
-        color: '#fff',
-        padding: '3rem 2rem',
-        textAlign: 'center'
-      }}>
-        <p style={{ margin: 0, color: '#aaa', fontSize: '1rem' }}>
-          © 2025 CaseBuddy. All rights reserved.
-        </p>
+      <footer className={styles.footer}>
+        <div className={styles.footerContent}>
+          <div className={styles.footerSection}>
+            <div className={styles.footerLogo}>
+              <Image src="/favicon.ico" alt="CaseBuddy" width={36} height={36} />
+              <span className={styles.footerLogoText}>CaseBuddy</span>
+            </div>
+            <p className={styles.footerDesc}>
+              Your one-stop shop for premium custom phone cases. Protect your device with style.
+            </p>
+            <div className={styles.socialLinks}>
+              <a href="#" className={styles.socialIcon}>
+                <Instagram size={20} />
+              </a>
+              <a href="#" className={styles.socialIcon}>
+                <Facebook size={20} />
+              </a>
+              <a href="#" className={styles.socialIcon}>
+                <Twitter size={20} />
+              </a>
+            </div>
+          </div>
+
+          <div className={styles.footerSection}>
+            <h4 className={styles.footerTitle}>Quick Links</h4>
+            <ul className={styles.footerLinks}>
+              <li><Link href="/shop">Shop All</Link></li>
+              <li><Link href="/templates">Templates</Link></li>
+              <li><Link href="/about">About Us</Link></li>
+              <li><Link href="/contact">Contact</Link></li>
+            </ul>
+          </div>
+
+          <div className={styles.footerSection}>
+            <h4 className={styles.footerTitle}>Customer Service</h4>
+            <ul className={styles.footerLinks}>
+              <li><Link href="/shipping">Shipping Info</Link></li>
+              <li><Link href="/returns">Returns & Exchanges</Link></li>
+              <li><Link href="/faq">FAQ</Link></li>
+              <li><Link href="/privacy">Privacy Policy</Link></li>
+            </ul>
+          </div>
+
+          <div className={styles.footerSection}>
+            <h4 className={styles.footerTitle}>Contact Us</h4>
+            <ul className={styles.footerContact}>
+              <li>
+                <Phone size={16} />
+                <span>+91 98765 43210</span>
+              </li>
+              <li>
+                <Mail size={16} />
+                <span>support@casebuddy.co.in</span>
+              </li>
+              <li>
+                <MapPin size={16} />
+                <span>Mumbai, India</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className={styles.footerBottom}>
+          <p className={styles.footerText}>
+            © 2025 CaseBuddy. All rights reserved.
+          </p>
+          <div className={styles.paymentMethods}>
+            <span>We Accept:</span>
+            <div className={styles.paymentIcons}>💳 UPI | Cards | Wallets</div>
+          </div>
+        </div>
       </footer>
     </div>
   );

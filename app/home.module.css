@@ -64,8 +64,7 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  background: #ffffff;
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
 }
@@ -82,31 +81,17 @@
 .logo {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
   text-decoration: none;
   transition: transform 0.3s ease;
 }
 
 .logo:hover {
-  transform: scale(1.05);
+  transform: scale(1.02);
 }
 
 .logoImg {
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-}
-
-.logoText {
-  font-size: 1.5rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, #ff6b00 0%, #ff9500 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  height: auto;
+  object-fit: contain;
 }
 
 .navLinks {
@@ -337,12 +322,16 @@
   animation: fadeInUp 0.8s ease-out;
 }
 
-.sectionIcon {
-  color: #ff6b00;
+.floralDecor {
+  font-size: 3rem;
   margin-bottom: 1rem;
-  animation: bounce 2s ease-in-out infinite;
-  width: 48px;
-  height: 48px;
+  animation: floralSpin 4s ease-in-out infinite;
+  display: inline-block;
+}
+
+@keyframes floralSpin {
+  0%, 100% { transform: rotate(-5deg) scale(1); }
+  50% { transform: rotate(5deg) scale(1.1); }
 }
 
 @keyframes bounce {
@@ -367,7 +356,83 @@
   font-weight: 400;
 }
 
-/* ===== Category Grid ===== */
+/* ===== Horizontal Scroll Section ===== */
+.horizontalScroll {
+  overflow: hidden;
+  padding: 2rem 0;
+  position: relative;
+}
+
+.scrollContent {
+  display: flex;
+  gap: 2rem;
+  animation: autoScroll 40s linear infinite;
+  width: max-content;
+}
+
+@keyframes autoScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.horizontalCard {
+  flex-shrink: 0;
+  width: 280px;
+  text-decoration: none;
+  color: #000;
+  position: relative;
+  transition: all 0.4s ease;
+}
+
+.horizontalCard:hover {
+  transform: translateY(-15px) scale(1.05);
+}
+
+.horizontalImageWrapper {
+  position: relative;
+  width: 280px;
+  height: 380px;
+  border-radius: 40% 40% 40% 40% / 50% 50% 50% 50%;
+  overflow: hidden;
+  background: #f5f5f5;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  transition: all 0.4s ease;
+}
+
+.horizontalCard:hover .horizontalImageWrapper {
+  box-shadow: 0 20px 60px rgba(255, 107, 0, 0.3);
+}
+
+.horizontalImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.4s ease;
+}
+
+.horizontalCard:hover .horizontalImage {
+  transform: scale(1.15);
+}
+
+.horizontalInfo {
+  padding: 1.5rem 0.5rem 0;
+  text-align: center;
+}
+
+.horizontalName {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #333;
+  transition: color 0.3s ease;
+}
+
+.horizontalCard:hover .horizontalName {
+  color: #ff6b00;
+}
+
+/* ===== Category Grid (Vertical) ===== */
 .categoryGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -384,7 +449,7 @@
   transition: all 0.4s ease;
   animation: fadeInScale 0.6s ease-out both;
   position: relative;
-  max-width: 350px;
+  max-width: 320px;
   width: 100%;
 }
 
@@ -400,7 +465,7 @@
 }
 
 .categoryCard:hover {
-  transform: translateY(-10px);
+  transform: translateY(-15px) scale(1.08);
 }
 
 .saleBadge {
@@ -424,20 +489,19 @@
   transform: scale(1.05);
 }
 
-.categoryImageWrapper {
+.ovalImageWrapper {
   position: relative;
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: 50%;
+  width: 280px;
+  height: 380px;
+  border-radius: 40% 40% 40% 40% / 50% 50% 50% 50%;
   overflow: hidden;
   background: #f5f5f5;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   transition: all 0.4s ease;
 }
 
-.categoryCard:hover .categoryImageWrapper {
-  box-shadow: 0 16px 48px rgba(255, 107, 0, 0.25);
-  transform: scale(1.05);
+.categoryCard:hover .ovalImageWrapper {
+  box-shadow: 0 20px 60px rgba(255, 107, 0, 0.3);
 }
 
 .categoryImage {
@@ -449,7 +513,7 @@
 }
 
 .categoryCard:hover .categoryImage {
-  transform: scale(1.1);
+  transform: scale(1.15);
 }
 
 .categoryInfo {
@@ -553,10 +617,27 @@
   box-shadow: 0 16px 40px rgba(255, 107, 0, 0.15);
 }
 
-.stars {
+.floralRating {
   display: flex;
-  gap: 0.3rem;
+  gap: 0.5rem;
   margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+}
+
+.floralRating span {
+  display: inline-block;
+  animation: floralPulse 2s ease-in-out infinite;
+}
+
+.floralRating span:nth-child(1) { animation-delay: 0s; }
+.floralRating span:nth-child(2) { animation-delay: 0.2s; }
+.floralRating span:nth-child(3) { animation-delay: 0.4s; }
+.floralRating span:nth-child(4) { animation-delay: 0.6s; }
+.floralRating span:nth-child(5) { animation-delay: 0.8s; }
+
+@keyframes floralPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
 }
 
 .testimonialText {

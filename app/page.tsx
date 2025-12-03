@@ -56,8 +56,7 @@ export default function HomePage() {
       <header className={styles.header}>
         <nav className={styles.nav}>
           <Link href="/" className={styles.logo}>
-            <Image src="/favicon.ico" alt="CaseBuddy" width={40} height={40} className={styles.logoImg} />
-            <span className={styles.logoText}>CaseBuddy</span>
+            <Image src="/casebuddy-logo.png" alt="CaseBuddy" width={180} height={50} className={styles.logoImg} priority />
           </Link>
           <div className={styles.navLinks}>
             <Link href="/" className={styles.navLink}>Home</Link>
@@ -126,41 +125,63 @@ export default function HomePage() {
       {/* Section 1: Our Custom Designed Cases */}
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
-          <TrendingUp size={48} className={styles.sectionIcon} />
+          <div className={styles.floralDecor}>🌸</div>
           <h2 className={styles.sectionTitle}>Our Custom Designed Cases</h2>
           <p className={styles.sectionSubtitle}>Exclusive designs you won't find anywhere else</p>
         </div>
         
-        <div className={styles.categoryGrid}>
-          {customDesignedCases.map((category, index) => (
-            <Link 
-              key={category.id}
-              href={`/shop/${category.slug}`}
-              className={styles.categoryCard}
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <div className={styles.saleBadge}>Sale</div>
-              <div className={styles.categoryImageWrapper}>
-                <Image 
-                  src={category.image_url} 
-                  alt={category.name}
-                  width={320}
-                  height={320}
-                  className={styles.categoryImage}
-                />
-              </div>
-              <div className={styles.categoryInfo}>
-                <h3 className={styles.categoryName}>{category.name}</h3>
-              </div>
-            </Link>
-          ))}
+        <div className={styles.horizontalScroll}>
+          <div className={styles.scrollContent}>
+            {customDesignedCases.map((category, index) => (
+              <Link 
+                key={category.id}
+                href={`/shop/${category.slug}`}
+                className={styles.horizontalCard}
+              >
+                <div className={styles.saleBadge}>Sale</div>
+                <div className={styles.horizontalImageWrapper}>
+                  <Image 
+                    src={category.image_url} 
+                    alt={category.name}
+                    width={280}
+                    height={380}
+                    className={styles.horizontalImage}
+                  />
+                </div>
+                <div className={styles.horizontalInfo}>
+                  <h3 className={styles.horizontalName}>{category.name}</h3>
+                </div>
+              </Link>
+            ))}
+            {customDesignedCases.map((category, index) => (
+              <Link 
+                key={`duplicate-${category.id}`}
+                href={`/shop/${category.slug}`}
+                className={styles.horizontalCard}
+              >
+                <div className={styles.saleBadge}>Sale</div>
+                <div className={styles.horizontalImageWrapper}>
+                  <Image 
+                    src={category.image_url} 
+                    alt={category.name}
+                    width={280}
+                    height={380}
+                    className={styles.horizontalImage}
+                  />
+                </div>
+                <div className={styles.horizontalInfo}>
+                  <h3 className={styles.horizontalName}>{category.name}</h3>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Section 2: Our Categories */}
       <section className={styles.sectionAlt}>
         <div className={styles.sectionHeader}>
-          <Star size={48} className={styles.sectionIcon} />
+          <div className={styles.floralDecor}>🌺</div>
           <h2 className={styles.sectionTitle}>Our Categories</h2>
           <p className={styles.sectionSubtitle}>Find the perfect case for your device</p>
         </div>
@@ -174,12 +195,12 @@ export default function HomePage() {
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <div className={styles.saleBadge}>Sale</div>
-              <div className={styles.categoryImageWrapper}>
+              <div className={styles.ovalImageWrapper}>
                 <Image 
                   src={category.image_url} 
                   alt={category.name}
-                  width={320}
-                  height={320}
+                  width={280}
+                  height={380}
                   className={styles.categoryImage}
                 />
               </div>
@@ -194,19 +215,19 @@ export default function HomePage() {
       {/* Testimonials Section */}
       <section className={styles.testimonials}>
         <div className={styles.sectionHeader}>
-          <Star size={48} className={styles.sectionIcon} />
+          <div className={styles.floralDecor}>🌷</div>
           <h2 className={styles.sectionTitle}>What Our Customers Say</h2>
           <p className={styles.sectionSubtitle}>Join thousands of happy customers</p>
         </div>
         
         <div className={styles.testimonialGrid}>
           <div className={styles.testimonialCard}>
-            <div className={styles.stars}>
-              <Star size={18} fill="#ff6b00" color="#ff6b00" />
-              <Star size={18} fill="#ff6b00" color="#ff6b00" />
-              <Star size={18} fill="#ff6b00" color="#ff6b00" />
-              <Star size={18} fill="#ff6b00" color="#ff6b00" />
-              <Star size={18} fill="#ff6b00" color="#ff6b00" />
+            <div className={styles.floralRating}>
+              <span>🌸</span>
+              <span>🌸</span>
+              <span>🌸</span>
+              <span>🌸</span>
+              <span>🌸</span>
             </div>
             <p className={styles.testimonialText}>
               "Amazing quality! The print is crystal clear and the case fits perfectly. Best purchase I've made this year!"
@@ -221,12 +242,12 @@ export default function HomePage() {
           </div>
 
           <div className={styles.testimonialCard}>
-            <div className={styles.stars}>
-              <Star size={18} fill="#ff6b00" color="#ff6b00" />
-              <Star size={18} fill="#ff6b00" color="#ff6b00" />
-              <Star size={18} fill="#ff6b00" color="#ff6b00" />
-              <Star size={18} fill="#ff6b00" color="#ff6b00" />
-              <Star size={18} fill="#ff6b00" color="#ff6b00" />
+            <div className={styles.floralRating}>
+              <span>🌸</span>
+              <span>🌸</span>
+              <span>🌸</span>
+              <span>🌸</span>
+              <span>🌸</span>
             </div>
             <p className={styles.testimonialText}>
               "Fast delivery and excellent packaging. The custom design looks exactly like the preview. Highly recommend!"
@@ -241,12 +262,12 @@ export default function HomePage() {
           </div>
 
           <div className={styles.testimonialCard}>
-            <div className={styles.stars}>
-              <Star size={18} fill="#ff6b00" color="#ff6b00" />
-              <Star size={18} fill="#ff6b00" color="#ff6b00" />
-              <Star size={18} fill="#ff6b00" color="#ff6b00" />
-              <Star size={18} fill="#ff6b00" color="#ff6b00" />
-              <Star size={18} fill="#ff6b00" color="#ff6b00" />
+            <div className={styles.floralRating}>
+              <span>🌸</span>
+              <span>🌸</span>
+              <span>🌸</span>
+              <span>🌸</span>
+              <span>🌸</span>
             </div>
             <p className={styles.testimonialText}>
               "Best phone case website! Great designs, affordable prices, and the quality is top-notch. Will order again!"

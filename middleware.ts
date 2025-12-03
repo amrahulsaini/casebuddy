@@ -3,18 +3,40 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || '';
+  const { pathname } = request.nextUrl;
   
-  // Check if it's the casetool subdomain
+  // Check if accessing /casetool routes (including subdomain)
+  const isCasetoolRoute = pathname.startsWith('/casetool') || hostname.startsWith('casetool.');
+  
+  // Allow auth API and login page without authentication
+  if (pathname === '/casetool/api/auth' || pathname === '/casetool/login') {
+    if (hostname.startsWith('casetool.') && !pathname.startsWith('/casetool')) {
+      const url = request.nextUrl.clone();
+      url.pathname = `/casetool${pathname}`;
+      return NextResponse.rewrite(url);
+    }
+    return NextResponse.next();
+  }
+  
+  // Check authentication for casetool routes
+  if (isCasetoolRoute) {
+    const authCookie = request.cookies.get('casetool_auth');
+    
+    if (!authCookie || authCookie.value !== 'authenticated') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/casetool/login';
+      return NextResponse.redirect(url);
+    }
+  }
+  
+  // Handle subdomain routing
   if (hostname.startsWith('casetool.')) {
-    // Rewrite to /casetool path
     const url = request.nextUrl.clone();
     
-    // If already on /casetool path, continue
     if (url.pathname.startsWith('/casetool')) {
       return NextResponse.next();
     }
     
-    // Rewrite root and other paths to /casetool
     if (url.pathname === '/') {
       url.pathname = '/casetool';
     } else {
@@ -24,7 +46,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.rewrite(url);
   }
   
-  // For main domain, continue as normal
   return NextResponse.next();
 }
 

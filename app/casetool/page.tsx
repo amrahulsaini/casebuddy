@@ -20,7 +20,8 @@ import {
   Clock,
   X,
   Image as ImageIcon,
-  Grid
+  Grid,
+  LogOut
 } from 'lucide-react';
 
 interface GeneratedImage {
@@ -381,6 +382,18 @@ export default function ToolPage() {
               <Grid size={20} />
               <span>Templates</span>
             </Link>
+          </div>
+          <div className={styles.navSection}>
+            <button 
+              className={`${styles.navLink} ${styles.logoutButton}`} 
+              onClick={async () => {
+                await fetch('/casetool/api/auth', { method: 'DELETE' });
+                window.location.href = '/casetool/login';
+              }}
+            >
+              <LogOut size={20} />
+              <span>Logout</span>
+            </button>
           </div>
         </nav>
       </div>

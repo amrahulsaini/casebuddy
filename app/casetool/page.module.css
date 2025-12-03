@@ -1239,5 +1239,24 @@
   transform: scaleY(1);
 }
 
+.logoutButton {
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  color: #dc2626;
+  margin-top: 8px;
+}
+
+.logoutButton:hover {
+  background: #fee;
+  color: #b91c1c;
+}
+
+.logoutButton::before {
+  background: #dc2626;
+}
+
 
 

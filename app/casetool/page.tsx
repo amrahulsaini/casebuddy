@@ -28,6 +28,7 @@ interface GeneratedImage {
   url: string;
   title: string;
   isProcessing?: boolean;
+  logId?: number;
 }
 
 export default function ToolPage() {
@@ -44,10 +45,13 @@ export default function ToolPage() {
   const [uploadedFileName, setUploadedFileName] = useState<string>('');
   const [lastFormData, setLastFormData] = useState<FormData | null>(null);
   const [lastPrompt, setLastPrompt] = useState<string>('');
+  const [feedbackGiven, setFeedbackGiven] = useState(false);
+  const [currentLogId, setCurrentLogId] = useState<number | null>(null);
 
   // Drag and drop state
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageResultsRef = useRef<HTMLDivElement>(null);
 
   // Crop modal state
   const [cropModalOpen, setCropModalOpen] = useState(false);
@@ -203,8 +207,18 @@ export default function ToolPage() {
         // Remove processing state and add final image
         setImages((prev) => {
           const withoutProcessing = prev.filter(img => !img.isProcessing);
-          return [...withoutProcessing, { url: data.payload.url, title: data.payload.title, isProcessing: false }];
+          return [...withoutProcessing, { 
+            url: data.payload.url, 
+            title: data.payload.title, 
+            isProcessing: false,
+            logId: data.payload.logId 
+          }];
         });
+        setCurrentLogId(data.payload.logId);
+        // Auto-scroll to results
+        setTimeout(() => {
+          imageResultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
         break;
 
       case 'image_start':
@@ -234,7 +248,30 @@ export default function ToolPage() {
       default:
         break;
     }
-  };  const handleReset = () => {
+  };
+
+  const handleFeedback = async (isCorrect: boolean, logId?: number) => {
+    if (!logId) return;
+
+    try {
+      await fetch('/casetool/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          generationLogId: logId,
+          feedbackType: isCorrect ? 'approved' : 'rejected',
+          issueCategory: isCorrect ? null : 'quality',
+          issueDescription: isCorrect ? null : 'User marked as incorrect',
+        }),
+      });
+
+      setFeedbackGiven(true);
+    } catch (err) {
+      console.error('Feedback error:', err);
+    }
+  };
+
+  const handleReset = () => {
     setImages([]);
     setUploadedFileName('');
     setLastFormData(null);
@@ -244,6 +281,8 @@ export default function ToolPage() {
     setError('');
     setShowError(false);
     setIsError(false);
+    setFeedbackGiven(false);
+    setCurrentLogId(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -258,6 +297,8 @@ export default function ToolPage() {
     setError('');
     setShowError(false);
     setIsError(false);
+    setFeedbackGiven(false);
+    setCurrentLogId(null);
 
     // Create new FormData with the saved prompt
     const newFormData = new FormData();
@@ -371,7 +412,7 @@ export default function ToolPage() {
               <Scissors size={20} />
               <span>Image Editor</span>
             </Link>
-            <Link href="/gallery" className={styles.navLink} onClick={() => setSidebarOpen(false)}>
+            <Link href="/casetool/gallery" className={styles.navLink} onClick={() => setSidebarOpen(false)}>
               <ImageIcon size={20} />
               <span>Gallery</span>
             </Link>
@@ -536,7 +577,7 @@ export default function ToolPage() {
 
         {/* Results Grid */}
         {images.length > 0 && (
-          <div className={styles.resultSection}>
+          <div className={styles.resultSection} ref={imageResultsRef}>
             <div className={styles.resultSectionHeader}>
               <h2 className={styles.resultSectionTitle}>Generated Mockups</h2>
               <button
@@ -566,16 +607,36 @@ export default function ToolPage() {
                         <img src={img.url} alt={img.title} className={styles.mockupImage} />
                       </div>
                       <div className={styles.mockupCardFooter}>
-                        <div className={styles.mockupCardActions}>
-                          <a href={img.url} download className={styles.actionBtn}>
-                            <Download size={16} />
-                            Download
-                          </a>
-                          <button onClick={() => handleCrop(img.url)} className={styles.actionBtnSecondary}>
-                            <Scissors size={16} />
-                            Crop
-                          </button>
-                        </div>
+                        {!feedbackGiven ? (
+                          <div className={styles.feedbackSection}>
+                            <p className={styles.feedbackQuestion}>Is this output correct?</p>
+                            <div className={styles.feedbackButtons}>
+                              <button 
+                                onClick={() => handleFeedback(true, img.logId)} 
+                                className={styles.feedbackBtnYes}
+                              >
+                                ✓ Yes, It's Correct
+                              </button>
+                              <button 
+                                onClick={() => handleFeedback(false, img.logId)} 
+                                className={styles.feedbackBtnNo}
+                              >
+                                ✗ No, It's Wrong
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className={styles.mockupCardActions}>
+                            <a href={img.url} download className={styles.actionBtn}>
+                              <Download size={16} />
+                              Download
+                            </a>
+                            <button onClick={() => handleCrop(img.url)} className={styles.actionBtnSecondary}>
+                              <Scissors size={16} />
+                              Crop
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </>
                   )}
@@ -586,7 +647,7 @@ export default function ToolPage() {
             <div className={styles.actionButtons}>
               <button
                 onClick={handleGenerateAnother}
-                disabled={isGenerating}
+                disabled={isGenerating || !feedbackGiven}
                 className={styles.submitButton}
               >
                 {isGenerating ? (

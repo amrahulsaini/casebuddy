@@ -52,7 +52,10 @@ export default function EditorPage() {
       console.log('Enhancement response:', data);
       
       if (data.success) {
-        setEnhancedImage(data.url);
+        // Add timestamp to prevent caching
+        const imageUrl = data.url + '?t=' + Date.now();
+        console.log('Setting enhanced image URL:', imageUrl);
+        setEnhancedImage(imageUrl);
       } else {
         console.error('Enhancement failed:', data.error);
         alert('Failed to enhance image: ' + (data.error || 'Unknown error'));
@@ -252,7 +255,15 @@ export default function EditorPage() {
                     <div className={styles.previewItem}>
                       <h4>Enhanced (4K Quality)</h4>
                       <div className={styles.imageWrapper}>
-                        <img src={enhancedImage} alt="Enhanced" />
+                        <img 
+                          src={enhancedImage} 
+                          alt="Enhanced" 
+                          onLoad={() => console.log('Enhanced image loaded successfully:', enhancedImage)}
+                          onError={(e) => {
+                            console.error('Enhanced image failed to load:', enhancedImage);
+                            console.error('Image error event:', e);
+                          }}
+                        />
                         <button 
                           onClick={() => handleFullscreen(enhancedImage)} 
                           className={styles.fullscreenButton}

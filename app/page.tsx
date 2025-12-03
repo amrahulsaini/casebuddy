@@ -190,19 +190,22 @@ export default function HomePage() {
               key={category.id}
               href={`/shop/${category.slug}`}
               className={styles.verticalCard}
-              style={{ animationDelay: `${index * 0.1}s` }}
+              data-index={index}
             >
               <div className={styles.verticalImageWrapper}>
                 <Image 
                   src={category.image_url} 
                   alt={category.name}
-                  width={280}
-                  height={380}
+                  width={320}
+                  height={420}
                   className={styles.verticalImage}
                 />
-              </div>
-              <div className={styles.verticalInfo}>
-                <h3 className={styles.verticalName}>{category.name}</h3>
+                <div className={styles.verticalOverlay}>
+                  <span className={styles.overlayText}>{category.name}</span>
+                  <div className={styles.overlayButton}>
+                    View Collection <ArrowRight size={20} />
+                  </div>
+                </div>
               </div>
             </Link>
           ))}

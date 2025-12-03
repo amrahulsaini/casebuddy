@@ -28,6 +28,7 @@ export default function BillingPage() {
   const [loading, setLoading] = useState(true);
   const [usageLogs, setUsageLogs] = useState<UsageLog[]>([]);
   const [summary, setSummary] = useState<BillingSummary | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   useEffect(() => {
     fetchBillingData();
@@ -40,10 +41,24 @@ export default function BillingPage() {
       
       if (data.success) {
         setUsageLogs(data.logs || []);
-        setSummary(data.summary || null);
+        // Convert string numbers to actual numbers
+        const rawSummary = data.summary || null;
+        if (rawSummary) {
+          setSummary({
+            total_operations: Number(rawSummary.total_operations) || 0,
+            total_cost_usd: Number(rawSummary.total_cost_usd) || 0,
+            total_cost_inr: Number(rawSummary.total_cost_inr) || 0,
+          });
+        }
+        if (data.message) {
+          setErrorMessage(data.message);
+        }
+      } else {
+        setErrorMessage(data.error || 'Failed to load billing data');
       }
     } catch (error) {
       console.error('Failed to fetch billing data:', error);
+      setErrorMessage('Network error: Unable to fetch billing data');
     } finally {
       setLoading(false);
     }
@@ -136,6 +151,12 @@ export default function BillingPage() {
           Usage History
         </h2>
 
+        {errorMessage && (
+          <div className={styles.errorMessage}>
+            {errorMessage}
+          </div>
+        )}
+
         {usageLogs.length === 0 ? (
           <div className={styles.emptyState}>
             <p>No API usage recorded yet.</p>
@@ -170,10 +191,10 @@ export default function BillingPage() {
                   {log.output_tokens > 0 && ` ${log.output_tokens} tokens`}
                 </div>
                 <div className={styles.tableCell}>
-                  <span className={styles.costUsd}>${log.cost_usd.toFixed(4)}</span>
+                  <span className={styles.costUsd}>${Number(log.cost_usd).toFixed(4)}</span>
                 </div>
                 <div className={styles.tableCell}>
-                  <span className={styles.costInr}>₹{log.cost_inr.toFixed(2)}</span>
+                  <span className={styles.costInr}>₹{Number(log.cost_inr).toFixed(2)}</span>
                 </div>
               </div>
             ))}

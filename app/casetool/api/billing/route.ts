@@ -14,6 +14,21 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // Check if table exists first
+    const [tableCheck] = await pool.execute(
+      `SHOW TABLES LIKE 'api_usage_logs'`
+    );
+
+    if (!Array.isArray(tableCheck) || tableCheck.length === 0) {
+      // Table doesn't exist yet - return empty data
+      return NextResponse.json({
+        success: true,
+        logs: [],
+        summary: { total_operations: 0, total_cost_usd: 0, total_cost_inr: 0 },
+        message: 'Billing tables not yet created. Please run the database migration.',
+      });
+    }
+
     // Fetch usage logs for the user
     const [logs] = await pool.execute(
       `SELECT 

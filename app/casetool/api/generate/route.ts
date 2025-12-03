@@ -226,8 +226,8 @@ export async function POST(request: NextRequest) {
         // Update log with failure
         if (logId) {
           await pool.execute(
-            'UPDATE generation_logs SET status = ?, feedback_note = ? WHERE id = ?',
-            ['failed', error.message, logId]
+            'UPDATE generation_logs SET status = ? WHERE id = ?',
+            ['failed', logId]
           );
         }
         writer.send('error', error.message || 'An error occurred', 0);

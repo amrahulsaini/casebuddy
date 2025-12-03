@@ -19,7 +19,7 @@ import {
   Shield,
   Clock,
   X,
-  Image,
+  Image as ImageIcon,
   Grid
 } from 'lucide-react';
 
@@ -371,7 +371,7 @@ export default function ToolPage() {
               <span>Image Editor</span>
             </Link>
             <Link href="/gallery" className={styles.navLink} onClick={() => setSidebarOpen(false)}>
-              <Image size={20} />
+              <ImageIcon size={20} />
               <span>Gallery</span>
             </Link>
           </div>

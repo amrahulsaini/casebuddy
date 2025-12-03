@@ -352,7 +352,7 @@ export default function ToolPage() {
         <div className={styles.sidebarHeader}>
           <div className={styles.sidebarLogo}>
             <div className={styles.sidebarLogoIcon}>
-              <Image src=\"/favicon.ico\" alt=\"CaseBuddy\" width={40} height={40} />
+              <Image src="/favicon.ico" alt="CaseBuddy" width={40} height={40} />
             </div>
             <span className={styles.sidebarLogoText}>CaseBuddy</span>
           </div>
@@ -418,7 +418,7 @@ export default function ToolPage() {
         <header className={styles.header}>
         <div className={styles.logo}>
           <div className={styles.logoIcon}>
-            <Image src=\"/favicon.ico\" alt=\"CaseBuddy\" width={40} height={40} />
+            <Image src="/favicon.ico" alt="CaseBuddy" width={40} height={40} />
           </div>
           <span className={styles.logoText}>CaseBuddy</span>
         </div>

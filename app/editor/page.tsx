@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Upload, Scissors, Download, Sparkles, Menu, X, Smartphone, Wand2, Image, Grid } from 'lucide-react';
+import Image from 'next/image';
+import { Upload, Scissors, Download, Sparkles, Menu, X, Smartphone, Wand2, Image as ImageIcon, Grid, LogOut, Maximize2 } from 'lucide-react';
 import styles from './page.module.css';
 
 export default function EditorPage() {
@@ -11,6 +12,8 @@ export default function EditorPage() {
   const [enhancedImage, setEnhancedImage] = useState<string | null>(null);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState<string>('');
+  const [fullscreenModalOpen, setFullscreenModalOpen] = useState(false);
+  const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null);
 
   const handleMenuClick = () => {
     setSidebarOpen(!sidebarOpen);
@@ -75,13 +78,25 @@ export default function EditorPage() {
     document.body.removeChild(a);
   };
 
+  const handleFullscreen = (url: string) => {
+    setFullscreenImageUrl(url);
+    setFullscreenModalOpen(true);
+  };
+
+  const closeFullscreenModal = () => {
+    setFullscreenModalOpen(false);
+    setFullscreenImageUrl(null);
+  };
+
   return (
     <div className={styles.container}>
       {/* Sidebar */}
       <div className={`${styles.sidebarOverlay} ${sidebarOpen ? styles.sidebarOpen : ''}`}>
         <div className={styles.sidebarHeader}>
           <div className={styles.sidebarLogo}>
-            <div className={styles.sidebarLogoIcon}>CB</div>
+            <div className={styles.sidebarLogoIcon}>
+              <Image src="/favicon.ico" alt="CaseBuddy" width={40} height={40} />
+            </div>
             <span className={styles.sidebarLogoText}>CaseBuddy</span>
           </div>
           <button className={styles.closeButton} onClick={() => setSidebarOpen(false)}>
@@ -91,7 +106,7 @@ export default function EditorPage() {
         <nav className={styles.sidebarNav}>
           <div className={styles.navSection}>
             <div className={styles.navSectionTitle}>Tools</div>
-            <Link href="/tool" className={styles.navLink} onClick={() => setSidebarOpen(false)}>
+            <Link href="/casetool" className={styles.navLink} onClick={() => setSidebarOpen(false)}>
               <Sparkles size={20} />
               <span>AI Generator</span>
             </Link>
@@ -99,8 +114,8 @@ export default function EditorPage() {
               <Scissors size={20} />
               <span>Image Editor</span>
             </Link>
-            <Link href="/gallery" className={styles.navLink} onClick={() => setSidebarOpen(false)}>
-              <Image size={20} />
+            <Link href="/casetool/gallery" className={styles.navLink} onClick={() => setSidebarOpen(false)}>
+              <ImageIcon size={20} />
               <span>Gallery</span>
             </Link>
           </div>
@@ -110,6 +125,18 @@ export default function EditorPage() {
               <Grid size={20} />
               <span>Templates</span>
             </Link>
+          </div>
+          <div className={styles.navSection}>
+            <button 
+              className={`${styles.navLink} ${styles.logoutButton}`} 
+              onClick={async () => {
+                await fetch('/casetool/api/auth', { method: 'DELETE' });
+                window.location.href = '/casetool/login';
+              }}
+            >
+              <LogOut size={20} />
+              <span>Logout</span>
+            </button>
           </div>
         </nav>
       </div>
@@ -133,7 +160,7 @@ export default function EditorPage() {
       <header className={styles.header}>
         <div className={styles.logo}>
           <div className={styles.logoIcon}>
-            <Smartphone size={24} />
+            <Image src="/favicon.ico" alt="CaseBuddy" width={40} height={40} />
           </div>
           <span className={styles.logoText}>CaseBuddy</span>
         </div>
@@ -191,26 +218,44 @@ export default function EditorPage() {
                 <div className={styles.previewGrid}>
                   <div className={styles.previewItem}>
                     <h4>Original</h4>
-                    <img src={uploadedImage} alt="Original" />
+                    <div className={styles.imageWrapper}>
+                      <img src={uploadedImage} alt="Original" />
+                      <button 
+                        onClick={() => handleFullscreen(uploadedImage)} 
+                        className={styles.fullscreenButton}
+                        title="View fullscreen"
+                      >
+                        <Maximize2 size={20} />
+                      </button>
+                    </div>
                   </div>
                   {isEnhancing ? (
                     <div className={styles.previewItem}>
                       <h4>Enhanced</h4>
                       <div className={styles.enhancingLoader}>
                         <Sparkles size={32} className={styles.spinIcon} />
-                        <p>Enhancing image...</p>
+                        <p>Enhancing image quality to 4K...</p>
                       </div>
                     </div>
                   ) : enhancedImage ? (
                     <div className={styles.previewItem}>
-                      <h4>Enhanced</h4>
-                      <img src={enhancedImage} alt="Enhanced" />
+                      <h4>Enhanced (4K Quality)</h4>
+                      <div className={styles.imageWrapper}>
+                        <img src={enhancedImage} alt="Enhanced" />
+                        <button 
+                          onClick={() => handleFullscreen(enhancedImage)} 
+                          className={styles.fullscreenButton}
+                          title="View fullscreen"
+                        >
+                          <Maximize2 size={20} />
+                        </button>
+                      </div>
                       <button 
                         className={styles.downloadButton}
-                        onClick={() => handleDownload(enhancedImage, `enhanced_${uploadedFileName}`)}
+                        onClick={() => handleDownload(enhancedImage, `enhanced_4k_${uploadedFileName}`)}
                       >
                         <Download size={18} />
-                        Download Enhanced
+                        Download Enhanced 4K
                       </button>
                     </div>
                   ) : null}
@@ -220,11 +265,15 @@ export default function EditorPage() {
           </div>
 
           <div className={styles.toolsPanel}>
-            <h3 className={styles.panelTitle}>Enhancement Features</h3>
+            <h3 className={styles.panelTitle}>AI Enhancement Features</h3>
             <div className={styles.toolsList}>
               <div className={styles.toolItem}>
                 <Sparkles size={20} />
-                <span>2x Upscaling</span>
+                <span>4K Upscaling</span>
+              </div>
+              <div className={styles.toolItem}>
+                <Sparkles size={20} />
+                <span>Detail Preservation</span>
               </div>
               <div className={styles.toolItem}>
                 <Sparkles size={20} />
@@ -232,20 +281,39 @@ export default function EditorPage() {
               </div>
               <div className={styles.toolItem}>
                 <Sparkles size={20} />
-                <span>Color Normalization</span>
+                <span>Color Accuracy</span>
               </div>
               <div className={styles.toolItem}>
                 <Sparkles size={20} />
-                <span>Quality Optimization</span>
+                <span>Noise Reduction</span>
               </div>
               <div className={styles.toolItem}>
                 <Download size={20} />
-                <span>HD Export</span>
+                <span>4K Export Ready</span>
               </div>
+            </div>
+            <div className={styles.infoBox}>
+              <p><strong>AI-Powered Enhancement</strong></p>
+              <p>Our advanced AI model upscales your images to 4K quality while preserving all original details, colors, and composition. Perfect for professional product listings.</p>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Fullscreen Modal */}
+      {fullscreenModalOpen && fullscreenImageUrl && (
+        <div className={styles.fullscreenModal} onClick={closeFullscreenModal}>
+          <button className={styles.fullscreenCloseButton} onClick={closeFullscreenModal}>
+            <X size={32} />
+          </button>
+          <img 
+            src={fullscreenImageUrl} 
+            alt="Fullscreen view" 
+            className={styles.fullscreenImage}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }

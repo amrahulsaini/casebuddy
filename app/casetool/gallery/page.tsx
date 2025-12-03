@@ -13,7 +13,9 @@ import {
   Smartphone,
   Image as ImageIcon,
   Calendar,
-  TrendingUp
+  TrendingUp,
+  Maximize2,
+  X
 } from 'lucide-react';
 
 interface GenerationLog {
@@ -42,6 +44,8 @@ export default function GalleryPage() {
   const [stats, setStats] = useState<Stats>({ total: 0, approved: 0, rejected: 0, pending: 0 });
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'approved' | 'rejected' | 'pending'>('all');
+  const [fullscreenModalOpen, setFullscreenModalOpen] = useState(false);
+  const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetchLogs();
@@ -85,6 +89,16 @@ export default function GalleryPage() {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const handleFullscreen = (url: string) => {
+    setFullscreenImageUrl(url);
+    setFullscreenModalOpen(true);
+  };
+
+  const closeFullscreenModal = () => {
+    setFullscreenModalOpen(false);
+    setFullscreenImageUrl(null);
   };
 
   return (
@@ -188,6 +202,13 @@ export default function GalleryPage() {
             <div key={log.id} className={styles.galleryCard}>
               <div className={styles.imageSection}>
                 <img src={log.generated_image_url} alt={log.phone_model} />
+                <button 
+                  onClick={() => handleFullscreen(log.generated_image_url)} 
+                  className={styles.galleryFullscreenButton}
+                  title="View fullscreen"
+                >
+                  <Maximize2 size={20} />
+                </button>
                 {log.user_feedback && (
                   <div className={`${styles.feedbackBadge} ${styles[log.user_feedback]}`}>
                     {log.user_feedback === 'approved' ? (
@@ -241,6 +262,21 @@ export default function GalleryPage() {
           ))
         )}
       </div>
+
+      {/* Fullscreen Modal */}
+      {fullscreenModalOpen && fullscreenImageUrl && (
+        <div className={styles.fullscreenModal} onClick={closeFullscreenModal}>
+          <button className={styles.fullscreenCloseButton} onClick={closeFullscreenModal}>
+            <X size={32} />
+          </button>
+          <img 
+            src={fullscreenImageUrl} 
+            alt="Fullscreen view" 
+            className={styles.fullscreenImage}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }

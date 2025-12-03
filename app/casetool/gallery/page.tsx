@@ -7,8 +7,6 @@ import styles from './gallery.module.css';
 import { 
   ArrowLeft,
   Download,
-  CheckCircle,
-  XCircle,
   Clock,
   Smartphone,
   Image as ImageIcon,
@@ -27,23 +25,20 @@ interface GenerationLog {
   generated_image_url: string;
   generation_time: number;
   status: string;
-  user_feedback: string | null;
-  feedback_note: string | null;
   created_at: string;
 }
 
 interface Stats {
   total: number;
-  approved: number;
-  rejected: number;
-  pending: number;
+  completed: number;
+  failed: number;
 }
 
 export default function GalleryPage() {
   const [logs, setLogs] = useState<GenerationLog[]>([]);
-  const [stats, setStats] = useState<Stats>({ total: 0, approved: 0, rejected: 0, pending: 0 });
+  const [stats, setStats] = useState<Stats>({ total: 0, completed: 0, failed: 0 });
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'approved' | 'rejected' | 'pending'>('all');
+  const [filter, setFilter] = useState<'all' | 'completed' | 'failed'>('all');
   const [fullscreenModalOpen, setFullscreenModalOpen] = useState(false);
   const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null);
 
@@ -61,11 +56,10 @@ export default function GalleryPage() {
         
         // Calculate stats
         const total = data.logs.length;
-        const approved = data.logs.filter((log: GenerationLog) => log.user_feedback === 'approved').length;
-        const rejected = data.logs.filter((log: GenerationLog) => log.user_feedback === 'rejected').length;
-        const pending = data.logs.filter((log: GenerationLog) => !log.user_feedback).length;
+        const completed = data.logs.filter((log: GenerationLog) => log.status === 'completed').length;
+        const failed = data.logs.filter((log: GenerationLog) => log.status === 'failed').length;
         
-        setStats({ total, approved, rejected, pending });
+        setStats({ total, completed, failed });
       }
     } catch (error) {
       console.error('Failed to fetch logs:', error);
@@ -76,8 +70,7 @@ export default function GalleryPage() {
 
   const filteredLogs = logs.filter(log => {
     if (filter === 'all') return true;
-    if (filter === 'pending') return !log.user_feedback;
-    return log.user_feedback === filter;
+    return log.status === filter;
   });
 
   const formatDate = (dateString: string) => {
@@ -131,31 +124,21 @@ export default function GalleryPage() {
 
         <div className={styles.statCard}>
           <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}>
-            <CheckCircle size={24} />
+            <Clock size={24} />
           </div>
           <div className={styles.statContent}>
-            <div className={styles.statValue}>{stats.approved}</div>
-            <div className={styles.statLabel}>Approved</div>
+            <div className={styles.statValue}>{stats.completed}</div>
+            <div className={styles.statLabel}>Completed</div>
           </div>
         </div>
 
         <div className={styles.statCard}>
           <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' }}>
-            <XCircle size={24} />
-          </div>
-          <div className={styles.statContent}>
-            <div className={styles.statValue}>{stats.rejected}</div>
-            <div className={styles.statLabel}>Rejected</div>
-          </div>
-        </div>
-
-        <div className={styles.statCard}>
-          <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' }}>
             <Clock size={24} />
           </div>
           <div className={styles.statContent}>
-            <div className={styles.statValue}>{stats.pending}</div>
-            <div className={styles.statLabel}>Pending Feedback</div>
+            <div className={styles.statValue}>{stats.failed}</div>
+            <div className={styles.statLabel}>Failed</div>
           </div>
         </div>
       </div>
@@ -169,22 +152,16 @@ export default function GalleryPage() {
           All ({stats.total})
         </button>
         <button 
-          className={`${styles.filterTab} ${filter === 'approved' ? styles.filterTabActive : ''}`}
-          onClick={() => setFilter('approved')}
+          className={`${styles.filterTab} ${filter === 'completed' ? styles.filterTabActive : ''}`}
+          onClick={() => setFilter('completed')}
         >
-          Approved ({stats.approved})
+          Completed ({stats.completed})
         </button>
         <button 
-          className={`${styles.filterTab} ${filter === 'rejected' ? styles.filterTabActive : ''}`}
-          onClick={() => setFilter('rejected')}
+          className={`${styles.filterTab} ${filter === 'failed' ? styles.filterTabActive : ''}`}
+          onClick={() => setFilter('failed')}
         >
-          Rejected ({stats.rejected})
-        </button>
-        <button 
-          className={`${styles.filterTab} ${filter === 'pending' ? styles.filterTabActive : ''}`}
-          onClick={() => setFilter('pending')}
-        >
-          Pending ({stats.pending})
+          Failed ({stats.failed})
         </button>
       </div>
 
@@ -209,15 +186,6 @@ export default function GalleryPage() {
                 >
                   <Maximize2 size={20} />
                 </button>
-                {log.user_feedback && (
-                  <div className={`${styles.feedbackBadge} ${styles[log.user_feedback]}`}>
-                    {log.user_feedback === 'approved' ? (
-                      <><CheckCircle size={14} /> Approved</>
-                    ) : (
-                      <><XCircle size={14} /> Rejected</>
-                    )}
-                  </div>
-                )}
               </div>
               
               <div className={styles.cardContent}>

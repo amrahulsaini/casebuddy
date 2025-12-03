@@ -46,8 +46,6 @@ export default function ToolPage() {
   const [uploadedFileName, setUploadedFileName] = useState<string>('');
   const [lastFormData, setLastFormData] = useState<FormData | null>(null);
   const [lastPrompt, setLastPrompt] = useState<string>('');
-  const [feedbackGiven, setFeedbackGiven] = useState<Set<number>>(new Set());
-  const [currentLogId, setCurrentLogId] = useState<number | null>(null);
 
   // Drag and drop state
   const [isDragging, setIsDragging] = useState(false);
@@ -219,7 +217,6 @@ export default function ToolPage() {
             logId: data.payload.logId 
           }];
         });
-        setCurrentLogId(data.payload.logId);
         // Auto-scroll to results
         setTimeout(() => {
           imageResultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -259,26 +256,7 @@ export default function ToolPage() {
     }
   };
 
-  const handleFeedback = async (isCorrect: boolean, logId?: number) => {
-    if (!logId) return;
 
-    try {
-      await fetch('/casetool/api/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          generationLogId: logId,
-          feedbackType: isCorrect ? 'approved' : 'rejected',
-          issueCategory: isCorrect ? null : 'quality',
-          issueDescription: isCorrect ? null : 'User marked as incorrect',
-        }),
-      });
-
-      setFeedbackGiven(prev => new Set([...prev, logId]));
-    } catch (err) {
-      console.error('Feedback error:', err);
-    }
-  };
 
   const handleReset = () => {
     setImages([]);
@@ -290,8 +268,6 @@ export default function ToolPage() {
     setError('');
     setShowError(false);
     setIsError(false);
-    setFeedbackGiven(new Set());
-    setCurrentLogId(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -306,9 +282,7 @@ export default function ToolPage() {
     setError('');
     setShowError(false);
     setIsError(false);
-    setCurrentLogId(null);
-    // Don't reset feedbackGiven - keep track of all feedback
-    // Don't clear images - keep previous images with their feedback state
+    setImages([]);
 
     // Create new FormData with the saved prompt
     const newFormData = new FormData();
@@ -636,36 +610,16 @@ export default function ToolPage() {
                         </button>
                       </div>
                       <div className={styles.mockupCardFooter}>
-                        {!img.logId || !feedbackGiven.has(img.logId) ? (
-                          <div className={styles.feedbackSection}>
-                            <p className={styles.feedbackQuestion}>Is this output correct?</p>
-                            <div className={styles.feedbackButtons}>
-                              <button 
-                                onClick={() => handleFeedback(true, img.logId)} 
-                                className={styles.feedbackBtnYes}
-                              >
-                                ✓ Yes, It's Correct
-                              </button>
-                              <button 
-                                onClick={() => handleFeedback(false, img.logId)} 
-                                className={styles.feedbackBtnNo}
-                              >
-                                ✗ No, It's Wrong
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className={styles.mockupCardActions}>
-                            <a href={img.url} download className={styles.actionBtn}>
-                              <Download size={16} />
-                              Download
-                            </a>
-                            <button onClick={() => handleCrop(img.url)} className={styles.actionBtnSecondary}>
-                              <Scissors size={16} />
-                              Crop
-                            </button>
-                          </div>
-                        )}
+                        <div className={styles.mockupCardActions}>
+                          <a href={img.url} download className={styles.actionBtn}>
+                            <Download size={16} />
+                            Download
+                          </a>
+                          <button onClick={() => handleCrop(img.url)} className={styles.actionBtnSecondary}>
+                            <Scissors size={16} />
+                            Crop
+                          </button>
+                        </div>
                       </div>
                     </>
                   )}
@@ -676,7 +630,7 @@ export default function ToolPage() {
             <div className={styles.actionButtons}>
               <button
                 onClick={handleGenerateAnother}
-                disabled={isGenerating || feedbackGiven.size === 0}
+                disabled={isGenerating}
                 className={styles.submitButton}
               >
                 {isGenerating ? (

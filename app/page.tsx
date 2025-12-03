@@ -178,27 +178,6 @@ export default function HomePage() {
                 </div>
               </Link>
             ))}
-            {customDesignedCases.map((category, index) => (
-              <Link 
-                key={`duplicate-${category.id}`}
-                href={`/shop/${category.slug}`}
-                className={styles.horizontalCard}
-              >
-                <div className={styles.horizontalImageWrapper}>
-                  <Image 
-                    src={category.image_url} 
-                    alt={category.name}
-                    width={280}
-                    height={380}
-                    className={styles.horizontalImage}
-                    loading="lazy"
-                  />
-                </div>
-                <div className={styles.horizontalInfo}>
-                  <h3 className={styles.horizontalName}>{category.name}</h3>
-                </div>
-              </Link>
-            ))}
           </div>
         </div>
       </section>

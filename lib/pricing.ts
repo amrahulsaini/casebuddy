@@ -65,6 +65,9 @@ export function calculateCost(usage: UsageCost): { usd: number; inr: number } {
   if (usage.operationType === 'text_analysis' || usage.operationType === 'image_generation') {
     // Show ₹1.8 per operation (₹3.6 total for both operations)
     displayCostINR = 1.8;
+  } else if (usage.operationType === 'image_enhancement') {
+    // Show ₹13 for 4K enhancement
+    displayCostINR = 13.0;
   }
 
   return {

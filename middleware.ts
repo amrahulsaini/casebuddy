@@ -18,6 +18,13 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
   
+  // Handle subdomain routing for /editor
+  if (hostname.startsWith('casetool.') && pathname === '/editor') {
+    const url = request.nextUrl.clone();
+    url.pathname = '/editor';
+    return NextResponse.rewrite(url);
+  }
+  
   // Check authentication for casetool routes
   if (isCasetoolRoute) {
     const authCookie = request.cookies.get('casetool_auth');

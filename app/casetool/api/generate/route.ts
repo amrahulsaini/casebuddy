@@ -132,6 +132,9 @@ export async function POST(request: NextRequest) {
         // Ensure output directory exists
         if (!existsSync(outputDir)) {
           await mkdir(outputDir, { recursive: true });
+          console.log('Created output directory:', outputDir);
+        } else {
+          console.log('Output directory exists:', outputDir);
         }
 
         let currentProgress = 40;
@@ -193,23 +196,27 @@ export async function POST(request: NextRequest) {
             throw new Error('No image data returned');
           }
 
-          const fileName = `mockup_grid_${ts}.png`;
+          // Create filename with phone model (sanitized)
+          const sanitizedModel = phoneModel.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+          const fileName = `${sanitizedModel}_${ts}.png`;
           const filePath = join(outputDir, fileName);
           await writeFile(filePath, Buffer.from(genB64, 'base64'));
+          console.log('Image saved to:', filePath);
 
           const generationTime = ((Date.now() - startTime) / 1000).toFixed(2);
+          const imageUrl = `/output/${fileName}`;
 
           // Update log with success
           if (logId) {
             await pool.execute(
               'UPDATE generation_logs SET generated_image_url = ?, ai_prompt = ?, generation_time = ?, status = ? WHERE id = ?',
-              [`/output/${fileName}`, finalPrompt, generationTime, 'completed', logId]
+              [imageUrl, finalPrompt, generationTime, 'completed', logId]
             );
           }
 
           writer.send('image_result', `Mockup image ready`, 90, {
-            url: `/output/${fileName}`,
-            title: `Phone Case Mockup – 5 angles collage`,
+            url: imageUrl,
+            title: `${phoneModel} Case Mockup`,
             logId: logId,
           });
 

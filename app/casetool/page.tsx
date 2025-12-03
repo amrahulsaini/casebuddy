@@ -228,6 +228,10 @@ export default function ToolPage() {
           title: data.msg || 'Generating...', 
           isProcessing: true 
         }]);
+        // Auto-scroll to results when image generation starts
+        setTimeout(() => {
+          imageResultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
         break;
 
       case 'error':

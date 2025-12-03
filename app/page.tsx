@@ -106,19 +106,19 @@ export default function HomePage() {
       {/* Features Bar */}
       <section className={styles.features}>
         <div className={styles.feature}>
-          <Truck size={24} className={styles.featureIcon} />
+          <Truck size={32} className={styles.featureIcon} />
           <span>Free Shipping</span>
         </div>
         <div className={styles.feature}>
-          <ShieldCheck size={24} className={styles.featureIcon} />
+          <ShieldCheck size={32} className={styles.featureIcon} />
           <span>Money Back Guarantee</span>
         </div>
         <div className={styles.feature}>
-          <Zap size={24} className={styles.featureIcon} />
+          <Zap size={32} className={styles.featureIcon} />
           <span>Fast Delivery</span>
         </div>
         <div className={styles.feature}>
-          <Headphones size={24} className={styles.featureIcon} />
+          <Headphones size={32} className={styles.featureIcon} />
           <span>24/7 Support</span>
         </div>
       </section>
@@ -126,7 +126,7 @@ export default function HomePage() {
       {/* Section 1: Our Custom Designed Cases */}
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
-          <TrendingUp size={32} className={styles.sectionIcon} />
+          <TrendingUp size={48} className={styles.sectionIcon} />
           <h2 className={styles.sectionTitle}>Our Custom Designed Cases</h2>
           <p className={styles.sectionSubtitle}>Exclusive designs you won't find anywhere else</p>
         </div>
@@ -144,12 +144,9 @@ export default function HomePage() {
                   src={category.image_url} 
                   alt={category.name}
                   fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  sizes="(max-width: 768px) 100vw, 160px"
                   className={styles.categoryImage}
                 />
-                <div className={styles.categoryOverlay}>
-                  <Package size={32} className={styles.overlayIcon} />
-                </div>
               </div>
               <div className={styles.categoryInfo}>
                 <h3 className={styles.categoryName}>{category.name}</h3>
@@ -163,7 +160,7 @@ export default function HomePage() {
       {/* Section 2: Our Categories */}
       <section className={styles.sectionAlt}>
         <div className={styles.sectionHeader}>
-          <Star size={32} className={styles.sectionIcon} />
+          <Star size={48} className={styles.sectionIcon} />
           <h2 className={styles.sectionTitle}>Our Categories</h2>
           <p className={styles.sectionSubtitle}>Find the perfect case for your device</p>
         </div>
@@ -181,12 +178,9 @@ export default function HomePage() {
                   src={category.image_url} 
                   alt={category.name}
                   fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  sizes="(max-width: 768px) 100vw, 160px"
                   className={styles.categoryImage}
                 />
-                <div className={styles.categoryOverlay}>
-                  <Package size={32} className={styles.overlayIcon} />
-                </div>
               </div>
               <div className={styles.categoryInfo}>
                 <h3 className={styles.categoryName}>{category.name}</h3>
@@ -200,7 +194,7 @@ export default function HomePage() {
       {/* Testimonials Section */}
       <section className={styles.testimonials}>
         <div className={styles.sectionHeader}>
-          <Star size={32} className={styles.sectionIcon} />
+          <Star size={48} className={styles.sectionIcon} />
           <h2 className={styles.sectionTitle}>What Our Customers Say</h2>
           <p className={styles.sectionSubtitle}>Join thousands of happy customers</p>
         </div>
@@ -271,7 +265,7 @@ export default function HomePage() {
       {/* Newsletter Section */}
       <section className={styles.newsletter}>
         <div className={styles.newsletterContent}>
-          <Mail size={48} className={styles.newsletterIcon} />
+          <Mail size={64} className={styles.newsletterIcon} />
           <h3 className={styles.newsletterTitle}>Stay Updated</h3>
           <p className={styles.newsletterText}>
             Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.
@@ -302,13 +296,13 @@ export default function HomePage() {
             </p>
             <div className={styles.socialLinks}>
               <a href="#" className={styles.socialIcon}>
-                <Instagram size={20} />
+                <Instagram size={24} />
               </a>
               <a href="#" className={styles.socialIcon}>
-                <Facebook size={20} />
+                <Facebook size={24} />
               </a>
               <a href="#" className={styles.socialIcon}>
-                <Twitter size={20} />
+                <Twitter size={24} />
               </a>
             </div>
           </div>
@@ -337,15 +331,15 @@ export default function HomePage() {
             <h4 className={styles.footerTitle}>Contact Us</h4>
             <ul className={styles.footerContact}>
               <li>
-                <Phone size={16} />
+                <Phone size={20} />
                 <span>+91 98765 43210</span>
               </li>
               <li>
-                <Mail size={16} />
+                <Mail size={20} />
                 <span>support@casebuddy.co.in</span>
               </li>
               <li>
-                <MapPin size={16} />
+                <MapPin size={20} />
                 <span>Mumbai, India</span>
               </li>
             </ul>

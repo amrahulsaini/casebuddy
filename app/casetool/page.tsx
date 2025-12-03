@@ -144,7 +144,7 @@ export default function ToolPage() {
     setLastFormData(formData);
 
     try {
-      const response = await fetch('/tool/api/generate', {
+      const response = await fetch('/casetool/api/generate', {
         method: 'POST',
         body: formData,
       });
@@ -271,7 +271,7 @@ export default function ToolPage() {
     }
 
     try {
-      const res = await fetch('/tool/api/generate', {
+      const res = await fetch('/casetool/api/generate', {
         method: 'POST',
         body: newFormData,
       });
@@ -363,7 +363,7 @@ export default function ToolPage() {
         <nav className={styles.sidebarNav}>
           <div className={styles.navSection}>
             <div className={styles.navSectionTitle}>Tools</div>
-            <Link href="/tool" className={`${styles.navLink} ${styles.navLinkActive}`} onClick={() => setSidebarOpen(false)}>
+            <Link href="/casetool" className={`${styles.navLink} ${styles.navLinkActive}`} onClick={() => setSidebarOpen(false)}>
               <Sparkles size={20} />
               <span>AI Generator</span>
             </Link>

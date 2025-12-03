@@ -463,10 +463,11 @@
 .categoryGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 3rem;
+  gap: 3.5rem 3rem;
   justify-items: center;
   max-width: 1200px;
   margin: 0 auto;
+  row-gap: 4.5rem;
 }
 
 .categoryCard {
@@ -996,7 +997,8 @@
   
   .categoryGrid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
+    gap: 3rem 2.5rem;
+    row-gap: 4rem;
   }
 }
 
@@ -1027,7 +1029,7 @@
   
   .categoryGrid {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 2.5rem;
   }
   
   .categoryCard {

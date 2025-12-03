@@ -145,6 +145,7 @@ export default function HomePage() {
                     width={280}
                     height={380}
                     className={styles.horizontalImage}
+                    loading="lazy"
                   />
                 </div>
                 <div className={styles.horizontalInfo}>
@@ -165,6 +166,7 @@ export default function HomePage() {
                     width={280}
                     height={380}
                     className={styles.horizontalImage}
+                    loading="lazy"
                   />
                 </div>
                 <div className={styles.horizontalInfo}>
@@ -199,6 +201,9 @@ export default function HomePage() {
                   width={320}
                   height={420}
                   className={styles.verticalImage}
+                  loading="lazy"
+                  placeholder="blur"
+                  blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjQyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzIwIiBoZWlnaHQ9IjQyMCIgZmlsbD0iI2Y1ZjVmNSIvPjwvc3ZnPg=="
                 />
                 <div className={styles.verticalOverlay}>
                   <span className={styles.overlayText}>{category.name}</span>

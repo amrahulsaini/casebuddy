@@ -1,90 +1,43 @@
 'use client';
 
-import { useState, FormEvent, useRef, useEffect } from 'react';
-import Link from 'next/link';
+import { useState, FormEvent, useRef } from 'react';
 import Image from 'next/image';
-import styles from './page.module.css';
-import 'cropperjs/dist/cropper.css';
+import styles from './page-new.module.css';
 import { 
   Sparkles, 
   Upload, 
-  Scissors, 
   Wand2, 
   Download,
   Menu,
-  Smartphone,
   Loader2,
-  Camera,
-  Zap,
-  Shield,
-  Clock,
   X,
-  Image as ImageIcon,
-  Grid,
-  LogOut
+  LogOut,
+  CheckCircle,
+  XCircle,
+  RotateCcw
 } from 'lucide-react';
 
 interface GeneratedImage {
   url: string;
   title: string;
   isProcessing?: boolean;
+  logId?: number;
 }
 
-export default function ToolPage() {
+export default function CaseToolPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState('');
   const [images, setImages] = useState<GeneratedImage[]>([]);
-  const [consoleContent, setConsoleContent] = useState('');
-  const [showConsole, setShowConsole] = useState(false);
   const [error, setError] = useState('');
-  const [showError, setShowError] = useState(false);
-  const [isError, setIsError] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState<string>('');
   const [lastFormData, setLastFormData] = useState<FormData | null>(null);
   const [lastPrompt, setLastPrompt] = useState<string>('');
-
-  // Drag and drop state
+  const [feedbackGiven, setFeedbackGiven] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Crop modal state
-  const [cropModalOpen, setCropModalOpen] = useState(false);
-  const [cropImageUrl, setCropImageUrl] = useState<string | null>(null);
-  const cropImageRef = useRef<HTMLImageElement>(null);
-  const [cropper, setCropper] = useState<any>(null);
-
-  // Initialize cropper when modal opens
-  useEffect(() => {
-    if (cropModalOpen && cropImageUrl && cropImageRef.current) {
-      import('cropperjs').then((Cropper) => {
-        if (cropImageRef.current) {
-          const cropperInstance = new Cropper.default(cropImageRef.current, {
-            viewMode: 1,
-            autoCrop: false,
-            autoCropArea: 0.5,
-            background: false,
-            dragMode: 'crop',
-            movable: false,
-            zoomable: true,
-            scalable: false,
-            rotatable: false,
-          });
-          setCropper(cropperInstance);
-        }
-      });
-    }
-
-    return () => {
-      if (cropper) {
-        cropper.destroy();
-        setCropper(null);
-      }
-    };
-  }, [cropModalOpen, cropImageUrl]);
-
-  // Drag and drop handlers
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -116,10 +69,6 @@ export default function ToolPage() {
     }
   };
 
-  const handleMenuClick = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -134,11 +83,8 @@ export default function ToolPage() {
     setProgress(0);
     setStatus('Initializing...');
     setImages([]);
-    setConsoleContent('');
-    setShowConsole(false);
     setError('');
-    setShowError(false);
-    setIsError(false);
+    setFeedbackGiven(false);
 
     const formData = new FormData(e.currentTarget);
     setLastFormData(formData);
@@ -175,8 +121,6 @@ export default function ToolPage() {
       }
     } catch (err: any) {
       setError('Network Error: ' + err.message);
-      setShowError(true);
-      setIsError(true);
     } finally {
       setIsGenerating(false);
     }
@@ -191,81 +135,76 @@ export default function ToolPage() {
       setStatus(data.msg);
     }
 
-        switch (data.type) {
+    switch (data.type) {
       case 'data_log':
-        // Save the AI prompt when received
         if (data.payload && data.payload.prompt) {
           setLastPrompt(data.payload.prompt);
         }
         break;
 
       case 'image_result':
-        // Remove processing state and add final image
-        setImages((prev) => {
-          const withoutProcessing = prev.filter(img => !img.isProcessing);
-          return [...withoutProcessing, { url: data.payload.url, title: data.payload.title, isProcessing: false }];
-        });
+        setImages([{ 
+          url: data.payload.url, 
+          title: data.payload.title, 
+          isProcessing: false,
+          logId: data.payload.logId 
+        }]);
         break;
 
       case 'image_start':
-        // Add processing placeholder
-        setImages((prev) => [...prev, { 
-          url: '', 
-          title: data.msg || 'Generating...', 
-          isProcessing: true 
-        }]);
+        setImages([{ url: '', title: data.msg || 'Generating...', isProcessing: true }]);
         break;
 
       case 'error':
         setError(data.msg);
-        setShowError(true);
-        setIsError(true);
-        // Remove processing placeholders on error
         setImages((prev) => prev.filter(img => !img.isProcessing));
         break;
 
       case 'done':
         setStatus('Generation Complete!');
-        setIsError(false);
-        // Remove any remaining processing placeholders
         setImages((prev) => prev.filter(img => !img.isProcessing));
         break;
 
       default:
         break;
     }
-  };  const handleReset = () => {
-    setImages([]);
-    setUploadedFileName('');
-    setLastFormData(null);
-    setLastPrompt('');
-    setProgress(0);
-    setStatus('');
-    setError('');
-    setShowError(false);
-    setIsError(false);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+  };
+
+  const handleFeedback = async (approved: boolean) => {
+    if (images.length === 0 || !images[0].logId) return;
+
+    try {
+      await fetch('/casetool/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          generationLogId: images[0].logId,
+          feedbackType: approved ? 'approved' : 'rejected',
+          issueCategory: approved ? null : 'quality',
+          issueDescription: approved ? null : 'User rejected the mockup',
+        }),
+      });
+
+      setFeedbackGiven(true);
+    } catch (err) {
+      console.error('Feedback error:', err);
     }
   };
 
   const handleGenerateAnother = async () => {
-    if (!lastFormData) return;
+    if (!lastFormData || !feedbackGiven) return;
     
     setIsGenerating(true);
     setProgress(0);
     setStatus('');
     setError('');
-    setShowError(false);
-    setIsError(false);
+    setFeedbackGiven(false);
 
-    // Create new FormData with the saved prompt
     const newFormData = new FormData();
     for (const [key, value] of lastFormData.entries()) {
       newFormData.append(key, value);
     }
     
-    // Add the saved prompt to force reuse
     if (lastPrompt) {
       newFormData.append('reuse_prompt', lastPrompt);
     }
@@ -275,10 +214,6 @@ export default function ToolPage() {
         method: 'POST',
         body: newFormData,
       });
-
-      if (!res.ok) {
-        throw new Error('Network response was not ok');
-      }
 
       const reader = res.body?.getReader();
       if (!reader) throw new Error('No reader available');
@@ -306,424 +241,233 @@ export default function ToolPage() {
       }
     } catch (err: any) {
       setError(err.message || 'Failed to generate');
-      setShowError(true);
-      setIsError(true);
     } finally {
       setIsGenerating(false);
     }
   };
 
-  const handleCrop = (url: string) => {
-    setCropImageUrl(url);
-    setCropModalOpen(true);
-  };
-
-  const closeCropModal = () => {
-    if (cropper) {
-      cropper.destroy();
-      setCropper(null);
+  const handleReset = () => {
+    setImages([]);
+    setUploadedFileName('');
+    setLastFormData(null);
+    setLastPrompt('');
+    setProgress(0);
+    setStatus('');
+    setError('');
+    setFeedbackGiven(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
-    setCropModalOpen(false);
-  };
-
-  const downloadCrop = () => {
-    if (!cropper) return;
-
-    const canvas = cropper.getCroppedCanvas();
-    if (!canvas) return;
-
-    canvas.toBlob((blob: Blob | null) => {
-      if (!blob) return;
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'mockup_crop.png';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 'image/png');
   };
 
   return (
     <div className={styles.container}>
       {/* Sidebar */}
-      <div className={`${styles.sidebarOverlay} ${sidebarOpen ? styles.sidebarOpen : ''}`}>
-        <div className={styles.sidebarHeader}>
-          <div className={styles.sidebarLogo}>
-            <div className={styles.sidebarLogoIcon}>
-              <Image src="/favicon.ico" alt="CaseBuddy" width={40} height={40} />
+      {sidebarOpen && (
+        <>
+          <div className={styles.sidebarOverlay} onClick={() => setSidebarOpen(false)} />
+          <div className={styles.sidebar}>
+            <div className={styles.sidebarHeader}>
+              <div className={styles.sidebarLogo}>
+                <Image src="/favicon.ico" alt="CaseBuddy" width={32} height={32} />
+                <span>CaseBuddy</span>
+              </div>
+              <button className={styles.closeBtn} onClick={() => setSidebarOpen(false)}>
+                <X size={20} />
+              </button>
             </div>
-            <span className={styles.sidebarLogoText}>CaseBuddy</span>
-          </div>
-          <button className={styles.closeButton} onClick={() => setSidebarOpen(false)}>
-            <X size={24} />
-          </button>
-        </div>
-        <nav className={styles.sidebarNav}>
-          <div className={styles.navSection}>
-            <div className={styles.navSectionTitle}>Tools</div>
-            <Link href="/casetool" className={`${styles.navLink} ${styles.navLinkActive}`} onClick={() => setSidebarOpen(false)}>
-              <Sparkles size={20} />
-              <span>AI Generator</span>
-            </Link>
-            <Link href="/editor" className={styles.navLink} onClick={() => setSidebarOpen(false)}>
-              <Scissors size={20} />
-              <span>Image Editor</span>
-            </Link>
-            <Link href="/gallery" className={styles.navLink} onClick={() => setSidebarOpen(false)}>
-              <ImageIcon size={20} />
-              <span>Gallery</span>
-            </Link>
-          </div>
-          <div className={styles.navSection}>
-            <div className={styles.navSectionTitle}>Resources</div>
-            <Link href="/templates" className={styles.navLink} onClick={() => setSidebarOpen(false)}>
-              <Grid size={20} />
-              <span>Templates</span>
-            </Link>
-          </div>
-          <div className={styles.navSection}>
             <button 
-              className={`${styles.navLink} ${styles.logoutButton}`} 
+              className={styles.logoutBtn}
               onClick={async () => {
                 await fetch('/casetool/api/auth', { method: 'DELETE' });
                 window.location.href = '/casetool/login';
               }}
             >
-              <LogOut size={20} />
+              <LogOut size={18} />
               <span>Logout</span>
             </button>
           </div>
-        </nav>
-      </div>
-
-      {sidebarOpen && (
-        <div 
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0, 0, 0, 0.5)',
-            zIndex: 999
-          }}
-          onClick={() => setSidebarOpen(false)}
-        />
+        </>
       )}
 
-      
-        {/* Header with Logo and Menu */}
-        <header className={styles.header}>
-        <div className={styles.logo}>
-          <div className={styles.logoIcon}>
-            <Image src="/favicon.ico" alt="CaseBuddy" width={40} height={40} />
-          </div>
-          <span className={styles.logoText}>CaseBuddy</span>
-        </div>
-        <button className={styles.menuButton} onClick={handleMenuClick}>
-          <Menu size={18} />
-          <span>Menu</span>
-        </button>
-      </header>
-
-      <div className={styles.wrapper}>
-        {/* Main Card */}
-        <div className={styles.mainCard}>
-          <div className={styles.badge}>
-            <Sparkles size={16} />
-            <span>AI-Powered Mockup Generator</span>
-          </div>
-          <h1 className={styles.title}>
-            Transform Your Phone Case Photos into Professional Product Images
-          </h1>
-          <p className={styles.description}>
-            Upload a photo of your phone case and let our advanced AI create stunning, professional Amazon-style product mockups in seconds. Get multiple angles, perfect lighting, and professional composition automatically.
-          </p>
-
-          <form onSubmit={handleSubmit} className={styles.form}>
-            <div className={styles.formGroup}>
-              <label className={styles.label}>
-                Target Phone Model
-              </label>
-              <input
-                type="text"
-                name="phone_model"
-                placeholder="e.g. Galaxy A35 5G, Infinix Note 40"
-                required
-                className={styles.input}
-              />
+      {/* Main Content - Split Screen */}
+      <div className={styles.splitScreen}>
+        {/* Left Panel - Input */}
+        <div className={styles.leftPanel}>
+          <div className={styles.header}>
+            <div className={styles.logo}>
+              <Image src="/favicon.ico" alt="CaseBuddy" width={36} height={36} />
+              <span>CaseBuddy AI</span>
             </div>
-
-            <div className={styles.formGroup}>
-              <label className={styles.label}>
-                Reference Image (Flat or Angled)
-              </label>
-              <div 
-                className={`${styles.dropZone} ${isDragging ? styles.dragOver : ''}`}
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-              >
-                <div className={styles.dropZoneContent}>
-                  <Upload className={styles.dropZoneIcon} size={48} />
-                  <div className={styles.dropZoneText}>
-                    {uploadedFileName || 'Drag & Drop your image here'}
-                  </div>
-                  <div className={styles.dropZoneSubtext}>
-                    {uploadedFileName ? 'Click to change file' : 'or click to browse'}
-                  </div>
-                </div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  name="case_image"
-                  accept="image/*"
-                  required
-                  className={styles.fileInput}
-                  onChange={handleFileChange}
-                  style={{ 
-                    position: 'absolute',
-                    inset: 0,
-                    opacity: 0,
-                    cursor: 'pointer'
-                  }}
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isGenerating || images.length > 0}
-              className={styles.submitButton}
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 size={20} className={styles.buttonIconSpinning} />
-                  <span>Processing...</span>
-                </>
-              ) : (
-                <>
-                  <Wand2 size={20} />
-                  <span>Generate Mockup</span>
-                </>
-              )}
+            <button className={styles.menuBtn} onClick={() => setSidebarOpen(true)}>
+              <Menu size={20} />
             </button>
-          </form>
+          </div>
 
-          {(isGenerating || progress > 0) && (
-            <div className={styles.progressContainer}>
-              <div className={styles.progressBar}>
-                <div 
-                  className={`${styles.progressFill} ${isError ? styles.progressFillError : ''}`}
-                  style={{ width: `${progress}%` }}
+          <div className={styles.inputContent}>
+            <div className={styles.badge}>
+              <Sparkles size={14} />
+              <span>AI-Powered Mockup Studio</span>
+            </div>
+
+            <h1 className={styles.pageTitle}>
+              Professional Phone Case Mockups in Seconds
+            </h1>
+
+            <p className={styles.pageSubtitle}>
+              Upload your case design and our AI creates stunning Amazon-ready product renders with perfect lighting and multiple angles.
+            </p>
+
+            <form onSubmit={handleSubmit} className={styles.form}>
+              <div className={styles.formField}>
+                <label>Phone Model</label>
+                <input
+                  type="text"
+                  name="phone_model"
+                  placeholder="e.g., Galaxy A35 5G"
+                  required
+                  disabled={isGenerating}
                 />
               </div>
-              <div className={`${styles.statusText} ${isError ? styles.statusTextError : ''}`}>
-                {status}
-              </div>
-            </div>
-          )}
 
-          {showError && (
-            <div className={styles.errorBox}>
-              {error}
-            </div>
-          )}
-        </div>
-
-        {/* Results Grid */}
-        {images.length > 0 && (
-          <div className={styles.resultSection}>
-            <div className={styles.resultSectionHeader}>
-              <h2 className={styles.resultSectionTitle}>Generated Mockups</h2>
-              <button
-                onClick={handleReset}
-                className={styles.resetIconButton}
-                disabled={isGenerating}
-                title="Reset and upload new image"
-              >
-                <X size={20} />
-                Reset
-              </button>
-            </div>
-            <div className={styles.resultsGridContainer}>
-              {images.map((img, idx) => (
-                <div key={idx} className={styles.mockupCard}>
-                  {img.isProcessing ? (
-                    <div className={styles.mockupCardLoading}>
-                      <div className={styles.spinnerContainer}>
-                        <div className={styles.spinner}></div>
-                        <Sparkles size={32} className={styles.sparkleIcon} />
-                      </div>
-                      <div className={styles.loadingText}>Generating mockup...</div>
-                    </div>
-                  ) : (
-                    <>
-                      <div className={styles.mockupImageContainer}>
-                        <img src={img.url} alt={img.title} className={styles.mockupImage} />
-                      </div>
-                      <div className={styles.mockupCardFooter}>
-                        <div className={styles.mockupCardActions}>
-                          <a href={img.url} download className={styles.actionBtn}>
-                            <Download size={16} />
-                            Download
-                          </a>
-                          <button onClick={() => handleCrop(img.url)} className={styles.actionBtnSecondary}>
-                            <Scissors size={16} />
-                            Crop
-                          </button>
-                        </div>
-                      </div>
-                    </>
-                  )}
+              <div className={styles.formField}>
+                <label>Upload Case Image</label>
+                <div 
+                  className={`${styles.dropzone} ${isDragging ? styles.dragging : ''} ${uploadedFileName ? styles.hasFile : ''}`}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                >
+                  <Upload size={32} />
+                  <p>{uploadedFileName || 'Drop your image here or click to browse'}</p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    name="case_image"
+                    accept="image/*"
+                    required
+                    onChange={handleFileChange}
+                    disabled={isGenerating}
+                  />
                 </div>
-              ))}
-            </div>
-            
-            <div className={styles.actionButtons}>
+              </div>
+
               <button
-                onClick={handleGenerateAnother}
-                disabled={isGenerating}
-                className={styles.submitButton}
+                type="submit"
+                className={styles.generateBtn}
+                disabled={isGenerating || images.length > 0}
               >
                 {isGenerating ? (
                   <>
-                    <Loader2 size={20} className={styles.buttonIconSpinning} />
+                    <Loader2 size={20} className={styles.spinning} />
                     <span>Generating...</span>
                   </>
                 ) : (
                   <>
                     <Wand2 size={20} />
-                    <span>Generate Another</span>
+                    <span>Generate Mockup</span>
                   </>
                 )}
               </button>
-            </div>
-          </div>
-        )}
+            </form>
 
-        {/* Features Section */}
-        {images.length === 0 && !isGenerating && (
-          <>
-          <div className={styles.infoSection}>
-            <h2 className={styles.sectionTitle}>
-              <Camera size={32} />
-              How It Works
-            </h2>
-            <div className={styles.stepsList}>
-                <div className={styles.stepItem}>
-                  <div className={styles.stepNumber}>1</div>
-                  <div className={styles.stepContent}>
-                    <h3 className={styles.stepTitle}>Upload Your Case Photo</h3>
-                    <p className={styles.stepDescription}>
-                      Simply upload any photo of your phone case. It can be a flat lay, angled shot, or even a quick snapshot.
-                    </p>
-                  </div>
+            {(isGenerating || progress > 0) && (
+              <div className={styles.progressSection}>
+                <div className={styles.progressBar}>
+                  <div 
+                    className={styles.progressFill}
+                    style={{ width: `${progress}%` }}
+                  />
                 </div>
-                <div className={styles.stepItem}>
-                  <div className={styles.stepNumber}>2</div>
-                  <div className={styles.stepContent}>
-                    <h3 className={styles.stepTitle}>AI Analyzes Geometry</h3>
-                    <p className={styles.stepDescription}>
-                      Our AI examines camera cutouts, button placements, and case dimensions to ensure perfect accuracy.
-                    </p>
-                  </div>
-                </div>
-                <div className={styles.stepItem}>
-                  <div className={styles.stepNumber}>3</div>
-                  <div className={styles.stepContent}>
-                    <h3 className={styles.stepTitle}>Professional Images Generated</h3>
-                    <p className={styles.stepDescription}>
-                      Get 5 high-quality product images with different angles, lighting, and compositions - perfect for listings.
-                    </p>
-                  </div>
-                </div>
-                <div className={styles.stepItem}>
-                  <div className={styles.stepNumber}>4</div>
-                  <div className={styles.stepContent}>
-                    <h3 className={styles.stepTitle}>Download & Use</h3>
-                    <p className={styles.stepDescription}>
-                      Download individual images or use our crop/split tools to extract specific angles for your needs.
-                    </p>
-                </div>
+                <p className={styles.progressText}>{status}</p>
               </div>
-            </div>
-          </div>
+            )}
 
-          <div className={styles.infoSection}>
-            <h2 className={styles.sectionTitle}>
-              <Zap size={32} />
-              Key Features
-            </h2>
-            <div className={styles.featureGrid}>
-                <div className={styles.featureCard}>
-                  <div className={styles.featureIcon}>
-                    <Sparkles size={24} />
-                  </div>
-                  <h3 className={styles.featureTitle}>AI-Powered Precision</h3>
-                  <p className={styles.featureDescription}>
-                    Advanced AI detects and preserves exact camera layouts, button positions, and case geometry.
-                  </p>
-                </div>
-                <div className={styles.featureCard}>
-                  <div className={styles.featureIcon}>
-                    <Camera size={24} />
-                  </div>
-                  <h3 className={styles.featureTitle}>5 Professional Angles</h3>
-                  <p className={styles.featureDescription}>
-                    Get front/back hero shots, 3/4 views, material showcases, and technical detail images.
-                  </p>
-                </div>
-                <div className={styles.featureCard}>
-                  <div className={styles.featureIcon}>
-                    <Clock size={24} />
-                  </div>
-                  <h3 className={styles.featureTitle}>Lightning Fast</h3>
-                  <p className={styles.featureDescription}>
-                    Generate all mockups in under 2 minutes. No manual editing or photography skills required.
-                  </p>
-                </div>
-                <div className={styles.featureCard}>
-                  <div className={styles.featureIcon}>
-                    <Shield size={24} />
-                  </div>
-                  <h3 className={styles.featureTitle}>Amazon-Ready Quality</h3>
-                  <p className={styles.featureDescription}>
-                    Studio lighting, professional composition, and high-resolution output ready for any platform.
-                </p>
+            {error && (
+              <div className={styles.errorBox}>
+                <XCircle size={18} />
+                <span>{error}</span>
               </div>
-            </div>
-          </div>
-          </>
-        )}
-      </div>
-
-      {/* Crop Modal */}
-      {cropModalOpen && cropImageUrl && (
-        <div className={styles.cropModal}>
-          <div className={styles.cropModalContent}>
-            <div className={styles.cropModalBody}>
-              <img
-                ref={cropImageRef}
-                src={cropImageUrl + '?t=' + Date.now()}
-                alt="Crop source"
-                className={styles.cropModalImage}
-              />
-            </div>
-            <div className={styles.cropModalActions}>
-              <button onClick={closeCropModal} className={styles.cropModalButton}>
-                Close
-              </button>
-              <button onClick={downloadCrop} className={`${styles.cropModalButton} ${styles.cropModalButtonPrimary}`}>
-                Download Crop
-              </button>
-            </div>
+            )}
           </div>
         </div>
-      )}
+
+        {/* Right Panel - Preview */}
+        <div className={styles.rightPanel}>
+          {images.length === 0 ? (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyIcon}>
+                <Sparkles size={64} />
+              </div>
+              <h2>Your mockup will appear here</h2>
+              <p>Upload a case image and click generate to see the magic happen</p>
+            </div>
+          ) : (
+            <div className={styles.previewContent}>
+              {images.map((img, idx) => (
+                <div key={idx} className={styles.mockupPreview}>
+                  {img.isProcessing ? (
+                    <div className={styles.loadingState}>
+                      <Loader2 size={48} className={styles.spinning} />
+                      <p>Creating your mockup...</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className={styles.imageWrapper}>
+                        <img src={img.url} alt={img.title} />
+                      </div>
+
+                      {!feedbackGiven && (
+                        <div className={styles.feedbackSection}>
+                          <p>Is this mockup correct?</p>
+                          <div className={styles.feedbackBtns}>
+                            <button 
+                              className={`${styles.feedbackBtn} ${styles.approve}`}
+                              onClick={() => handleFeedback(true)}
+                            >
+                              <CheckCircle size={20} />
+                              <span>Yes, Perfect!</span>
+                            </button>
+                            <button 
+                              className={`${styles.feedbackBtn} ${styles.reject}`}
+                              onClick={() => handleFeedback(false)}
+                            >
+                              <XCircle size={20} />
+                              <span>No, Try Again</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {feedbackGiven && (
+                        <div className={styles.actions}>
+                          <button 
+                            className={styles.actionBtn}
+                            onClick={handleGenerateAnother}
+                            disabled={isGenerating}
+                          >
+                            <Wand2 size={18} />
+                            <span>Generate Another</span>
+                          </button>
+                          <a href={img.url} download className={styles.actionBtn}>
+                            <Download size={18} />
+                            <span>Download</span>
+                          </a>
+                          <button className={styles.resetBtn} onClick={handleReset}>
+                            <RotateCcw size={18} />
+                            <span>Start Over</span>
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

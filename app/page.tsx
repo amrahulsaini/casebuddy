@@ -138,7 +138,6 @@ export default function HomePage() {
                 href={`/shop/${category.slug}`}
                 className={styles.horizontalCard}
               >
-                <div className={styles.saleBadge}>Sale</div>
                 <div className={styles.horizontalImageWrapper}>
                   <Image 
                     src={category.image_url} 
@@ -159,7 +158,6 @@ export default function HomePage() {
                 href={`/shop/${category.slug}`}
                 className={styles.horizontalCard}
               >
-                <div className={styles.saleBadge}>Sale</div>
                 <div className={styles.horizontalImageWrapper}>
                   <Image 
                     src={category.image_url} 
@@ -191,21 +189,20 @@ export default function HomePage() {
             <Link 
               key={category.id}
               href={`/shop/${category.slug}`}
-              className={styles.categoryCard}
+              className={styles.verticalCard}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className={styles.saleBadge}>Sale</div>
-              <div className={styles.ovalImageWrapper}>
+              <div className={styles.verticalImageWrapper}>
                 <Image 
                   src={category.image_url} 
                   alt={category.name}
                   width={280}
                   height={380}
-                  className={styles.categoryImage}
+                  className={styles.verticalImage}
                 />
               </div>
-              <div className={styles.categoryInfo}>
-                <h3 className={styles.categoryName}>{category.name}</h3>
+              <div className={styles.verticalInfo}>
+                <h3 className={styles.verticalName}>{category.name}</h3>
               </div>
             </Link>
           ))}
@@ -283,34 +280,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Newsletter Section */}
-      <section className={styles.newsletter}>
-        <div className={styles.newsletterContent}>
-          <Mail size={64} className={styles.newsletterIcon} />
-          <h3 className={styles.newsletterTitle}>Stay Updated</h3>
-          <p className={styles.newsletterText}>
-            Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.
-          </p>
-          <form className={styles.newsletterForm}>
-            <input 
-              type="email" 
-              placeholder="Enter your email" 
-              className={styles.newsletterInput}
-            />
-            <button type="submit" className={styles.newsletterButton}>
-              Subscribe <ArrowRight size={18} />
-            </button>
-          </form>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className={styles.footer}>
         <div className={styles.footerContent}>
           <div className={styles.footerSection}>
             <div className={styles.footerLogo}>
-              <Image src="/favicon.ico" alt="CaseBuddy" width={36} height={36} />
-              <span className={styles.footerLogoText}>CaseBuddy</span>
+              <div className={styles.footerLogoWrapper}>
+                <Image src="/casebuddy-logo.png" alt="CaseBuddy" width={160} height={45} />
+              </div>
             </div>
             <p className={styles.footerDesc}>
               Your one-stop shop for premium custom phone cases. Protect your device with style.

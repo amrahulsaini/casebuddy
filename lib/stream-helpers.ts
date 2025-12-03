@@ -3,7 +3,7 @@
  */
 
 export interface StreamUpdate {
-  type: 'status' | 'data_log' | 'image_result' | 'error' | 'done';
+  type: 'status' | 'data_log' | 'image_result' | 'image_start' | 'error' | 'done';
   msg: string;
   progress: number;
   payload?: any;

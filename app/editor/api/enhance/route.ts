@@ -58,18 +58,35 @@ export async function POST(req: NextRequest) {
     
     // Save the enhanced image
     const ts = Date.now();
-    const outputDir = join(process.cwd(), 'public', 'output');
+    const cwd = process.cwd();
+    console.log('Current working directory:', cwd);
+    
+    const outputDir = join(cwd, 'public', 'output');
+    console.log('Output directory path:', outputDir);
+    console.log('Output directory exists?', existsSync(outputDir));
     
     if (!existsSync(outputDir)) {
       console.log('Creating output directory:', outputDir);
-      await mkdir(outputDir, { recursive: true });
+      try {
+        await mkdir(outputDir, { recursive: true });
+        console.log('Directory created successfully');
+      } catch (mkdirError: any) {
+        console.error('Failed to create directory:', mkdirError);
+        throw new Error(`Cannot create output directory: ${mkdirError.message}`);
+      }
     }
 
     const fileName = `enhanced_${ts}.jpg`;
     const filePath = join(outputDir, fileName);
-    await writeFile(filePath, finalEnhanced);
+    console.log('Attempting to save file to:', filePath);
     
-    console.log('Enhanced image saved:', fileName);
+    try {
+      await writeFile(filePath, finalEnhanced);
+      console.log('Enhanced image saved successfully:', fileName);
+    } catch (writeError: any) {
+      console.error('Failed to write file:', writeError);
+      throw new Error(`Cannot write file: ${writeError.message}`);
+    }
 
     return new Response(
       JSON.stringify({
@@ -84,12 +101,19 @@ export async function POST(req: NextRequest) {
     );
 
   } catch (error: any) {
-    console.error('Enhancement error:', error);
+    console.error('=== ENHANCEMENT ERROR ===');
+    console.error('Error message:', error.message);
+    console.error('Error name:', error.name);
+    console.error('Error code:', error.code);
+    console.error('Full error:', error);
     console.error('Error stack:', error.stack);
+    console.error('========================');
     return new Response(
       JSON.stringify({
+        success: false,
         error: 'Failed to enhance image',
         details: error.message,
+        errorCode: error.code || 'UNKNOWN',
       }),
       {
         status: 500,

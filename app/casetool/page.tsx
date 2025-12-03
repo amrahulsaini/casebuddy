@@ -45,7 +45,7 @@ export default function ToolPage() {
   const [uploadedFileName, setUploadedFileName] = useState<string>('');
   const [lastFormData, setLastFormData] = useState<FormData | null>(null);
   const [lastPrompt, setLastPrompt] = useState<string>('');
-  const [feedbackGiven, setFeedbackGiven] = useState(false);
+  const [feedbackGiven, setFeedbackGiven] = useState<Set<number>>(new Set());
   const [currentLogId, setCurrentLogId] = useState<number | null>(null);
 
   // Drag and drop state
@@ -269,7 +269,7 @@ export default function ToolPage() {
         }),
       });
 
-      setFeedbackGiven(true);
+      setFeedbackGiven(prev => new Set([...prev, logId]));
     } catch (err) {
       console.error('Feedback error:', err);
     }
@@ -285,7 +285,7 @@ export default function ToolPage() {
     setError('');
     setShowError(false);
     setIsError(false);
-    setFeedbackGiven(false);
+    setFeedbackGiven(new Set());
     setCurrentLogId(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -301,9 +301,9 @@ export default function ToolPage() {
     setError('');
     setShowError(false);
     setIsError(false);
-    setFeedbackGiven(false);
     setCurrentLogId(null);
-    setImages([]); // Clear previous images
+    // Don't reset feedbackGiven - keep track of all feedback
+    // Don't clear images - keep previous images with their feedback state
 
     // Create new FormData with the saved prompt
     const newFormData = new FormData();
@@ -475,18 +475,20 @@ export default function ToolPage() {
       </header>
 
       <div className={styles.wrapper}>
-        {/* Main Card */}
+        {/* Main Card - Hero Section */}
         <div className={styles.mainCard}>
-          <div className={styles.badge}>
-            <Sparkles size={16} />
-            <span>AI-Powered Mockup Generator</span>
+          <div className={styles.heroContent}>
+            <div className={styles.badge}>
+              <Sparkles size={18} />
+              <span>AI-Powered Generator</span>
+            </div>
+            <h1 className={styles.title}>
+              Transform Phone Cases into Pro Product Images
+            </h1>
+            <p className={styles.description}>
+              Upload your phone case photo and watch our AI create stunning, professional Amazon-ready mockups instantly. Multiple angles, perfect lighting, and flawless composition—all automated.
+            </p>
           </div>
-          <h1 className={styles.title}>
-            Transform Your Phone Case Photos into Professional Product Images
-          </h1>
-          <p className={styles.description}>
-            Upload a photo of your phone case and let our advanced AI create stunning, professional Amazon-style product mockups in seconds. Get multiple angles, perfect lighting, and professional composition automatically.
-          </p>
 
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.formGroup}>
@@ -612,7 +614,7 @@ export default function ToolPage() {
                         <img src={img.url} alt={img.title} className={styles.mockupImage} />
                       </div>
                       <div className={styles.mockupCardFooter}>
-                        {!feedbackGiven ? (
+                        {!img.logId || !feedbackGiven.has(img.logId) ? (
                           <div className={styles.feedbackSection}>
                             <p className={styles.feedbackQuestion}>Is this output correct?</p>
                             <div className={styles.feedbackButtons}>
@@ -652,7 +654,7 @@ export default function ToolPage() {
             <div className={styles.actionButtons}>
               <button
                 onClick={handleGenerateAnother}
-                disabled={isGenerating || !feedbackGiven}
+                disabled={isGenerating || feedbackGiven.size === 0}
                 className={styles.submitButton}
               >
                 {isGenerating ? (
@@ -674,11 +676,11 @@ export default function ToolPage() {
         {/* Features Section */}
         {images.length === 0 && !isGenerating && (
           <>
-          <div className={styles.infoSection}>
-            <h2 className={styles.sectionTitle}>
-              <Camera size={32} />
-              How It Works
-            </h2>
+            <div className={styles.infoSection}>
+              <h2 className={styles.sectionTitle}>
+                <Camera size={32} />
+                How It Works
+              </h2>
             <div className={styles.stepsList}>
                 <div className={styles.stepItem}>
                   <div className={styles.stepNumber}>1</div>

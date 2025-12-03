@@ -34,21 +34,32 @@ export default function EditorPage() {
       const formData = new FormData();
       formData.append('image', file);
 
+      console.log('Sending enhancement request...');
       const response = await fetch('/editor/api/enhance', {
         method: 'POST',
         body: formData,
       });
 
+      console.log('Response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Enhancement request failed:', errorText);
+        throw new Error(`Server error: ${response.status}`);
+      }
+
       const data = await response.json();
+      console.log('Enhancement response:', data);
+      
       if (data.success) {
         setEnhancedImage(data.url);
       } else {
         console.error('Enhancement failed:', data.error);
         alert('Failed to enhance image: ' + (data.error || 'Unknown error'));
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Enhancement error:', error);
-      alert('Failed to enhance image');
+      alert('Failed to enhance image: ' + (error.message || 'Network error'));
     } finally {
       setIsEnhancing(false);
     }

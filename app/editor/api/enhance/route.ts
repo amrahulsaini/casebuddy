@@ -10,6 +10,8 @@ export const maxDuration = 60;
 export async function POST(req: NextRequest) {
   try {
     console.log('Enhancement request received');
+    console.log('Request URL:', req.url);
+    console.log('Request headers:', Object.fromEntries(req.headers.entries()));
     
     const formData = await req.formData();
     const imageFile = formData.get('image') as File;

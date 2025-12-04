@@ -19,12 +19,15 @@ import {
 interface GenerationLog {
   id: number;
   session_id: string;
+  user_id: number | null;
+  user_email: string | null;
   phone_model: string;
   original_image_name: string;
   ai_prompt: string;
   generated_image_url: string;
   generation_time: number;
   status: string;
+  feedback_status: string;
   created_at: string;
 }
 
@@ -224,6 +227,18 @@ export default function GalleryPage() {
                         : log.original_image_name}
                     </span>
                   </div>
+                  {log.user_email && (
+                    <div className={styles.userEmail} title={log.user_email}>
+                      📧 {log.user_email.length > 20 
+                        ? log.user_email.substring(0, 20) + '...' 
+                        : log.user_email}
+                    </div>
+                  )}
+                  {log.feedback_status && (
+                    <div className={`${styles.feedbackBadge} ${styles[`feedback${log.feedback_status}`]}`}>
+                      {log.feedback_status === 'accurate' ? '✓' : log.feedback_status === 'inaccurate' ? '✗' : '⏳'} {log.feedback_status}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

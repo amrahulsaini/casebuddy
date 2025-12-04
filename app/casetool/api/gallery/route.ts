@@ -8,27 +8,30 @@ export async function GET(request: NextRequest) {
     const userId = userIdCookie ? parseInt(userIdCookie.value) : null;
 
     let query = `SELECT 
-        id,
-        session_id,
-        phone_model,
-        original_image_name,
-        ai_prompt,
-        generated_image_url,
-        generation_time,
-        status,
-        feedback_status,
-        created_at
-      FROM generation_logs`;
+        gl.id,
+        gl.session_id,
+        gl.user_id,
+        u.email as user_email,
+        gl.phone_model,
+        gl.original_image_name,
+        gl.ai_prompt,
+        gl.generated_image_url,
+        gl.generation_time,
+        gl.status,
+        gl.feedback_status,
+        gl.created_at
+      FROM generation_logs gl
+      LEFT JOIN users u ON gl.user_id = u.id`;
     
     const params: any[] = [];
 
     // Filter by user if logged in
     if (userId) {
-      query += ` WHERE user_id = ?`;
+      query += ` WHERE gl.user_id = ?`;
       params.push(userId);
     }
 
-    query += ` ORDER BY created_at DESC LIMIT 100`;
+    query += ` ORDER BY gl.created_at DESC LIMIT 100`;
 
     const [rows] = await pool.execute(query, params);
 

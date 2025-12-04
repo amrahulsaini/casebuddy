@@ -146,8 +146,32 @@ async function importProducts() {
           [slug]
         );
         
+        let productId;
+        
         if (existing.length > 0) {
-          console.log(`  ⚠️  Product already exists, skipping...\n`);
+          productId = existing[0].id;
+          console.log(`  ℹ️  Product already exists (ID: ${productId}), adding to category...`);
+          
+          // Check if already linked to this category
+          const [linkExists] = await connection.execute(
+            'SELECT id FROM product_categories WHERE product_id = ? AND category_id = ?',
+            [productId, categoryId]
+          );
+          
+          if (linkExists.length > 0) {
+            console.log(`  ✓ Already in this category\n`);
+            successCount++;
+            continue;
+          }
+          
+          // Link product to this category
+          await connection.execute(
+            'INSERT INTO product_categories (product_id, category_id) VALUES (?, ?)',
+            [productId, categoryId]
+          );
+          
+          console.log(`  ✓ Added to ${CATEGORY_NAME}\n`);
+          successCount++;
           continue;
         }
         
@@ -176,7 +200,7 @@ async function importProducts() {
         // Extract price
         const price = extractPrice(item.title, item.tags);
         
-        // Insert product
+        // Insert product (only if we didn't find an existing one above)
         const [productResult] = await connection.execute(
           `INSERT INTO products (
             name, slug, description, short_description, price, 
@@ -192,7 +216,7 @@ async function importProducts() {
           ]
         );
         
-        const productId = productResult.insertId;
+        productId = productResult.insertId;
         
         // Link product to category
         await connection.execute(

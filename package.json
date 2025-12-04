@@ -12,7 +12,7 @@
     "db:main:schema": "mysql -u case_main -p case_main < database/case_main_schema.sql"
   },
   "dependencies": {
-    "@google/genai": "^1.30.0",
+    "@google/genai": "^1.31.0",
     "@google/generative-ai": "^0.24.1",
     "axios": "^1.13.2",
     "cropperjs": "^1.6.2",

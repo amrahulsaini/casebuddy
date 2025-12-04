@@ -14,6 +14,9 @@ interface UsageLog {
   output_tokens: number;
   cost_usd: number;
   cost_inr: number;
+  is_billable: boolean;
+  phone_model: string;
+  feedback_status: string;
   created_at: string;
 }
 
@@ -21,6 +24,7 @@ interface BillingSummary {
   total_operations: number;
   total_cost_usd: number;
   total_cost_inr: number;
+  refunded_cost_inr?: number;
 }
 
 export default function BillingPage() {
@@ -138,10 +142,22 @@ export default function BillingPage() {
               <IndianRupee size={24} />
             </div>
             <div className={styles.cardContent}>
-              <div className={styles.cardLabel}>Total Cost (INR)</div>
+              <div className={styles.cardLabel}>Billable Cost (INR)</div>
               <div className={styles.cardValue}>₹{summary.total_cost_inr.toFixed(2)}</div>
             </div>
           </div>
+
+          {summary.refunded_cost_inr !== undefined && summary.refunded_cost_inr > 0 && (
+            <div className={styles.summaryCard}>
+              <div className={styles.cardIcon} style={{ background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' }}>
+                <IndianRupee size={24} />
+              </div>
+              <div className={styles.cardContent}>
+                <div className={styles.cardLabel}>Refunded (INR)</div>
+                <div className={styles.cardValue}>₹{summary.refunded_cost_inr.toFixed(2)}</div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -166,11 +182,10 @@ export default function BillingPage() {
           <div className={styles.table}>
             <div className={styles.tableHeader}>
               <div className={styles.tableCell}>Date & Time</div>
+              <div className={styles.tableCell}>Phone Model</div>
               <div className={styles.tableCell}>Operation</div>
               <div className={styles.tableCell}>Model</div>
-              <div className={styles.tableCell}>Input</div>
-              <div className={styles.tableCell}>Output</div>
-              <div className={styles.tableCell}>Cost (USD)</div>
+              <div className={styles.tableCell}>Status</div>
               <div className={styles.tableCell}>Cost (INR)</div>
             </div>
 
@@ -178,23 +193,28 @@ export default function BillingPage() {
               <div key={log.id} className={styles.tableRow}>
                 <div className={styles.tableCell}>{formatDate(log.created_at)}</div>
                 <div className={styles.tableCell}>
+                  <span className={styles.phoneModel}>{log.phone_model}</span>
+                </div>
+                <div className={styles.tableCell}>
                   <span className={styles.operationType}>{getOperationLabel(log.operation_type)}</span>
                 </div>
                 <div className={styles.tableCell}>
                   <span className={styles.modelName}>{getModelLabel(log.model_name)}</span>
                 </div>
                 <div className={styles.tableCell}>
-                  {log.input_images > 0 && `${log.input_images} img`}
+                  <span className={`${styles.billingStatus} ${log.is_billable ? styles.billable : styles.refunded}`}>
+                    {log.is_billable ? '✓ Billable' : '✗ Refunded'}
+                  </span>
+                  {log.feedback_status && (
+                    <span className={styles.feedbackBadge}>
+                      {log.feedback_status === 'accurate' ? '👍' : log.feedback_status === 'inaccurate' ? '👎' : '⏳'}
+                    </span>
+                  )}
                 </div>
                 <div className={styles.tableCell}>
-                  {log.output_images > 0 && `${log.output_images} img`}
-                  {log.output_tokens > 0 && ` ${log.output_tokens} tokens`}
-                </div>
-                <div className={styles.tableCell}>
-                  <span className={styles.costUsd}>${Number(log.cost_usd).toFixed(4)}</span>
-                </div>
-                <div className={styles.tableCell}>
-                  <span className={styles.costInr}>₹{Number(log.cost_inr).toFixed(2)}</span>
+                  <span className={log.is_billable ? styles.costInr : styles.costRefunded}>
+                    ₹{Number(log.cost_inr).toFixed(2)}
+                  </span>
                 </div>
               </div>
             ))}

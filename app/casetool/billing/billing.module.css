@@ -149,7 +149,7 @@
 
 .tableHeader {
   display: grid;
-  grid-template-columns: 180px 140px 180px 80px 100px 100px 100px;
+  grid-template-columns: 200px 140px 140px 180px 150px 120px;
   gap: 1rem;
   padding: 1rem;
   background: rgba(255, 107, 0, 0.15);
@@ -164,7 +164,7 @@
 
 .tableRow {
   display: grid;
-  grid-template-columns: 180px 140px 180px 80px 100px 100px 100px;
+  grid-template-columns: 200px 140px 140px 180px 150px 120px;
   gap: 1rem;
   padding: 1rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -203,15 +203,52 @@
 }
 
 .costInr {
-  color: #60a5fa;
+  color: #4ade80;
   font-weight: 600;
+}
+
+.costRefunded {
+  color: #ef4444;
+  font-weight: 600;
+  text-decoration: line-through;
+}
+
+.phoneModel {
+  color: #a78bfa;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.billingStatus {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.billable {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+}
+
+.refunded {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #991b1b;
+}
+
+.feedbackBadge {
+  margin-left: 6px;
+  font-size: 0.9rem;
 }
 
 /* Responsive design */
 @media (max-width: 1200px) {
   .tableHeader,
   .tableRow {
-    grid-template-columns: 160px 120px 160px 70px 90px 90px 90px;
+    grid-template-columns: 180px 120px 120px 150px 130px 100px;
     gap: 0.75rem;
     font-size: 0.85rem;
   }

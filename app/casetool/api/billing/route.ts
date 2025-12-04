@@ -29,33 +29,39 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Fetch usage logs for the user
+    // Fetch usage logs for the user (join through generation_logs)
     const [logs] = await pool.execute(
       `SELECT 
-        id,
-        model_name,
-        operation_type,
-        input_images,
-        output_images,
-        output_tokens,
-        cost_usd,
-        cost_inr,
-        created_at
-      FROM api_usage_logs
-      WHERE user_id = ?
-      ORDER BY created_at DESC
+        aul.id,
+        aul.model_name,
+        aul.operation_type,
+        aul.input_images,
+        aul.output_images,
+        aul.output_tokens,
+        aul.cost_usd,
+        aul.cost_inr,
+        aul.is_billable,
+        aul.created_at,
+        gl.phone_model,
+        gl.feedback_status
+      FROM api_usage_logs aul
+      JOIN generation_logs gl ON aul.generation_log_id = gl.id
+      WHERE gl.user_id = ?
+      ORDER BY aul.created_at DESC
       LIMIT 100`,
       [userId]
     );
 
-    // Fetch billing summary for the user
+    // Fetch billing summary for the user (only billable items)
     const [summaryRows] = await pool.execute(
       `SELECT 
         COUNT(*) as total_operations,
-        COALESCE(SUM(cost_usd), 0) as total_cost_usd,
-        COALESCE(SUM(cost_inr), 0) as total_cost_inr
-      FROM api_usage_logs
-      WHERE user_id = ?`,
+        COALESCE(SUM(CASE WHEN aul.is_billable = TRUE THEN aul.cost_usd ELSE 0 END), 0) as total_cost_usd,
+        COALESCE(SUM(CASE WHEN aul.is_billable = TRUE THEN aul.cost_inr ELSE 0 END), 0) as total_cost_inr,
+        COALESCE(SUM(CASE WHEN aul.is_billable = FALSE THEN aul.cost_inr ELSE 0 END), 0) as refunded_cost_inr
+      FROM api_usage_logs aul
+      JOIN generation_logs gl ON aul.generation_log_id = gl.id
+      WHERE gl.user_id = ?`,
       [userId]
     );
 

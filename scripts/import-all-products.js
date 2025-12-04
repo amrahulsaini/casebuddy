@@ -154,7 +154,7 @@ async function importProducts() {
           
           // Check if already linked to this category
           const [linkExists] = await connection.execute(
-            'SELECT id FROM product_categories WHERE product_id = ? AND category_id = ?',
+            'SELECT product_id FROM product_categories WHERE product_id = ? AND category_id = ?',
             [productId, categoryId]
           );
           

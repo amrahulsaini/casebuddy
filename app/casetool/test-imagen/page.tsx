@@ -119,28 +119,26 @@ export default function TestImagenPage() {
         if (done) break;
 
         const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
+        const lines = chunk.split('\n').filter(line => line.trim());
 
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6));
+          try {
+            const data = JSON.parse(line);
 
-              if (data.type === 'status') {
-                setStatus(data.message);
-                setProgress(data.progress);
-              } else if (data.type === 'image_result') {
-                setImages((prev) => [...prev, { url: data.data.url, title: data.data.title }]);
-                setProgress(data.progress);
-              } else if (data.type === 'done') {
-                setStatus(data.message);
-                setProgress(100);
-              } else if (data.type === 'error') {
-                setError(data.message);
-              }
-            } catch (parseError) {
-              console.error('Parse error:', parseError);
+            if (data.type === 'status') {
+              setStatus(data.msg);
+              setProgress(data.progress);
+            } else if (data.type === 'image_result') {
+              setImages((prev) => [...prev, { url: data.payload.url, title: data.payload.title }]);
+              setProgress(data.progress);
+            } else if (data.type === 'done') {
+              setStatus(data.msg);
+              setProgress(100);
+            } else if (data.type === 'error') {
+              setError(data.msg);
             }
+          } catch (parseError) {
+            console.error('Parse error:', parseError, 'Line:', line);
           }
         }
       }

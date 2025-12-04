@@ -79,7 +79,7 @@ async function importProducts() {
     console.log('🚀 Starting product import...\n');
     
     // Read JSON file
-    const jsonPath = path.join(__dirname, '..', 'atcasa_data.json');
+    const jsonPath = path.join(__dirname, '..', 'app', 'atcasa_data.json');
     const jsonData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
     
     console.log(`📦 Found ${jsonData.length} products to import\n`);

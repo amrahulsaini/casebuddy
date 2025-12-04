@@ -59,17 +59,17 @@ export function calculateCost(usage: UsageCost): { usd: number; inr: number } {
 
   const costINR = costUSD * USD_TO_INR;
 
-  // Display reduced cost to user (₹3.6 per generation shown in billing)
+  // Display reduced cost to user (₹4.2 per generation shown in billing)
   // Actual API costs are higher but we show discounted price
   let displayCostINR = costINR;
   if (usage.operationType === 'text_analysis' || usage.operationType === 'image_generation') {
     // Check if using gemini-3-pro-image model for high quality
     if (usage.modelName === 'gemini-3-pro-image-preview') {
-      // Show ₹9 per image for Ultra HD quality
-      displayCostINR = 9.0;
+      // Show ₹9.39 per generation for Ultra HD quality (text_analysis + image_generation combined)
+      displayCostINR = 9.39;
     } else {
-      // Show ₹1.8 per operation (₹3.6 total for both operations) for standard quality
-      displayCostINR = 1.8;
+      // Show ₹2.1 per operation (₹4.2 total for both operations) for standard quality
+      displayCostINR = 2.1;
     }
   } else if (usage.operationType === 'image_enhancement') {
     // Show ₹13 for 4K enhancement

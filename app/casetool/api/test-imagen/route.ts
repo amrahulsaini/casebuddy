@@ -124,6 +124,11 @@ export async function POST(request: NextRequest) {
 
         const generatedImages = [];
         let idx = 1;
+        
+        if (!response.generatedImages || response.generatedImages.length === 0) {
+          throw new Error('No images generated');
+        }
+        
         for (const generatedImage of response.generatedImages) {
           const imgBytes = generatedImage.image.imageBytes;
           const imageBuffer = Buffer.from(imgBytes, 'base64');

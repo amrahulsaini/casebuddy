@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "seed:categories": "tsx scripts/seed-categories.ts",
+    "import:products": "node scripts/import-products.js",
     "db:main:create": "mysql -u root -p -e \"CREATE DATABASE IF NOT EXISTS case_main; CREATE USER IF NOT EXISTS 'case_main'@'localhost' IDENTIFIED BY 'main'; GRANT ALL PRIVILEGES ON case_main.* TO 'case_main'@'localhost'; FLUSH PRIVILEGES;\"",
     "db:main:schema": "mysql -u case_main -p case_main < database/case_main_schema.sql"
   },

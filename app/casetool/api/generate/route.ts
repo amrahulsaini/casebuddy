@@ -20,6 +20,7 @@ import { logAPIUsage } from '@/lib/pricing';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const TEXT_MODEL = process.env.TEXT_MODEL || 'gemini-2.0-flash';
 const IMAGE_MODEL = process.env.IMAGE_MODEL || 'gemini-2.5-flash-image';
+const IMAGE_ENHANCE_MODEL = process.env.IMAGE_ENHANCE_MODEL || 'gemini-3-pro-image-preview';
 
 export async function POST(request: NextRequest) {
   const stream = new ReadableStream({
@@ -42,6 +43,10 @@ export async function POST(request: NextRequest) {
         const phoneModel = (formData.get('phone_model') as string) || 'Unknown Model';
         const caseImage = formData.get('case_image') as File;
         const reusePrompt = formData.get('reuse_prompt') as string | null;
+        const imageModel = (formData.get('image_model') as string) || 'normal';
+        
+        // Select model based on user choice
+        const selectedImageModel = imageModel === 'high' ? IMAGE_ENHANCE_MODEL : IMAGE_MODEL;
 
         if (!caseImage) {
           throw new Error('Image upload failed');
@@ -195,7 +200,7 @@ export async function POST(request: NextRequest) {
           };
 
           const imgRes = await callGemini(
-            `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_MODEL}:generateContent`,
+            `https://generativelanguage.googleapis.com/v1beta/models/${selectedImageModel}:generateContent`,
             imgPayload,
             GEMINI_API_KEY
           );
@@ -228,7 +233,7 @@ export async function POST(request: NextRequest) {
           // Log image generation API usage
           if (userId && logId) {
             await logAPIUsage(userId, logId, {
-              modelName: IMAGE_MODEL,
+              modelName: selectedImageModel,
               operationType: 'image_generation',
               inputImages: 1,
               outputImages: 1,

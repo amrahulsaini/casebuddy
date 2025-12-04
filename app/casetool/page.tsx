@@ -46,6 +46,7 @@ export default function ToolPage() {
   const [uploadedFileName, setUploadedFileName] = useState<string>('');
   const [lastFormData, setLastFormData] = useState<FormData | null>(null);
   const [lastPrompt, setLastPrompt] = useState<string>('');
+  const [selectedModel, setSelectedModel] = useState<'normal' | 'high'>('normal');
 
   // Drag and drop state
   const [isDragging, setIsDragging] = useState(false);
@@ -148,6 +149,7 @@ export default function ToolPage() {
     setIsError(false);
 
     const formData = new FormData(e.currentTarget);
+    formData.append('image_model', selectedModel);
     setLastFormData(formData);
 
     try {
@@ -498,6 +500,38 @@ export default function ToolPage() {
                 required
                 className={styles.input}
               />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>
+                Quality Model
+              </label>
+              <div className={styles.modelSelector}>
+                <button
+                  type="button"
+                  className={`${styles.modelOption} ${selectedModel === 'normal' ? styles.modelOptionActive : ''}`}
+                  onClick={() => setSelectedModel('normal')}
+                >
+                  <div className={styles.modelOptionHeader}>
+                    <Zap size={20} />
+                    <span className={styles.modelOptionTitle}>Standard Quality</span>
+                  </div>
+                  <div className={styles.modelOptionDesc}>Fast generation • Good quality</div>
+                  <div className={styles.modelOptionBadge}>gemini-2.5-flash</div>
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.modelOption} ${selectedModel === 'high' ? styles.modelOptionActive : ''}`}
+                  onClick={() => setSelectedModel('high')}
+                >
+                  <div className={styles.modelOptionHeader}>
+                    <Sparkles size={20} />
+                    <span className={styles.modelOptionTitle}>Ultra HD Quality</span>
+                  </div>
+                  <div className={styles.modelOptionDesc}>4K resolution • Best quality</div>
+                  <div className={styles.modelOptionBadge}>gemini-3-pro</div>
+                </button>
+              </div>
             </div>
 
             <div className={styles.formGroup}>

@@ -28,7 +28,7 @@ interface Category {
 
 export default function ShopPage() {
   const params = useParams();
-  const categorySlug = params.slug as string;
+  const categorySlug = params?.slug as string;
   
   const [products, setProducts] = useState<Product[]>([]);
   const [category, setCategory] = useState<Category | null>(null);
@@ -36,6 +36,8 @@ export default function ShopPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
+    if (!categorySlug) return;
+    
     Promise.all([
       fetch(`/api/products?category=${categorySlug}`).then(res => res.json()),
       fetch(`/api/categories/${categorySlug}`).then(res => res.json())

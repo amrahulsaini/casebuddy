@@ -37,8 +37,8 @@ interface Product {
 
 export default function ProductDetailPage() {
   const params = useParams();
-  const categorySlug = params.slug as string;
-  const productSlug = params.product as string;
+  const categorySlug = params?.slug as string;
+  const productSlug = params?.product as string;
   
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,6 +46,8 @@ export default function ProductDetailPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   useEffect(() => {
+    if (!productSlug) return;
+    
     fetch(`/api/products/${productSlug}`)
       .then(res => res.json())
       .then(data => {

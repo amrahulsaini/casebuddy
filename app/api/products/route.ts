@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const categorySlug = searchParams.get('category');
     const featured = searchParams.get('featured');
-    const limit = parseInt(searchParams.get('limit') || '11');
+    const limit = parseInt(searchParams.get('limit') || '24');
     const offset = parseInt(searchParams.get('offset') || '0');
 
     let query = `
@@ -42,6 +42,30 @@ export async function GET(request: NextRequest) {
       query += ` AND p.is_featured = TRUE`;
     }
 
+    // Get total count
+    let countQuery = `
+      SELECT COUNT(DISTINCT p.id) as total
+      FROM products p
+      WHERE p.is_active = TRUE
+    `;
+    const countParams: any[] = [];
+
+    if (categorySlug) {
+      countQuery += ` AND p.id IN (
+        SELECT pc.product_id FROM product_categories pc
+        JOIN categories c ON pc.category_id = c.id
+        WHERE c.slug = ?
+      )`;
+      countParams.push(categorySlug);
+    }
+
+    if (featured === 'true') {
+      countQuery += ` AND p.is_featured = TRUE`;
+    }
+
+    const [countResult]: any = await pool.execute(countQuery, countParams);
+    const total = Number(countResult[0]?.total || 0);
+
     query += ` ORDER BY p.created_at DESC LIMIT ? OFFSET ?`;
     params.push(limit, offset);
 
@@ -60,6 +84,9 @@ export async function GET(request: NextRequest) {
       success: true,
       products: sanitizedProducts,
       count: sanitizedProducts.length,
+      total: total,
+      limit: limit,
+      offset: offset,
     });
   } catch (error: any) {
     console.error('Products API error:', error);

@@ -34,16 +34,33 @@ export default function ShopPage() {
   const [category, setCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [cart, setCart] = useState<number[]>([]);
+  const [wishlist, setWishlist] = useState<number[]>([]);
+  const productsPerPage = 24;
+
+  useEffect(() => {
+    // Load cart and wishlist from localStorage
+    const savedCart = localStorage.getItem('cart');
+    const savedWishlist = localStorage.getItem('wishlist');
+    if (savedCart) setCart(JSON.parse(savedCart));
+    if (savedWishlist) setWishlist(JSON.parse(savedWishlist));
+  }, []);
 
   useEffect(() => {
     if (!categorySlug) return;
     
+    setLoading(true);
+    const offset = (currentPage - 1) * productsPerPage;
+    
     Promise.all([
-      fetch(`/api/products?category=${categorySlug}`).then(res => res.json()),
+      fetch(`/api/products?category=${categorySlug}&limit=${productsPerPage}&offset=${offset}`).then(res => res.json()),
       fetch(`/api/categories/${categorySlug}`).then(res => res.json())
     ]).then(([productsData, categoryData]) => {
       if (productsData.success) {
         setProducts(productsData.products);
+        setTotalProducts(productsData.total || 0);
       }
       if (categoryData.success) {
         setCategory(categoryData.category);
@@ -53,7 +70,29 @@ export default function ShopPage() {
       console.error('Error loading shop data:', error);
       setLoading(false);
     });
-  }, [categorySlug]);
+  }, [categorySlug, currentPage]);
+
+  const totalPages = Math.ceil(totalProducts / productsPerPage);
+
+  const toggleWishlist = (e: React.MouseEvent, productId: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const newWishlist = wishlist.includes(productId)
+      ? wishlist.filter(id => id !== productId)
+      : [...wishlist, productId];
+    setWishlist(newWishlist);
+    localStorage.setItem('wishlist', JSON.stringify(newWishlist));
+  };
+
+  const addToCart = (e: React.MouseEvent, productId: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!cart.includes(productId)) {
+      const newCart = [...cart, productId];
+      setCart(newCart);
+      localStorage.setItem('cart', JSON.stringify(newCart));
+    }
+  };
 
   if (loading) {
     return (
@@ -80,10 +119,11 @@ export default function ShopPage() {
           <div className={styles.navActions}>
             <button className={styles.iconButton}>
               <Heart size={22} />
+              {wishlist.length > 0 && <span className={styles.cartBadge}>{wishlist.length}</span>}
             </button>
             <button className={styles.iconButton}>
               <ShoppingCart size={22} />
-              <span className={styles.cartBadge}>0</span>
+              {cart.length > 0 && <span className={styles.cartBadge}>{cart.length}</span>}
             </button>
           </div>
         </nav>
@@ -102,7 +142,7 @@ export default function ShopPage() {
       {/* Toolbar */}
       <div className={styles.toolbar}>
         <div className={styles.toolbarLeft}>
-          <span className={styles.resultCount}>{products.length} Products</span>
+          <span className={styles.resultCount}>{totalProducts} Products</span>
         </div>
         <div className={styles.toolbarRight}>
           <div className={styles.viewToggle}>
@@ -144,8 +184,11 @@ export default function ShopPage() {
                   {Math.round(((product.compare_price - product.price) / product.compare_price) * 100)}% OFF
                 </div>
               )}
-              <button className={styles.wishlistButton}>
-                <Heart size={20} />
+              <button 
+                className={`${styles.wishlistButton} ${wishlist.includes(product.id) ? styles.wishlisted : ''}`}
+                onClick={(e) => toggleWishlist(e, product.id)}
+              >
+                <Heart size={20} fill={wishlist.includes(product.id) ? '#ff6b00' : 'none'} />
               </button>
             </div>
             <div className={styles.productInfo}>
@@ -164,9 +207,12 @@ export default function ShopPage() {
                   <span className={styles.comparePrice}>₹{product.compare_price.toFixed(2)}</span>
                 )}
               </div>
-              <button className={styles.addToCartButton}>
+              <button 
+                className={styles.addToCartButton}
+                onClick={(e) => addToCart(e, product.id)}
+              >
                 <ShoppingCart size={18} />
-                <span>Add to Cart</span>
+                <span>{cart.includes(product.id) ? 'In Cart' : 'Add to Cart'}</span>
               </button>
             </div>
           </Link>
@@ -179,6 +225,37 @@ export default function ShopPage() {
           <Link href="/" className={styles.backHomeButton}>
             Back to Home
           </Link>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className={styles.pagination}>
+          <button 
+            className={styles.pageButton}
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+          <div className={styles.pageNumbers}>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              <button
+                key={page}
+                className={`${styles.pageNumber} ${currentPage === page ? styles.activePage : ''}`}
+                onClick={() => setCurrentPage(page)}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+          <button 
+            className={styles.pageButton}
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
         </div>
       )}
 

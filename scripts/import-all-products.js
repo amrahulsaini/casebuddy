@@ -151,12 +151,13 @@ async function importProducts() {
           continue;
         }
         
-        // Download and save image
+        // Download and save image - handle multiple field names
         let imageUrl = '/products/default.jpg';
-        if (item.image_src) {
+        const imageSourceUrl = item.image_src || item.image || item.imageUrl || item.image_url;
+        
+        if (imageSourceUrl) {
           const imageFileName = `${slug}-${Date.now()}.jpg`;
           const imagePath = path.join(productsDir, imageFileName);
-          const imageSourceUrl = item.image_src;
           
           console.log(`  📥 Downloading from: ${imageSourceUrl}`);
           

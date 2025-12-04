@@ -94,17 +94,24 @@ async function fixProductImages() {
         
         // Find matching product in JSON
         const jsonProduct = jsonData.find(item => {
-          const slug = item.handle || item.title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
+          const slug = item.handle || item.title.toLowerCase().replace(/[^a-z0-9\\s-]/g, '').replace(/\\s+/g, '-');
           return slug === product.slug;
         });
         
-        if (!jsonProduct || !jsonProduct.image_src) {
-          console.log(`  ⚠️  No image found in JSON, skipping...\n`);
+        if (!jsonProduct) {
+          console.log(`  ⚠️  No matching product found in JSON, skipping...\\n`);
           errorCount++;
           continue;
         }
         
-        const imageSourceUrl = jsonProduct.image_src;
+        // Handle multiple field names for image URL
+        const imageSourceUrl = jsonProduct.image_src || jsonProduct.image || jsonProduct.imageUrl || jsonProduct.image_url;
+        
+        if (!imageSourceUrl) {
+          console.log(`  ⚠️  No image URL found in JSON, skipping...\\n`);
+          errorCount++;
+          continue;
+        }
         const imageFileName = `${product.slug}-${Date.now()}.jpg`;
         const imagePath = path.join(productsDir, imageFileName);
         

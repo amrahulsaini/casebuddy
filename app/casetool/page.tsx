@@ -22,7 +22,9 @@ import {
   Image as ImageIcon,
   Grid,
   LogOut,
-  Maximize2
+  Maximize2,
+  ThumbsUp,
+  ThumbsDown
 } from 'lucide-react';
 
 interface GeneratedImage {
@@ -30,6 +32,7 @@ interface GeneratedImage {
   title: string;
   isProcessing?: boolean;
   logId?: number;
+  feedbackStatus?: 'pending' | 'accurate' | 'inaccurate';
 }
 
 export default function ToolPage() {
@@ -47,6 +50,7 @@ export default function ToolPage() {
   const [lastFormData, setLastFormData] = useState<FormData | null>(null);
   const [lastPrompt, setLastPrompt] = useState<string>('');
   const [selectedModel, setSelectedModel] = useState<'normal' | 'high'>('normal');
+  const [feedbackLoading, setFeedbackLoading] = useState<number | null>(null);
 
   // Drag and drop state
   const [isDragging, setIsDragging] = useState(false);
@@ -216,7 +220,8 @@ export default function ToolPage() {
             url: data.payload.url, 
             title: data.payload.title, 
             isProcessing: false,
-            logId: data.payload.logId 
+            logId: data.payload.logId,
+            feedbackStatus: 'pending'
           }];
         });
         // Auto-scroll to results
@@ -380,6 +385,48 @@ export default function ToolPage() {
   const closeFullscreenModal = () => {
     setFullscreenModalOpen(false);
     setFullscreenImageUrl(null);
+  };
+
+  const handleFeedback = async (logId: number | undefined, feedbackType: 'accurate' | 'inaccurate') => {
+    if (!logId) {
+      alert('Unable to submit feedback: Generation ID not found');
+      return;
+    }
+
+    setFeedbackLoading(logId);
+
+    try {
+      const response = await fetch('/casetool/api/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          logId,
+          feedbackType,
+          comment: null,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to submit feedback');
+      }
+
+      // Update image feedback status
+      setImages((prev) => 
+        prev.map((img) => 
+          img.logId === logId ? { ...img, feedbackStatus: feedbackType } : img
+        )
+      );
+
+      alert(data.message);
+    } catch (error: any) {
+      alert(error.message || 'Failed to submit feedback');
+    } finally {
+      setFeedbackLoading(null);
+    }
   };
 
   return (
@@ -661,6 +708,51 @@ export default function ToolPage() {
                             Crop
                           </button>
                         </div>
+                        {img.logId && img.feedbackStatus === 'pending' && (
+                          <div className={styles.feedbackSection}>
+                            <span className={styles.feedbackLabel}>Rate this result:</span>
+                            <div className={styles.feedbackButtons}>
+                              <button
+                                onClick={() => handleFeedback(img.logId, 'accurate')}
+                                className={styles.feedbackBtnAccurate}
+                                disabled={feedbackLoading === img.logId}
+                                title="Accurate - Good quality"
+                              >
+                                {feedbackLoading === img.logId ? (
+                                  <Loader2 size={16} className={styles.buttonIconSpinning} />
+                                ) : (
+                                  <ThumbsUp size={16} />
+                                )}
+                                Accurate
+                              </button>
+                              <button
+                                onClick={() => handleFeedback(img.logId, 'inaccurate')}
+                                className={styles.feedbackBtnInaccurate}
+                                disabled={feedbackLoading === img.logId}
+                                title="Inaccurate - Will be refunded"
+                              >
+                                {feedbackLoading === img.logId ? (
+                                  <Loader2 size={16} className={styles.buttonIconSpinning} />
+                                ) : (
+                                  <ThumbsDown size={16} />
+                                )}
+                                Inaccurate
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                        {img.feedbackStatus === 'accurate' && (
+                          <div className={styles.feedbackStatusAccurate}>
+                            <ThumbsUp size={16} />
+                            Marked as accurate
+                          </div>
+                        )}
+                        {img.feedbackStatus === 'inaccurate' && (
+                          <div className={styles.feedbackStatusInaccurate}>
+                            <ThumbsDown size={16} />
+                            Marked as inaccurate - Refunded
+                          </div>
+                        )}
                       </div>
                     </>
                   )}

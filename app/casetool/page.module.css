@@ -1018,6 +1018,9 @@
   padding: 28px;
   border-top: 1px solid var(--light-gray);
   background: var(--pure-white);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .mockupCardActions {
@@ -1084,6 +1087,16 @@
   padding: 12px 0;
   text-align: center;
   animation: fadeInUp 0.5s ease-out;
+  border-top: 1px solid var(--light-gray);
+  padding-top: 16px;
+}
+
+.feedbackLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--medium-gray);
+  margin-bottom: 10px;
+  display: block;
 }
 
 .feedbackQuestion {
@@ -1098,6 +1111,90 @@
   display: flex;
   gap: 12px;
   justify-content: center;
+}
+
+.feedbackBtnAccurate {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: var(--pure-white);
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+}
+
+.feedbackBtnAccurate:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.feedbackBtnAccurate:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.feedbackBtnInaccurate {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: var(--pure-white);
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+.feedbackBtnInaccurate:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.feedbackBtnInaccurate:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.feedbackStatusAccurate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 13px;
+  border-top: 1px solid var(--light-gray);
+  padding-top: 16px;
+}
+
+.feedbackStatusInaccurate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 13px;
+  border-top: 1px solid var(--light-gray);
+  padding-top: 16px;
 }
 
 .feedbackBtnYes {

@@ -43,6 +43,7 @@ export default function AdminStatsPage() {
   const [platformStats, setPlatformStats] = useState<PlatformStats | null>(null);
   const [userStats, setUserStats] = useState<UserStat[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>('');
   const [sortBy, setSortBy] = useState<'cost' | 'generations' | 'recent'>('cost');
 
   useEffect(() => {
@@ -52,15 +53,19 @@ export default function AdminStatsPage() {
   const fetchStats = async () => {
     try {
       setLoading(true);
+      setError('');
       const response = await fetch('/casetool/api/admin/stats');
       const data = await response.json();
       
       if (data.success) {
         setPlatformStats(data.platformStats);
-        setUserStats(data.userStats);
+        setUserStats(data.userStats || []);
+      } else {
+        setError(data.error || 'Failed to load statistics');
       }
     } catch (error) {
       console.error('Failed to fetch stats:', error);
+      setError('Network error: Unable to fetch statistics');
     } finally {
       setLoading(false);
     }
@@ -113,6 +118,13 @@ export default function AdminStatsPage() {
 
       {loading ? (
         <div className={styles.loading}>Loading statistics...</div>
+      ) : error ? (
+        <div className={styles.error}>
+          <p>{error}</p>
+          <button onClick={fetchStats} className={styles.retryButton}>
+            Try Again
+          </button>
+        </div>
       ) : (
         <>
           {/* Platform Stats */}

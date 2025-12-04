@@ -110,10 +110,33 @@ export async function GET(request: NextRequest) {
       LEFT JOIN api_usage_logs aul ON gl.id = aul.generation_log_id`
     );
 
+    // Convert BigInt to Number for JSON serialization
+    const sanitizedUserStats = userStats.map((user: any) => ({
+      id: Number(user.id),
+      email: user.email,
+      created_at: user.created_at,
+      last_login: user.last_login,
+      total_generations: Number(user.total_generations),
+      successful_generations: Number(user.successful_generations),
+      failed_generations: Number(user.failed_generations),
+      accurate_feedbacks: Number(user.accurate_feedbacks),
+      inaccurate_feedbacks: Number(user.inaccurate_feedbacks),
+      pending_feedbacks: Number(user.pending_feedbacks),
+      total_billable_cost: Number(user.total_billable_cost),
+      total_refunded_cost: Number(user.total_refunded_cost),
+    }));
+
+    const sanitizedPlatformStats = {
+      total_users: Number(platformStats[0].total_users),
+      total_generations: Number(platformStats[0].total_generations),
+      total_revenue: Number(platformStats[0].total_revenue),
+      total_refunds: Number(platformStats[0].total_refunds),
+    };
+
     return NextResponse.json({
       success: true,
-      platformStats: platformStats[0],
-      userStats,
+      platformStats: sanitizedPlatformStats,
+      userStats: sanitizedUserStats,
     });
   } catch (error: any) {
     console.error('Admin stats error:', error);

@@ -51,6 +51,7 @@ export default function ToolPage() {
   const [lastPrompt, setLastPrompt] = useState<string>('');
   const [selectedModel, setSelectedModel] = useState<'normal' | 'high'>('normal');
   const [feedbackLoading, setFeedbackLoading] = useState<number | null>(null);
+  const [feedbackMessage, setFeedbackMessage] = useState<{ logId: number; message: string; type: 'success' | 'error' } | null>(null);
 
   // Drag and drop state
   const [isDragging, setIsDragging] = useState(false);
@@ -389,11 +390,12 @@ export default function ToolPage() {
 
   const handleFeedback = async (logId: number | undefined, feedbackType: 'accurate' | 'inaccurate') => {
     if (!logId) {
-      alert('Unable to submit feedback: Generation ID not found');
+      setFeedbackMessage({ logId: 0, message: 'Unable to submit feedback: Generation ID not found', type: 'error' });
       return;
     }
 
     setFeedbackLoading(logId);
+    setFeedbackMessage(null);
 
     try {
       const response = await fetch('/casetool/api/feedback', {
@@ -421,13 +423,21 @@ export default function ToolPage() {
         )
       );
 
-      alert(data.message);
+      setFeedbackMessage({ logId, message: data.message, type: 'success' });
+      
+      // Auto-hide success message after 5 seconds
+      setTimeout(() => {
+        setFeedbackMessage((prev) => prev?.logId === logId ? null : prev);
+      }, 5000);
     } catch (error: any) {
-      alert(error.message || 'Failed to submit feedback');
+      setFeedbackMessage({ logId, message: error.message || 'Failed to submit feedback', type: 'error' });
     } finally {
       setFeedbackLoading(null);
     }
   };
+
+  // Check if any images need feedback
+  const hasPendingFeedback = images.some(img => img.feedbackStatus === 'pending' && img.logId);
 
   return (
     <div className={styles.container}>
@@ -739,6 +749,11 @@ export default function ToolPage() {
                                 Inaccurate
                               </button>
                             </div>
+                            {feedbackMessage && feedbackMessage.logId === img.logId && (
+                              <div className={feedbackMessage.type === 'success' ? styles.feedbackMessageSuccess : styles.feedbackMessageError}>
+                                {feedbackMessage.message}
+                              </div>
+                            )}
                           </div>
                         )}
                         {img.feedbackStatus === 'accurate' && (
@@ -761,10 +776,17 @@ export default function ToolPage() {
             </div>
             
             <div className={styles.actionButtons}>
+              {hasPendingFeedback && !isGenerating && (
+                <div className={styles.feedbackWarning}>
+                  <Shield size={20} />
+                  <span>Please rate the generated image before creating another one</span>
+                </div>
+              )}
               <button
                 onClick={handleGenerateAnother}
-                disabled={isGenerating}
+                disabled={isGenerating || hasPendingFeedback}
                 className={styles.submitButton}
+                title={hasPendingFeedback ? 'Please submit feedback first' : ''}
               >
                 {isGenerating ? (
                   <>

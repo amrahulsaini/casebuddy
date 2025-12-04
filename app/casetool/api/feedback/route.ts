@@ -57,16 +57,10 @@ export async function POST(request: NextRequest) {
 
       refundAmount = usageRows[0]?.total_cost || 0;
 
-      // Mark api_usage_logs as non-billable
+      // Mark api_usage_logs as non-billable (this excludes them from billing)
       await pool.execute(
         'UPDATE api_usage_logs SET is_billable = FALSE WHERE generation_log_id = ?',
         [logId]
-      );
-
-      // Update user balance (add refund)
-      await pool.execute(
-        'UPDATE users SET balance = balance + ? WHERE id = ?',
-        [refundAmount, userId]
       );
     }
 
@@ -94,7 +88,7 @@ export async function POST(request: NextRequest) {
       feedbackType,
       refundAmount: feedbackType === 'inaccurate' ? refundAmount : 0,
       message: feedbackType === 'inaccurate' 
-        ? `Refund of ₹${refundAmount.toFixed(2)} has been added to your balance` 
+        ? `Marked as inaccurate. ₹${refundAmount.toFixed(2)} will be excluded from billing` 
         : 'Thank you for your feedback!'
     });
 

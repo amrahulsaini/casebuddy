@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
         generated_image_url,
         generation_time,
         status,
+        feedback_status,
         created_at
       FROM generation_logs`;
     

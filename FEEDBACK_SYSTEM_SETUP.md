@@ -5,15 +5,12 @@
 ```sql
 -- Add feedback columns to generation_logs table
 ALTER TABLE generation_logs 
-ADD COLUMN user_id INT DEFAULT NULL AFTER session_id,
 ADD COLUMN feedback_status ENUM('pending', 'accurate', 'inaccurate') DEFAULT 'pending' AFTER status,
 ADD COLUMN feedback_comment TEXT DEFAULT NULL AFTER feedback_status,
 ADD COLUMN feedback_at TIMESTAMP NULL DEFAULT NULL AFTER feedback_comment,
 ADD COLUMN is_refunded BOOLEAN DEFAULT FALSE AFTER feedback_at,
 ADD COLUMN refund_amount_inr DECIMAL(10, 2) DEFAULT 0.00 AFTER is_refunded,
-ADD INDEX idx_user (user_id),
-ADD INDEX idx_feedback_status (feedback_status),
-ADD FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+ADD INDEX idx_feedback_status (feedback_status);
 
 -- Add is_billable column to api_usage_logs
 ALTER TABLE api_usage_logs

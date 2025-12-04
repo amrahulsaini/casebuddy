@@ -25,8 +25,16 @@ async function downloadImage(url, filepath) {
     const protocol = url.startsWith('https') ? https : http;
     
     protocol.get(url, (response) => {
+      // Handle redirects
+      if (response.statusCode === 301 || response.statusCode === 302) {
+        const redirectUrl = response.headers.location;
+        console.log(`    ↳ Redirecting to: ${redirectUrl}`);
+        downloadImage(redirectUrl, filepath).then(resolve).catch(reject);
+        return;
+      }
+
       if (response.statusCode !== 200) {
-        reject(new Error(`Failed to download: ${response.statusCode}`));
+        reject(new Error(`HTTP ${response.statusCode}`));
         return;
       }
 
@@ -35,7 +43,6 @@ async function downloadImage(url, filepath) {
 
       fileStream.on('finish', () => {
         fileStream.close();
-        console.log(`✓ Downloaded: ${path.basename(filepath)}`);
         resolve();
       });
 
@@ -138,16 +145,23 @@ async function importProducts() {
         
         // Download and save image
         let imageUrl = '/products/default.jpg';
-        if (item.images && item.images.length > 0) {
+        if (item.images && item.images.length > 0 && item.images[0].src) {
           const imageFileName = `${slug}-${Date.now()}.jpg`;
           const imagePath = path.join(productsDir, imageFileName);
+          const imageSourceUrl = item.images[0].src;
+          
+          console.log(`  📥 Downloading from: ${imageSourceUrl}`);
           
           try {
-            await downloadImage(item.images[0].src, imagePath);
+            await downloadImage(imageSourceUrl, imagePath);
             imageUrl = `/products/designer-slim-case/${imageFileName}`;
+            console.log(`  ✓ Saved as: ${imageUrl}`);
           } catch (imgError) {
-            console.log(`  ⚠️  Failed to download image: ${imgError.message}`);
+            console.log(`  ✗ Failed to download image: ${imgError.message}`);
+            console.log(`  📝 Using default image instead`);
           }
+        } else {
+          console.log(`  📝 No image URL found, using default`);
         }
         
         // Extract price

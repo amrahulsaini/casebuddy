@@ -63,8 +63,14 @@ export function calculateCost(usage: UsageCost): { usd: number; inr: number } {
   // Actual API costs are higher but we show discounted price
   let displayCostINR = costINR;
   if (usage.operationType === 'text_analysis' || usage.operationType === 'image_generation') {
-    // Show ₹1.8 per operation (₹3.6 total for both operations)
-    displayCostINR = 1.8;
+    // Check if using gemini-3-pro-image model for high quality
+    if (usage.modelName === 'gemini-3-pro-image-preview') {
+      // Show ₹9 per image for Ultra HD quality
+      displayCostINR = 9.0;
+    } else {
+      // Show ₹1.8 per operation (₹3.6 total for both operations) for standard quality
+      displayCostINR = 1.8;
+    }
   } else if (usage.operationType === 'image_enhancement') {
     // Show ₹13 for 4K enhancement
     displayCostINR = 13.0;

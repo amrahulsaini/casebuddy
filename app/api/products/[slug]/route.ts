@@ -55,21 +55,42 @@ export async function GET(
     );
 
     // Get product variants
-    const [variants] = await pool.execute(
+    const [variants]: any = await pool.execute(
       `SELECT id, name, sku, price, stock_quantity, image_url, is_active
        FROM product_variants
        WHERE product_id = ? AND is_active = TRUE`,
       [product.id]
     );
 
+    // Sanitize numeric fields
+    const sanitizedProduct = {
+      ...product,
+      id: Number(product.id),
+      price: parseFloat(product.price),
+      compare_price: product.compare_price ? parseFloat(product.compare_price) : null,
+      stock_quantity: Number(product.stock_quantity),
+      is_featured: Boolean(product.is_featured),
+      images: Array.isArray(images) ? images.map((img: any) => ({
+        ...img,
+        sort_order: Number(img.sort_order),
+        is_primary: Boolean(img.is_primary),
+      })) : [],
+      categories: Array.isArray(categories) ? categories.map((cat: any) => ({
+        ...cat,
+        id: Number(cat.id),
+      })) : [],
+      variants: Array.isArray(variants) ? variants.map((v: any) => ({
+        ...v,
+        id: Number(v.id),
+        price: parseFloat(v.price),
+        stock_quantity: Number(v.stock_quantity),
+        is_active: Boolean(v.is_active),
+      })) : [],
+    };
+
     return NextResponse.json({
       success: true,
-      product: {
-        ...product,
-        images,
-        categories,
-        variants: variants || [],
-      },
+      product: sanitizedProduct,
     });
   } catch (error: any) {
     console.error('Product detail API error:', error);

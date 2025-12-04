@@ -45,12 +45,21 @@ export async function GET(request: NextRequest) {
     query += ` ORDER BY p.created_at DESC LIMIT ? OFFSET ?`;
     params.push(limit, offset);
 
-    const [products] = await pool.execute(query, params);
+    const [products]: any = await pool.execute(query, params);
+
+    // Convert numeric fields from strings to numbers
+    const sanitizedProducts = Array.isArray(products) ? products.map((p: any) => ({
+      ...p,
+      id: Number(p.id),
+      price: parseFloat(p.price),
+      compare_price: p.compare_price ? parseFloat(p.compare_price) : null,
+      is_featured: Boolean(p.is_featured),
+    })) : [];
 
     return NextResponse.json({
       success: true,
-      products,
-      count: Array.isArray(products) ? products.length : 0,
+      products: sanitizedProducts,
+      count: sanitizedProducts.length,
     });
   } catch (error: any) {
     console.error('Products API error:', error);

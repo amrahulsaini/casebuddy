@@ -98,13 +98,13 @@ async function fixProductImages() {
           return slug === product.slug;
         });
         
-        if (!jsonProduct || !jsonProduct.images || jsonProduct.images.length === 0) {
+        if (!jsonProduct || !jsonProduct.image_src) {
           console.log(`  ⚠️  No image found in JSON, skipping...\n`);
           errorCount++;
           continue;
         }
         
-        const imageSourceUrl = jsonProduct.images[0].src;
+        const imageSourceUrl = jsonProduct.image_src;
         const imageFileName = `${product.slug}-${Date.now()}.jpg`;
         const imagePath = path.join(productsDir, imageFileName);
         

@@ -145,10 +145,10 @@ async function importProducts() {
         
         // Download and save image
         let imageUrl = '/products/default.jpg';
-        if (item.images && item.images.length > 0 && item.images[0].src) {
+        if (item.image_src) {
           const imageFileName = `${slug}-${Date.now()}.jpg`;
           const imagePath = path.join(productsDir, imageFileName);
-          const imageSourceUrl = item.images[0].src;
+          const imageSourceUrl = item.image_src;
           
           console.log(`  📥 Downloading from: ${imageSourceUrl}`);
           
@@ -198,26 +198,8 @@ async function importProducts() {
           [productId, imageUrl, item.title]
         );
         
-        // Insert additional images
-        if (item.images && item.images.length > 1) {
-          for (let j = 1; j < Math.min(item.images.length, 5); j++) {
-            const additionalFileName = `${slug}-${j}-${Date.now()}.jpg`;
-            const additionalImagePath = path.join(productsDir, additionalFileName);
-            
-            try {
-              await downloadImage(item.images[j].src, additionalImagePath);
-              const additionalImageUrl = `/products/designer-slim-case/${additionalFileName}`;
-              
-              await connection.execute(
-                `INSERT INTO product_images (product_id, image_url, alt_text, sort_order, is_primary)
-                 VALUES (?, ?, ?, ?, FALSE)`,
-                [productId, additionalImageUrl, item.title, j]
-              );
-            } catch (imgError) {
-              console.log(`  ⚠️  Failed to download additional image ${j}`);
-            }
-          }
-        }
+        // Additional images not available in this JSON format
+        // Each product only has one image_src field
         
         successCount++;
         console.log(`  ✓ Product imported successfully (ID: ${productId})\n`);

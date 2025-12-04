@@ -130,6 +130,9 @@ export async function POST(request: NextRequest) {
         }
         
         for (const generatedImage of response.generatedImages) {
+          if (!generatedImage.image || !generatedImage.image.imageBytes) {
+            continue;
+          }
           const imgBytes = generatedImage.image.imageBytes;
           const imageBuffer = Buffer.from(imgBytes, 'base64');
           

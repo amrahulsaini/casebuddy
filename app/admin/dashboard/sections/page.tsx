@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import styles from './sections.module.css';
 
 interface Page {
@@ -22,6 +23,7 @@ interface Section {
 }
 
 export default function SectionsPage() {
+  const searchParams = useSearchParams();
   const [sections, setSections] = useState<Section[]>([]);
   const [pages, setPages] = useState<Page[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,7 +43,14 @@ export default function SectionsPage() {
   useEffect(() => {
     fetchPages();
     fetchSections();
-  }, []);
+    
+    // Auto-select page from URL query
+    const pageParam = searchParams.get('page');
+    if (pageParam) {
+      setFilterPage(pageParam);
+      setFormData(prev => ({ ...prev, page_id: pageParam }));
+    }
+  }, [searchParams]);
 
   const fetchPages = async () => {
     try {

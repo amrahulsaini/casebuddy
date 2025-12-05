@@ -130,7 +130,7 @@ export default function PageDetailsPage({ params }: { params: Promise<{ id: stri
       <div className={styles.section}>
         <div className={styles.sectionHeader}>
           <h2>Sections ({sections.length})</h2>
-          <Link href="/admin/dashboard/homepage-sections" className={styles.addButton}>
+          <Link href={`/admin/dashboard/sections?page=${pageId}`} className={styles.addButton}>
             + Add Section
           </Link>
         </div>
@@ -200,7 +200,7 @@ export default function PageDetailsPage({ params }: { params: Promise<{ id: stri
       <div className={styles.quickActions}>
         <h2>Quick Actions</h2>
         <div className={styles.actionsGrid}>
-          <Link href="/admin/dashboard/homepage-sections" className={styles.actionCard}>
+          <Link href={`/admin/dashboard/sections?page=${pageId}`} className={styles.actionCard}>
             <span className={styles.actionIcon}>📝</span>
             <span>Manage Sections</span>
           </Link>

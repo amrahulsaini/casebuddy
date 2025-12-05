@@ -17,7 +17,7 @@ export async function PUT(
       await connection.execute(
         `UPDATE categories SET
          name = ?, slug = ?, description = ?, image_url = ?,
-         parent_id = ?, sort_order = ?, is_active = ?
+         parent_id = ?, section_key = ?, sort_order = ?, is_active = ?
          WHERE id = ?`,
         [
           data.name,
@@ -25,6 +25,7 @@ export async function PUT(
           data.description || '',
           data.image_url || null,
           data.parent_id || null,
+          data.section_key || null,
           data.sort_order || 0,
           data.is_active ?? true,
           id,

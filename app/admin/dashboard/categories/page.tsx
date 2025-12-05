@@ -10,6 +10,7 @@ interface Category {
   description: string | null;
   image_url: string | null;
   parent_id: number | null;
+  section_key: string | null;
   sort_order: number;
   is_active: boolean;
 }
@@ -25,6 +26,7 @@ export default function CategoriesPage() {
     description: '',
     image_url: '',
     parent_id: '',
+    section_key: '',
     sort_order: '0',
     is_active: true,
   });
@@ -54,6 +56,7 @@ export default function CategoriesPage() {
       description: '',
       image_url: '',
       parent_id: '',
+      section_key: '',
       sort_order: '0',
       is_active: true,
     });
@@ -68,6 +71,7 @@ export default function CategoriesPage() {
       description: category.description || '',
       image_url: category.image_url || '',
       parent_id: category.parent_id?.toString() || '',
+      section_key: category.section_key || '',
       sort_order: category.sort_order.toString(),
       is_active: category.is_active,
     });
@@ -91,6 +95,7 @@ export default function CategoriesPage() {
     const data = {
       ...formData,
       parent_id: formData.parent_id ? parseInt(formData.parent_id) : null,
+      section_key: formData.section_key || null,
       sort_order: parseInt(formData.sort_order),
     };
 
@@ -250,6 +255,20 @@ export default function CategoriesPage() {
                     setFormData({ ...formData, image_url: e.target.value })
                   }
                 />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Homepage Section (for parent categories)</label>
+                <select
+                  value={formData.section_key}
+                  onChange={(e) =>
+                    setFormData({ ...formData, section_key: e.target.value })
+                  }
+                >
+                  <option value="">None</option>
+                  <option value="custom_cases">Our Custom Designed Cases</option>
+                  <option value="device_categories">Our Categories</option>
+                </select>
               </div>
 
               <div className={styles.formGroup}>

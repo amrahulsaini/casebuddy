@@ -13,18 +13,28 @@ interface Category {
   sort_order: number;
 }
 
+interface HomepageSection {
+  id: number;
+  section_key: string;
+  title: string;
+  subtitle: string;
+  icon: string;
+  sort_order: number;
+  categories: Category[];
+}
+
 export default function HomePage() {
-  const [categories, setCategories] = useState<{ custom: Category[], regular: Category[] }>({ custom: [], regular: [] });
+  const [sections, setSections] = useState<HomepageSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [scrollY, setScrollY] = useState(0);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
 
   useEffect(() => {
-    fetch('/api/categories')
+    fetch('/api/homepage-sections')
       .then(res => res.json())
       .then(data => {
-        setCategories(data);
+        setSections(data);
         setLoading(false);
       });
 
@@ -55,8 +65,6 @@ export default function HomePage() {
       </div>
     );
   }
-
-  const { custom: customDesignedCases, regular: ourCategories } = categories;
 
   return (
     <div className={styles.container}>
@@ -169,72 +177,70 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Section 1: Our Custom Designed Cases */}
-      <section className={styles.sectionFullWidth}>
-        <div className={styles.sectionHeader}>
-          <div className={styles.floralDecor}>🌸</div>
-          <h2 className={styles.sectionTitle}>Our Custom Designed Cases</h2>
-          <p className={styles.sectionSubtitle}>Exclusive designs you won't find anywhere else</p>
-        </div>
-        
-        <div className={styles.horizontalScroll}>
-          <div className={styles.scrollContent}>
-            {customDesignedCases.map((category, index) => (
-              <Link 
-                key={category.id}
-                href={`/shop/${category.slug}`}
-                className={styles.horizontalCard}
-              >
-                <div className={styles.horizontalImageWrapper}>
-                  <Image 
-                    src={category.image_url} 
-                    alt={category.name}
-                    width={280}
-                    height={380}
-                    className={styles.horizontalImage}
-                    loading="lazy"
-                  />
-                </div>
-                <div className={styles.horizontalInfo}>
-                  <h3 className={styles.horizontalName}>{category.name}</h3>
-                </div>
-              </Link>
-            ))}
-            {customDesignedCases.map((category, index) => (
-              <Link 
-                key={`duplicate-${category.id}`}
-                href={`/shop/${category.slug}`}
-                className={styles.horizontalCard}
-              >
-                <div className={styles.horizontalImageWrapper}>
-                  <Image 
-                    src={category.image_url} 
-                    alt={category.name}
-                    width={280}
-                    height={380}
-                    className={styles.horizontalImage}
-                    loading="lazy"
-                  />
-                </div>
-                <div className={styles.horizontalInfo}>
-                  <h3 className={styles.horizontalName}>{category.name}</h3>
-                </div>
-              </Link>
-            ))}
+      {/* Dynamic Homepage Sections */}
+      {sections.map((section, sectionIndex) => (
+        <section 
+          key={section.id} 
+          className={sectionIndex === 0 ? styles.sectionFullWidth : styles.sectionAltFullWidth}
+        >
+          <div className={styles.sectionHeader}>
+            <div className={styles.floralDecor}>{section.icon}</div>
+            <h2 className={styles.sectionTitle}>{section.title}</h2>
+            <p className={styles.sectionSubtitle}>{section.subtitle}</p>
           </div>
-        </div>
-      </section>
-
-      {/* Section 2: Our Categories */}
-      <section className={styles.sectionAltFullWidth}>
-        <div className={styles.sectionHeader}>
-          <div className={styles.floralDecor}>🌺</div>
-          <h2 className={styles.sectionTitle}>Our Categories</h2>
-          <p className={styles.sectionSubtitle}>Find the perfect case for your device</p>
-        </div>
-        
-        <div className={styles.categoryGrid}>
-          {ourCategories.map((category, index) => (
+          
+          {sectionIndex === 0 ? (
+            // First section: Horizontal scroll
+            <div className={styles.horizontalScroll}>
+              <div className={styles.scrollContent}>
+                {section.categories.map((category) => (
+                  <Link 
+                    key={category.id}
+                    href={`/shop/${category.slug}`}
+                    className={styles.horizontalCard}
+                  >
+                    <div className={styles.horizontalImageWrapper}>
+                      <Image 
+                        src={category.image_url} 
+                        alt={category.name}
+                        width={280}
+                        height={380}
+                        className={styles.horizontalImage}
+                        loading="lazy"
+                      />
+                    </div>
+                    <div className={styles.horizontalInfo}>
+                      <h3 className={styles.horizontalName}>{category.name}</h3>
+                    </div>
+                  </Link>
+                ))}
+                {section.categories.map((category) => (
+                  <Link 
+                    key={`duplicate-${category.id}`}
+                    href={`/shop/${category.slug}`}
+                    className={styles.horizontalCard}
+                  >
+                    <div className={styles.horizontalImageWrapper}>
+                      <Image 
+                        src={category.image_url} 
+                        alt={category.name}
+                        width={280}
+                        height={380}
+                        className={styles.horizontalImage}
+                        loading="lazy"
+                      />
+                    </div>
+                    <div className={styles.horizontalInfo}>
+                      <h3 className={styles.horizontalName}>{category.name}</h3>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : (
+            // Other sections: Grid layout
+            <div className={styles.categoryGrid}>
+              {section.categories.map((category, index) => (
             <Link 
               key={category.id}
               href={`/shop/${category.slug}`}
@@ -262,7 +268,9 @@ export default function HomePage() {
             </Link>
           ))}
         </div>
-      </section>
+          )}
+        </section>
+      ))}
 
       {/* Testimonials Section */}
       <section className={styles.testimonials}>

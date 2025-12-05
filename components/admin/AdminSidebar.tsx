@@ -14,8 +14,10 @@ export default function AdminSidebar({ user }: AdminSidebarProps) {
 
   const menuItems = [
     { href: '/admin/dashboard', icon: '📊', label: 'Dashboard' },
-    { href: '/admin/dashboard/products', icon: '📦', label: 'Products' },
+    { href: '/admin/dashboard/pages', icon: '📄', label: 'Pages' },
+    { href: '/admin/dashboard/sections', icon: '🎨', label: 'Sections' },
     { href: '/admin/dashboard/categories', icon: '📁', label: 'Categories' },
+    { href: '/admin/dashboard/products', icon: '📦', label: 'Products' },
     { href: '/admin/dashboard/orders', icon: '🛒', label: 'Orders' },
     { href: '/admin/dashboard/users', icon: '👥', label: 'Admin Users', adminOnly: true },
   ];

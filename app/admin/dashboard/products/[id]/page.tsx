@@ -2,11 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import ImageUpload from '@/components/ImageUpload';
 import styles from './edit.module.css';
 
 interface Category {
   id: number;
   name: string;
+}
+
+interface ProductImage {
+  id: number;
+  image_url: string;
+  alt_text: string;
+  sort_order: number;
+  is_primary: boolean;
 }
 
 interface Product {
@@ -31,6 +40,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
   const [product, setProduct] = useState<Product | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
+  const [images, setImages] = useState<ProductImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
@@ -50,6 +60,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
     params.then((p) => {
       setProductId(p.id);
       fetchProduct(p.id);
+      fetchImages(p.id);
     });
     fetchCategories();
   }, []);
@@ -86,6 +97,16 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
       setCategories(data);
     } catch (error) {
       console.error('Error fetching categories:', error);
+    }
+  };
+
+  const fetchImages = async (id: string) => {
+    try {
+      const response = await fetch(`/api/admin/products/${id}/images`);
+      const data = await response.json();
+      setImages(data);
+    } catch (error) {
+      console.error('Error fetching images:', error);
     }
   };
 
@@ -247,6 +268,16 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
               />
             </div>
           </div>
+        </div>
+
+        <div className={styles.formCard}>
+          <h2>Product Images</h2>
+          <ImageUpload
+            productId={productId}
+            images={images}
+            onImagesChange={setImages}
+            mode="edit"
+          />
         </div>
 
         <div className={styles.formCard}>

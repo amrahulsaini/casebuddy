@@ -1,0 +1,128 @@
+.container {
+  margin: 20px 0;
+}
+
+.dropzone {
+  border: 2px dashed #cbd5e0;
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: #f7fafc;
+}
+
+.dropzone:hover {
+  border-color: #667eea;
+  background: #edf2f7;
+}
+
+.dropzone.active {
+  border-color: #667eea;
+  background: #e6f2ff;
+}
+
+.dropzoneContent {
+  pointer-events: none;
+}
+
+.uploadIcon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.dropzone p {
+  margin: 8px 0;
+  color: #4a5568;
+  font-size: 15px;
+}
+
+.hint {
+  font-size: 13px !important;
+  color: #718096 !important;
+}
+
+.uploading {
+  text-align: center;
+  padding: 20px;
+  color: #667eea;
+  font-weight: 500;
+}
+
+.imageGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.imageCard {
+  position: relative;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+  transition: all 0.2s;
+}
+
+.imageCard:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.imageCard img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+
+.primaryBadge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.imageActions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid #e2e8f0;
+}
+
+.actionButton,
+.deleteButton {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.actionButton {
+  background: #edf2f7;
+}
+
+.actionButton:hover {
+  background: #e2e8f0;
+  transform: scale(1.1);
+}
+
+.deleteButton {
+  background: #fed7d7;
+}
+
+.deleteButton:hover {
+  background: #fc8181;
+  transform: scale(1.1);
+}

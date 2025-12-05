@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import ImageUpload from '@/components/ImageUpload';
 import styles from './new.module.css';
 
 interface Category {
@@ -9,10 +10,18 @@ interface Category {
   name: string;
 }
 
+interface ProductImage {
+  image_url: string;
+  alt_text: string;
+  sort_order: number;
+  is_primary: boolean;
+}
+
 export default function ProductNewPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
+  const [images, setImages] = useState<ProductImage[]>([]);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -63,16 +72,21 @@ export default function ProductNewPage() {
     e.preventDefault();
     setSaving(true);
 
+    if (images.length === 0) {
+      alert('Please upload at least one product image');
+      return;
+    }
+
     const data = {
       ...formData,
       price: parseFloat(formData.price),
       compare_price: formData.compare_price ? parseFloat(formData.compare_price) : null,
       stock_quantity: parseInt(formData.stock_quantity),
       categories: selectedCategories,
-      image_url: '/products/default.jpg', // Default image
     };
 
     try {
+      // Create the product first
       const response = await fetch('/api/admin/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -80,7 +94,22 @@ export default function ProductNewPage() {
       });
 
       if (response.ok) {
+        const result = await response.json();
+        const productId = result.productId;
+
+        // Add all images to the product
+        for (const image of images) {
+          await fetch(`/api/admin/products/${productId}/images`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(image),
+          });
+        }
+
         router.push('/admin/dashboard/products');
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Error creating product');
       }
     } catch (error) {
       console.error('Error creating product:', error);
@@ -203,6 +232,18 @@ export default function ProductNewPage() {
               />
             </div>
           </div>
+        </div>
+
+        <div className={styles.formCard}>
+          <h2>Product Images</h2>
+          <ImageUpload
+            images={images}
+            onImagesChange={setImages}
+            mode="create"
+          />
+          {images.length === 0 && (
+            <p className={styles.hint}>Please upload at least one product image</p>
+          )}
         </div>
 
         <div className={styles.formCard}>

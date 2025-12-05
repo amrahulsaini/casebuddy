@@ -137,7 +137,7 @@ export async function POST(request: Request) {
 
       await connection.commit();
 
-      return NextResponse.json({ success: true, id: productId });
+      return NextResponse.json({ success: true, productId: productId });
     } catch (error) {
       await connection.rollback();
       throw error;

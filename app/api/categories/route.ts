@@ -11,14 +11,19 @@ interface Category {
 
 export async function GET() {
   try {
-    const [rows] = await caseMainPool.execute<any[]>(
-      'SELECT id, name, slug, image_url, sort_order FROM categories WHERE is_active = TRUE ORDER BY sort_order ASC'
+    // Get custom cases section
+    const [customRows] = await caseMainPool.execute<any[]>(
+      "SELECT id, name, slug, image_url, sort_order FROM categories WHERE is_active = TRUE AND section = 'custom_cases' ORDER BY sort_order ASC"
     );
-    const allCategories = rows as Category[];
+    
+    // Get device categories section
+    const [regularRows] = await caseMainPool.execute<any[]>(
+      "SELECT id, name, slug, image_url, sort_order FROM categories WHERE is_active = TRUE AND section = 'device_categories' ORDER BY sort_order ASC"
+    );
     
     return NextResponse.json({
-      custom: allCategories.slice(0, 8),
-      regular: allCategories.slice(8)
+      custom: customRows as Category[],
+      regular: regularRows as Category[]
     });
   } catch (error) {
     console.error('Error fetching categories:', error);

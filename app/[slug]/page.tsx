@@ -36,15 +36,24 @@ interface PageData {
 async function getPageData(slug: string): Promise<PageData | null> {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/pages/${slug}`, {
+    const url = `${baseUrl}/api/pages/${slug}`;
+    console.log('Fetching page data from:', url);
+    
+    const response = await fetch(url, {
       cache: 'no-store'
     });
 
+    console.log('Response status:', response.status);
+
     if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Failed to fetch page:', response.status, errorData);
       return null;
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log('Page data received:', data);
+    return data;
   } catch (error) {
     console.error('Error fetching page data:', error);
     return null;

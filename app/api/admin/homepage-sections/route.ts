@@ -1,31 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { productsPool } from '@/lib/db';
-import { jwtVerify } from 'jose';
-import { cookies } from 'next/headers';
-
-// Verify admin authentication
-async function verifyAdmin(req: NextRequest) {
-  try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('admin_token');
-
-    if (!token) {
-      return null;
-    }
-
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'your-secret-key');
-    const { payload } = await jwtVerify(token.value, secret);
-    return payload;
-  } catch (error) {
-    console.error('Auth verification error:', error);
-    return null;
-  }
-}
+import { getSession } from '@/lib/auth';
 
 // GET: Fetch all homepage sections with category counts
 export async function GET(req: NextRequest) {
   try {
-    const admin = await verifyAdmin(req);
+    const admin = await getSession();
     if (!admin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -53,7 +33,7 @@ export async function GET(req: NextRequest) {
 // POST: Create new homepage section
 export async function POST(req: NextRequest) {
   try {
-    const admin = await verifyAdmin(req);
+    const admin = await getSession();
     if (!admin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

@@ -37,10 +37,21 @@ export default function HomepageSectionsPage() {
     setLoading(true);
     try {
       const response = await fetch('/api/admin/homepage-sections');
+      
+      if (response.status === 401) {
+        window.location.href = '/admin/login';
+        return;
+      }
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
-      setSections(data);
+      setSections(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching sections:', error);
+      setSections([]);
     } finally {
       setLoading(false);
     }
@@ -76,10 +87,21 @@ export default function HomepageSectionsPage() {
     if (!confirm('Delete this homepage section? All categories in this section will be unlinked.')) return;
 
     try {
-      await fetch(`/api/admin/homepage-sections/${id}`, { method: 'DELETE' });
+      const response = await fetch(`/api/admin/homepage-sections/${id}`, { method: 'DELETE' });
+      
+      if (response.status === 401) {
+        window.location.href = '/admin/login';
+        return;
+      }
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete section');
+      }
+      
       fetchSections();
     } catch (error) {
       console.error('Error deleting section:', error);
+      alert('Failed to delete section');
     }
   };
 
@@ -92,25 +114,33 @@ export default function HomepageSectionsPage() {
     };
 
     try {
-      if (editingSection) {
-        await fetch(`/api/admin/homepage-sections/${editingSection.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-        });
-      } else {
-        await fetch('/api/admin/homepage-sections', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-        });
+      const url = editingSection
+        ? `/api/admin/homepage-sections/${editingSection.id}`
+        : '/api/admin/homepage-sections';
+      
+      const method = editingSection ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      
+      if (response.status === 401) {
+        window.location.href = '/admin/login';
+        return;
+      }
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to save section');
       }
 
       setShowModal(false);
       fetchSections();
     } catch (error) {
       console.error('Error saving section:', error);
-      alert('Error saving section');
+      alert(error instanceof Error ? error.message : 'Error saving section');
     }
   };
 

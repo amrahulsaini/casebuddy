@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import styles from './page.module.css';
 
 interface Category {
@@ -52,6 +53,9 @@ export default function CategoriesPage() {
     sort_order: '0',
     is_active: true,
   });
+
+  const [uploading, setUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string>('');
 
   useEffect(() => {
     fetchPages();
@@ -123,7 +127,50 @@ export default function CategoriesPage() {
       sort_order: '0',
       is_active: true,
     });
+    setImagePreview('');
     setShowModal(true);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size should be less than 5MB');
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const data = await response.json();
+      setFormData(prev => ({ ...prev, image_url: data.url }));
+      setImagePreview(data.url);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleEdit = (category: Category) => {
@@ -144,6 +191,7 @@ export default function CategoriesPage() {
       sort_order: category.sort_order.toString(),
       is_active: category.is_active,
     });
+    setImagePreview(category.image_url || '');
     setShowModal(true);
   };
 
@@ -375,14 +423,26 @@ export default function CategoriesPage() {
               </div>
 
               <div className={styles.formGroup}>
-                <label>Image URL</label>
+                <label>Category Image</label>
                 <input
-                  type="text"
-                  value={formData.image_url}
-                  onChange={(e) =>
-                    setFormData({ ...formData, image_url: e.target.value })
-                  }
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploading}
+                  className={styles.fileInput}
                 />
+                {uploading && <span className={styles.uploadingText}>Uploading...</span>}
+                {(imagePreview || formData.image_url) && (
+                  <div className={styles.imagePreview}>
+                    <Image
+                      src={imagePreview || formData.image_url}
+                      width={200}
+                      height={200}
+                      alt="Category preview"
+                      className={styles.previewImage}
+                    />
+                  </div>
+                )}
               </div>
 
               <div className={styles.formGroup}>

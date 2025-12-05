@@ -13,13 +13,13 @@ export default function AdminSidebar({ user }: AdminSidebarProps) {
   const pathname = usePathname();
 
   const menuItems = [
-    { href: '/admin/dashboard', icon: '📊', label: 'Dashboard' },
-    { href: '/admin/dashboard/pages', icon: '📄', label: 'Pages' },
-    { href: '/admin/dashboard/sections', icon: '🎨', label: 'Sections' },
-    { href: '/admin/dashboard/categories', icon: '📁', label: 'Categories' },
-    { href: '/admin/dashboard/products', icon: '📦', label: 'Products' },
-    { href: '/admin/dashboard/orders', icon: '🛒', label: 'Orders' },
-    { href: '/admin/dashboard/users', icon: '👥', label: 'Admin Users', adminOnly: true },
+    { href: '/admin/dashboard', label: 'Dashboard' },
+    { href: '/admin/dashboard/pages', label: 'Pages' },
+    { href: '/admin/dashboard/sections', label: 'Sections' },
+    { href: '/admin/dashboard/categories', label: 'Categories' },
+    { href: '/admin/dashboard/products', label: 'Products' },
+    { href: '/admin/dashboard/orders', label: 'Orders' },
+    { href: '/admin/dashboard/users', label: 'Admin Users', adminOnly: true },
   ];
 
   const filteredItems = menuItems.filter(
@@ -42,7 +42,6 @@ export default function AdminSidebar({ user }: AdminSidebarProps) {
               pathname === item.href ? styles.active : ''
             }`}
           >
-            <span className={styles.icon}>{item.icon}</span>
             <span className={styles.label}>{item.label}</span>
           </Link>
         ))}

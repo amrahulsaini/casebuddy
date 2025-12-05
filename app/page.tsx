@@ -18,7 +18,6 @@ interface HomepageSection {
   section_key: string;
   title: string;
   subtitle: string;
-  icon: string;
   sort_order: number;
   categories: Category[];
 }
@@ -184,7 +183,6 @@ export default function HomePage() {
           className={sectionIndex === 0 ? styles.sectionFullWidth : styles.sectionAltFullWidth}
         >
           <div className={styles.sectionHeader}>
-            <div className={styles.floralDecor}>{section.icon}</div>
             <h2 className={styles.sectionTitle}>{section.title}</h2>
             <p className={styles.sectionSubtitle}>{section.subtitle}</p>
           </div>
@@ -275,7 +273,6 @@ export default function HomePage() {
       {/* Testimonials Section */}
       <section className={styles.testimonials}>
         <div className={styles.sectionHeader}>
-          <div className={styles.floralDecor}>🌷</div>
           <h2 className={styles.sectionTitle}>What Our Customers Say</h2>
           <p className={styles.sectionSubtitle}>Join thousands of happy customers</p>
         </div>

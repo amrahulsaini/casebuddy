@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { page_id, section_key, title, subtitle, icon, sort_order, is_active } = body;
+    const { page_id, section_key, title, subtitle, sort_order, is_active } = body;
 
     // Validate required fields
     if (!page_id || !section_key || !title) {
@@ -65,14 +65,13 @@ export async function POST(req: NextRequest) {
     // Insert new section
     const [result]: any = await productsPool.query(
       `INSERT INTO homepage_sections 
-       (page_id, section_key, title, subtitle, icon, sort_order, is_active) 
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+       (page_id, section_key, title, subtitle, sort_order, is_active) 
+       VALUES (?, ?, ?, ?, ?, ?)`,
       [
         page_id,
         section_key,
         title,
         subtitle || null,
-        icon || null,
         sort_order || 0,
         is_active !== false ? 1 : 0
       ]

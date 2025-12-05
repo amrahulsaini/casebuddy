@@ -15,7 +15,7 @@ export async function PUT(
 
     const { id } = await params;
     const body = await req.json();
-    const { title, subtitle, icon, sort_order, is_active } = body;
+    const { title, subtitle, sort_order, is_active } = body;
 
     // Validate required fields
     if (!title) {
@@ -41,12 +41,11 @@ export async function PUT(
     // Update section (section_key cannot be changed)
     await productsPool.query(
       `UPDATE homepage_sections 
-       SET title = ?, subtitle = ?, icon = ?, sort_order = ?, is_active = ?
+       SET title = ?, subtitle = ?, sort_order = ?, is_active = ?
        WHERE id = ?`,
       [
         title,
         subtitle || null,
-        icon || null,
         sort_order || 0,
         is_active !== false ? 1 : 0,
         id

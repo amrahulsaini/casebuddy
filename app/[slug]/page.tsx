@@ -98,10 +98,7 @@ export default async function DynamicPage({ params }: { params: Promise<{ slug: 
         
         return (
           <section key={section.id} className={styles.pageSection}>
-            <div className={styles.pageSectionHeader}>
-              {section.icon && (
-                <div className={styles.pageSectionIcon}>{section.icon}</div>
-              )}
+            <div className={styles.pageSection}>
               <h2 className={styles.pageSectionTitle}>{section.title}</h2>
               {section.subtitle && (
                 <p className={styles.pageSectionSubtitle}>{section.subtitle}</p>

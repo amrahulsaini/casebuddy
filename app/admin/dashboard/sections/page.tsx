@@ -16,7 +16,6 @@ interface Section {
   section_key: string;
   title: string;
   subtitle: string;
-  icon: string;
   sort_order: number;
   is_active: number;
   page_name?: string;
@@ -35,7 +34,6 @@ export default function SectionsPage() {
     page_id: '',
     title: '',
     subtitle: '',
-    icon: '',
     sort_order: 0,
     is_active: true,
   });
@@ -130,7 +128,6 @@ export default function SectionsPage() {
       page_id: section.page_id.toString(),
       title: section.title,
       subtitle: section.subtitle || '',
-      icon: section.icon || '',
       sort_order: section.sort_order,
       is_active: section.is_active === 1,
     });
@@ -161,7 +158,6 @@ export default function SectionsPage() {
       page_id: '',
       title: '',
       subtitle: '',
-      icon: '',
       sort_order: 0,
       is_active: true,
     });
@@ -221,7 +217,6 @@ export default function SectionsPage() {
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>Icon</th>
               <th>Title</th>
               <th>Subtitle</th>
               <th>Page</th>
@@ -240,7 +235,6 @@ export default function SectionsPage() {
             ) : (
               filteredSections.map((section) => (
                 <tr key={section.id}>
-                  <td className={styles.iconCell}>{section.icon}</td>
                   <td className={styles.titleCell}>{section.title}</td>
                   <td>{section.subtitle}</td>
                   <td>
@@ -330,20 +324,6 @@ export default function SectionsPage() {
                   }
                   className={styles.input}
                   placeholder="e.g., Choose from our wide range"
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Icon (Emoji)</label>
-                <input
-                  type="text"
-                  value={formData.icon}
-                  onChange={(e) =>
-                    setFormData({ ...formData, icon: e.target.value })
-                  }
-                  className={styles.input}
-                  placeholder="e.g., 📱"
-                  maxLength={10}
                 />
               </div>
 

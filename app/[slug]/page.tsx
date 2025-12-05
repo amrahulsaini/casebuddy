@@ -64,7 +64,7 @@ export default async function DynamicPage({ params }: { params: Promise<{ slug: 
   const { slug } = await params;
   const data = await getPageData(slug);
 
-  if (!data) {
+  if (!data || !data.page) {
     notFound();
   }
 
@@ -91,7 +91,13 @@ export default async function DynamicPage({ params }: { params: Promise<{ slug: 
       )}
 
       {/* Dynamic Sections */}
-      {sections.map((section, sectionIndex) => (
+      {sections.map((section, sectionIndex) => {
+        // Skip sections with no categories to avoid empty display
+        if (!section.categories || section.categories.length === 0) {
+          return null;
+        }
+        
+        return (
         <section 
           key={section.id} 
           className={sectionIndex === 0 ? styles.sectionFullWidth : styles.sectionAltFullWidth}
@@ -183,7 +189,8 @@ export default async function DynamicPage({ params }: { params: Promise<{ slug: 
             </div>
           )}
         </section>
-      ))}
+        );
+      })}
     </div>
   );
 }

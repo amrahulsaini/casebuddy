@@ -35,7 +35,7 @@ export async function GET(request: Request) {
       }
 
       if (category) {
-        query += ` AND c.slug = ?`;
+        query += ` AND pc.category_id = ?`;
         params.push(category);
       }
 
@@ -56,7 +56,7 @@ export async function GET(request: Request) {
           countParams.push(`%${search}%`, `%${search}%`);
         }
         if (category) {
-          countQuery += ` AND c.slug = ?`;
+          countQuery += ` AND pc.category_id = ?`;
           countParams.push(category);
         }
         const [countResult] = await connection.execute(countQuery, countParams);

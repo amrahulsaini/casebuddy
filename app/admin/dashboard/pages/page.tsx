@@ -82,11 +82,6 @@ export default function PagesManagementPage() {
   };
 
   const handleDelete = async (id: number, pageKey: string) => {
-    if (pageKey === 'homepage') {
-      alert('Cannot delete homepage!');
-      return;
-    }
-
     if (!confirm('Delete this page? All sections and categories in this page will be affected.')) return;
 
     try {
@@ -206,10 +201,10 @@ export default function PagesManagementPage() {
 
               <div className={styles.pageActions}>
                 <Link 
-                  href={`/admin/dashboard/pages/${page.id}/sections`}
+                  href={`/admin/dashboard/pages/${page.id}`}
                   className={styles.manageButton}
                 >
-                  Manage Sections
+                  View Details
                 </Link>
                 <button
                   onClick={() => handleEdit(page)}
@@ -217,14 +212,12 @@ export default function PagesManagementPage() {
                 >
                   Edit
                 </button>
-                {page.page_key !== 'homepage' && (
-                  <button
-                    onClick={() => handleDelete(page.id, page.page_key)}
-                    className={styles.deleteButton}
-                  >
-                    Delete
-                  </button>
-                )}
+                <button
+                  onClick={() => handleDelete(page.id, page.page_key)}
+                  className={styles.deleteButton}
+                >
+                  Delete
+                </button>
               </div>
             </div>
           ))}

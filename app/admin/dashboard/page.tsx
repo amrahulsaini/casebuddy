@@ -29,6 +29,40 @@ export default async function AdminDashboardPage() {
       <div className={styles.dashboard}>
         <h1 className={styles.title}>Dashboard</h1>
         
+        <div className={styles.quickLinks}>
+          <a href="/admin/dashboard/homepage-sections" className={styles.quickLink}>
+            <div className={styles.linkIcon}>🏠</div>
+            <div>
+              <div className={styles.linkTitle}>Homepage Sections</div>
+              <div className={styles.linkDesc}>Manage page sections</div>
+            </div>
+          </a>
+
+          <a href="/admin/dashboard/categories" className={styles.quickLink}>
+            <div className={styles.linkIcon}>📁</div>
+            <div>
+              <div className={styles.linkTitle}>Categories</div>
+              <div className={styles.linkDesc}>{stats.categories} categories</div>
+            </div>
+          </a>
+
+          <a href="/admin/dashboard/products" className={styles.quickLink}>
+            <div className={styles.linkIcon}>📦</div>
+            <div>
+              <div className={styles.linkTitle}>Products</div>
+              <div className={styles.linkDesc}>{stats.products} products</div>
+            </div>
+          </a>
+
+          <a href="/admin/dashboard/orders" className={styles.quickLink}>
+            <div className={styles.linkIcon}>🛒</div>
+            <div>
+              <div className={styles.linkTitle}>Orders</div>
+              <div className={styles.linkDesc}>{stats.pending} pending</div>
+            </div>
+          </a>
+        </div>
+
         <div className={styles.statsGrid}>
           <div className={styles.statCard}>
             <div className={styles.statIcon}>📦</div>

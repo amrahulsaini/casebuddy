@@ -15,7 +15,7 @@ export async function GET(request: Request) {
 
     const connection = await productsPool.getConnection();
 
-    try:
+    try {
       let query = `
         SELECT 
           p.*,

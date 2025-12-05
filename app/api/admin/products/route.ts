@@ -13,9 +13,9 @@ export async function GET(request: Request) {
     const category = searchParams.get('category') || '';
     const offset = (page - 1) * limit;
 
-    const connection = await pool.getConnection();
+    const connection = await productsPool.getConnection();
 
-    try {
+    try:
       let query = `
         SELECT 
           p.*,

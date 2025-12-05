@@ -6,7 +6,7 @@ export async function GET() {
   try {
     await requireAdmin();
 
-    const connection = await pool.getConnection();
+    const connection = await productsPool.getConnection();
 
     try {
       const [categories] = await connection.execute(

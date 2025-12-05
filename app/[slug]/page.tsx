@@ -10,6 +10,7 @@ interface Category {
   slug: string;
   description: string;
   icon: string | null;
+  image_url: string;
 }
 
 interface Section {

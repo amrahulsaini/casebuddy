@@ -43,7 +43,7 @@ export async function GET(
       (sectionRows || []).map(async (section: any) => {
         // Get categories for this section
         const [categoryRows]: any = await productsPool.query(
-          `SELECT id, name, slug, description, icon, is_active
+          `SELECT id, name, slug, description, icon, image_url, is_active
            FROM categories
            WHERE section_key = ? AND is_active = 1 AND parent_id IS NULL
            ORDER BY sort_order ASC`,

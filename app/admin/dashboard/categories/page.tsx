@@ -10,7 +10,7 @@ interface Category {
   description: string | null;
   image_url: string | null;
   parent_id: number | null;
-  section: 'custom_cases' | 'device_categories';
+  section?: 'custom_cases' | 'device_categories';
   sort_order: number;
   is_active: boolean;
 }

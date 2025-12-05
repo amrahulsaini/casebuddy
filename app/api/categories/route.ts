@@ -11,14 +11,13 @@ interface Category {
 
 export async function GET() {
   try {
-    // Get custom cases section
+    // Get categories grouped by section for homepage
     const [customRows] = await caseMainPool.execute<any[]>(
-      "SELECT id, name, slug, image_url, sort_order FROM categories WHERE is_active = TRUE AND section = 'custom_cases' ORDER BY sort_order ASC"
+      "SELECT id, name, slug, image_url, sort_order FROM categories WHERE is_active = TRUE AND parent_id IS NULL AND section = 'custom_cases' ORDER BY sort_order ASC"
     );
     
-    // Get device categories section
     const [regularRows] = await caseMainPool.execute<any[]>(
-      "SELECT id, name, slug, image_url, sort_order FROM categories WHERE is_active = TRUE AND section = 'device_categories' ORDER BY sort_order ASC"
+      "SELECT id, name, slug, image_url, sort_order FROM categories WHERE is_active = TRUE AND parent_id IS NULL AND section = 'device_categories' ORDER BY sort_order ASC"
     );
     
     return NextResponse.json({

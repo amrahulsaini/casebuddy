@@ -3,24 +3,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import styles from './dynamic-page.module.css';
 
-interface Product {
-  id: number;
-  name: string;
-  slug: string;
-  description: string;
-  price: number;
-  stock_quantity: number;
-  image_url: string | null;
-  alt_text: string | null;
-}
-
 interface Category {
   id: number;
   name: string;
   slug: string;
   description: string;
   icon: string | null;
-  products: Product[];
 }
 
 interface Section {
@@ -112,55 +100,13 @@ export default async function DynamicPage({ params }: { params: { slug: string }
                   <p className={styles.categoryDescription}>{category.description}</p>
                 )}
 
-                {/* Products */}
-                {category.products.length > 0 ? (
-                  <div className={styles.productsGrid}>
-                    {category.products.map((product) => (
-                      <Link
-                        key={product.id}
-                        href={`/product/${product.slug}`}
-                        className={styles.productCard}
-                      >
-                        {product.image_url ? (
-                          <div className={styles.productImage}>
-                            <Image
-                              src={product.image_url}
-                              alt={product.alt_text || product.name}
-                              fill
-                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                              style={{ objectFit: 'cover' }}
-                            />
-                          </div>
-                        ) : (
-                          <div className={styles.productImagePlaceholder}>
-                            No Image
-                          </div>
-                        )}
-
-                        <div className={styles.productInfo}>
-                          <h4 className={styles.productName}>{product.name}</h4>
-                          <p className={styles.productPrice}>₹{product.price}</p>
-                          
-                          {product.stock_quantity === 0 && (
-                            <span className={styles.outOfStock}>Out of Stock</span>
-                          )}
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                ) : (
-                  <p className={styles.noProducts}>No products available</p>
-                )}
-
-                {/* View All Link */}
-                {category.products.length > 0 && (
-                  <Link
-                    href={`/category/${category.slug}`}
-                    className={styles.viewAllLink}
-                  >
-                    View All {category.name} →
-                  </Link>
-                )}
+                {/* Category Link - Click to view products */}
+                <Link
+                  href={`/category/${category.slug}`}
+                  className={styles.categoryLink}
+                >
+                  View {category.name} Products →
+                </Link>
               </div>
             ))}
           </div>

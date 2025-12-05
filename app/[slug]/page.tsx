@@ -108,33 +108,12 @@ export default async function DynamicPage({ params }: { params: Promise<{ slug: 
           </div>
           
           {sectionIndex === 0 ? (
-            // First section: Horizontal scroll
+            // First section: Horizontal scroll (no animation, no duplicates)
             <div className={styles.horizontalScroll}>
-              <div className={styles.scrollContent}>
+              <div className={styles.scrollContent} style={{ animation: 'none' }}>
                 {section.categories.map((category) => (
                   <Link 
                     key={category.id}
-                    href={`/shop/${category.slug}`}
-                    className={styles.horizontalCard}
-                  >
-                    <div className={styles.horizontalImageWrapper}>
-                      <Image 
-                        src={category.image_url} 
-                        alt={category.name}
-                        width={280}
-                        height={380}
-                        className={styles.horizontalImage}
-                        loading="lazy"
-                      />
-                    </div>
-                    <div className={styles.horizontalInfo}>
-                      <h3 className={styles.horizontalName}>{category.name}</h3>
-                    </div>
-                  </Link>
-                ))}
-                {section.categories.map((category) => (
-                  <Link 
-                    key={`duplicate-${category.id}`}
                     href={`/shop/${category.slug}`}
                     className={styles.horizontalCard}
                   >

@@ -10,7 +10,6 @@ interface Category {
   description: string | null;
   image_url: string | null;
   parent_id: number | null;
-  section?: 'custom_cases' | 'device_categories';
   sort_order: number;
   is_active: boolean;
 }
@@ -26,7 +25,6 @@ export default function CategoriesPage() {
     description: '',
     image_url: '',
     parent_id: '',
-    section: 'device_categories' as 'custom_cases' | 'device_categories',
     sort_order: '0',
     is_active: true,
   });
@@ -56,7 +54,6 @@ export default function CategoriesPage() {
       description: '',
       image_url: '',
       parent_id: '',
-      section: 'device_categories',
       sort_order: '0',
       is_active: true,
     });
@@ -71,7 +68,6 @@ export default function CategoriesPage() {
       description: category.description || '',
       image_url: category.image_url || '',
       parent_id: category.parent_id?.toString() || '',
-      section: category.section,
       sort_order: category.sort_order.toString(),
       is_active: category.is_active,
     });
@@ -254,20 +250,6 @@ export default function CategoriesPage() {
                     setFormData({ ...formData, image_url: e.target.value })
                   }
                 />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Section *</label>
-                <select
-                  value={formData.section}
-                  onChange={(e) =>
-                    setFormData({ ...formData, section: e.target.value as 'custom_cases' | 'device_categories' })
-                  }
-                  required
-                >
-                  <option value="custom_cases">Custom Cases (Homepage Section 1)</option>
-                  <option value="device_categories">Device Categories (Homepage Section 2)</option>
-                </select>
               </div>
 
               <div className={styles.formGroup}>

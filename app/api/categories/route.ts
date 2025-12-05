@@ -11,18 +11,17 @@ interface Category {
 
 export async function GET() {
   try {
-    // Get categories grouped by section for homepage
-    const [customRows] = await caseMainPool.execute<any[]>(
-      "SELECT id, name, slug, image_url, sort_order FROM categories WHERE is_active = TRUE AND parent_id IS NULL AND section = 'custom_cases' ORDER BY sort_order ASC"
+    // Get only parent categories (parent_id IS NULL) for homepage
+    const [rows] = await caseMainPool.execute<any[]>(
+      'SELECT id, name, slug, image_url, sort_order FROM categories WHERE is_active = TRUE AND parent_id IS NULL ORDER BY sort_order ASC'
     );
     
-    const [regularRows] = await caseMainPool.execute<any[]>(
-      "SELECT id, name, slug, image_url, sort_order FROM categories WHERE is_active = TRUE AND parent_id IS NULL AND section = 'device_categories' ORDER BY sort_order ASC"
-    );
+    // Split first 8 for section 1, rest for section 2 (based on sort_order)
+    const allCategories = rows as Category[];
     
     return NextResponse.json({
-      custom: customRows as Category[],
-      regular: regularRows as Category[]
+      custom: allCategories.slice(0, 8),
+      regular: allCategories.slice(8)
     });
   } catch (error) {
     console.error('Error fetching categories:', error);

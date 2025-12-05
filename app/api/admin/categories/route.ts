@@ -35,15 +35,14 @@ export async function POST(request: Request) {
     try {
       const [result] = await connection.execute(
         `INSERT INTO categories 
-         (name, slug, description, image_url, parent_id, section, sort_order, is_active)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+         (name, slug, description, image_url, parent_id, sort_order, is_active)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [
           data.name,
           data.slug,
           data.description || '',
           data.image_url || null,
           data.parent_id || null,
-          data.section || 'device_categories',
           data.sort_order || 0,
           data.is_active ?? true,
         ]

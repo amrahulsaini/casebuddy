@@ -16,16 +16,34 @@ interface Product {
   primary_image: string;
 }
 
+interface Category {
+  id: number;
+  name: string;
+}
+
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [filterCategory, setFilterCategory] = useState<string>('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
+    fetchCategories();
     fetchProducts();
-  }, [page, search]);
+  }, [page, search, filterCategory]);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('/api/admin/categories');
+      const data = await response.json();
+      setCategories(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -35,6 +53,10 @@ export default function ProductsPage() {
         limit: '50',
         search,
       });
+
+      if (filterCategory) {
+        params.append('category', filterCategory);
+      }
 
       const response = await fetch(`/api/admin/products?${params}`);
       const data = await response.json();
@@ -74,6 +96,25 @@ export default function ProductsPage() {
       </div>
 
       <div className={styles.filters}>
+        <div className={styles.filterGroup}>
+          <label>Filter by Category:</label>
+          <select
+            value={filterCategory}
+            onChange={(e) => {
+              setFilterCategory(e.target.value);
+              setPage(1);
+            }}
+            className={styles.select}
+          >
+            <option value="">All Categories</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        
         <input
           type="text"
           placeholder="Search products..."
@@ -81,6 +122,15 @@ export default function ProductsPage() {
           onChange={(e) => handleSearch(e.target.value)}
           className={styles.searchInput}
         />
+        
+        {filterCategory && (
+          <button
+            onClick={() => setFilterCategory('')}
+            className={styles.clearButton}
+          >
+            Clear Filter
+          </button>
+        )}
       </div>
 
       {loading ? (

@@ -1,4 +1,3 @@
--- Create pages table for managing different pages
 CREATE TABLE IF NOT EXISTS pages (
   id INT AUTO_INCREMENT PRIMARY KEY,
   page_key VARCHAR(50) NOT NULL UNIQUE,
@@ -13,11 +12,3 @@ CREATE TABLE IF NOT EXISTS pages (
   INDEX idx_slug (slug),
   INDEX idx_is_active (is_active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Add page_id to homepage_sections table (nullable, no foreign key yet)
-ALTER TABLE homepage_sections 
-ADD COLUMN page_id INT NULL AFTER id;
-
--- Add indexes for better performance
-ALTER TABLE homepage_sections 
-ADD INDEX idx_page_id (page_id);

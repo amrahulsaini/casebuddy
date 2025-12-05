@@ -20,7 +20,7 @@ interface Category {
 
 export async function GET() {
   try {
-    // Get active homepage sections
+    // Get active homepage sections (page_id can be NULL for now during migration)
     const [sections] = await caseMainPool.execute<any[]>(
       'SELECT * FROM homepage_sections WHERE is_active = TRUE ORDER BY sort_order ASC'
     );

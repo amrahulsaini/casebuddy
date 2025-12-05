@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
-import styles from '../home.module.css';
+import styles from './dynamic-page.module.css';
 
 interface Category {
   id: number;
@@ -70,103 +70,74 @@ export default async function DynamicPage({ params }: { params: Promise<{ slug: 
   const { page, sections } = data;
 
   return (
-    <div className={styles.container}>
-      {/* Hero Section for Page */}
-      <section className={styles.hero}>
-        <div className={styles.heroContent}>
-          <h1 className={styles.heroTitle}>{page.page_name}</h1>
+    <div className={styles.pageContainer}>
+      {/* Hero Section */}
+      <section className={styles.pageHero}>
+        <div className={styles.pageHeroBackground}></div>
+        <div className={styles.pageHeroContent}>
+          <h1 className={styles.pageHeroTitle}>{page.page_name}</h1>
           {page.description && (
-            <p className={styles.heroSubtitle}>{page.description}</p>
+            <p className={styles.pageHeroDescription}>{page.description}</p>
           )}
         </div>
-        <div className={styles.heroBackground}></div>
       </section>
 
       {/* Empty State */}
       {sections.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '4rem 2rem', color: '#666' }}>
+        <div className={styles.emptyState}>
           <p>No content available for this page yet. Add sections from admin dashboard.</p>
         </div>
       )}
 
       {/* Dynamic Sections */}
       {sections.map((section, sectionIndex) => {
-        // Skip sections with no categories to avoid empty display
+        // Skip sections with no categories
         if (!section.categories || section.categories.length === 0) {
           return null;
         }
         
         return (
-        <section 
-          key={section.id} 
-          className={sectionIndex === 0 ? styles.sectionFullWidth : styles.sectionAltFullWidth}
-        >
-          <div className={styles.sectionHeader}>
-            <div className={styles.floralDecor}>{section.icon}</div>
-            <h2 className={styles.sectionTitle}>{section.title}</h2>
-            <p className={styles.sectionSubtitle}>{section.subtitle}</p>
-          </div>
-          
-          {sectionIndex === 0 ? (
-            // First section: Horizontal scroll (no animation, no duplicates)
-            <div className={styles.horizontalScroll}>
-              <div className={styles.scrollContent} style={{ animation: 'none' }}>
-                {section.categories.map((category) => (
-                  <Link 
-                    key={category.id}
-                    href={`/shop/${category.slug}`}
-                    className={styles.horizontalCard}
-                  >
-                    <div className={styles.horizontalImageWrapper}>
-                      <Image 
-                        src={category.image_url} 
-                        alt={category.name}
-                        width={280}
-                        height={380}
-                        className={styles.horizontalImage}
-                        loading="lazy"
-                      />
-                    </div>
-                    <div className={styles.horizontalInfo}>
-                      <h3 className={styles.horizontalName}>{category.name}</h3>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+          <section key={section.id} className={styles.pageSection}>
+            <div className={styles.pageSectionHeader}>
+              {section.icon && (
+                <div className={styles.pageSectionIcon}>{section.icon}</div>
+              )}
+              <h2 className={styles.pageSectionTitle}>{section.title}</h2>
+              {section.subtitle && (
+                <p className={styles.pageSectionSubtitle}>{section.subtitle}</p>
+              )}
             </div>
-          ) : (
-            // Other sections: Grid layout
-            <div className={styles.categoryGrid}>
-              {section.categories.map((category, index) => (
+            
+            <div className={styles.categoriesGrid}>
+              {section.categories.map((category) => (
                 <Link 
                   key={category.id}
                   href={`/shop/${category.slug}`}
-                  className={styles.verticalCard}
-                  data-index={index}
+                  className={styles.categoryCard}
                 >
-                  <div className={styles.verticalImageWrapper}>
+                  <div className={styles.categoryImageWrapper}>
                     <Image 
                       src={category.image_url} 
                       alt={category.name}
-                      width={320}
-                      height={420}
-                      className={styles.verticalImage}
+                      width={400}
+                      height={320}
+                      className={styles.categoryImage}
                       loading="lazy"
-                      placeholder="blur"
-                      blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjQyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzIwIiBoZWlnaHQ9IjQyMCIgZmlsbD0iI2Y1ZjVmNSIvPjwvc3ZnPg=="
                     />
-                    <div className={styles.verticalOverlay}>
-                      <span className={styles.overlayText}>{category.name}</span>
-                      <div className={styles.overlayButton}>
-                        View Collection <ArrowRight size={20} />
-                      </div>
+                  </div>
+                  <div className={styles.categoryInfo}>
+                    <h3 className={styles.categoryName}>{category.name}</h3>
+                    {category.description && (
+                      <p className={styles.categoryDescription}>{category.description}</p>
+                    )}
+                    <div className={styles.categoryButton}>
+                      View Collection <ArrowRight size={18} />
                     </div>
                   </div>
                 </Link>
               ))}
             </div>
-          )}
-        </section>
+          </section>
         );
       })}
     </div>

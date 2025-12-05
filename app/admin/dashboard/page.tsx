@@ -1,8 +1,8 @@
-import pool from '@/lib/db';
+import { productsPool } from '@/lib/db';
 import styles from './page.module.css';
 
 export default async function AdminDashboardPage() {
-  const connection = await pool.getConnection();
+  const connection = await productsPool.getConnection();
   
   try {
     // Get statistics

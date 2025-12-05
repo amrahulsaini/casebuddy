@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import bcrypt from 'bcryptjs';
-import pool from '@/lib/db';
+import { productsPool } from '@/lib/db';
 import { createToken } from '@/lib/auth';
 
 export async function POST(request: Request) {
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     }
 
     // Get user from database
-    const connection = await pool.getConnection();
+    const connection = await productsPool.getConnection();
     
     try {
       const [rows] = await connection.execute(

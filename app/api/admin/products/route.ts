@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
-import pool from '@/lib/db';
+import { productsPool } from '@/lib/db';
 
 export async function GET(request: Request) {
   try {
@@ -91,7 +91,7 @@ export async function POST(request: Request) {
     await requireAdmin();
 
     const data = await request.json();
-    const connection = await pool.getConnection();
+    const connection = await productsPool.getConnection();
 
     try {
       await connection.beginTransaction();

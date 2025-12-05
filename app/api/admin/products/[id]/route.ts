@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
-import pool from '@/lib/db';
+import { productsPool } from '@/lib/db';
 
 export async function GET(
   request: Request,
@@ -10,7 +10,7 @@ export async function GET(
     await requireAdmin();
     const { id } = await params;
 
-    const connection = await pool.getConnection();
+    const connection = await productsPool.getConnection();
 
     try {
       const [products] = await connection.execute(
@@ -63,7 +63,7 @@ export async function PUT(
     const { id } = await params;
     const data = await request.json();
 
-    const connection = await pool.getConnection();
+    const connection = await productsPool.getConnection();
 
     try {
       await connection.beginTransaction();
@@ -126,7 +126,7 @@ export async function DELETE(
     await requireAdmin();
     const { id } = await params;
 
-    const connection = await pool.getConnection();
+    const connection = await productsPool.getConnection();
 
     try {
       await connection.execute('DELETE FROM products WHERE id = ?', [id]);

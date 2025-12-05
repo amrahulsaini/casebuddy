@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
-import pool from '@/lib/db';
+import { productsPool } from '@/lib/db';
 
 export async function PUT(
   request: Request,

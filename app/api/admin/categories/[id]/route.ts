@@ -11,7 +11,7 @@ export async function PUT(
     const { id } = await params;
     const data = await request.json();
 
-    const connection = await pool.getConnection();
+    const connection = await productsPool.getConnection();
 
     try {
       await connection.execute(
@@ -51,7 +51,7 @@ export async function DELETE(
     await requireAdmin();
     const { id } = await params;
 
-    const connection = await pool.getConnection();
+    const connection = await productsPool.getConnection();
 
     try {
       await connection.execute('DELETE FROM categories WHERE id = ?', [id]);

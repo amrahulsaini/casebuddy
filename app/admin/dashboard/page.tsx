@@ -30,6 +30,14 @@ export default async function AdminDashboardPage() {
         <h1 className={styles.title}>Dashboard</h1>
         
         <div className={styles.quickLinks}>
+          <a href="/admin/dashboard/pages" className={styles.quickLink}>
+            <div className={styles.linkIcon}>📄</div>
+            <div>
+              <div className={styles.linkTitle}>Pages</div>
+              <div className={styles.linkDesc}>Manage website pages</div>
+            </div>
+          </a>
+
           <a href="/admin/dashboard/homepage-sections" className={styles.quickLink}>
             <div className={styles.linkIcon}>🏠</div>
             <div>

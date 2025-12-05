@@ -15,11 +15,32 @@ interface Category {
   is_active: boolean;
 }
 
+interface Page {
+  id: number;
+  page_key: string;
+  page_name: string;
+  slug: string;
+}
+
+interface Section {
+  id: number;
+  section_key: string;
+  title: string;
+  page_id: number;
+}
+
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [pages, setPages] = useState<Page[]>([]);
+  const [sections, setSections] = useState<Section[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  
+  // Filters
+  const [filterPageId, setFilterPageId] = useState<string>('');
+  const [filterSectionKey, setFilterSectionKey] = useState<string>('');
+  
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -27,13 +48,54 @@ export default function CategoriesPage() {
     image_url: '',
     parent_id: '',
     section_key: '',
+    page_id: '',
     sort_order: '0',
     is_active: true,
   });
 
   useEffect(() => {
+    fetchPages();
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+    if (filterPageId) {
+      fetchSectionsForPage(filterPageId);
+    } else {
+      setSections([]);
+      setFilterSectionKey('');
+    }
+  }, [filterPageId]);
+
+  useEffect(() => {
+    if (formData.page_id) {
+      fetchSectionsForPage(formData.page_id);
+    }
+  }, [formData.page_id]);
+
+  const fetchPages = async () => {
+    try {
+      const response = await fetch('/api/admin/pages');
+      if (response.ok) {
+        const data = await response.json();
+        setPages(Array.isArray(data) ? data : []);
+      }
+    } catch (error) {
+      console.error('Error fetching pages:', error);
+    }
+  };
+
+  const fetchSectionsForPage = async (pageId: string) => {
+    try {
+      const response = await fetch(`/api/admin/pages/${pageId}/sections`);
+      if (response.ok) {
+        const data = await response.json();
+        setSections(Array.isArray(data) ? data : []);
+      }
+    } catch (error) {
+      console.error('Error fetching sections:', error);
+    }
+  };
 
   const fetchCategories = async () => {
     setLoading(true);
@@ -57,6 +119,7 @@ export default function CategoriesPage() {
       image_url: '',
       parent_id: '',
       section_key: '',
+      page_id: '',
       sort_order: '0',
       is_active: true,
     });
@@ -65,6 +128,11 @@ export default function CategoriesPage() {
 
   const handleEdit = (category: Category) => {
     setEditingCategory(category);
+    
+    // Find page_id from section_key
+    const section = sections.find(s => s.section_key === category.section_key);
+    const pageId = section?.page_id?.toString() || '';
+    
     setFormData({
       name: category.name,
       slug: category.slug,
@@ -72,6 +140,7 @@ export default function CategoriesPage() {
       image_url: category.image_url || '',
       parent_id: category.parent_id?.toString() || '',
       section_key: category.section_key || '',
+      page_id: pageId,
       sort_order: category.sort_order.toString(),
       is_active: category.is_active,
     });
@@ -136,6 +205,16 @@ export default function CategoriesPage() {
     return parent ? `${parent.name} > ${category.name}` : category.name;
   };
 
+  const filteredCategories = categories.filter((category) => {
+    if (filterPageId && filterSectionKey) {
+      return category.section_key === filterSectionKey;
+    }
+    if (filterSectionKey) {
+      return category.section_key === filterSectionKey;
+    }
+    return true;
+  });
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -143,6 +222,55 @@ export default function CategoriesPage() {
         <button onClick={handleAdd} className={styles.addButton}>
           + Add Category
         </button>
+      </div>
+
+      {/* Hierarchical Filters */}
+      <div className={styles.filters}>
+        <div className={styles.filterGroup}>
+          <label>Filter by Page:</label>
+          <select
+            value={filterPageId}
+            onChange={(e) => setFilterPageId(e.target.value)}
+            className={styles.select}
+          >
+            <option value="">All Pages</option>
+            {pages.map((page) => (
+              <option key={page.id} value={page.id}>
+                {page.page_name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {filterPageId && (
+          <div className={styles.filterGroup}>
+            <label>Filter by Section:</label>
+            <select
+              value={filterSectionKey}
+              onChange={(e) => setFilterSectionKey(e.target.value)}
+              className={styles.select}
+            >
+              <option value="">All Sections</option>
+              {sections.map((section) => (
+                <option key={section.id} value={section.section_key}>
+                  {section.title}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {(filterPageId || filterSectionKey) && (
+          <button
+            onClick={() => {
+              setFilterPageId('');
+              setFilterSectionKey('');
+            }}
+            className={styles.clearButton}
+          >
+            Clear Filters
+          </button>
+        )}
       </div>
 
       {loading ? (
@@ -161,7 +289,7 @@ export default function CategoriesPage() {
               </tr>
             </thead>
             <tbody>
-              {categories.map((category) => (
+              {filteredCategories.map((category) => (
                 <tr key={category.id}>
                   <td>
                     <div className={styles.categoryName}>
@@ -258,18 +386,47 @@ export default function CategoriesPage() {
               </div>
 
               <div className={styles.formGroup}>
-                <label>Homepage Section (for parent categories)</label>
+                <label>Page (for parent categories)</label>
                 <select
-                  value={formData.section_key}
+                  value={formData.page_id}
                   onChange={(e) =>
-                    setFormData({ ...formData, section_key: e.target.value })
+                    setFormData({ ...formData, page_id: e.target.value, section_key: '' })
                   }
+                  disabled={!!formData.parent_id}
                 >
                   <option value="">None</option>
-                  <option value="custom_cases">Our Custom Designed Cases</option>
-                  <option value="device_categories">Our Categories</option>
+                  {pages.map((page) => (
+                    <option key={page.id} value={page.id}>
+                      {page.page_name}
+                    </option>
+                  ))}
                 </select>
+                {formData.parent_id && (
+                  <small style={{ color: '#666', marginTop: '4px', display: 'block' }}>
+                    Only root categories can be assigned to pages
+                  </small>
+                )}
               </div>
+
+              {formData.page_id && !formData.parent_id && (
+                <div className={styles.formGroup}>
+                  <label>Section *</label>
+                  <select
+                    value={formData.section_key}
+                    onChange={(e) =>
+                      setFormData({ ...formData, section_key: e.target.value })
+                    }
+                    required
+                  >
+                    <option value="">Select Section</option>
+                    {sections.map((section) => (
+                      <option key={section.id} value={section.section_key}>
+                        {section.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className={styles.formGroup}>
                 <label>Parent Category</label>

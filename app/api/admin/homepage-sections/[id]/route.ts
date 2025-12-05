@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { productsPool } from '@/lib/db';
-import { verify } from 'jose';
+import { jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
 // Verify admin authentication
@@ -14,7 +14,7 @@ async function verifyAdmin(req: NextRequest) {
     }
 
     const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'your-secret-key');
-    const { payload } = await verify(token.value, secret);
+    const { payload } = await jwtVerify(token.value, secret);
     return payload;
   } catch (error) {
     console.error('Auth verification error:', error);

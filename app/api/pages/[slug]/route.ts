@@ -12,27 +12,31 @@ export async function GET(
     const [pageRows]: any = await productsPool.query(
       `SELECT id, page_key, page_name, slug, description, is_active 
        FROM pages 
-       WHERE slug = ? AND is_active = 1`,
+       WHERE slug = ?`,
       [slug]
     );
 
     if (!pageRows || pageRows.length === 0) {
+      console.log(`Page not found for slug: ${slug}`);
       return NextResponse.json(
-        { error: 'Page not found' },
+        { error: `Page not found for slug: ${slug}` },
         { status: 404 }
       );
     }
 
     const page = pageRows[0];
+    console.log(`Found page:`, page);
 
     // Fetch sections for this page
     const [sectionRows]: any = await productsPool.query(
       `SELECT id, section_key, title, subtitle, icon, sort_order, is_active
        FROM homepage_sections
-       WHERE page_id = ? AND is_active = 1
+       WHERE page_id = ?
        ORDER BY sort_order ASC`,
       [page.id]
     );
+    
+    console.log(`Found ${sectionRows?.length || 0} sections for page ${page.id}`);
 
     // Fetch categories for each section (no products needed)
     const sections = await Promise.all(

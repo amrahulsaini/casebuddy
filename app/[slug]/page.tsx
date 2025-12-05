@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import styles from './dynamic-page.module.css';
+import { ArrowRight } from 'lucide-react';
+import styles from '../home.module.css';
 
 interface Category {
   id: number;
@@ -60,66 +61,119 @@ export default async function DynamicPage({ params }: { params: Promise<{ slug: 
   const { page, sections } = data;
 
   return (
-    <main className={styles.main}>
-      {/* Page Header */}
-      <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>{page.page_name}</h1>
-        {page.description && (
-          <p className={styles.pageDescription}>{page.description}</p>
-        )}
-      </div>
-
-      {/* Sections */}
-      {sections.map((section) => (
-        <section key={section.id} className={styles.section}>
-          {/* Section Header */}
-          <div className={styles.sectionHeader}>
-            {section.icon && (
-              <div className={styles.sectionIcon}>{section.icon}</div>
-            )}
-            <div className={styles.sectionTitleWrapper}>
-              <h2 className={styles.sectionTitle}>{section.title}</h2>
-              {section.subtitle && (
-                <p className={styles.sectionSubtitle}>{section.subtitle}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Categories Grid */}
-          <div className={styles.categoriesGrid}>
-            {section.categories.map((category) => (
-              <div key={category.id} className={styles.categoryCard}>
-                {/* Category Header */}
-                <div className={styles.categoryHeader}>
-                  {category.icon && (
-                    <span className={styles.categoryIcon}>{category.icon}</span>
-                  )}
-                  <h3 className={styles.categoryTitle}>{category.name}</h3>
-                </div>
-
-                {category.description && (
-                  <p className={styles.categoryDescription}>{category.description}</p>
-                )}
-
-                {/* Category Link - Click to view products */}
-                <Link
-                  href={`/category/${category.slug}`}
-                  className={styles.categoryLink}
-                >
-                  View {category.name} Products →
-                </Link>
-              </div>
-            ))}
-          </div>
-        </section>
-      ))}
+    <div className={styles.container}>
+      {/* Hero Section for Page */}
+      <section className={styles.hero}>
+        <div className={styles.heroContent}>
+          <h1 className={styles.heroTitle}>{page.page_name}</h1>
+          {page.description && (
+            <p className={styles.heroSubtitle}>{page.description}</p>
+          )}
+        </div>
+        <div className={styles.heroBackground}></div>
+      </section>
 
       {/* Empty State */}
       {sections.length === 0 && (
-        <div className={styles.emptyState}>
-          <p>No content available for this page yet.</p>
+        <div style={{ textAlign: 'center', padding: '4rem 2rem', color: '#666' }}>
+          <p>No content available for this page yet. Add sections from admin dashboard.</p>
         </div>
       )}
-    </main>
+
+      {/* Dynamic Sections */}
+      {sections.map((section, sectionIndex) => (
+        <section 
+          key={section.id} 
+          className={sectionIndex === 0 ? styles.sectionFullWidth : styles.sectionAltFullWidth}
+        >
+          <div className={styles.sectionHeader}>
+            <div className={styles.floralDecor}>{section.icon}</div>
+            <h2 className={styles.sectionTitle}>{section.title}</h2>
+            <p className={styles.sectionSubtitle}>{section.subtitle}</p>
+          </div>
+          
+          {sectionIndex === 0 ? (
+            // First section: Horizontal scroll
+            <div className={styles.horizontalScroll}>
+              <div className={styles.scrollContent}>
+                {section.categories.map((category) => (
+                  <Link 
+                    key={category.id}
+                    href={`/shop/${category.slug}`}
+                    className={styles.horizontalCard}
+                  >
+                    <div className={styles.horizontalImageWrapper}>
+                      <Image 
+                        src={category.image_url} 
+                        alt={category.name}
+                        width={280}
+                        height={380}
+                        className={styles.horizontalImage}
+                        loading="lazy"
+                      />
+                    </div>
+                    <div className={styles.horizontalInfo}>
+                      <h3 className={styles.horizontalName}>{category.name}</h3>
+                    </div>
+                  </Link>
+                ))}
+                {section.categories.map((category) => (
+                  <Link 
+                    key={`duplicate-${category.id}`}
+                    href={`/shop/${category.slug}`}
+                    className={styles.horizontalCard}
+                  >
+                    <div className={styles.horizontalImageWrapper}>
+                      <Image 
+                        src={category.image_url} 
+                        alt={category.name}
+                        width={280}
+                        height={380}
+                        className={styles.horizontalImage}
+                        loading="lazy"
+                      />
+                    </div>
+                    <div className={styles.horizontalInfo}>
+                      <h3 className={styles.horizontalName}>{category.name}</h3>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : (
+            // Other sections: Grid layout
+            <div className={styles.categoryGrid}>
+              {section.categories.map((category, index) => (
+                <Link 
+                  key={category.id}
+                  href={`/shop/${category.slug}`}
+                  className={styles.verticalCard}
+                  data-index={index}
+                >
+                  <div className={styles.verticalImageWrapper}>
+                    <Image 
+                      src={category.image_url} 
+                      alt={category.name}
+                      width={320}
+                      height={420}
+                      className={styles.verticalImage}
+                      loading="lazy"
+                      placeholder="blur"
+                      blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjQyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzIwIiBoZWlnaHQ9IjQyMCIgZmlsbD0iI2Y1ZjVmNSIvPjwvc3ZnPg=="
+                    />
+                    <div className={styles.verticalOverlay}>
+                      <span className={styles.overlayText}>{category.name}</span>
+                      <div className={styles.overlayButton}>
+                        View Collection <ArrowRight size={20} />
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
+      ))}
+    </div>
   );
 }

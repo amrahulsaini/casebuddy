@@ -5,9 +5,23 @@ import { useRouter } from 'next/navigation';
 import ImageUpload from '@/components/ImageUpload';
 import styles from './new.module.css';
 
+interface Page {
+  id: number;
+  page_name: string;
+}
+
+interface Section {
+  id: number;
+  section_key: string;
+  title: string;
+  page_id: number;
+}
+
 interface Category {
   id: number;
   name: string;
+  section_key: string | null;
+  parent_id: number | null;
 }
 
 interface ProductImage {
@@ -20,7 +34,11 @@ interface ProductImage {
 
 export default function ProductNewPage() {
   const router = useRouter();
+  const [pages, setPages] = useState<Page[]>([]);
+  const [sections, setSections] = useState<Section[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedPage, setSelectedPage] = useState<string>('');
+  const [selectedSection, setSelectedSection] = useState<string>('');
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   const [images, setImages] = useState<ProductImage[]>([]);
   const [saving, setSaving] = useState(false);
@@ -38,8 +56,66 @@ export default function ProductNewPage() {
   });
 
   useEffect(() => {
-    fetchCategories();
+    fetchPages();
   }, []);
+
+  useEffect(() => {
+    if (selectedPage) {
+      fetchSectionsForPage(selectedPage);
+      setSelectedSection('');
+      setSelectedCategories([]);
+    } else {
+      setSections([]);
+      setCategories([]);
+    }
+  }, [selectedPage]);
+
+  useEffect(() => {
+    if (selectedSection) {
+      fetchCategoriesForSection(selectedSection);
+      setSelectedCategories([]);
+    } else {
+      setCategories([]);
+    }
+  }, [selectedSection]);
+
+  const fetchPages = async () => {
+    try {
+      const response = await fetch('/api/admin/pages');
+      if (response.ok) {
+        const data = await response.json();
+        setPages(Array.isArray(data) ? data : []);
+      }
+    } catch (error) {
+      console.error('Error fetching pages:', error);
+    }
+  };
+
+  const fetchSectionsForPage = async (pageId: string) => {
+    try {
+      const response = await fetch(`/api/admin/pages/${pageId}/sections`);
+      if (response.ok) {
+        const data = await response.json();
+        setSections(Array.isArray(data) ? data : []);
+      }
+    } catch (error) {
+      console.error('Error fetching sections:', error);
+    }
+  };
+
+  const fetchCategoriesForSection = async (sectionKey: string) => {
+    try {
+      const response = await fetch('/api/admin/categories');
+      const data = await response.json();
+      // Filter categories by section_key and only parent categories
+      const filtered = data.filter((cat: Category) => 
+        cat.section_key === sectionKey && cat.parent_id === null
+      );
+      setCategories(filtered);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
 
   const fetchCategories = async () => {
     try {
@@ -248,21 +324,69 @@ export default function ProductNewPage() {
         </div>
 
         <div className={styles.formCard}>
-          <h2>Categories</h2>
-          <div className={styles.categoryGrid}>
-            {categories.map((category) => (
-              <label key={category.id} className={styles.categoryCheckbox}>
-                <input
-                  type="checkbox"
-                  checked={selectedCategories.includes(category.id)}
-                  onChange={() => toggleCategory(category.id)}
-                />
-                {category.name}
-              </label>
-            ))}
+          <h2>Categories (Select Page → Section → Category)</h2>
+          
+          <div className={styles.formGroup}>
+            <label>1. Select Page *</label>
+            <select
+              value={selectedPage}
+              onChange={(e) => setSelectedPage(e.target.value)}
+              required
+              className={styles.select}
+            >
+              <option value="">Choose a page...</option>
+              {pages.map((page) => (
+                <option key={page.id} value={page.id}>
+                  {page.page_name}
+                </option>
+              ))}
+            </select>
           </div>
-          {selectedCategories.length === 0 && (
-            <p className={styles.hint}>Please select at least one category</p>
+
+          {selectedPage && (
+            <div className={styles.formGroup}>
+              <label>2. Select Section *</label>
+              <select
+                value={selectedSection}
+                onChange={(e) => setSelectedSection(e.target.value)}
+                required
+                className={styles.select}
+              >
+                <option value="">Choose a section...</option>
+                {sections.map((section) => (
+                  <option key={section.id} value={section.section_key}>
+                    {section.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {selectedSection && (
+            <>
+              <div className={styles.formGroup}>
+                <label>3. Select Categories *</label>
+                <div className={styles.categoryGrid}>
+                  {categories.length === 0 ? (
+                    <p className={styles.hint}>No categories found for this section</p>
+                  ) : (
+                    categories.map((category) => (
+                      <label key={category.id} className={styles.categoryCheckbox}>
+                        <input
+                          type="checkbox"
+                          checked={selectedCategories.includes(category.id)}
+                          onChange={() => toggleCategory(category.id)}
+                        />
+                        {category.name}
+                      </label>
+                    ))
+                  )}
+                </div>
+              </div>
+              {selectedCategories.length === 0 && categories.length > 0 && (
+                <p className={styles.hint}>Please select at least one category</p>
+              )}
+            </>
           )}
         </div>
 

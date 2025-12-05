@@ -16,30 +16,92 @@ interface Product {
   primary_image: string;
 }
 
+interface Page {
+  id: number;
+  page_name: string;
+}
+
+interface Section {
+  id: number;
+  section_key: string;
+  title: string;
+  page_id: number;
+}
+
 interface Category {
   id: number;
   name: string;
+  section_key: string | null;
 }
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [pages, setPages] = useState<Page[]>([]);
+  const [sections, setSections] = useState<Section[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [filterPage, setFilterPage] = useState<string>('');
+  const [filterSection, setFilterSection] = useState<string>('');
   const [filterCategory, setFilterCategory] = useState<string>('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    fetchCategories();
+    fetchPages();
     fetchProducts();
   }, [page, search, filterCategory]);
 
-  const fetchCategories = async () => {
+  useEffect(() => {
+    if (filterPage) {
+      fetchSectionsForPage(filterPage);
+      setFilterSection('');
+      setFilterCategory('');
+    } else {
+      setSections([]);
+      setCategories([]);
+    }
+  }, [filterPage]);
+
+  useEffect(() => {
+    if (filterSection) {
+      fetchCategoriesForSection(filterSection);
+      setFilterCategory('');
+    } else {
+      setCategories([]);
+    }
+  }, [filterSection]);
+
+  const fetchPages = async () => {
+    try {
+      const response = await fetch('/api/admin/pages');
+      if (response.ok) {
+        const data = await response.json();
+        setPages(Array.isArray(data) ? data : []);
+      }
+    } catch (error) {
+      console.error('Error fetching pages:', error);
+    }
+  };
+
+  const fetchSectionsForPage = async (pageId: string) => {
+    try {
+      const response = await fetch(`/api/admin/pages/${pageId}/sections`);
+      if (response.ok) {
+        const data = await response.json();
+        setSections(Array.isArray(data) ? data : []);
+      }
+    } catch (error) {
+      console.error('Error fetching sections:', error);
+    }
+  };
+
+  const fetchCategoriesForSection = async (sectionKey: string) => {
     try {
       const response = await fetch('/api/admin/categories');
       const data = await response.json();
-      setCategories(Array.isArray(data) ? data : []);
+      const filtered = data.filter((cat: Category) => cat.section_key === sectionKey);
+      setCategories(filtered);
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
@@ -97,23 +159,65 @@ export default function ProductsPage() {
 
       <div className={styles.filters}>
         <div className={styles.filterGroup}>
-          <label>Filter by Category:</label>
+          <label>Filter by Page:</label>
           <select
-            value={filterCategory}
+            value={filterPage}
             onChange={(e) => {
-              setFilterCategory(e.target.value);
+              setFilterPage(e.target.value);
               setPage(1);
             }}
             className={styles.select}
           >
-            <option value="">All Categories</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
+            <option value="">All Pages</option>
+            {pages.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.page_name}
               </option>
             ))}
           </select>
         </div>
+
+        {filterPage && (
+          <div className={styles.filterGroup}>
+            <label>Filter by Section:</label>
+            <select
+              value={filterSection}
+              onChange={(e) => {
+                setFilterSection(e.target.value);
+                setPage(1);
+              }}
+              className={styles.select}
+            >
+              <option value="">All Sections</option>
+              {sections.map((s) => (
+                <option key={s.id} value={s.section_key}>
+                  {s.title}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {filterSection && (
+          <div className={styles.filterGroup}>
+            <label>Filter by Category:</label>
+            <select
+              value={filterCategory}
+              onChange={(e) => {
+                setFilterCategory(e.target.value);
+                setPage(1);
+              }}
+              className={styles.select}
+            >
+              <option value="">All Categories</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         
         <input
           type="text"
@@ -123,12 +227,16 @@ export default function ProductsPage() {
           className={styles.searchInput}
         />
         
-        {filterCategory && (
+        {(filterPage || filterSection || filterCategory) && (
           <button
-            onClick={() => setFilterCategory('')}
+            onClick={() => {
+              setFilterPage('');
+              setFilterSection('');
+              setFilterCategory('');
+            }}
             className={styles.clearButton}
           >
-            Clear Filter
+            Clear Filters
           </button>
         )}
       </div>

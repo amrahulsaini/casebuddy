@@ -151,7 +151,8 @@ export default function CategoriesPage() {
 
     try {
       const formData = new FormData();
-      formData.append('image', file);
+      formData.append('file', file);
+      formData.append('type', 'category');
 
       const response = await fetch('/api/admin/upload', {
         method: 'POST',
@@ -159,7 +160,8 @@ export default function CategoriesPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Upload failed');
+        const error = await response.json();
+        throw new Error(error.error || 'Upload failed');
       }
 
       const data = await response.json();
@@ -167,7 +169,7 @@ export default function CategoriesPage() {
       setImagePreview(data.url);
     } catch (error) {
       console.error('Error uploading image:', error);
-      alert('Failed to upload image');
+      alert(error instanceof Error ? error.message : 'Failed to upload image');
     } finally {
       setUploading(false);
     }

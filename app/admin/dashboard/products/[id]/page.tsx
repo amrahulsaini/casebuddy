@@ -11,7 +11,7 @@ interface Category {
 }
 
 interface ProductImage {
-  id: number;
+  id?: number;
   image_url: string;
   alt_text: string;
   sort_order: number;

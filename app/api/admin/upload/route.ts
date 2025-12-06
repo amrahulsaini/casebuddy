@@ -55,24 +55,13 @@ export async function POST(request: NextRequest) {
     // Determine upload directory based on type
     const uploadSubDir = type === 'category' ? 'categories' : 'products';
     
-    // In production, save to web root; in development, save to Next.js public folder
-    const isProduction = process.env.NODE_ENV === 'production';
-    let uploadDir: string;
-    
-    if (isProduction) {
-      // Production: save to web root /home/casebuddy.co.in/public_html/cdn/
-      const webRoot = process.env.WEB_ROOT || '/home/casebuddy.co.in/public_html';
-      uploadDir = path.join(webRoot, 'cdn', uploadSubDir);
-    } else {
-      // Development: save to Next.js public folder
-      uploadDir = path.join(process.cwd(), 'public', 'cdn', uploadSubDir);
-    }
-    
+    // Always save to the Next.js public/cdn folder (this works in both dev and production)
+    const uploadDir = path.join(process.cwd(), 'public', 'cdn', uploadSubDir);
     const filepath = path.join(uploadDir, filename);
     const url = `/cdn/${uploadSubDir}/${filename}`;
 
     console.log('Upload configuration:', {
-      isProduction,
+      cwd: process.cwd(),
       uploadDir,
       filepath,
       url,

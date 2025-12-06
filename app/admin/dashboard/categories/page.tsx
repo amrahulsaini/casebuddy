@@ -150,22 +150,35 @@ export default function CategoriesPage() {
     setUploading(true);
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('type', 'category');
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', file);
+      uploadFormData.append('type', 'category');
+
+      console.log('Uploading category image:', file.name, file.type, file.size);
 
       const response = await fetch('/api/admin/upload', {
         method: 'POST',
-        body: formData,
+        body: uploadFormData,
       });
 
+      const data = await response.json();
+      console.log('Upload response:', data);
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Upload failed');
+        throw new Error(data.error || `Upload failed with status ${response.status}`);
       }
 
-      const data = await response.json();
-      const imageUrl = data?.absoluteUrl || data?.url;
+      if (!data.success) {
+        throw new Error(data.error || 'Upload was not successful');
+      }
+
+      // Use the URL from the response (prefer url over absoluteUrl for local storage)
+      const imageUrl = data.url || data.absoluteUrl;
+      if (!imageUrl) {
+        throw new Error('No image URL returned from server');
+      }
+
+      console.log('Setting image URL:', imageUrl);
       setFormData(prev => ({ ...prev, image_url: imageUrl }));
       setImagePreview(imageUrl);
     } catch (error) {

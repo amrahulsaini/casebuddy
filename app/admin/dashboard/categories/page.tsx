@@ -154,36 +154,55 @@ export default function CategoriesPage() {
       uploadFormData.append('file', file);
       uploadFormData.append('type', 'category');
 
-      console.log('Uploading category image:', file.name, file.type, file.size);
+      console.log('=== UPLOAD STARTED ===');
+      console.log('File details:', {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        sizeInMB: (file.size / 1024 / 1024).toFixed(2) + 'MB'
+      });
 
       const response = await fetch('/api/admin/upload', {
         method: 'POST',
         body: uploadFormData,
       });
 
+      console.log('Response status:', response.status, response.statusText);
+      
       const data = await response.json();
-      console.log('Upload response:', data);
+      console.log('Response data:', JSON.stringify(data, null, 2));
 
       if (!response.ok) {
-        throw new Error(data.error || `Upload failed with status ${response.status}`);
+        const errorMsg = data.error || `Upload failed with status ${response.status}`;
+        alert(`Upload Error: ${errorMsg}`);
+        throw new Error(errorMsg);
       }
 
       if (!data.success) {
-        throw new Error(data.error || 'Upload was not successful');
+        const errorMsg = data.error || 'Upload was not successful';
+        alert(`Upload Failed: ${errorMsg}`);
+        throw new Error(errorMsg);
       }
 
       // Always use the relative URL (not absoluteUrl) to avoid hardcoded domains
       const imageUrl = data.url;
       if (!imageUrl) {
+        alert('Error: No image URL returned from server');
         throw new Error('No image URL returned from server');
       }
 
-      console.log('Setting image URL:', imageUrl);
+      console.log('SUCCESS! Image URL:', imageUrl);
+      console.log('File saved to:', data.filename);
+      alert(`Image uploaded successfully!\nURL: ${imageUrl}`);
+      
       setFormData(prev => ({ ...prev, image_url: imageUrl }));
       setImagePreview(imageUrl);
     } catch (error) {
-      console.error('Error uploading image:', error);
-      alert(error instanceof Error ? error.message : 'Failed to upload image');
+      console.error('=== UPLOAD ERROR ===');
+      console.error('Error details:', error);
+      if (!(error instanceof Error && error.message.startsWith('Upload'))) {
+        alert(`Upload Error: ${error instanceof Error ? error.message : 'Failed to upload image'}`);
+      }
     } finally {
       setUploading(false);
     }

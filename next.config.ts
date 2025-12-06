@@ -17,16 +17,7 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'atcasa.co.in',
       },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-      },
-      {
-        protocol: 'https',
-        hostname: 'localhost',
-      },
     ],
-    // Allow images from the public folder
     unoptimized: false,
   },
 };

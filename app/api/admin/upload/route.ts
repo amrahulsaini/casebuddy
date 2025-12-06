@@ -109,15 +109,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate absolute URL
-    const origin = request.nextUrl.origin || 
-      `${request.headers.get('x-forwarded-proto') || 'http'}://${request.headers.get('x-forwarded-host') || request.headers.get('host')}`;
+    // Generate absolute URL with proper domain detection
+    const forwardedHost = request.headers.get('x-forwarded-host');
+    const forwardedProto = request.headers.get('x-forwarded-proto');
+    const host = forwardedHost || request.headers.get('host') || 'localhost:3000';
+    const protocol = forwardedProto || (host.includes('localhost') ? 'http' : 'https');
+    const origin = `${protocol}://${host}`;
     const absoluteUrl = `${origin}${url}`;
 
     console.log('Upload successful:', {
       url,
       absoluteUrl,
-      filename
+      filename,
+      origin,
+      host,
+      protocol
     });
 
     return NextResponse.json({

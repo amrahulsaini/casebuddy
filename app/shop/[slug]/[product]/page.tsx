@@ -84,16 +84,16 @@ export default function ProductDetailPage() {
           setProduct(data.product);
           console.log('📦 Product Data:', data.product);
           console.log('📂 Categories:', data.product.categories);
-          console.log('✅ Customization Enabled?', data.product.categories?.[0]?.customization_enabled);
-          console.log('⚙️ Customization Options:', data.product.categories?.[0]?.customization_options);
           
-          // If product has customization enabled, fetch phone brands
-          if (data.product.categories?.[0]?.customization_enabled) {
-            const categoryId = data.product.categories[0].id;
-            console.log('🔄 Fetching phone brands for category:', categoryId);
-            fetchPhoneBrands(categoryId);
+          // Find ANY category with customization enabled
+          const customCategory = data.product.categories?.find((cat: Category) => cat.customization_enabled);
+          console.log('✅ Customization Category Found?', customCategory);
+          
+          if (customCategory) {
+            console.log('🔄 Fetching phone brands for category:', customCategory.id, customCategory.name);
+            fetchPhoneBrands(customCategory.id);
           } else {
-            console.log('❌ Customization NOT enabled for this product');
+            console.log('❌ No category with customization enabled');
           }
         }
         setLoading(false);
@@ -338,21 +338,26 @@ export default function ProductDetailPage() {
           }}>
             <h4 style={{ margin: '0 0 10px 0', color: '#856404' }}>🔍 DEBUG INFO:</h4>
             <div><strong>Has Categories:</strong> {product.categories?.length > 0 ? 'Yes ✅' : 'No ❌'}</div>
-            {product.categories?.[0] && (
-              <>
-                <div><strong>Category Name:</strong> {product.categories[0].name}</div>
-                <div><strong>Customization Enabled:</strong> {String(product.categories[0].customization_enabled)} {product.categories[0].customization_enabled ? '✅' : '❌'}</div>
-                <div><strong>Customization Options:</strong> {JSON.stringify(product.categories[0].customization_options)}</div>
-              </>
-            )}
-            <div><strong>Phone Brands Loaded:</strong> {phoneBrands.length} brands</div>
+            <div><strong>Total Categories:</strong> {product.categories?.length || 0}</div>
+            {product.categories?.map((cat, idx) => {
+              const customCategory = product.categories?.find((c: Category) => c.customization_enabled);
+              return (
+                <div key={idx} style={{ marginLeft: '10px', marginTop: '5px', borderLeft: cat.customization_enabled ? '3px solid green' : '3px solid red', paddingLeft: '10px' }}>
+                  <div><strong>Category {idx}:</strong> {cat.name}</div>
+                  <div><strong>Customization:</strong> {String(cat.customization_enabled)} {cat.customization_enabled ? '✅' : '❌'}</div>
+                </div>
+              );
+            })}
+            <div style={{ marginTop: '10px' }}><strong>Phone Brands Loaded:</strong> {phoneBrands.length} brands</div>
             <div style={{ marginTop: '10px', fontSize: '12px', color: '#666' }}>
               Check browser console (F12) for detailed logs
             </div>
           </div>
 
-          {/* Customization Section */}
-          {product.categories?.[0]?.customization_enabled && (
+          {/* Customization Section - Check ANY category has customization enabled */}
+          {product.categories?.some((cat: Category) => cat.customization_enabled) && (() => {
+            const customCategory = product.categories.find((cat: Category) => cat.customization_enabled);
+            return (
             <div className={styles.customizationSection}>
               <h3 className={styles.customizationTitle}>🎨 Customize Your Case</h3>
               
@@ -412,11 +417,11 @@ export default function ProductDetailPage() {
               </div>
 
               {/* Font Style */}
-              {customText && product.categories[0].customization_options?.fonts && (
+              {customText && customCategory?.customization_options?.fonts && (
                 <div className={styles.customizationGroup}>
                   <label className={styles.customizationLabel}>Choose Font Style</label>
                   <div className={styles.fontOptions}>
-                    {product.categories[0].customization_options.fonts.map((font) => (
+                    {customCategory.customization_options.fonts.map((font) => (
                       <button
                         key={font}
                         type="button"
@@ -431,11 +436,11 @@ export default function ProductDetailPage() {
               )}
 
               {/* Placement Options */}
-              {customText && product.categories[0].customization_options?.placements && (
+              {customText && customCategory?.customization_options?.placements && (
                 <div className={styles.customizationGroup}>
                   <label className={styles.customizationLabel}>Choose Placement</label>
                   <div className={styles.placementOptions}>
-                    {product.categories[0].customization_options.placements.map((placement) => (
+                    {customCategory.customization_options.placements.map((placement) => (
                       <button
                         key={placement}
                         type="button"
@@ -461,7 +466,8 @@ export default function ProductDetailPage() {
                 </div>
               )}
             </div>
-          )}
+            );
+          })()}
 
           <div className={styles.actions}>
             <button className={styles.addToCartButton}>

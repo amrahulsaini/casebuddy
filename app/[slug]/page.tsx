@@ -164,17 +164,6 @@ export default function DynamicPage({ params }: { params: Promise<{ slug: string
         </nav>
       </header>
 
-      {/* Hero Section */}
-      <section className={styles.pageHero}>
-        <div className={styles.pageHeroBackground}></div>
-        <div className={styles.pageHeroContent}>
-          <h1 className={styles.pageHeroTitle}>{page.page_name}</h1>
-          {page.description && (
-            <p className={styles.pageHeroDescription}>{page.description}</p>
-          )}
-        </div>
-      </section>
-
       {/* Empty State */}
       {sections.length === 0 && (
         <div className={styles.emptyState}>

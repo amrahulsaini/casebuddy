@@ -455,6 +455,150 @@
   margin: 0;
 }
 
+/* Customization Section */
+.customizationSection {
+  margin: 32px 0;
+  padding: 28px;
+  background: linear-gradient(135deg, #fff5eb 0%, #ffe8d6 100%);
+  border-radius: 16px;
+  border: 2px solid #ff6b00;
+}
+
+.customizationTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 24px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.customizationGroup {
+  margin-bottom: 20px;
+}
+
+.customizationLabel {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 15px;
+}
+
+.optionalLabel {
+  font-size: 13px;
+  color: #999;
+  font-weight: 400;
+  margin-left: 6px;
+}
+
+.customizationSelect,
+.customizationInput {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: inherit;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.customizationSelect:focus,
+.customizationInput:focus {
+  outline: none;
+  border-color: #ff6b00;
+  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+}
+
+.charCount {
+  display: block;
+  text-align: right;
+  font-size: 13px;
+  color: #999;
+  margin-top: 6px;
+}
+
+.fontOptions,
+.placementOptions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.fontOption,
+.placementOption {
+  padding: 12px 16px;
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.fontOption {
+  font-size: 18px;
+}
+
+.fontOption:hover,
+.placementOption:hover {
+  border-color: #ff6b00;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.2);
+}
+
+.fontOption.selected,
+.placementOption.selected {
+  background: linear-gradient(135deg, #ff6b00 0%, #ff9500 100%);
+  color: white;
+  border-color: #ff6b00;
+  box-shadow: 0 4px 16px rgba(255, 107, 0, 0.3);
+}
+
+.placementOptions {
+  grid-template-columns: 1fr;
+}
+
+.placementOption {
+  text-align: left;
+}
+
+.customizationSummary {
+  margin-top: 24px;
+  padding: 16px;
+  background: white;
+  border-radius: 10px;
+  border: 2px dashed #ff6b00;
+}
+
+.customizationSummary strong {
+  display: block;
+  margin-bottom: 10px;
+  color: #000;
+  font-size: 15px;
+}
+
+.customizationSummary ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.customizationSummary li {
+  padding: 6px 0;
+  color: #555;
+  font-size: 14px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.customizationSummary li:last-child {
+  border-bottom: none;
+}
+
 /* Description Section */
 .descriptionSection {
   max-width: 1400px;

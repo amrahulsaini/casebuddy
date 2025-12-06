@@ -207,13 +207,21 @@ export default function ShopPage() {
                   <span className={styles.comparePrice}>₹{product.compare_price.toFixed(2)}</span>
                 )}
               </div>
-              <button 
-                className={styles.addToCartButton}
-                onClick={(e) => addToCart(e, product.id)}
-              >
-                <ShoppingCart size={18} />
-                <span>{cart.includes(product.id) ? 'In Cart' : 'Add to Cart'}</span>
-              </button>
+              <div className={styles.productActions}>
+                <Link 
+                  href={`/shop/${categorySlug}/${product.slug}`}
+                  className={styles.viewProductButton}
+                >
+                  View Product
+                </Link>
+                <button 
+                  className={styles.addToCartButton}
+                  onClick={(e) => addToCart(e, product.id)}
+                >
+                  <ShoppingCart size={18} />
+                  <span>{cart.includes(product.id) ? 'In Cart' : 'Add to Cart'}</span>
+                </button>
+              </div>
             </div>
           </Link>
         ))}

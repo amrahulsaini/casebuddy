@@ -18,6 +18,25 @@ interface Category {
   id: number;
   name: string;
   slug: string;
+  customization_enabled?: boolean;
+  customization_options?: {
+    text_enabled: boolean;
+    fonts: string[];
+    placements: string[];
+  };
+}
+
+interface PhoneBrand {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+interface PhoneModel {
+  id: number;
+  brand_id: number;
+  model_name: string;
+  slug: string;
 }
 
 interface Product {
@@ -44,6 +63,15 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  
+  // Customization state
+  const [phoneBrands, setPhoneBrands] = useState<PhoneBrand[]>([]);
+  const [phoneModels, setPhoneModels] = useState<PhoneModel[]>([]);
+  const [selectedBrand, setSelectedBrand] = useState<number | null>(null);
+  const [selectedModel, setSelectedModel] = useState<number | null>(null);
+  const [customText, setCustomText] = useState('');
+  const [selectedFont, setSelectedFont] = useState<string>('');
+  const [selectedPlacement, setSelectedPlacement] = useState<string>('');
 
   useEffect(() => {
     if (!productSlug) return;
@@ -53,6 +81,11 @@ export default function ProductDetailPage() {
       .then(data => {
         if (data.success) {
           setProduct(data.product);
+          // If product has customization enabled, fetch phone brands
+          if (data.product.categories?.[0]?.customization_enabled) {
+            const categoryId = data.product.categories[0].id;
+            fetchPhoneBrands(categoryId);
+          }
         }
         setLoading(false);
       })
@@ -61,6 +94,37 @@ export default function ProductDetailPage() {
         setLoading(false);
       });
   }, [productSlug]);
+
+  const fetchPhoneBrands = async (categoryId: number) => {
+    try {
+      const response = await fetch(`/api/phone-brands?category=${categoryId}`);
+      const data = await response.json();
+      if (data.success) {
+        setPhoneBrands(data.brands);
+      }
+    } catch (error) {
+      console.error('Error fetching phone brands:', error);
+    }
+  };
+
+  const fetchPhoneModels = async (brandId: number) => {
+    try {
+      const response = await fetch(`/api/phone-brands/${brandId}/models`);
+      const data = await response.json();
+      if (data.success) {
+        setPhoneModels(data.models);
+      }
+    } catch (error) {
+      console.error('Error fetching phone models:', error);
+    }
+  };
+
+  const handleBrandChange = (brandId: number) => {
+    setSelectedBrand(brandId);
+    setSelectedModel(null);
+    setPhoneModels([]);
+    fetchPhoneModels(brandId);
+  };
 
   const handleQuantityChange = (change: number) => {
     const newQuantity = quantity + change;
@@ -247,6 +311,118 @@ export default function ProductDetailPage() {
               {product.stock_quantity > 10 ? 'In Stock' : `Only ${product.stock_quantity} left!`}
             </span>
           </div>
+
+          {/* Customization Section */}
+          {product.categories?.[0]?.customization_enabled && (
+            <div className={styles.customizationSection}>
+              <h3 className={styles.customizationTitle}>🎨 Customize Your Case</h3>
+              
+              {/* Phone Brand Selection */}
+              <div className={styles.customizationGroup}>
+                <label className={styles.customizationLabel}>Select Phone Brand *</label>
+                <select
+                  className={styles.customizationSelect}
+                  value={selectedBrand || ''}
+                  onChange={(e) => handleBrandChange(Number(e.target.value))}
+                  required
+                >
+                  <option value="">Choose your phone brand...</option>
+                  {phoneBrands.map((brand) => (
+                    <option key={brand.id} value={brand.id}>
+                      {brand.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Phone Model Selection */}
+              {selectedBrand && (
+                <div className={styles.customizationGroup}>
+                  <label className={styles.customizationLabel}>Select Phone Model *</label>
+                  <select
+                    className={styles.customizationSelect}
+                    value={selectedModel || ''}
+                    onChange={(e) => setSelectedModel(Number(e.target.value))}
+                    required
+                  >
+                    <option value="">Choose your phone model...</option>
+                    {phoneModels.map((model) => (
+                      <option key={model.id} value={model.id}>
+                        {model.model_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Custom Text */}
+              <div className={styles.customizationGroup}>
+                <label className={styles.customizationLabel}>
+                  Name / Text to be Customized
+                  <span className={styles.optionalLabel}>(Optional)</span>
+                </label>
+                <input
+                  type="text"
+                  className={styles.customizationInput}
+                  placeholder="Enter your custom text..."
+                  value={customText}
+                  onChange={(e) => setCustomText(e.target.value)}
+                  maxLength={30}
+                />
+                <span className={styles.charCount}>{customText.length}/30</span>
+              </div>
+
+              {/* Font Style */}
+              {customText && product.categories[0].customization_options?.fonts && (
+                <div className={styles.customizationGroup}>
+                  <label className={styles.customizationLabel}>Choose Font Style</label>
+                  <div className={styles.fontOptions}>
+                    {product.categories[0].customization_options.fonts.map((font) => (
+                      <button
+                        key={font}
+                        type="button"
+                        className={`${styles.fontOption} ${selectedFont === font ? styles.selected : ''}`}
+                        onClick={() => setSelectedFont(font)}
+                      >
+                        {font === 'bold' ? '𝐁𝐨𝐥𝐝' : '𝒞𝓊𝓇𝓈𝒾𝓋𝑒'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Placement Options */}
+              {customText && product.categories[0].customization_options?.placements && (
+                <div className={styles.customizationGroup}>
+                  <label className={styles.customizationLabel}>Choose Placement</label>
+                  <div className={styles.placementOptions}>
+                    {product.categories[0].customization_options.placements.map((placement) => (
+                      <button
+                        key={placement}
+                        type="button"
+                        className={`${styles.placementOption} ${selectedPlacement === placement ? styles.selected : ''}`}
+                        onClick={() => setSelectedPlacement(placement)}
+                      >
+                        {placement.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Customization Summary */}
+              {selectedBrand && selectedModel && (
+                <div className={styles.customizationSummary}>
+                  <strong>Your Selection:</strong>
+                  <ul>
+                    <li>Phone: {phoneBrands.find(b => b.id === selectedBrand)?.name} - {phoneModels.find(m => m.id === selectedModel)?.model_name}</li>
+                    {customText && <li>Text: "{customText}" ({selectedFont || 'Default'})</li>}
+                    {customText && selectedPlacement && <li>Placement: {selectedPlacement.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</li>}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className={styles.actions}>
             <button className={styles.addToCartButton}>

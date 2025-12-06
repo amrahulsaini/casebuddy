@@ -268,9 +268,28 @@
   cursor: pointer;
 }
 
-.checkbox input[type='checkbox'] {
+.checkbox input[type="checkbox"] {
   width: auto;
   cursor: pointer;
+}
+
+.formSection {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 2px solid #f0f0f0;
+}
+
+.formSection h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.checkboxGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
 }
 
 .formActions {

@@ -45,9 +45,9 @@ export async function GET(
       [product.id]
     );
 
-    // Get product categories
+    // Get product categories with customization info
     const [categories] = await pool.execute(
-      `SELECT c.id, c.name, c.slug
+      `SELECT c.id, c.name, c.slug, c.customization_enabled, c.customization_options
        FROM categories c
        JOIN product_categories pc ON c.id = pc.category_id
        WHERE pc.product_id = ?`,
@@ -78,6 +78,8 @@ export async function GET(
       categories: Array.isArray(categories) ? categories.map((cat: any) => ({
         ...cat,
         id: Number(cat.id),
+        customization_enabled: Boolean(cat.customization_enabled),
+        customization_options: cat.customization_options ? JSON.parse(cat.customization_options) : null,
       })) : [],
       variants: Array.isArray(variants) ? variants.map((v: any) => ({
         ...v,

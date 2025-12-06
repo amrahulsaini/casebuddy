@@ -62,6 +62,14 @@ export default async function AdminDashboardPage() {
             </div>
           </a>
 
+          <a href="/admin/dashboard/phone-brands" className={styles.quickLink}>
+            <div className={styles.linkIcon}>📱</div>
+            <div>
+              <div className={styles.linkTitle}>Phone Brands</div>
+              <div className={styles.linkDesc}>Manage phone models</div>
+            </div>
+          </a>
+
           <a href="/admin/dashboard/orders" className={styles.quickLink}>
             <div className={styles.linkIcon}>🛒</div>
             <div>

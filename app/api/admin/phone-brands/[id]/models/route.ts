@@ -18,7 +18,7 @@ export async function GET(
         [id]
       );
 
-      return NextResponse.json(models);
+      return NextResponse.json({ success: true, models });
     } finally {
       connection.release();
     }

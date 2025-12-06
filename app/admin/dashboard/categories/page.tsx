@@ -165,8 +165,9 @@ export default function CategoriesPage() {
       }
 
       const data = await response.json();
-      setFormData(prev => ({ ...prev, image_url: data.url }));
-      setImagePreview(data.url);
+      const imageUrl = data?.absoluteUrl || data?.url;
+      setFormData(prev => ({ ...prev, image_url: imageUrl }));
+      setImagePreview(imageUrl);
     } catch (error) {
       console.error('Error uploading image:', error);
       alert(error instanceof Error ? error.message : 'Failed to upload image');
@@ -444,6 +445,16 @@ export default function CategoriesPage() {
                       className={styles.previewImage}
                       unoptimized
                     />
+                    <div style={{ marginTop: 8 }}>
+                      <a
+                        href={imagePreview || formData.image_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ fontSize: 12 }}
+                      >
+                        Open image in new tab
+                      </a>
+                    </div>
                   </div>
                 )}
               </div>

@@ -71,8 +71,9 @@ export default function ImageUpload({
         const data = await response.json();
 
         if (data.success) {
+          const imageUrl = data?.absoluteUrl || data?.url;
           const newImage: ProductImage = {
-            image_url: data.url,
+            image_url: imageUrl,
             alt_text: '',
             sort_order: images.length,
             is_primary: images.length === 0,
@@ -227,6 +228,11 @@ export default function ImageUpload({
           {images.map((image, index) => (
             <div key={image.id || index} className={styles.imageCard}>
               <img src={image.image_url} alt={image.alt_text} />
+              <div style={{ marginTop: 6 }}>
+                <a href={image.image_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12 }}>
+                  Open in new tab
+                </a>
+              </div>
               
               {image.is_primary && (
                 <div className={styles.primaryBadge}>Primary</div>

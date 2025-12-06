@@ -49,10 +49,16 @@ export async function POST(request: NextRequest) {
     const filename = `${type}_${timestamp}_${nameWithoutExt}${extension}`;
 
     let uploadDir = PRODUCT_UPLOAD_DIR;
-    let url = `/cdn/products/${filename}`;
+    // Compute base path -- take NEXT_PUBLIC_BASE_PATH if set, otherwise derive from NEXT_PUBLIC_BASE_URL
+    const rawBase = process.env.NEXT_PUBLIC_BASE_PATH || (process.env.NEXT_PUBLIC_BASE_URL ? new URL(process.env.NEXT_PUBLIC_BASE_URL).pathname : '');
+    let basePath = rawBase || '';
+    basePath = basePath.replace(/\/$/, ''); // remove trailing slash if any
+    if (basePath && !basePath.startsWith('/')) basePath = '/' + basePath;
+
+    let url = `${basePath}/cdn/products/${filename}`;
     if (type === 'category') {
       uploadDir = CATEGORY_UPLOAD_DIR;
-      url = `/cdn/categories/${filename}`;
+      url = `${basePath}/cdn/categories/${filename}`;
     }
 
     console.log('Upload dir:', uploadDir);
@@ -107,10 +113,29 @@ export async function POST(request: NextRequest) {
 
     console.log('Upload successful, returning URL:', url);
 
-    // Return the public URL
+    // Resolve origin from the request (supports proxies setting x-forwarded-* headers)
+    let origin = '';
+    try {
+      // NextRequest has nextUrl which contains an origin
+      origin = request.nextUrl?.origin || '';
+    } catch (err) {
+      origin = '';
+    }
+
+    // Fall back to x-forwarded or host
+    if (!origin) {
+      const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
+      const proto = request.headers.get('x-forwarded-proto') || 'http';
+      origin = host ? `${proto}://${host}` : '';
+    }
+
+    const absoluteUrl = origin ? `${origin}${url}` : url;
+
+    // Return both relative (url) and absolute URL (absoluteUrl)
     return NextResponse.json({
       success: true,
       url,
+      absoluteUrl,
       filename,
       size: file.size,
       type: file.type,

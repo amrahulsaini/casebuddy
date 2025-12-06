@@ -56,7 +56,11 @@ async function downloadImage(url: string, filename: string): Promise<string> {
     const filePath = join(cdnDir, filename);
     await writeFile(filePath, buffer);
     
-    return `/cdn/categories/${filename}`;
+    const rawBase = process.env.NEXT_PUBLIC_BASE_PATH || (process.env.NEXT_PUBLIC_BASE_URL ? new URL(process.env.NEXT_PUBLIC_BASE_URL).pathname : '');
+    let basePath = rawBase || '';
+    basePath = basePath.replace(/\/$/, '');
+    if (basePath && !basePath.startsWith('/')) basePath = '/' + basePath;
+    return `${basePath}/cdn/categories/${filename}`;
   } catch (error) {
     console.error(`Failed to download ${url}:`, error);
     return url; // Fallback to original URL

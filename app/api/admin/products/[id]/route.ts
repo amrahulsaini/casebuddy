@@ -48,7 +48,7 @@ export async function GET(
       );
 
       // Get product-specific phone brands if override is enabled
-      let phoneBrands = [];
+      let phoneBrands: any[] = [];
       if (product.customization_override) {
         const [brands] = await connection.execute(
           `SELECT pb.* FROM phone_brands pb
@@ -57,7 +57,7 @@ export async function GET(
            ORDER BY pb.name`,
           [id]
         );
-        phoneBrands = brands;
+        phoneBrands = brands as any[];
       }
 
       return NextResponse.json({

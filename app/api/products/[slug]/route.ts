@@ -95,7 +95,7 @@ export async function GET(
         const [categoryBrands] = await pool.execute(
           `SELECT pb.id, pb.name, pb.slug
            FROM phone_brands pb
-           JOIN category_phone_brands cpb ON pb.id = cpb.phone_brand_id
+           JOIN category_phone_brands cpb ON pb.id = cpb.brand_id
            WHERE cpb.category_id = ?
            ORDER BY pb.name`,
           [customCategory.id]

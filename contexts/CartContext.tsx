@@ -25,46 +25,53 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-export function CartProvider({ children }: { children: ReactNode }) {
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [wishlist, setWishlist] = useState<number[]>([]);
-  const [isMounted, setIsMounted] = useState(false);
+// Helper to safely access localStorage
+const getLocalStorage = (key: string, defaultValue: any) => {
+  if (typeof window === 'undefined') return defaultValue;
+  try {
+    const item = window.localStorage.getItem(key);
+    return item ? JSON.parse(item) : defaultValue;
+  } catch (error) {
+    console.error(`Error reading localStorage key "${key}":`, error);
+    return defaultValue;
+  }
+};
 
-  // Load from localStorage on mount
+const setLocalStorage = (key: string, value: any) => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.error(`Error setting localStorage key "${key}":`, error);
+  }
+};
+
+export function CartProvider({ children }: { children: ReactNode }) {
+  // Initialize with function to avoid SSR hydration issues
+  const [cart, setCart] = useState<CartItem[]>(() => getLocalStorage('casebuddy_cart', []));
+  const [wishlist, setWishlist] = useState<number[]>(() => getLocalStorage('casebuddy_wishlist', []));
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Hydrate on mount
   useEffect(() => {
-    const savedCart = localStorage.getItem('casebuddy_cart');
-    const savedWishlist = localStorage.getItem('casebuddy_wishlist');
-    
-    if (savedCart) {
-      try {
-        setCart(JSON.parse(savedCart));
-      } catch (e) {
-        console.error('Failed to parse cart data:', e);
-      }
-    }
-    if (savedWishlist) {
-      try {
-        setWishlist(JSON.parse(savedWishlist));
-      } catch (e) {
-        console.error('Failed to parse wishlist data:', e);
-      }
-    }
-    setIsMounted(true);
+    setCart(getLocalStorage('casebuddy_cart', []));
+    setWishlist(getLocalStorage('casebuddy_wishlist', []));
+    setIsHydrated(true);
   }, []);
 
-  // Save to localStorage whenever cart changes
+  // Sync cart to localStorage
   useEffect(() => {
-    if (isMounted) {
-      localStorage.setItem('casebuddy_cart', JSON.stringify(cart));
+    if (isHydrated) {
+      setLocalStorage('casebuddy_cart', cart);
     }
-  }, [cart, isMounted]);
+  }, [cart, isHydrated]);
 
-  // Save to localStorage whenever wishlist changes
+  // Sync wishlist to localStorage
   useEffect(() => {
-    if (isMounted) {
-      localStorage.setItem('casebuddy_wishlist', JSON.stringify(wishlist));
+    if (isHydrated) {
+      setLocalStorage('casebuddy_wishlist', wishlist);
     }
-  }, [wishlist, isMounted]);
+  }, [wishlist, isHydrated]);
 
   const addToCart = (item: Omit<CartItem, 'quantity'>) => {
     setCart((prevCart) => {

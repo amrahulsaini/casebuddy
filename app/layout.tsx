@@ -1,5 +1,6 @@
 import './globals.css';
 import { Sora } from 'next/font/google';
+import { CartProvider } from '@/contexts/CartContext';
 
 const sora = Sora({ subsets: ['latin'] });
 
@@ -16,7 +17,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={sora.className}>
-        {children}
+        <CartProvider>
+          {children}
+        </CartProvider>
       </body>
     </html>
   );

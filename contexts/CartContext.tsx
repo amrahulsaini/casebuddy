@@ -48,20 +48,34 @@ const setLocalStorage = (key: string, value: any) => {
 
 export function CartProvider({ children }: { children: ReactNode }) {
   // Initialize with function to avoid SSR hydration issues
-  const [cart, setCart] = useState<CartItem[]>(() => getLocalStorage('casebuddy_cart', []));
-  const [wishlist, setWishlist] = useState<number[]>(() => getLocalStorage('casebuddy_wishlist', []));
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    const initial = getLocalStorage('casebuddy_cart', []);
+    console.log('CartProvider initial cart from localStorage:', initial);
+    return initial;
+  });
+  const [wishlist, setWishlist] = useState<number[]>(() => {
+    const initial = getLocalStorage('casebuddy_wishlist', []);
+    console.log('CartProvider initial wishlist from localStorage:', initial);
+    return initial;
+  });
   const [isHydrated, setIsHydrated] = useState(false);
 
   // Hydrate on mount
   useEffect(() => {
-    setCart(getLocalStorage('casebuddy_cart', []));
-    setWishlist(getLocalStorage('casebuddy_wishlist', []));
+    console.log('CartProvider hydrating...');
+    const loadedCart = getLocalStorage('casebuddy_cart', []);
+    const loadedWishlist = getLocalStorage('casebuddy_wishlist', []);
+    console.log('CartProvider loaded from localStorage - cart:', loadedCart, 'wishlist:', loadedWishlist);
+    setCart(loadedCart);
+    setWishlist(loadedWishlist);
     setIsHydrated(true);
+    console.log('CartProvider hydration complete');
   }, []);
 
   // Sync cart to localStorage
   useEffect(() => {
     if (isHydrated) {
+      console.log('CartProvider saving cart to localStorage:', cart);
       setLocalStorage('casebuddy_cart', cart);
     }
   }, [cart, isHydrated]);
@@ -69,6 +83,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Sync wishlist to localStorage
   useEffect(() => {
     if (isHydrated) {
+      console.log('CartProvider saving wishlist to localStorage:', wishlist);
       setLocalStorage('casebuddy_wishlist', wishlist);
     }
   }, [wishlist, isHydrated]);

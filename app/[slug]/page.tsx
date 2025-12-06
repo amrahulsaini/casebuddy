@@ -1,7 +1,9 @@
+'use client';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Gift, Star, Truck, ShieldCheck, Heart, ShoppingCart, User, Menu, Instagram, Facebook, Twitter, Mail, Phone, MapPin } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import styles from './dynamic-page.module.css';
 
 interface Category {
@@ -59,18 +61,107 @@ async function getPageData(slug: string): Promise<PageData | null> {
   }
 }
 
-export default async function DynamicPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const data = await getPageData(slug);
+export default function DynamicPage({ params }: { params: Promise<{ slug: string }> }) {
+  const [pageData, setPageData] = useState<PageData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [scrollY, setScrollY] = useState(0);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [headerVisible, setHeaderVisible] = useState(true);
 
-  if (!data || !data.page) {
+  useEffect(() => {
+    async function loadPage() {
+      const { slug } = await params;
+      const data = await getPageData(slug);
+      if (!data || !data.page) {
+        notFound();
+      }
+      setPageData(data);
+      setLoading(false);
+    }
+    
+    loadPage();
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setHeaderVisible(false);
+      } else {
+        setHeaderVisible(true);
+      }
+      
+      setScrollY(currentScrollY);
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [params, lastScrollY]);
+
+  if (loading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loader}></div>
+      </div>
+    );
+  }
+
+  if (!pageData) {
     notFound();
   }
 
-  const { page, sections } = data;
+  const { page, sections } = pageData;
 
   return (
     <div className={styles.pageContainer}>
+      {/* Announcement Banner */}
+      <div className={`${styles.announcementBar} ${!headerVisible ? styles.hidden : ''}`}>
+        <div className={styles.marquee}>
+          <div className={styles.marqueeContent}>
+            <span><Gift size={16} /> First Time Order? Get FREE SHIPPING with code: CASEBUDDY100</span>
+            <span><Star size={16} /> Buy 2 Get 10% OFF • Buy 3 Get 20% OFF</span>
+            <span><Truck size={16} /> Express Delivery Available • Track Your Order</span>
+            <span><ShieldCheck size={16} /> Premium Quality Cases • 30-Day Money Back</span>
+            <span><Gift size={16} /> First Time Order? Get FREE SHIPPING with code: CASEBUDDY100</span>
+            <span><Star size={16} /> Buy 2 Get 10% OFF • Buy 3 Get 20% OFF</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Header */}
+      <header className={`${styles.header} ${scrollY > 50 ? styles.scrolled : ''} ${!headerVisible ? styles.hidden : ''}`}>
+        <nav className={styles.nav}>
+          <Link href="/" className={styles.logo}>
+            <Image src="/casebuddy-logo.png" alt="CaseBuddy" width={180} height={50} className={styles.logoImg} priority />
+          </Link>
+          <div className={styles.navLinks}>
+            <Link href="/" className={styles.navLink}>Home</Link>
+            <Link href="/shop" className={styles.navLink}>Shop</Link>
+            <Link href="/templates" className={styles.navLink}>Templates</Link>
+            <Link href="/about" className={styles.navLink}>About</Link>
+            <Link href="/contact" className={styles.navLink}>Contact</Link>
+          </div>
+          <div className={styles.navActions}>
+            <button className={styles.iconButton}>
+              <Heart size={22} />
+            </button>
+            <button className={styles.iconButton}>
+              <ShoppingCart size={22} />
+              <span className={styles.cartBadge}>0</span>
+            </button>
+            <button className={styles.iconButton}>
+              <User size={22} />
+            </button>
+            <button className={styles.mobileMenu}>
+              <Menu size={24} />
+            </button>
+          </div>
+        </nav>
+      </header>
+
       {/* Hero Section */}
       <section className={styles.pageHero}>
         <div className={styles.pageHeroBackground}></div>
@@ -137,6 +228,81 @@ export default async function DynamicPage({ params }: { params: Promise<{ slug: 
           </section>
         );
       })}
+
+      {/* Footer */}
+      <footer className={styles.footer}>
+        <div className={styles.footerContent}>
+          <div className={styles.footerSection}>
+            <div className={styles.footerLogo}>
+              <div className={styles.footerLogoWrapper}>
+                <Image src="/casebuddy-logo.png" alt="CaseBuddy" width={160} height={45} />
+              </div>
+            </div>
+            <p className={styles.footerDesc}>
+              Your one-stop shop for premium custom phone cases. Protect your device with style.
+            </p>
+            <div className={styles.socialLinks}>
+              <a href="#" className={styles.socialIcon}>
+                <Instagram size={24} />
+              </a>
+              <a href="#" className={styles.socialIcon}>
+                <Facebook size={24} />
+              </a>
+              <a href="#" className={styles.socialIcon}>
+                <Twitter size={24} />
+              </a>
+            </div>
+          </div>
+
+          <div className={styles.footerSection}>
+            <h4 className={styles.footerTitle}>Quick Links</h4>
+            <ul className={styles.footerLinks}>
+              <li><Link href="/shop">Shop All</Link></li>
+              <li><Link href="/templates">Templates</Link></li>
+              <li><Link href="/about">About Us</Link></li>
+              <li><Link href="/contact">Contact</Link></li>
+            </ul>
+          </div>
+
+          <div className={styles.footerSection}>
+            <h4 className={styles.footerTitle}>Customer Service</h4>
+            <ul className={styles.footerLinks}>
+              <li><Link href="/shipping">Shipping Info</Link></li>
+              <li><Link href="/returns">Returns & Exchanges</Link></li>
+              <li><Link href="/faq">FAQ</Link></li>
+              <li><Link href="/privacy">Privacy Policy</Link></li>
+            </ul>
+          </div>
+
+          <div className={styles.footerSection}>
+            <h4 className={styles.footerTitle}>Contact Us</h4>
+            <ul className={styles.footerContact}>
+              <li>
+                <Phone size={20} />
+                <span>+91 98765 43210</span>
+              </li>
+              <li>
+                <Mail size={20} />
+                <span>support@casebuddy.co.in</span>
+              </li>
+              <li>
+                <MapPin size={20} />
+                <span>Mumbai, India</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className={styles.footerBottom}>
+          <p className={styles.footerText}>
+            © 2025 CaseBuddy. All rights reserved.
+          </p>
+          <div className={styles.paymentMethods}>
+            <span>We Accept:</span>
+            <div className={styles.paymentIcons}>💳 UPI | Cards | Wallets</div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

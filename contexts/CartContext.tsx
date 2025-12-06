@@ -32,7 +32,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Load from localStorage on mount
   useEffect(() => {
-    setIsMounted(true);
     const savedCart = localStorage.getItem('casebuddy_cart');
     const savedWishlist = localStorage.getItem('casebuddy_wishlist');
     
@@ -50,6 +49,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         console.error('Failed to parse wishlist data:', e);
       }
     }
+    setIsMounted(true);
   }, []);
 
   // Save to localStorage whenever cart changes

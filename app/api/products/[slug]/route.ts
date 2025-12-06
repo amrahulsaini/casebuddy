@@ -171,6 +171,7 @@ export async function GET(
         enabled: effectiveCustomization.enabled,
         options: effectiveCustomization.options,
         phone_brands: effectiveCustomization.phone_brands,
+        phone_models: effectiveCustomization.phone_models,
         source: product.customization_override ? 'product' : 'category'
       }
     };

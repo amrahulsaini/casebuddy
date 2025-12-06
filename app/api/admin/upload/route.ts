@@ -10,16 +10,22 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('Upload API called');
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    const type = formData.get('type') as string || 'product'; // product or category
+    const type = formData.get('type') as string || 'product';
+
+    console.log('File received:', file?.name, 'Type:', type);
 
     if (!file) {
+      console.log('No file uploaded');
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
 
     // Validate file type
     if (!ALLOWED_TYPES.includes(file.type)) {
+      console.log('Invalid file type:', file.type);
       return NextResponse.json(
         { error: 'Invalid file type. Only JPEG, PNG, and WebP are allowed.' },
         { status: 400 }
@@ -28,6 +34,7 @@ export async function POST(request: NextRequest) {
 
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
+      console.log('File too large:', file.size);
       return NextResponse.json(
         { error: 'File too large. Maximum size is 5MB.' },
         { status: 400 }
@@ -47,6 +54,9 @@ export async function POST(request: NextRequest) {
       uploadDir = CATEGORY_UPLOAD_DIR;
       url = `/cdn/categories/${filename}`;
     }
+
+    console.log('Upload dir:', uploadDir);
+    console.log('URL:', url);
 
     // Create upload directory if it doesn't exist
     try {
@@ -70,13 +80,8 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes);
     const filepath = path.join(uploadDir, filename);
 
-    console.log('Upload details:');
-    console.log('- Type:', type);
-    console.log('- Filename:', filename);
-    console.log('- Upload dir:', uploadDir);
-    console.log('- Full path:', filepath);
-    console.log('- File size:', buffer.length);
-    console.log('- Current working directory:', process.cwd());
+    console.log('Saving file to:', filepath);
+    console.log('File size:', buffer.length);
 
     try {
       await writeFile(filepath, buffer);
@@ -99,6 +104,8 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    console.log('Upload successful, returning URL:', url);
 
     // Return the public URL
     return NextResponse.json({

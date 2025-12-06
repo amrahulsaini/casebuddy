@@ -24,6 +24,15 @@ export async function GET(
 
       const product = (products as any[])[0];
 
+      // Parse customization_options if it's a string
+      if (product.customization_options && typeof product.customization_options === 'string') {
+        try {
+          product.customization_options = JSON.parse(product.customization_options);
+        } catch (e) {
+          product.customization_options = null;
+        }
+      }
+
       // Get categories
       const [categories] = await connection.execute(
         `SELECT c.* FROM categories c
@@ -38,10 +47,24 @@ export async function GET(
         [id]
       );
 
+      // Get product-specific phone brands if override is enabled
+      let phoneBrands = [];
+      if (product.customization_override) {
+        const [brands] = await connection.execute(
+          `SELECT pb.* FROM phone_brands pb
+           JOIN product_phone_brands ppb ON pb.id = ppb.phone_brand_id
+           WHERE ppb.product_id = ?
+           ORDER BY pb.name`,
+          [id]
+        );
+        phoneBrands = brands;
+      }
+
       return NextResponse.json({
         ...product,
         categories,
         images,
+        phone_brands: phoneBrands,
       });
     } finally {
       connection.release();
@@ -73,7 +96,8 @@ export async function PUT(
         `UPDATE products SET
          name = ?, slug = ?, description = ?, short_description = ?,
          price = ?, compare_price = ?, sku = ?, stock_quantity = ?,
-         is_featured = ?, is_active = ?
+         is_featured = ?, is_active = ?,
+         customization_override = ?, customization_enabled = ?, customization_options = ?
          WHERE id = ?`,
         [
           data.name,
@@ -86,6 +110,9 @@ export async function PUT(
           data.stock_quantity || 0,
           data.is_featured || false,
           data.is_active ?? true,
+          data.customization_override ?? false,
+          data.customization_override ? (data.customization_enabled ?? null) : null,
+          data.customization_override && data.customization_options ? JSON.stringify(data.customization_options) : null,
           id,
         ]
       );
@@ -99,6 +126,23 @@ export async function PUT(
             [id, categoryId]
           );
         }
+      }
+
+      // Update product-specific phone brands if override is enabled
+      if (data.customization_override && data.phone_brands) {
+        // Delete existing associations
+        await connection.execute('DELETE FROM product_phone_brands WHERE product_id = ?', [id]);
+        
+        // Insert new associations
+        for (const brandId of data.phone_brands) {
+          await connection.execute(
+            'INSERT INTO product_phone_brands (product_id, phone_brand_id) VALUES (?, ?)',
+            [id, brandId]
+          );
+        }
+      } else if (!data.customization_override) {
+        // If override is disabled, clear product-specific brands
+        await connection.execute('DELETE FROM product_phone_brands WHERE product_id = ?', [id]);
       }
 
       await connection.commit();

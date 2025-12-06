@@ -54,6 +54,52 @@ export async function GET(
       [product.id]
     );
 
+    // Determine effective customization settings
+    let effectiveCustomization = {
+      enabled: false,
+      options: null,
+      phone_brands: []
+    };
+
+    if (product.customization_override) {
+      // Use product-level customization
+      effectiveCustomization.enabled = Boolean(product.customization_enabled);
+      effectiveCustomization.options = product.customization_options ? 
+        (typeof product.customization_options === 'string' ? JSON.parse(product.customization_options) : product.customization_options) : 
+        null;
+      
+      // Get product-specific phone brands
+      const [productBrands] = await pool.execute(
+        `SELECT pb.id, pb.name, pb.slug
+         FROM phone_brands pb
+         JOIN product_phone_brands ppb ON pb.id = ppb.phone_brand_id
+         WHERE ppb.product_id = ?
+         ORDER BY pb.name`,
+        [product.id]
+      );
+      effectiveCustomization.phone_brands = productBrands as any[];
+    } else {
+      // Use category-level customization (from first category with customization enabled)
+      const customCategory = (categories as any[]).find((cat: any) => cat.customization_enabled);
+      if (customCategory) {
+        effectiveCustomization.enabled = true;
+        effectiveCustomization.options = customCategory.customization_options ? 
+          (typeof customCategory.customization_options === 'string' ? JSON.parse(customCategory.customization_options) : customCategory.customization_options) : 
+          null;
+        
+        // Get category phone brands
+        const [categoryBrands] = await pool.execute(
+          `SELECT pb.id, pb.name, pb.slug
+           FROM phone_brands pb
+           JOIN category_phone_brands cpb ON pb.id = cpb.phone_brand_id
+           WHERE cpb.category_id = ?
+           ORDER BY pb.name`,
+          [customCategory.id]
+        );
+        effectiveCustomization.phone_brands = categoryBrands as any[];
+      }
+    }
+
     // Get product variants
     const [variants]: any = await pool.execute(
       `SELECT id, name, sku, price, stock_quantity, image_url, is_active
@@ -70,6 +116,7 @@ export async function GET(
       compare_price: product.compare_price ? parseFloat(product.compare_price) : null,
       stock_quantity: Number(product.stock_quantity),
       is_featured: Boolean(product.is_featured),
+      customization_override: Boolean(product.customization_override),
       images: Array.isArray(images) ? images.map((img: any) => ({
         ...img,
         sort_order: Number(img.sort_order),
@@ -88,6 +135,13 @@ export async function GET(
         stock_quantity: Number(v.stock_quantity),
         is_active: Boolean(v.is_active),
       })) : [],
+      // Add effective customization data
+      customization: {
+        enabled: effectiveCustomization.enabled,
+        options: effectiveCustomization.options,
+        phone_brands: effectiveCustomization.phone_brands,
+        source: product.customization_override ? 'product' : 'category'
+      }
     };
 
     return NextResponse.json({

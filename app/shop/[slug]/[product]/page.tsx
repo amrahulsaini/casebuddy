@@ -52,6 +52,16 @@ interface Product {
   is_featured: boolean;
   images: ProductImage[];
   categories: Category[];
+  customization?: {
+    enabled: boolean;
+    options: {
+      text_enabled: boolean;
+      fonts: string[];
+      placements: string[];
+    } | null;
+    phone_brands: PhoneBrand[];
+    source: 'product' | 'category';
+  };
 }
 
 export default function ProductDetailPage() {
@@ -82,11 +92,10 @@ export default function ProductDetailPage() {
         if (data.success) {
           setProduct(data.product);
           
-          // Find ANY category with customization enabled
-          const customCategory = data.product.categories?.find((cat: Category) => cat.customization_enabled);
-          
-          if (customCategory) {
-            fetchPhoneBrands(customCategory.id);
+          // Check if customization is enabled (either from product or category)
+          if (data.product.customization?.enabled) {
+            // Phone brands are already included in customization object
+            setPhoneBrands(data.product.customization.phone_brands || []);
           }
         }
         setLoading(false);
@@ -314,9 +323,9 @@ export default function ProductDetailPage() {
             </span>
           </div>
 
-          {/* Customization Section - Check ANY category has customization enabled */}
-          {product.categories?.some((cat: Category) => cat.customization_enabled) && (() => {
-            const customCategory = product.categories.find((cat: Category) => cat.customization_enabled);
+          {/* Customization Section - Check if customization is enabled */}
+          {product.customization?.enabled && (() => {
+            const customOptions = product.customization.options;
             return (
             <div className={styles.customizationSection}>
               <h3 className={styles.customizationTitle}>🎨 Customize Your Case</h3>
@@ -377,11 +386,11 @@ export default function ProductDetailPage() {
               </div>
 
               {/* Font Style */}
-              {customText && customCategory?.customization_options?.fonts && (
+              {customText && customOptions?.fonts && (
                 <div className={styles.customizationGroup}>
                   <label className={styles.customizationLabel}>Choose Font Style</label>
                   <div className={styles.fontOptions}>
-                    {customCategory.customization_options.fonts.map((font) => (
+                    {customOptions.fonts.map((font) => (
                       <button
                         key={font}
                         type="button"
@@ -396,11 +405,11 @@ export default function ProductDetailPage() {
               )}
 
               {/* Placement Options */}
-              {customText && customCategory?.customization_options?.placements && (
+              {customText && customOptions?.placements && (
                 <div className={styles.customizationGroup}>
                   <label className={styles.customizationLabel}>Choose Placement</label>
                   <div className={styles.placementOptions}>
-                    {customCategory.customization_options.placements.map((placement) => (
+                    {customOptions.placements.map((placement) => (
                       <button
                         key={placement}
                         type="button"

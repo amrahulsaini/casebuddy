@@ -18,6 +18,12 @@ interface ProductImage {
   is_primary: boolean;
 }
 
+interface PhoneBrand {
+  id: number;
+  name: string;
+  slug: string;
+}
+
 interface Product {
   id: number;
   name: string;
@@ -32,6 +38,13 @@ interface Product {
   is_active: boolean;
   categories: Category[];
   images: any[];
+  customization_override?: boolean;
+  customization_enabled?: boolean;
+  customization_options?: {
+    fonts: string[];
+    placements: string[];
+  };
+  phone_brands?: PhoneBrand[];
 }
 
 export default function ProductEditPage({ params }: { params: Promise<{ id: string }> }) {
@@ -43,6 +56,15 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
   const [images, setImages] = useState<ProductImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  
+  // Customization states
+  const [allPhoneBrands, setAllPhoneBrands] = useState<PhoneBrand[]>([]);
+  const [customizationOverride, setCustomizationOverride] = useState(false);
+  const [customizationEnabled, setCustomizationEnabled] = useState(false);
+  const [selectedFonts, setSelectedFonts] = useState<string[]>([]);
+  const [selectedPlacements, setSelectedPlacements] = useState<string[]>([]);
+  const [selectedPhoneBrands, setSelectedPhoneBrands] = useState<number[]>([]);
+  
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -63,6 +85,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
       fetchImages(p.id);
     });
     fetchCategories();
+    fetchAllPhoneBrands();
   }, []);
 
   const fetchProduct = async (id: string) => {
@@ -83,6 +106,15 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
         is_active: data.is_active,
       });
       setSelectedCategories(data.categories.map((c: Category) => c.id));
+      
+      // Set customization data if override is enabled
+      if (data.customization_override) {
+        setCustomizationOverride(true);
+        setCustomizationEnabled(data.customization_enabled || false);
+        setSelectedFonts(data.customization_options?.fonts || []);
+        setSelectedPlacements(data.customization_options?.placements || []);
+        setSelectedPhoneBrands(data.phone_brands?.map((b: PhoneBrand) => b.id) || []);
+      }
     } catch (error) {
       console.error('Error fetching product:', error);
     } finally {
@@ -97,6 +129,18 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
       setCategories(data);
     } catch (error) {
       console.error('Error fetching categories:', error);
+    }
+  };
+
+  const fetchAllPhoneBrands = async () => {
+    try {
+      const response = await fetch('/api/admin/phone-brands');
+      const data = await response.json();
+      if (data.success) {
+        setAllPhoneBrands(data.brands);
+      }
+    } catch (error) {
+      console.error('Error fetching phone brands:', error);
     }
   };
 
@@ -132,13 +176,24 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
     e.preventDefault();
     setSaving(true);
 
-    const data = {
+    const data: any = {
       ...formData,
       price: parseFloat(formData.price),
       compare_price: formData.compare_price ? parseFloat(formData.compare_price) : null,
       stock_quantity: parseInt(formData.stock_quantity),
       categories: selectedCategories,
+      customization_override: customizationOverride,
     };
+
+    // Add customization data if override is enabled
+    if (customizationOverride) {
+      data.customization_enabled = customizationEnabled;
+      data.customization_options = {
+        fonts: selectedFonts,
+        placements: selectedPlacements,
+      };
+      data.phone_brands = selectedPhoneBrands;
+    }
 
     try {
       const response = await fetch(`/api/admin/products/${productId}`, {
@@ -294,6 +349,106 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
               </label>
             ))}
           </div>
+        </div>
+
+        <div className={styles.formCard}>
+          <h2>Customization Override</h2>
+          <p className={styles.helpText}>
+            By default, products use customization settings from their category. 
+            Enable override to set custom settings for this specific product.
+          </p>
+          
+          <label className={styles.checkbox}>
+            <input
+              type="checkbox"
+              checked={customizationOverride}
+              onChange={(e) => setCustomizationOverride(e.target.checked)}
+            />
+            Override Category Customization Settings
+          </label>
+
+          {customizationOverride && (
+            <div className={styles.customizationOverrideSection}>
+              <label className={styles.checkbox}>
+                <input
+                  type="checkbox"
+                  checked={customizationEnabled}
+                  onChange={(e) => setCustomizationEnabled(e.target.checked)}
+                />
+                Enable Customization for This Product
+              </label>
+
+              {customizationEnabled && (
+                <>
+                  <div className={styles.customizationGroup}>
+                    <h3>Phone Brands</h3>
+                    <div className={styles.brandGrid}>
+                      {allPhoneBrands.map((brand) => (
+                        <label key={brand.id} className={styles.brandCheckbox}>
+                          <input
+                            type="checkbox"
+                            checked={selectedPhoneBrands.includes(brand.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedPhoneBrands([...selectedPhoneBrands, brand.id]);
+                              } else {
+                                setSelectedPhoneBrands(selectedPhoneBrands.filter(id => id !== brand.id));
+                              }
+                            }}
+                          />
+                          {brand.name}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className={styles.customizationGroup}>
+                    <h3>Font Styles</h3>
+                    <div className={styles.fontGrid}>
+                      {['bold', 'cursive'].map((font) => (
+                        <label key={font} className={styles.fontCheckbox}>
+                          <input
+                            type="checkbox"
+                            checked={selectedFonts.includes(font)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedFonts([...selectedFonts, font]);
+                              } else {
+                                setSelectedFonts(selectedFonts.filter(f => f !== font));
+                              }
+                            }}
+                          />
+                          {font.charAt(0).toUpperCase() + font.slice(1)}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className={styles.customizationGroup}>
+                    <h3>Text Placements</h3>
+                    <div className={styles.placementGrid}>
+                      {['top_left', 'top_center', 'top_right', 'bottom_left', 'bottom_center', 'bottom_right'].map((placement) => (
+                        <label key={placement} className={styles.placementCheckbox}>
+                          <input
+                            type="checkbox"
+                            checked={selectedPlacements.includes(placement)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedPlacements([...selectedPlacements, placement]);
+                              } else {
+                                setSelectedPlacements(selectedPlacements.filter(p => p !== placement));
+                              }
+                            }}
+                          />
+                          {placement.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         <div className={styles.formCard}>

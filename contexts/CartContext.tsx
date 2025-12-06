@@ -37,12 +37,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const savedWishlist = localStorage.getItem('casebuddy_wishlist');
     
     if (savedCart) {
-      setCart(JSON.parse(savedCart));
+      try {
+        setCart(JSON.parse(savedCart));
+      } catch (e) {
+        console.error('Failed to parse cart data:', e);
+      }
     }
     if (savedWishlist) {
-      setWishlist(JSON.parse(savedWishlist));
+      try {
+        setWishlist(JSON.parse(savedWishlist));
+      } catch (e) {
+        console.error('Failed to parse wishlist data:', e);
+      }
     }
-    setIsLoaded(true);
+    
+    // Use setTimeout to ensure state updates are processed
+    setTimeout(() => setIsLoaded(true), 0);
   }, []);
 
   // Save to localStorage whenever cart changes

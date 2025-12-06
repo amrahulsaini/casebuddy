@@ -79,21 +79,14 @@ export default function ProductDetailPage() {
     fetch(`/api/products/${productSlug}`)
       .then(res => res.json())
       .then(data => {
-        console.log('🔍 Product API Response:', data);
         if (data.success) {
           setProduct(data.product);
-          console.log('📦 Product Data:', data.product);
-          console.log('📂 Categories:', data.product.categories);
           
           // Find ANY category with customization enabled
           const customCategory = data.product.categories?.find((cat: Category) => cat.customization_enabled);
-          console.log('✅ Customization Category Found?', customCategory);
           
           if (customCategory) {
-            console.log('🔄 Fetching phone brands for category:', customCategory.id, customCategory.name);
             fetchPhoneBrands(customCategory.id);
-          } else {
-            console.log('❌ No category with customization enabled');
           }
         }
         setLoading(false);
@@ -106,18 +99,13 @@ export default function ProductDetailPage() {
 
   const fetchPhoneBrands = async (categoryId: number) => {
     try {
-      console.log('📞 Fetching brands for category:', categoryId);
       const response = await fetch(`/api/phone-brands?category=${categoryId}`);
       const data = await response.json();
-      console.log('📞 Phone Brands Response:', data);
       if (data.success) {
         setPhoneBrands(data.brands);
-        console.log('✅ Phone brands loaded:', data.brands.length);
-      } else {
-        console.log('❌ Failed to load phone brands:', data.error);
       }
     } catch (error) {
-      console.error('❌ Error fetching phone brands:', error);
+      console.error('Error fetching phone brands:', error);
     }
   };
 
@@ -324,34 +312,6 @@ export default function ProductDetailPage() {
             <span className={styles.stockInfo}>
               {product.stock_quantity > 10 ? 'In Stock' : `Only ${product.stock_quantity} left!`}
             </span>
-          </div>
-
-          {/* DEBUG INFO */}
-          <div style={{
-            margin: '20px 0',
-            padding: '15px',
-            background: '#fff3cd',
-            border: '2px solid #ffc107',
-            borderRadius: '8px',
-            fontSize: '14px',
-            fontFamily: 'monospace'
-          }}>
-            <h4 style={{ margin: '0 0 10px 0', color: '#856404' }}>🔍 DEBUG INFO:</h4>
-            <div><strong>Has Categories:</strong> {product.categories?.length > 0 ? 'Yes ✅' : 'No ❌'}</div>
-            <div><strong>Total Categories:</strong> {product.categories?.length || 0}</div>
-            {product.categories?.map((cat, idx) => {
-              const customCategory = product.categories?.find((c: Category) => c.customization_enabled);
-              return (
-                <div key={idx} style={{ marginLeft: '10px', marginTop: '5px', borderLeft: cat.customization_enabled ? '3px solid green' : '3px solid red', paddingLeft: '10px' }}>
-                  <div><strong>Category {idx}:</strong> {cat.name}</div>
-                  <div><strong>Customization:</strong> {String(cat.customization_enabled)} {cat.customization_enabled ? '✅' : '❌'}</div>
-                </div>
-              );
-            })}
-            <div style={{ marginTop: '10px' }}><strong>Phone Brands Loaded:</strong> {phoneBrands.length} brands</div>
-            <div style={{ marginTop: '10px', fontSize: '12px', color: '#666' }}>
-              Check browser console (F12) for detailed logs
-            </div>
           </div>
 
           {/* Customization Section - Check ANY category has customization enabled */}

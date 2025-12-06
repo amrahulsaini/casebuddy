@@ -20,10 +20,23 @@ CREATE TABLE IF NOT EXISTS product_phone_brands (
   UNIQUE KEY unique_product_brand (product_id, phone_brand_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Create product_phone_models junction table for product-specific phone model associations
+CREATE TABLE IF NOT EXISTS product_phone_models (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  product_id INT NOT NULL,
+  phone_model_id INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+  FOREIGN KEY (phone_model_id) REFERENCES phone_models(id) ON DELETE CASCADE,
+  UNIQUE KEY unique_product_model (product_id, phone_model_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Add indexes for better performance
 CREATE INDEX idx_products_customization_override ON products(customization_override);
 CREATE INDEX idx_product_phone_brands_product ON product_phone_brands(product_id);
 CREATE INDEX idx_product_phone_brands_brand ON product_phone_brands(phone_brand_id);
+CREATE INDEX idx_product_phone_models_product ON product_phone_models(product_id);
+CREATE INDEX idx_product_phone_models_model ON product_phone_models(phone_model_id);
 
 -- Migration complete
 SELECT 'Product-level customization override migration completed successfully!' AS status;

@@ -49,6 +49,7 @@ export async function GET(
 
       // Get product-specific phone brands if override is enabled
       let phoneBrands: any[] = [];
+      let phoneModels: any[] = [];
       if (product.customization_override) {
         const [brands] = await connection.execute(
           `SELECT pb.* FROM phone_brands pb
@@ -58,6 +59,16 @@ export async function GET(
           [id]
         );
         phoneBrands = brands as any[];
+        
+        // Get product-specific phone models
+        const [models] = await connection.execute(
+          `SELECT pm.* FROM phone_models pm
+           JOIN product_phone_models ppm ON pm.id = ppm.phone_model_id
+           WHERE ppm.product_id = ?
+           ORDER BY pm.model_name`,
+          [id]
+        );
+        phoneModels = models as any[];
       }
 
       return NextResponse.json({
@@ -65,6 +76,7 @@ export async function GET(
         categories,
         images,
         phone_brands: phoneBrands,
+        phone_models: phoneModels,
       });
     } finally {
       connection.release();
@@ -143,6 +155,23 @@ export async function PUT(
       } else if (!data.customization_override) {
         // If override is disabled, clear product-specific brands
         await connection.execute('DELETE FROM product_phone_brands WHERE product_id = ?', [id]);
+      }
+
+      // Update product-specific phone models if override is enabled
+      if (data.customization_override && data.phone_models) {
+        // Delete existing associations
+        await connection.execute('DELETE FROM product_phone_models WHERE product_id = ?', [id]);
+        
+        // Insert new associations
+        for (const modelId of data.phone_models) {
+          await connection.execute(
+            'INSERT INTO product_phone_models (product_id, phone_model_id) VALUES (?, ?)',
+            [id, modelId]
+          );
+        }
+      } else if (!data.customization_override) {
+        // If override is disabled, clear product-specific models
+        await connection.execute('DELETE FROM product_phone_models WHERE product_id = ?', [id]);
       }
 
       await connection.commit();

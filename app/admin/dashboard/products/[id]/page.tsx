@@ -24,6 +24,13 @@ interface PhoneBrand {
   slug: string;
 }
 
+interface PhoneModel {
+  id: number;
+  brand_id: number;
+  model_name: string;
+  slug: string;
+}
+
 interface Product {
   id: number;
   name: string;
@@ -59,11 +66,13 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
   
   // Customization states
   const [allPhoneBrands, setAllPhoneBrands] = useState<PhoneBrand[]>([]);
+  const [allPhoneModels, setAllPhoneModels] = useState<PhoneModel[]>([]);
   const [customizationOverride, setCustomizationOverride] = useState(false);
   const [customizationEnabled, setCustomizationEnabled] = useState(false);
   const [selectedFonts, setSelectedFonts] = useState<string[]>([]);
   const [selectedPlacements, setSelectedPlacements] = useState<string[]>([]);
   const [selectedPhoneBrands, setSelectedPhoneBrands] = useState<number[]>([]);
+  const [selectedPhoneModels, setSelectedPhoneModels] = useState<number[]>([]);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -86,6 +95,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
     });
     fetchCategories();
     fetchAllPhoneBrands();
+    fetchAllPhoneModels();
   }, []);
 
   const fetchProduct = async (id: string) => {
@@ -114,6 +124,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
         setSelectedFonts(data.customization_options?.fonts || []);
         setSelectedPlacements(data.customization_options?.placements || []);
         setSelectedPhoneBrands(data.phone_brands?.map((b: PhoneBrand) => b.id) || []);
+        setSelectedPhoneModels(data.phone_models?.map((m: PhoneModel) => m.id) || []);
       }
     } catch (error) {
       console.error('Error fetching product:', error);
@@ -141,6 +152,27 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
       }
     } catch (error) {
       console.error('Error fetching phone brands:', error);
+    }
+  };
+
+  const fetchAllPhoneModels = async () => {
+    try {
+      const response = await fetch('/api/admin/phone-brands');
+      const data = await response.json();
+      if (data.success) {
+        // Fetch models for each brand
+        const allModels: PhoneModel[] = [];
+        for (const brand of data.brands) {
+          const modelsResponse = await fetch(`/api/admin/phone-brands/${brand.id}/models`);
+          const modelsData = await modelsResponse.json();
+          if (modelsData.success) {
+            allModels.push(...modelsData.models);
+          }
+        }
+        setAllPhoneModels(allModels);
+      }
+    } catch (error) {
+      console.error('Error fetching phone models:', error);
     }
   };
 
@@ -193,6 +225,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
         placements: selectedPlacements,
       };
       data.phone_brands = selectedPhoneBrands;
+      data.phone_models = selectedPhoneModels;
     }
 
     try {
@@ -399,6 +432,41 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
                           {brand.name}
                         </label>
                       ))}
+                    </div>
+                  </div>
+
+                  <div className={styles.customizationGroup}>
+                    <h3>Phone Models</h3>
+                    <p className={styles.helpText} style={{marginTop: 0}}>
+                      Select specific models to allow. If no models are selected, all models from selected brands will be available.
+                    </p>
+                    <div className={styles.brandGrid}>
+                      {allPhoneModels
+                        .filter(model => selectedPhoneBrands.includes(model.brand_id))
+                        .map((model) => {
+                          const brand = allPhoneBrands.find(b => b.id === model.brand_id);
+                          return (
+                            <label key={model.id} className={styles.brandCheckbox}>
+                              <input
+                                type="checkbox"
+                                checked={selectedPhoneModels.includes(model.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedPhoneModels([...selectedPhoneModels, model.id]);
+                                  } else {
+                                    setSelectedPhoneModels(selectedPhoneModels.filter(id => id !== model.id));
+                                  }
+                                }}
+                              />
+                              {brand?.name} - {model.model_name}
+                            </label>
+                          );
+                        })}
+                      {allPhoneModels.filter(model => selectedPhoneBrands.includes(model.brand_id)).length === 0 && (
+                        <p style={{gridColumn: '1 / -1', color: '#999', fontStyle: 'italic'}}>
+                          Select phone brands above to see available models
+                        </p>
+                      )}
                     </div>
                   </div>
 

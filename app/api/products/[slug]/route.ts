@@ -21,6 +21,9 @@ export async function GET(
         p.sku,
         p.stock_quantity,
         p.is_featured,
+        p.customization_override,
+        p.customization_enabled,
+        p.customization_options,
         p.created_at
       FROM products p
       WHERE p.slug = ? AND p.is_active = TRUE`,
@@ -59,10 +62,12 @@ export async function GET(
       enabled: boolean;
       options: any;
       phone_brands: any[];
+      phone_models: any[];
     } = {
       enabled: false,
       options: null,
-      phone_brands: []
+      phone_brands: [],
+      phone_models: []
     };
 
     if (product.customization_override) {
@@ -82,6 +87,17 @@ export async function GET(
         [product.id]
       );
       effectiveCustomization.phone_brands = productBrands as any[];
+
+      // Get product-specific phone models
+      const [productModels] = await pool.execute(
+        `SELECT pm.id, pm.model_name, pm.brand_id, pm.slug
+         FROM phone_models pm
+         JOIN product_phone_models ppm ON pm.id = ppm.phone_model_id
+         WHERE ppm.product_id = ?
+         ORDER BY pm.model_name`,
+        [product.id]
+      );
+      effectiveCustomization.phone_models = productModels as any[];
     } else {
       // Use category-level customization (from first category with customization enabled)
       const customCategory = (categories as any[]).find((cat: any) => cat.customization_enabled);
@@ -101,6 +117,17 @@ export async function GET(
           [customCategory.id]
         );
         effectiveCustomization.phone_brands = categoryBrands as any[];
+
+        // Get category phone models
+        const [categoryModels] = await pool.execute(
+          `SELECT pm.id, pm.model_name, pm.brand_id, pm.slug
+           FROM phone_models pm
+           JOIN category_phone_models cpm ON pm.id = cpm.phone_model_id
+           WHERE cpm.category_id = ?
+           ORDER BY pm.model_name`,
+          [customCategory.id]
+        );
+        effectiveCustomization.phone_models = categoryModels as any[];
       }
     }
 

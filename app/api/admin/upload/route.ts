@@ -3,7 +3,8 @@ import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
 
-const UPLOAD_DIR = path.join(process.cwd(), 'public', 'products');
+const CATEGORY_UPLOAD_DIR = path.join(process.cwd(), 'public', 'cdn', 'categories');
+const PRODUCT_UPLOAD_DIR = path.join(process.cwd(), 'public', 'cdn', 'products');
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
@@ -33,11 +34,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create upload directory if it doesn't exist
-    if (!existsSync(UPLOAD_DIR)) {
-      await mkdir(UPLOAD_DIR, { recursive: true });
-    }
-
     // Generate unique filename
     const timestamp = Date.now();
     const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
@@ -45,16 +41,26 @@ export async function POST(request: NextRequest) {
     const nameWithoutExt = path.basename(originalName, extension);
     const filename = `${type}_${timestamp}_${nameWithoutExt}${extension}`;
 
+    let uploadDir = PRODUCT_UPLOAD_DIR;
+    let url = `/cdn/products/${filename}`;
+    if (type === 'category') {
+      uploadDir = CATEGORY_UPLOAD_DIR;
+      url = `/cdn/categories/${filename}`;
+    }
+
+    // Create upload directory if it doesn't exist
+    if (!existsSync(uploadDir)) {
+      await mkdir(uploadDir, { recursive: true });
+    }
+
     // Convert file to buffer and save
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const filepath = path.join(UPLOAD_DIR, filename);
+    const filepath = path.join(uploadDir, filename);
 
     await writeFile(filepath, buffer);
 
     // Return the public URL
-    const url = `/products/${filename}`;
-
     return NextResponse.json({
       success: true,
       url,

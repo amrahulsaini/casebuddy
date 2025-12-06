@@ -79,31 +79,45 @@ export default function ProductDetailPage() {
     fetch(`/api/products/${productSlug}`)
       .then(res => res.json())
       .then(data => {
+        console.log('🔍 Product API Response:', data);
         if (data.success) {
           setProduct(data.product);
+          console.log('📦 Product Data:', data.product);
+          console.log('📂 Categories:', data.product.categories);
+          console.log('✅ Customization Enabled?', data.product.categories?.[0]?.customization_enabled);
+          console.log('⚙️ Customization Options:', data.product.categories?.[0]?.customization_options);
+          
           // If product has customization enabled, fetch phone brands
           if (data.product.categories?.[0]?.customization_enabled) {
             const categoryId = data.product.categories[0].id;
+            console.log('🔄 Fetching phone brands for category:', categoryId);
             fetchPhoneBrands(categoryId);
+          } else {
+            console.log('❌ Customization NOT enabled for this product');
           }
         }
         setLoading(false);
       })
       .catch(error => {
-        console.error('Error loading product:', error);
+        console.error('❌ Error loading product:', error);
         setLoading(false);
       });
   }, [productSlug]);
 
   const fetchPhoneBrands = async (categoryId: number) => {
     try {
+      console.log('📞 Fetching brands for category:', categoryId);
       const response = await fetch(`/api/phone-brands?category=${categoryId}`);
       const data = await response.json();
+      console.log('📞 Phone Brands Response:', data);
       if (data.success) {
         setPhoneBrands(data.brands);
+        console.log('✅ Phone brands loaded:', data.brands.length);
+      } else {
+        console.log('❌ Failed to load phone brands:', data.error);
       }
     } catch (error) {
-      console.error('Error fetching phone brands:', error);
+      console.error('❌ Error fetching phone brands:', error);
     }
   };
 
@@ -310,6 +324,31 @@ export default function ProductDetailPage() {
             <span className={styles.stockInfo}>
               {product.stock_quantity > 10 ? 'In Stock' : `Only ${product.stock_quantity} left!`}
             </span>
+          </div>
+
+          {/* DEBUG INFO */}
+          <div style={{
+            margin: '20px 0',
+            padding: '15px',
+            background: '#fff3cd',
+            border: '2px solid #ffc107',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontFamily: 'monospace'
+          }}>
+            <h4 style={{ margin: '0 0 10px 0', color: '#856404' }}>🔍 DEBUG INFO:</h4>
+            <div><strong>Has Categories:</strong> {product.categories?.length > 0 ? 'Yes ✅' : 'No ❌'}</div>
+            {product.categories?.[0] && (
+              <>
+                <div><strong>Category Name:</strong> {product.categories[0].name}</div>
+                <div><strong>Customization Enabled:</strong> {String(product.categories[0].customization_enabled)} {product.categories[0].customization_enabled ? '✅' : '❌'}</div>
+                <div><strong>Customization Options:</strong> {JSON.stringify(product.categories[0].customization_options)}</div>
+              </>
+            )}
+            <div><strong>Phone Brands Loaded:</strong> {phoneBrands.length} brands</div>
+            <div style={{ marginTop: '10px', fontSize: '12px', color: '#666' }}>
+              Check browser console (F12) for detailed logs
+            </div>
           </div>
 
           {/* Customization Section */}

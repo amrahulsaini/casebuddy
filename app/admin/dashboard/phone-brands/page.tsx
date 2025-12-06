@@ -55,7 +55,7 @@ export default function PhoneBrandsPage() {
     try {
       const response = await fetch('/api/admin/phone-brands');
       const data = await response.json();
-      setBrands(Array.isArray(data) ? data : []);
+      setBrands(data.success ? data.brands : (Array.isArray(data) ? data : []));
     } catch (error) {
       console.error('Error fetching brands:', error);
     } finally {
@@ -67,7 +67,7 @@ export default function PhoneBrandsPage() {
     try {
       const response = await fetch(`/api/admin/phone-brands/${brandId}/models`);
       const data = await response.json();
-      setModels(Array.isArray(data) ? data : []);
+      setModels(data.success ? data.models : (Array.isArray(data) ? data : []));
     } catch (error) {
       console.error('Error fetching models:', error);
     }

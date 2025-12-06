@@ -21,7 +21,6 @@ interface CartContextType {
   clearCart: () => void;
   cartTotal: number;
   cartCount: number;
-  isLoaded: boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -29,10 +28,11 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<number[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   // Load from localStorage on mount
   useEffect(() => {
+    setIsMounted(true);
     const savedCart = localStorage.getItem('casebuddy_cart');
     const savedWishlist = localStorage.getItem('casebuddy_wishlist');
     
@@ -50,24 +50,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
         console.error('Failed to parse wishlist data:', e);
       }
     }
-    
-    // Use setTimeout to ensure state updates are processed
-    setTimeout(() => setIsLoaded(true), 0);
   }, []);
 
   // Save to localStorage whenever cart changes
   useEffect(() => {
-    if (isLoaded) {
+    if (isMounted) {
       localStorage.setItem('casebuddy_cart', JSON.stringify(cart));
     }
-  }, [cart, isLoaded]);
+  }, [cart, isMounted]);
 
   // Save to localStorage whenever wishlist changes
   useEffect(() => {
-    if (isLoaded) {
+    if (isMounted) {
       localStorage.setItem('casebuddy_wishlist', JSON.stringify(wishlist));
     }
-  }, [wishlist, isLoaded]);
+  }, [wishlist, isMounted]);
 
   const addToCart = (item: Omit<CartItem, 'quantity'>) => {
     setCart((prevCart) => {
@@ -130,7 +127,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
         clearCart,
         cartTotal,
         cartCount,
-        isLoaded,
       }}
     >
       {children}

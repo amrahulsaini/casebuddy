@@ -33,7 +33,7 @@ export default function HomePage() {
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
-  const { cartCount, wishlist, isLoaded } = useCart();
+  const { cartCount, wishlist } = useCart();
 
   useEffect(() => {
     fetch('/api/homepage-sections')
@@ -143,11 +143,11 @@ export default function HomePage() {
           <div className={styles.navActions}>
             <button className={styles.iconButton}>
               <Heart size={22} />
-              {isLoaded && wishlist.length > 0 && <span className={styles.cartBadge}>{wishlist.length}</span>}
+              {wishlist.length > 0 && <span className={styles.cartBadge}>{wishlist.length}</span>}
             </button>
             <button className={styles.iconButton}>
               <ShoppingCart size={22} />
-              {isLoaded && cartCount > 0 && <span className={styles.cartBadge}>{cartCount}</span>}
+              {cartCount > 0 && <span className={styles.cartBadge}>{cartCount}</span>}
             </button>
             <button className={styles.iconButton}>
               <User size={22} />

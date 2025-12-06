@@ -136,7 +136,7 @@ export default function CategoriesPage() {
     try {
       const response = await fetch('/api/admin/phone-brands');
       const data = await response.json();
-      setPhoneBrands(Array.isArray(data) ? data : []);
+      setPhoneBrands(data.success ? data.brands : (Array.isArray(data) ? data : []));
     } catch (error) {
       console.error('Error fetching phone brands:', error);
     }

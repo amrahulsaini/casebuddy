@@ -172,8 +172,8 @@ export default function CategoriesPage() {
         throw new Error(data.error || 'Upload was not successful');
       }
 
-      // Use the URL from the response (prefer url over absoluteUrl for local storage)
-      const imageUrl = data.url || data.absoluteUrl;
+      // Always use the relative URL (not absoluteUrl) to avoid hardcoded domains
+      const imageUrl = data.url;
       if (!imageUrl) {
         throw new Error('No image URL returned from server');
       }

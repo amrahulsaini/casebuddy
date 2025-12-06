@@ -442,6 +442,7 @@ export default function CategoriesPage() {
                       height={200}
                       alt="Category preview"
                       className={styles.previewImage}
+                      unoptimized
                     />
                   </div>
                 )}

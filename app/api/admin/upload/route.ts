@@ -49,8 +49,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Create upload directory if it doesn't exist
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
+    try {
+      if (!existsSync(uploadDir)) {
+        console.log('Creating upload directory:', uploadDir);
+        await mkdir(uploadDir, { recursive: true });
+        console.log('Directory created successfully');
+      } else {
+        console.log('Upload directory already exists');
+      }
+    } catch (dirError) {
+      console.error('Directory creation error:', dirError);
+      return NextResponse.json(
+        { error: `Failed to create upload directory: ${dirError.message}` },
+        { status: 500 }
+      );
     }
 
     // Convert file to buffer and save
@@ -58,7 +70,35 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes);
     const filepath = path.join(uploadDir, filename);
 
-    await writeFile(filepath, buffer);
+    console.log('Upload details:');
+    console.log('- Type:', type);
+    console.log('- Filename:', filename);
+    console.log('- Upload dir:', uploadDir);
+    console.log('- Full path:', filepath);
+    console.log('- File size:', buffer.length);
+    console.log('- Current working directory:', process.cwd());
+
+    try {
+      await writeFile(filepath, buffer);
+      console.log('File write completed');
+    } catch (writeError) {
+      console.error('File write error:', writeError);
+      return NextResponse.json(
+        { error: `Failed to write file: ${writeError.message}` },
+        { status: 500 }
+      );
+    }
+
+    // Verify file was saved
+    const fileExists = existsSync(filepath);
+    console.log('File exists after save:', fileExists);
+
+    if (!fileExists) {
+      return NextResponse.json(
+        { error: 'File was not saved to disk - check permissions and path' },
+        { status: 500 }
+      );
+    }
 
     // Return the public URL
     return NextResponse.json({

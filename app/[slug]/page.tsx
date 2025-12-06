@@ -68,7 +68,7 @@ export default function DynamicPage({ params }: { params: Promise<{ slug: string
   const [scrollY, setScrollY] = useState(0);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
-  const { cartCount, wishlist } = useCart();
+  const { cartCount, wishlist, isLoaded } = useCart();
 
   useEffect(() => {
     async function loadPage() {
@@ -149,11 +149,11 @@ export default function DynamicPage({ params }: { params: Promise<{ slug: string
           <div className={styles.navActions}>
             <button className={styles.iconButton}>
               <Heart size={22} />
-              {wishlist.length > 0 && <span className={styles.cartBadge}>{wishlist.length}</span>}
+              {isLoaded && wishlist.length > 0 && <span className={styles.cartBadge}>{wishlist.length}</span>}
             </button>
             <button className={styles.iconButton}>
               <ShoppingCart size={22} />
-              {cartCount > 0 && <span className={styles.cartBadge}>{cartCount}</span>}
+              {isLoaded && cartCount > 0 && <span className={styles.cartBadge}>{cartCount}</span>}
             </button>
             <button className={styles.iconButton}>
               <User size={22} />

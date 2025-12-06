@@ -1,8 +1,8 @@
 'use client';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Sparkles, ShieldCheck, Truck, Gift, Star, TrendingUp, Zap, ArrowRight, Package, Headphones, ShoppingCart, User, Menu, Heart, Instagram, Facebook, Twitter, Mail, Phone, MapPin } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Sparkles, ShieldCheck, Truck, Gift, Star, TrendingUp, Zap, ArrowRight, Package, Headphones, ShoppingCart, User, Menu, Heart, Instagram, Facebook, Twitter, Mail, Phone, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
 import styles from './home.module.css';
 
 interface Category {
@@ -28,6 +28,10 @@ export default function HomePage() {
   const [scrollY, setScrollY] = useState(0);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   useEffect(() => {
     fetch('/api/homepage-sections')
@@ -56,6 +60,38 @@ export default function HomePage() {
       window.removeEventListener('scroll', handleScroll);
     };
   }, [lastScrollY]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (!scrollRef.current) return;
+    const scrollAmount = 300;
+    scrollRef.current.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth'
+    });
+  };
 
   if (loading) {
     return (
@@ -189,51 +225,54 @@ export default function HomePage() {
           
           {sectionIndex === 0 ? (
             // First section: Horizontal scroll
-            <div className={styles.horizontalScroll}>
-              <div className={styles.scrollContent}>
-                {section.categories.map((category) => (
-                  <Link 
-                    key={category.id}
-                    href={`/shop/${category.slug}`}
-                    className={styles.horizontalCard}
-                  >
-                    <div className={styles.horizontalImageWrapper}>
-                      <Image 
-                        src={category.image_url} 
-                        alt={category.name}
-                        width={280}
-                        height={380}
-                        className={styles.horizontalImage}
-                        loading="lazy"
-                      />
-                    </div>
-                    <div className={styles.horizontalInfo}>
-                      <h3 className={styles.horizontalName}>{category.name}</h3>
-                    </div>
-                  </Link>
-                ))}
-                {section.categories.map((category) => (
-                  <Link 
-                    key={`duplicate-${category.id}`}
-                    href={`/shop/${category.slug}`}
-                    className={styles.horizontalCard}
-                  >
-                    <div className={styles.horizontalImageWrapper}>
-                      <Image 
-                        src={category.image_url} 
-                        alt={category.name}
-                        width={280}
-                        height={380}
-                        className={styles.horizontalImage}
-                        loading="lazy"
-                      />
-                    </div>
-                    <div className={styles.horizontalInfo}>
-                      <h3 className={styles.horizontalName}>{category.name}</h3>
-                    </div>
-                  </Link>
-                ))}
+            <div className={styles.horizontalScrollWrapper}>
+              <button 
+                className={styles.scrollButton + ' ' + styles.scrollButtonLeft}
+                onClick={() => scroll('left')}
+                aria-label="Scroll left"
+              >
+                <ChevronLeft size={32} />
+              </button>
+              <div 
+                className={styles.horizontalScroll}
+                ref={scrollRef}
+                onMouseDown={handleMouseDown}
+                onMouseLeave={handleMouseLeave}
+                onMouseUp={handleMouseUp}
+                onMouseMove={handleMouseMove}
+                style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+              >
+                <div className={styles.scrollContent}>
+                  {section.categories.map((category) => (
+                    <Link 
+                      key={category.id}
+                      href={`/shop/${category.slug}`}
+                      className={styles.horizontalCard}
+                    >
+                      <div className={styles.horizontalImageWrapper}>
+                        <Image 
+                          src={category.image_url} 
+                          alt={category.name}
+                          width={280}
+                          height={380}
+                          className={styles.horizontalImage}
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className={styles.horizontalInfo}>
+                        <h3 className={styles.horizontalName}>{category.name}</h3>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
               </div>
+              <button 
+                className={styles.scrollButton + ' ' + styles.scrollButtonRight}
+                onClick={() => scroll('right')}
+                aria-label="Scroll right"
+              >
+                <ChevronRight size={32} />
+              </button>
             </div>
           ) : (
             // Other sections: Grid layout

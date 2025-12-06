@@ -55,7 +55,11 @@ export async function GET(
     );
 
     // Determine effective customization settings
-    let effectiveCustomization = {
+    let effectiveCustomization: {
+      enabled: boolean;
+      options: any;
+      phone_brands: any[];
+    } = {
       enabled: false,
       options: null,
       phone_brands: []

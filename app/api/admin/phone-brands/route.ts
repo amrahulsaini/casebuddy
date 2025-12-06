@@ -13,7 +13,7 @@ export async function GET() {
         'SELECT * FROM phone_brands ORDER BY sort_order, name'
       );
 
-      return NextResponse.json(brands);
+      return NextResponse.json({ success: true, brands });
     } finally {
       connection.release();
     }

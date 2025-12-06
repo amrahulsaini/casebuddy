@@ -66,6 +66,7 @@ export default function HomePage() {
     setIsDragging(true);
     setStartX(e.pageX - scrollRef.current.offsetLeft);
     setScrollLeft(scrollRef.current.scrollLeft);
+    e.preventDefault();
   };
 
   const handleMouseLeave = () => {
@@ -82,6 +83,13 @@ export default function HomePage() {
     const x = e.pageX - scrollRef.current.offsetLeft;
     const walk = (x - startX) * 2;
     scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (isDragging) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
   };
 
   const scroll = (direction: 'left' | 'right') => {
@@ -240,6 +248,7 @@ export default function HomePage() {
                 onMouseLeave={handleMouseLeave}
                 onMouseUp={handleMouseUp}
                 onMouseMove={handleMouseMove}
+                onClick={handleClick}
                 style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
               >
                 <div className={styles.scrollContent}>
@@ -248,6 +257,8 @@ export default function HomePage() {
                       key={category.id}
                       href={`/shop/${category.slug}`}
                       className={styles.horizontalCard}
+                      draggable={false}
+                      onClick={(e) => isDragging && e.preventDefault()}
                     >
                       <div className={styles.horizontalImageWrapper}>
                         <Image 
@@ -257,6 +268,31 @@ export default function HomePage() {
                           height={380}
                           className={styles.horizontalImage}
                           loading="lazy"
+                          draggable={false}
+                        />
+                      </div>
+                      <div className={styles.horizontalInfo}>
+                        <h3 className={styles.horizontalName}>{category.name}</h3>
+                      </div>
+                    </Link>
+                  ))}
+                  {section.categories.map((category) => (
+                    <Link 
+                      key={`duplicate-${category.id}`}
+                      href={`/shop/${category.slug}`}
+                      className={styles.horizontalCard}
+                      draggable={false}
+                      onClick={(e) => isDragging && e.preventDefault()}
+                    >
+                      <div className={styles.horizontalImageWrapper}>
+                        <Image 
+                          src={category.image_url} 
+                          alt={category.name}
+                          width={280}
+                          height={380}
+                          className={styles.horizontalImage}
+                          loading="lazy"
+                          draggable={false}
                         />
                       </div>
                       <div className={styles.horizontalInfo}>

@@ -555,6 +555,17 @@
   gap: 2rem;
   width: max-content;
   padding: 0 2rem;
+  animation: autoScroll 60s linear infinite;
+}
+
+.horizontalScroll:hover .scrollContent,
+.horizontalScroll:active .scrollContent {
+  animation-play-state: paused;
+}
+
+@keyframes autoScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(-50% - 1rem)); }
 }
 
 .horizontalCard {
@@ -564,6 +575,12 @@
   color: #000;
   position: relative;
   transition: all 0.4s ease;
+  pointer-events: auto;
+}
+
+.horizontalCard img {
+  pointer-events: none;
+  user-select: none;
 }
 
 .horizontalCard:hover {
@@ -591,6 +608,9 @@
   object-fit: cover;
   object-position: center;
   transition: transform 0.4s ease;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .horizontalCard:hover .horizontalImage {

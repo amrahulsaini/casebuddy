@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Sparkles, ShieldCheck, Truck, Gift, Star, TrendingUp, Zap, ArrowRight, Package, Headphones, ShoppingCart, User, Menu, Heart, Instagram, Facebook, Twitter, Mail, Phone, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
-import { useCart } from '@/contexts/CartContext';
+import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import styles from './home.module.css';
 
 interface Category {
@@ -33,7 +33,6 @@ export default function HomePage() {
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
-  const { cartCount, wishlist } = useCart();
 
   useEffect(() => {
     fetch('/api/homepage-sections')
@@ -143,11 +142,11 @@ export default function HomePage() {
           <div className={styles.navActions}>
             <button className={styles.iconButton}>
               <Heart size={22} />
-              {wishlist.length > 0 && <span className={styles.cartBadge}>{wishlist.length}</span>}
+              <WishlistBadge className={styles.cartBadge} />
             </button>
             <button className={styles.iconButton}>
               <ShoppingCart size={22} />
-              {cartCount > 0 && <span className={styles.cartBadge}>{cartCount}</span>}
+              <CartBadge className={styles.cartBadge} />
             </button>
             <button className={styles.iconButton}>
               <User size={22} />

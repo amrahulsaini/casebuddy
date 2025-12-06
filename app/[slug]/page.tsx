@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Gift, Star, Truck, ShieldCheck, Heart, ShoppingCart, User, Menu, Instagram, Facebook, Twitter, Mail, Phone, MapPin } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useCart } from '@/contexts/CartContext';
+import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import styles from './dynamic-page.module.css';
 
 interface Category {
@@ -68,7 +68,6 @@ export default function DynamicPage({ params }: { params: Promise<{ slug: string
   const [scrollY, setScrollY] = useState(0);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
-  const { cartCount, wishlist } = useCart();
 
   useEffect(() => {
     async function loadPage() {
@@ -149,11 +148,11 @@ export default function DynamicPage({ params }: { params: Promise<{ slug: string
           <div className={styles.navActions}>
             <button className={styles.iconButton}>
               <Heart size={22} />
-              {wishlist.length > 0 && <span className={styles.cartBadge}>{wishlist.length}</span>}
+              <WishlistBadge className={styles.cartBadge} />
             </button>
             <button className={styles.iconButton}>
               <ShoppingCart size={22} />
-              {cartCount > 0 && <span className={styles.cartBadge}>{cartCount}</span>}
+              <CartBadge className={styles.cartBadge} />
             </button>
             <button className={styles.iconButton}>
               <User size={22} />

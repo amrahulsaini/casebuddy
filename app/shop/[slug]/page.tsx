@@ -129,16 +129,6 @@ export default function ShopPage() {
         </nav>
       </header>
 
-      {/* Category Header */}
-      <section className={styles.categoryHeader}>
-        <Link href="/" className={styles.backButton}>
-          <ArrowLeft size={20} />
-          <span>Back to Home</span>
-        </Link>
-        <h1 className={styles.categoryTitle}>{category?.name || 'Products'}</h1>
-        <p className={styles.categoryDescription}>{category?.description}</p>
-      </section>
-
       {/* Toolbar */}
       <div className={styles.toolbar}>
         <div className={styles.toolbarLeft}>

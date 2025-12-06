@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     } catch (dirError) {
       console.error('Directory creation error:', dirError);
       return NextResponse.json(
-        { error: `Failed to create upload directory: ${dirError.message}` },
+        { error: `Failed to create upload directory: ${dirError instanceof Error ? dirError.message : 'Unknown error'}` },
         { status: 500 }
       );
     }

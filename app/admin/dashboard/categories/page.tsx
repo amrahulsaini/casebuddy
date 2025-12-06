@@ -10,7 +10,6 @@ interface Category {
   slug: string;
   description: string | null;
   image_url: string | null;
-  parent_id: number | null;
   section_key: string | null;
   sort_order: number;
   is_active: boolean;
@@ -47,7 +46,6 @@ export default function CategoriesPage() {
     slug: '',
     description: '',
     image_url: '',
-    parent_id: '',
     section_key: '',
     page_id: '',
     sort_order: '0',
@@ -121,7 +119,6 @@ export default function CategoriesPage() {
       slug: '',
       description: '',
       image_url: '',
-      parent_id: '',
       section_key: '',
       page_id: '',
       sort_order: '0',
@@ -208,24 +205,49 @@ export default function CategoriesPage() {
     }
   };
 
-  const handleEdit = (category: Category) => {
+  const handleEdit = async (category: Category) => {
     setEditingCategory(category);
     
-    // Find page_id from section_key
-    const section = sections.find(s => s.section_key === category.section_key);
-    const pageId = section?.page_id?.toString() || '';
+    // If we have section_key, fetch all sections to find the page_id
+    if (category.section_key) {
+      try {
+        const response = await fetch('/api/admin/homepage-sections');
+        if (response.ok) {
+          const allSections = await response.json();
+          const section = allSections.find((s: Section) => s.section_key === category.section_key);
+          if (section) {
+            const pageId = section.page_id.toString();
+            // Fetch sections for this page
+            await fetchSectionsForPage(pageId);
+            
+            setFormData({
+              name: category.name,
+              slug: category.slug,
+              description: category.description || '',
+              image_url: category.image_url || '',
+              section_key: category.section_key || '',
+              page_id: pageId,
+              sort_order: category.sort_order.toString(),
+              is_active: category.is_active,
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching section details:', error);
+      }
+    } else {
+      setFormData({
+        name: category.name,
+        slug: category.slug,
+        description: category.description || '',
+        image_url: category.image_url || '',
+        section_key: '',
+        page_id: '',
+        sort_order: category.sort_order.toString(),
+        is_active: category.is_active,
+      });
+    }
     
-    setFormData({
-      name: category.name,
-      slug: category.slug,
-      description: category.description || '',
-      image_url: category.image_url || '',
-      parent_id: category.parent_id?.toString() || '',
-      section_key: category.section_key || '',
-      page_id: pageId,
-      sort_order: category.sort_order.toString(),
-      is_active: category.is_active,
-    });
     setImagePreview(category.image_url || '');
     setShowModal(true);
   };
@@ -244,10 +266,20 @@ export default function CategoriesPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validate required fields
+    if (!formData.page_id) {
+      alert('Please select a Page');
+      return;
+    }
+    if (!formData.section_key) {
+      alert('Please select a Section');
+      return;
+    }
+
     const data = {
       ...formData,
-      parent_id: formData.parent_id ? parseInt(formData.parent_id) : null,
-      section_key: formData.section_key || null,
+      parent_id: null, // Always null - no subcategories
+      section_key: formData.section_key,
       sort_order: parseInt(formData.sort_order),
     };
 
@@ -282,10 +314,18 @@ export default function CategoriesPage() {
     setFormData({ ...formData, name, slug });
   };
 
-  const getCategoryPath = (category: Category): string => {
-    if (!category.parent_id) return category.name;
-    const parent = categories.find((c) => c.id === category.parent_id);
-    return parent ? `${parent.name} > ${category.name}` : category.name;
+  const getSectionName = (sectionKey: string | null): string => {
+    if (!sectionKey) return '-';
+    const section = sections.find(s => s.section_key === sectionKey);
+    return section?.title || sectionKey;
+  };
+
+  const getPageName = (sectionKey: string | null): string => {
+    if (!sectionKey) return '-';
+    const section = sections.find(s => s.section_key === sectionKey);
+    if (!section) return '-';
+    const page = pages.find(p => p.id === section.page_id);
+    return page?.page_name || '-';
   };
 
   const filteredCategories = categories.filter((category) => {
@@ -364,8 +404,8 @@ export default function CategoriesPage() {
             <thead>
               <tr>
                 <th>Name</th>
-                <th>Slug</th>
-                <th>Parent</th>
+                <th>Page</th>
+                <th>Section</th>
                 <th>Sort Order</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -376,16 +416,11 @@ export default function CategoriesPage() {
                 <tr key={category.id}>
                   <td>
                     <div className={styles.categoryName}>
-                      {getCategoryPath(category)}
+                      {category.name}
                     </div>
                   </td>
-                  <td>{category.slug}</td>
-                  <td>
-                    {category.parent_id
-                      ? categories.find((c) => c.id === category.parent_id)
-                          ?.name || '-'
-                      : 'Root'}
-                  </td>
+                  <td>{getPageName(category.section_key)}</td>
+                  <td>{getSectionName(category.section_key)}</td>
                   <td>{category.sort_order}</td>
                   <td>
                     <span
@@ -492,29 +527,24 @@ export default function CategoriesPage() {
               </div>
 
               <div className={styles.formGroup}>
-                <label>Page (for parent categories)</label>
+                <label>Page *</label>
                 <select
                   value={formData.page_id}
                   onChange={(e) =>
                     setFormData({ ...formData, page_id: e.target.value, section_key: '' })
                   }
-                  disabled={!!formData.parent_id}
+                  required
                 >
-                  <option value="">None</option>
+                  <option value="">Select Page</option>
                   {pages.map((page) => (
                     <option key={page.id} value={page.id}>
                       {page.page_name}
                     </option>
                   ))}
                 </select>
-                {formData.parent_id && (
-                  <small style={{ color: '#666', marginTop: '4px', display: 'block' }}>
-                    Only root categories can be assigned to pages
-                  </small>
-                )}
               </div>
 
-              {formData.page_id && !formData.parent_id && (
+              {formData.page_id && (
                 <div className={styles.formGroup}>
                   <label>Section *</label>
                   <select
@@ -533,25 +563,6 @@ export default function CategoriesPage() {
                   </select>
                 </div>
               )}
-
-              <div className={styles.formGroup}>
-                <label>Parent Category</label>
-                <select
-                  value={formData.parent_id}
-                  onChange={(e) =>
-                    setFormData({ ...formData, parent_id: e.target.value })
-                  }
-                >
-                  <option value="">None (Root Category)</option>
-                  {categories
-                    .filter((c) => c.id !== editingCategory?.id)
-                    .map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
-                    ))}
-                </select>
-              </div>
 
               <div className={styles.formGroup}>
                 <label>Sort Order</label>

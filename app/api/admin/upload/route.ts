@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
     } catch (writeError) {
       console.error('File write error:', writeError);
       return NextResponse.json(
-        { error: `Failed to write file: ${writeError.message}` },
+        { error: `Failed to write file: ${writeError instanceof Error ? writeError.message : 'Unknown error'}` },
         { status: 500 }
       );
     }

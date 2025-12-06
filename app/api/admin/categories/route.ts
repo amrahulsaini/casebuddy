@@ -35,8 +35,8 @@ export async function POST(request: Request) {
     try {
       const [result] = await connection.execute(
         `INSERT INTO categories 
-         (name, slug, description, image_url, parent_id, section_key, sort_order, is_active)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+         (name, slug, description, image_url, parent_id, section_key, sort_order, is_active, customization_enabled, customization_options)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           data.name,
           data.slug,
@@ -46,8 +46,21 @@ export async function POST(request: Request) {
           data.section_key || null,
           data.sort_order || 0,
           data.is_active ?? true,
+          data.customization_enabled ?? false,
+          data.customization_options ? JSON.stringify(data.customization_options) : null,
         ]
       );
+
+      // Add phone brands if provided
+      const categoryId = (result as any).insertId;
+      if (data.phone_brands && Array.isArray(data.phone_brands) && data.phone_brands.length > 0) {
+        for (const brandId of data.phone_brands) {
+          await connection.execute(
+            'INSERT INTO category_phone_brands (category_id, brand_id) VALUES (?, ?)',
+            [categoryId, brandId]
+          );
+        }
+      }
 
       return NextResponse.json({ success: true, id: (result as any).insertId });
     } finally {

@@ -9,7 +9,7 @@ export async function GET(
     const { slug } = await params;
 
     const [categories]: any = await pool.execute(
-      `SELECT id, name, slug, description, parent_id, sort_order
+      `SELECT id, name, slug, description, parent_id, sort_order, customization_enabled, customization_options
        FROM categories
        WHERE slug = ? AND is_active = TRUE`,
       [slug]
@@ -22,9 +22,23 @@ export async function GET(
       );
     }
 
+    const category = categories[0];
+
+    // Parse customization_options if it exists
+    if (category.customization_options && typeof category.customization_options === 'string') {
+      try {
+        category.customization_options = JSON.parse(category.customization_options);
+      } catch (e) {
+        category.customization_options = null;
+      }
+    }
+
     return NextResponse.json({
       success: true,
-      category: categories[0],
+      category: {
+        ...category,
+        customization_enabled: Boolean(category.customization_enabled),
+      },
     });
   } catch (error: any) {
     console.error('Category API error:', error);

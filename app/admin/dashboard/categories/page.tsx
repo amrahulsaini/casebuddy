@@ -40,8 +40,6 @@ export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [pages, setPages] = useState<Page[]>([]);
   const [sections, setSections] = useState<Section[]>([]);
-  const [phoneBrands, setPhoneBrands] = useState<PhoneBrand[]>([]);
-  const [selectedBrands, setSelectedBrands] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
@@ -77,7 +75,6 @@ export default function CategoriesPage() {
   useEffect(() => {
     fetchPages();
     fetchCategories();
-    fetchPhoneBrands();
   }, []);
 
   useEffect(() => {
@@ -132,15 +129,7 @@ export default function CategoriesPage() {
     }
   };
 
-  const fetchPhoneBrands = async () => {
-    try {
-      const response = await fetch('/api/admin/phone-brands');
-      const data = await response.json();
-      setPhoneBrands(data.success ? data.brands : (Array.isArray(data) ? data : []));
-    } catch (error) {
-      console.error('Error fetching phone brands:', error);
-    }
-  };
+
 
   const handleAdd = () => {
     setEditingCategory(null);
@@ -164,7 +153,6 @@ export default function CategoriesPage() {
         'name_with_heart_at_bottom'
       ],
     });
-    setSelectedBrands([]);
     setImagePreview('');
     setShowModal(true);
   };
@@ -248,17 +236,6 @@ export default function CategoriesPage() {
 
   const handleEdit = async (category: Category) => {
     setEditingCategory(category);
-    
-    // Fetch phone brands for this category
-    try {
-      const brandsResponse = await fetch(`/api/admin/categories/${category.id}/phone-brands`);
-      if (brandsResponse.ok) {
-        const categoryBrands = await brandsResponse.json();
-        setSelectedBrands(categoryBrands.map((b: PhoneBrand) => b.id));
-      }
-    } catch (error) {
-      console.error('Error fetching category brands:', error);
-    }
     
     // If we have section_key, fetch all sections to find the page_id
     if (category.section_key) {
@@ -353,7 +330,6 @@ export default function CategoriesPage() {
       parent_id: null, // Always null - no subcategories
       section_key: formData.section_key,
       sort_order: parseInt(formData.sort_order),
-      phone_brands: selectedBrands,
       customization_options: formData.customization_enabled ? {
         text_enabled: true,
         fonts: formData.fonts,
@@ -666,29 +642,6 @@ export default function CategoriesPage() {
                 </label>
               </div>
 
-              {/* Phone Brands Section */}
-              <div className={styles.formSection}>
-                <h3>Compatible Phone Brands</h3>
-                <div className={styles.checkboxGrid}>
-                  {phoneBrands.map((brand) => (
-                    <label key={brand.id} className={styles.checkbox}>
-                      <input
-                        type="checkbox"
-                        checked={selectedBrands.includes(brand.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedBrands([...selectedBrands, brand.id]);
-                          } else {
-                            setSelectedBrands(selectedBrands.filter(id => id !== brand.id));
-                          }
-                        }}
-                      />
-                      {brand.name}
-                    </label>
-                  ))}
-                </div>
-              </div>
-
               {/* Customization Section */}
               <div className={styles.formSection}>
                 <h3>Product Customization</h3>
@@ -707,6 +660,16 @@ export default function CategoriesPage() {
 
                 {formData.customization_enabled && (
                   <>
+                    <div className={styles.infoBox}>
+                      <p>
+                        📱 <strong>Phone Compatibility:</strong> Manage compatible phone brands and models in the{' '}
+                        <a href="/admin/dashboard/category-phones" style={{color: '#3b82f6', textDecoration: 'underline'}}>
+                          Category Phones
+                        </a>{' '}
+                        section.
+                      </p>
+                    </div>
+
                     <div className={styles.formGroup}>
                       <label>Font Styles:</label>
                       <div className={styles.checkboxGrid}>

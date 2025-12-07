@@ -413,61 +413,14 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
 
               {customizationEnabled && (
                 <>
-                  <div className={styles.customizationGroup}>
-                    <h3>Phone Brands</h3>
-                    <div className={styles.brandGrid}>
-                      {allPhoneBrands.map((brand) => (
-                        <label key={brand.id} className={styles.brandCheckbox}>
-                          <input
-                            type="checkbox"
-                            checked={selectedPhoneBrands.includes(brand.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedPhoneBrands([...selectedPhoneBrands, brand.id]);
-                              } else {
-                                setSelectedPhoneBrands(selectedPhoneBrands.filter(id => id !== brand.id));
-                              }
-                            }}
-                          />
-                          {brand.name}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className={styles.customizationGroup}>
-                    <h3>Phone Models</h3>
-                    <p className={styles.helpText} style={{marginTop: 0}}>
-                      Select specific models to allow. If no models are selected, all models from selected brands will be available.
+                  <div className={styles.infoBox}>
+                    <p>
+                      📱 <strong>Phone Compatibility:</strong> Phone brands and models are managed at the category level in the{' '}
+                      <a href="/admin/dashboard/category-phones" style={{color: '#3b82f6', textDecoration: 'underline'}}>
+                        Category Phones
+                      </a>{' '}
+                      section.
                     </p>
-                    <div className={styles.brandGrid}>
-                      {allPhoneModels
-                        .filter(model => selectedPhoneBrands.includes(model.brand_id))
-                        .map((model) => {
-                          const brand = allPhoneBrands.find(b => b.id === model.brand_id);
-                          return (
-                            <label key={model.id} className={styles.brandCheckbox}>
-                              <input
-                                type="checkbox"
-                                checked={selectedPhoneModels.includes(model.id)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setSelectedPhoneModels([...selectedPhoneModels, model.id]);
-                                  } else {
-                                    setSelectedPhoneModels(selectedPhoneModels.filter(id => id !== model.id));
-                                  }
-                                }}
-                              />
-                              {brand?.name} - {model.model_name}
-                            </label>
-                          );
-                        })}
-                      {allPhoneModels.filter(model => selectedPhoneBrands.includes(model.brand_id)).length === 0 && (
-                        <p style={{gridColumn: '1 / -1', color: '#999', fontStyle: 'italic'}}>
-                          Select phone brands above to see available models
-                        </p>
-                      )}
-                    </div>
                   </div>
 
                   <div className={styles.customizationGroup}>

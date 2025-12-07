@@ -62,8 +62,16 @@ export default async function AdminDashboardPage() {
             </div>
           </a>
 
-          <a href="/admin/dashboard/phone-brands" className={styles.quickLink}>
+          <a href="/admin/dashboard/category-phones" className={styles.quickLink}>
             <div className={styles.linkIcon}>📱</div>
+            <div>
+              <div className={styles.linkTitle}>Category Phones</div>
+              <div className={styles.linkDesc}>Set phone compatibility</div>
+            </div>
+          </a>
+
+          <a href="/admin/dashboard/phone-brands" className={styles.quickLink}>
+            <div className={styles.linkIcon}>🔧</div>
             <div>
               <div className={styles.linkTitle}>Phone Brands</div>
               <div className={styles.linkDesc}>Manage phone models</div>

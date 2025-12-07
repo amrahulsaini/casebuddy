@@ -60,6 +60,7 @@ interface Product {
       placements: string[];
     } | null;
     phone_brands: PhoneBrand[];
+    phone_models: PhoneModel[];
     source: 'product' | 'category';
   };
 }
@@ -94,8 +95,12 @@ export default function ProductDetailPage() {
           
           // Check if customization is enabled (either from product or category)
           if (data.product.customization?.enabled) {
-            // Phone brands are already included in customization object
+            // Phone brands and models are already included in customization object
             setPhoneBrands(data.product.customization.phone_brands || []);
+            // Set all available models from the category/product
+            if (data.product.customization.phone_models) {
+              setPhoneModels(data.product.customization.phone_models);
+            }
           }
         }
         setLoading(false);
@@ -133,8 +138,7 @@ export default function ProductDetailPage() {
   const handleBrandChange = (brandId: number) => {
     setSelectedBrand(brandId);
     setSelectedModel(null);
-    setPhoneModels([]);
-    fetchPhoneModels(brandId);
+    // Models are already loaded from the category, just filter by brand
   };
 
   const handleQuantityChange = (change: number) => {
@@ -359,11 +363,13 @@ export default function ProductDetailPage() {
                     required
                   >
                     <option value="">Choose your phone model...</option>
-                    {phoneModels.map((model) => (
-                      <option key={model.id} value={model.id}>
-                        {model.model_name}
-                      </option>
-                    ))}
+                    {phoneModels
+                      .filter(model => model.brand_id === selectedBrand)
+                      .map((model) => (
+                        <option key={model.id} value={model.id}>
+                          {model.model_name}
+                        </option>
+                      ))}
                   </select>
                 </div>
               )}

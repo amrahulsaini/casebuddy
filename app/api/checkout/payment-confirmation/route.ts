@@ -5,17 +5,26 @@ import nodemailer from 'nodemailer';
 
 interface Order extends RowDataPacket {
   id: number;
+  order_number: string;
   customer_name: string;
   customer_email: string;
   customer_mobile: string;
-  address: string;
-  city: string;
-  state: string;
-  pincode: string;
+  shipping_address_line1: string;
+  shipping_address_line2: string | null;
+  shipping_city: string;
+  shipping_state: string;
+  shipping_pincode: string;
+  product_name: string;
+  phone_model: string;
+  design_name: string | null;
+  quantity: number;
+  unit_price: number;
+  subtotal: number;
   total_amount: number;
   payment_status: string;
   order_status: string;
   payment_id: string | null;
+  notes: string | null;
   created_at: Date;
 }
 
@@ -90,14 +99,8 @@ export async function POST(request: Request) {
 
         const order = orderRows[0];
 
-        // Fetch order items
-        const [itemRows] = await connection.execute<OrderItem[]>(
-          'SELECT product_name, quantity, price, customization_text, preview_url FROM order_items WHERE order_id = ?',
-          [orderId]
-        );
-
-        // Send emails
-        await sendOrderConfirmationEmails(order, itemRows);
+        // Send emails (order has product info embedded, no separate items table)
+        await sendOrderConfirmationEmails(order);
 
         return NextResponse.json({
           success: true,
@@ -130,7 +133,7 @@ export async function POST(request: Request) {
   }
 }
 
-async function sendOrderConfirmationEmails(order: Order, items: OrderItem[]) {
+async function sendOrderConfirmationEmails(order: Order) {
   const transporter = nodemailer.createTransport({
     host: 'mail.casebuddy.co.in',
     port: 587,
@@ -169,25 +172,25 @@ async function sendOrderConfirmationEmails(order: Order, items: OrderItem[]) {
           
           <div class="order-details">
             <h2>Order Details</h2>
-            <p><strong>Order ID:</strong> #${order.id}</p>
+            <p><strong>Order Number:</strong> ${order.order_number}</p>
             <p><strong>Date:</strong> ${new Date(order.created_at).toLocaleDateString()}</p>
             
-            <h3>Items:</h3>
-            ${items.map(item => `
-              <div class="item">
-                <p><strong>${item.product_name}</strong></p>
-                <p>Quantity: ${item.quantity} × ₹${item.price}</p>
-                ${item.customization_text ? `<p>Customization: ${item.customization_text}</p>` : ''}
-              </div>
-            `).join('')}
+            <h3>Product:</h3>
+            <div class="item">
+              <p><strong>${order.product_name}</strong></p>
+              <p>Phone Model: ${order.phone_model}</p>
+              ${order.design_name ? `<p>Design: ${order.design_name}</p>` : ''}
+              <p>Quantity: ${order.quantity} × ₹${order.unit_price}</p>
+            </div>
             
             <p class="total">Total: ₹${order.total_amount}</p>
           </div>
           
           <div class="order-details">
             <h3>Shipping Address</h3>
-            <p>${order.address}</p>
-            <p>${order.city}, ${order.state} - ${order.pincode}</p>
+            <p>${order.shipping_address_line1}</p>
+            ${order.shipping_address_line2 ? `<p>${order.shipping_address_line2}</p>` : ''}
+            <p>${order.shipping_city}, ${order.shipping_state} - ${order.shipping_pincode}</p>
             <p>Mobile: ${order.customer_mobile}</p>
           </div>
         </div>
@@ -220,7 +223,7 @@ async function sendOrderConfirmationEmails(order: Order, items: OrderItem[]) {
       <div class="container">
         <div class="header">
           <h1>New Order Received</h1>
-          <p>Order #${order.id}</p>
+          <p>Order ${order.order_number}</p>
         </div>
         <div class="content">
           <div class="highlight">
@@ -237,20 +240,19 @@ async function sendOrderConfirmationEmails(order: Order, items: OrderItem[]) {
           
           <div class="order-details">
             <h2>Shipping Address</h2>
-            <p>${order.address}</p>
-            <p>${order.city}, ${order.state} - ${order.pincode}</p>
+            <p>${order.shipping_address_line1}</p>
+            ${order.shipping_address_line2 ? `<p>${order.shipping_address_line2}</p>` : ''}
+            <p>${order.shipping_city}, ${order.shipping_state} - ${order.shipping_pincode}</p>
           </div>
           
           <div class="order-details">
-            <h2>Order Items</h2>
-            ${items.map(item => `
-              <div class="item">
-                <p><strong>${item.product_name}</strong></p>
-                <p>Quantity: ${item.quantity} × ₹${item.price} = ₹${item.quantity * item.price}</p>
-                ${item.customization_text ? `<p><strong>Customization:</strong> ${item.customization_text}</p>` : ''}
-                ${item.preview_url ? `<p><a href="${item.preview_url}">View Preview</a></p>` : ''}
-              </div>
-            `).join('')}
+            <h2>Product Details</h2>
+            <div class="item">
+              <p><strong>${order.product_name}</strong></p>
+              <p>Phone Model: ${order.phone_model}</p>
+              ${order.design_name ? `<p>Design: ${order.design_name}</p>` : ''}
+              <p>Quantity: ${order.quantity} × ₹${order.unit_price} = ₹${order.subtotal}</p>
+            </div>
             
             <p class="total">Total Amount: ₹${order.total_amount}</p>
           </div>
@@ -258,6 +260,7 @@ async function sendOrderConfirmationEmails(order: Order, items: OrderItem[]) {
           <div class="order-details">
             <p><strong>Payment ID:</strong> ${order.payment_id || 'N/A'}</p>
             <p><strong>Order Date:</strong> ${new Date(order.created_at).toLocaleString()}</p>
+            ${order.notes ? `<p><strong>Notes:</strong> ${order.notes}</p>` : ''}
           </div>
         </div>
       </div>
@@ -269,7 +272,7 @@ async function sendOrderConfirmationEmails(order: Order, items: OrderItem[]) {
   await transporter.sendMail({
     from: `"CaseBuddy" <${process.env.EMAIL_USER}>`,
     to: order.customer_email,
-    subject: `Order Confirmation - Order #${order.id}`,
+    subject: `Order Confirmation - ${order.order_number}`,
     html: customerEmailHtml,
   });
 
@@ -277,7 +280,7 @@ async function sendOrderConfirmationEmails(order: Order, items: OrderItem[]) {
   await transporter.sendMail({
     from: `"CaseBuddy Orders" <${process.env.EMAIL_USER}>`,
     to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
-    subject: `New Order #${order.id} - ${order.customer_name}`,
+    subject: `New Order ${order.order_number} - ${order.customer_name}`,
     html: adminEmailHtml,
   });
 }

@@ -27,6 +27,7 @@ export default function CategoryPhonesPage() {
   const [allPhoneBrands, setAllPhoneBrands] = useState<PhoneBrand[]>([]);
   const [allPhoneModels, setAllPhoneModels] = useState<PhoneModel[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [previousCategory, setPreviousCategory] = useState<number | null>(null);
   const [selectedBrands, setSelectedBrands] = useState<number[]>([]);
   const [selectedModels, setSelectedModels] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,15 +40,18 @@ export default function CategoryPhonesPage() {
 
   useEffect(() => {
     if (selectedCategory) {
-      // Clear previous selections first
-      setSelectedBrands([]);
-      setSelectedModels([]);
-      // Then fetch new data
+      // Only clear if switching to a DIFFERENT category
+      if (previousCategory !== null && previousCategory !== selectedCategory) {
+        setSelectedBrands([]);
+        setSelectedModels([]);
+      }
+      setPreviousCategory(selectedCategory);
       fetchCategoryPhones(selectedCategory);
     } else {
       // If no category selected, clear everything
       setSelectedBrands([]);
       setSelectedModels([]);
+      setPreviousCategory(null);
     }
   }, [selectedCategory]);
 

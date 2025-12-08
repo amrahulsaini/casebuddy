@@ -417,7 +417,6 @@ export default function HomePage() {
             <h4 className={styles.footerTitle}>Quick Links</h4>
             <ul className={styles.footerLinks}>
               <li><Link href="/shop">Shop All</Link></li>
-              <li><Link href="/templates">Templates</Link></li>
               <li><Link href="/about">About Us</Link></li>
               <li><Link href="/contact">Contact</Link></li>
             </ul>
@@ -438,15 +437,15 @@ export default function HomePage() {
             <ul className={styles.footerContact}>
               <li>
                 <Phone size={20} />
-                <span>+91 98765 43210</span>
+                <span>+918107624752</span>
               </li>
               <li>
                 <Mail size={20} />
-                <span>support@casebuddy.co.in</span>
+                <span>info@casebuddy.co.in</span>
               </li>
               <li>
                 <MapPin size={20} />
-                <span>Mumbai, India</span>
+                <span>Rajgarh, Rajasthan 331023</span>
               </li>
             </ul>
           </div>

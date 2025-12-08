@@ -278,7 +278,7 @@
   }
 }
 
-@media (min-width: 1025px) {
+/* Mobile portrait (480px) */\n@media (max-width: 480px) {\n  .sidebar {\n    width: 280px;\n    max-width: 85vw;\n  }\n\n  .sidebarLogo {\n    padding: 24px 20px;\n  }\n\n  .logoIcon {\n    width: 44px;\n    height: 44px;\n    font-size: 18px;\n  }\n\n  .logoTitle {\n    font-size: 20px;\n  }\n\n  .logoSubtitle {\n    font-size: 10px;\n  }\n\n  .sidebarNav {\n    padding: 20px 12px;\n  }\n\n  .navItem {\n    padding: 12px 14px;\n    font-size: 14px;\n  }\n\n  .navItemIcon {\n    width: 18px;\n    height: 18px;\n  }\n\n  .navItemBadge {\n    font-size: 9px;\n    padding: 2px 6px;\n  }\n\n  .sidebarFooter {\n    padding: 16px;\n  }\n\n  .userAvatar {\n    width: 36px;\n    height: 36px;\n    font-size: 14px;\n  }\n\n  .userName {\n    font-size: 13px;\n  }\n\n  .userRole {\n    font-size: 11px;\n  }\n\n  .menuToggle {\n    top: 16px;\n    left: 16px;\n    width: 44px;\n    height: 44px;\n  }\n}\n\n@media (min-width: 1025px) {
   .menuToggle {
     display: none !important;
   }

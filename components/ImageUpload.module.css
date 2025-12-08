@@ -126,3 +126,169 @@
   background: #fc8181;
   transform: scale(1.1);
 }
+
+/* ===== Responsive Design ===== */
+
+/* Tablet and below (1024px) */
+@media (max-width: 1024px) {
+  .dropzone {
+    padding: 32px;
+  }
+
+  .imageGrid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+  }
+
+  .imageCard img {
+    height: 180px;
+  }
+}
+
+/* Mobile landscape and small tablets (768px) */
+@media (max-width: 768px) {
+  .dropzone {
+    padding: 28px;
+    border-radius: 10px;
+  }
+
+  .uploadIcon {
+    font-size: 40px;
+    margin-bottom: 10px;
+  }
+
+  .dropzone p {
+    font-size: 14px;
+    margin: 6px 0;
+  }
+
+  .hint {
+    font-size: 12px !important;
+  }
+
+  .imageGrid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .imageCard {
+    border-radius: 10px;
+  }
+
+  .imageCard img {
+    height: 160px;
+  }
+
+  .primaryBadge {
+    top: 6px;
+    left: 6px;
+    padding: 3px 10px;
+    font-size: 11px;
+  }
+
+  .imageActions {
+    padding: 10px;
+    gap: 6px;
+  }
+
+  .actionButton,
+  .deleteButton {
+    padding: 5px 10px;
+    font-size: 14px;
+  }
+}
+
+/* Mobile portrait (480px) */
+@media (max-width: 480px) {
+  .container {
+    margin: 16px 0;
+  }
+
+  .dropzone {
+    padding: 24px 16px;
+    border-radius: 10px;
+  }
+
+  .uploadIcon {
+    font-size: 36px;
+    margin-bottom: 8px;
+  }
+
+  .dropzone p {
+    font-size: 13px;
+    margin: 5px 0;
+  }
+
+  .hint {
+    font-size: 11px !important;
+  }
+
+  .uploading {
+    padding: 16px;
+    font-size: 14px;
+  }
+
+  .imageGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .imageCard {
+    border-radius: 8px;
+  }
+
+  .imageCard img {
+    height: 140px;
+  }
+
+  .primaryBadge {
+    top: 6px;
+    left: 6px;
+    padding: 3px 8px;
+    font-size: 10px;
+    border-radius: 5px;
+  }
+
+  .imageActions {
+    padding: 8px;
+    gap: 6px;
+  }
+
+  .actionButton,
+  .deleteButton {
+    padding: 5px 8px;
+    font-size: 13px;
+    border-radius: 5px;
+  }
+}
+
+/* Very small devices (375px) */
+@media (max-width: 375px) {
+  .dropzone {
+    padding: 20px 12px;
+  }
+
+  .uploadIcon {
+    font-size: 32px;
+  }
+
+  .dropzone p {
+    font-size: 12px;
+  }
+
+  .imageGrid {
+    gap: 8px;
+  }
+
+  .imageCard img {
+    height: 120px;
+  }
+
+  .actionButton,
+  .deleteButton {
+    padding: 4px 6px;
+    font-size: 12px;
+  }
+}

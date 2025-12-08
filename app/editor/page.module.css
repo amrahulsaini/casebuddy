@@ -698,27 +698,299 @@
   }
 }
 
-/* Responsive */
+/* ===== Responsive Design ===== */
+
+/* Tablet and below (1024px) */
+@media (max-width: 1024px) {
+  .wrapper {
+    padding: 48px 4%;
+  }
+
+  .contentGrid {
+    gap: 24px;
+  }
+
+  .editorPanel {
+    padding: 40px;
+  }
+
+  .toolsPanel {
+    padding: 32px;
+  }
+}
+
+/* Mobile landscape and small tablets (968px) */
 @media (max-width: 968px) {
   .wrapper {
     padding: 40px 5%;
   }
 
+  .header {
+    padding: 16px 4%;
+  }
+
+  .logo {
+    font-size: 22px;
+  }
+
+  .logoIcon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .menuButton {
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+
+  .hero {
+    padding: 32px 16px 48px;
+  }
+
+  .heroIcon {
+    width: 90px;
+    height: 90px;
+    border-radius: 20px;
+  }
+
   .heroTitle {
-    font-size: 32px;
+    font-size: 36px;
+    letter-spacing: -1.5px;
+  }
+
+  .heroDescription {
+    font-size: 17px;
+  }
+
+  .contentGrid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .editorPanel {
+    padding: 36px;
+  }
+
+  .uploadZone {
+    padding: 80px 32px;
+  }
+
+  .uploadZone h3 {
+    font-size: 24px;
+  }
+
+  .uploadZone p {
+    font-size: 15px;
+  }
+
+  .toolsPanel {
+    position: relative;
+    top: 0;
+    padding: 32px;
+  }
+
+  .previewGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile portrait (480px) */
+@media (max-width: 480px) {
+  .wrapper {
+    padding: 32px 4%;
+  }
+
+  .header {
+    padding: 12px 4%;
+  }
+
+  .logo {
+    font-size: 20px;
+  }
+
+  .logoIcon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+
+  .menuButton {
+    padding: 10px 20px;
+    font-size: 13px;
+    border-radius: 40px;
+  }
+
+  .hero {
+    padding: 24px 12px 36px;
+  }
+
+  .heroIcon {
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+  }
+
+  .heroTitle {
+    font-size: 28px;
+    margin-bottom: 16px;
+    letter-spacing: -1px;
   }
 
   .heroDescription {
     font-size: 16px;
   }
 
+  .contentGrid {
+    gap: 24px;
+  }
+
   .editorPanel {
-    padding: 32px;
+    padding: 24px;
+    border-radius: 20px;
+  }
+
+  .uploadZone {
+    padding: 60px 20px;
+    border-radius: 16px;
+    border-width: 2px;
+  }
+
+  .uploadZone h3 {
+    font-size: 22px;
+    margin-bottom: 10px;
+  }
+
+  .uploadZone p {
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+
+  .uploadButton {
+    padding: 14px 32px;
+    font-size: 14px;
+  }
+
+  .previewHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+  }
+
+  .previewHeader h3 {
+    font-size: 18px;
+  }
+
+  .newImageButton {
+    padding: 11px 20px;
+    font-size: 13px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .previewItem {
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  .previewItem h4 {
+    font-size: 15px;
+    margin-bottom: 12px;
+  }
+
+  .imageWrapper {
+    height: 320px;
+    border-radius: 12px;
+  }
+
+  .fullscreenButton {
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .downloadButton {
+    padding: 12px 20px;
+    font-size: 13px;
+    border-radius: 40px;
   }
 
   .toolsPanel {
-    position: relative;
-    top: 0;
+    padding: 24px;
+    border-radius: 20px;
+  }
+
+  .panelTitle {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+
+  .toolsList {
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .toolItem {
+    padding: 12px 16px;
+    border-radius: 10px;
+  }
+
+  .toolItem span {
+    font-size: 13px;
+  }
+
+  .infoBox {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .infoBox p {
+    font-size: 13px;
+  }
+
+  .fullscreenCloseButton {
+    top: 16px;
+    right: 16px;
+    width: 48px;
+    height: 48px;
+  }
+
+  .sidebarOverlay {
+    width: 260px;
+  }
+}
+
+/* Very small devices (375px) */
+@media (max-width: 375px) {
+  .heroTitle {
+    font-size: 26px;
+  }
+
+  .heroDescription {
+    font-size: 15px;
+  }
+
+  .uploadZone {
+    padding: 48px 16px;
+  }
+
+  .uploadZone h3 {
+    font-size: 20px;
+  }
+
+  .uploadZone p {
+    font-size: 13px;
+  }
+
+  .imageWrapper {
+    height: 280px;
+  }
+
+  .panelTitle {
+    font-size: 18px;
   }
 }
 

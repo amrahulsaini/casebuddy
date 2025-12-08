@@ -415,19 +415,257 @@
   transform: scaleY(1);
 }
 
-/* Responsive */
+/* ===== Responsive Design ===== */
+
+/* Tablet and below (1024px) */
 @media (max-width: 1024px) {
   .container {
     margin-left: 0;
-    padding: 20px;
+    padding: 32px 24px;
   }
 
   .heroTitle {
-    font-size: 40px;
+    font-size: 44px;
+  }
+
+  .heroDescription {
+    font-size: 18px;
+  }
+
+  .galleryGrid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+}
+
+/* Mobile landscape and small tablets (768px) */
+@media (max-width: 768px) {
+  .container {
+    padding: 24px 20px;
+  }
+
+  .hero {
+    padding: 40px 16px;
+  }
+
+  .heroIcon {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 24px;
+  }
+
+  .heroTitle {
+    font-size: 36px;
+    margin-bottom: 12px;
   }
 
   .heroDescription {
     font-size: 16px;
+  }
+
+  .galleryStats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin: 32px 0;
+  }
+
+  .statCard {
+    padding: 24px;
+  }
+
+  .statValue {
+    font-size: 40px;
+  }
+
+  .statLabel {
+    font-size: 13px;
+  }
+
+  .galleryGrid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+
+  .galleryInfo {
+    padding: 16px;
+  }
+
+  .galleryTitle {
+    font-size: 16px;
+  }
+
+  .galleryDate {
+    font-size: 13px;
+  }
+
+  .comingSoon {
+    padding: 80px 32px;
+    margin-top: 48px;
+  }
+
+  .comingSoon h2 {
+    font-size: 32px;
+  }
+
+  .comingSoon p {
+    font-size: 16px;
+  }
+
+  .header {
+    padding: 16px 24px;
+    margin-bottom: 32px;
+  }
+
+  .logo {
+    font-size: 20px;
+  }
+
+  .logoIcon {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+
+  .menuButton {
+    padding: 10px 18px;
+    font-size: 13px;
+  }
+}
+
+/* Mobile portrait (480px) */
+@media (max-width: 480px) {
+  .container {
+    padding: 20px 16px;
+  }
+
+  .hero {
+    padding: 32px 12px;
+  }
+
+  .heroIcon {
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+  }
+
+  .heroTitle {
+    font-size: 28px;
+    margin-bottom: 12px;
+    letter-spacing: -1px;
+  }
+
+  .heroDescription {
+    font-size: 15px;
+  }
+
+  .galleryStats {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin: 24px 0;
+  }
+
+  .statCard {
+    padding: 20px;
+  }
+
+  .statValue {
+    font-size: 36px;
+  }
+
+  .statLabel {
+    font-size: 12px;
+  }
+
+  .galleryGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .galleryCard {
+    border-radius: 12px;
+  }
+
+  .galleryInfo {
+    padding: 14px;
+  }
+
+  .galleryTitle {
+    font-size: 15px;
+  }
+
+  .galleryDate {
+    font-size: 12px;
+  }
+
+  .overlayButton {
+    width: 44px;
+    height: 44px;
+  }
+
+  .comingSoon {
+    padding: 60px 20px;
+    margin-top: 40px;
+    border-radius: 12px;
+  }
+
+  .comingSoon h2 {
+    font-size: 26px;
+    margin-bottom: 10px;
+  }
+
+  .comingSoon p {
+    font-size: 15px;
+  }
+
+  .header {
+    padding: 12px 16px;
+    margin-bottom: 24px;
+    border-radius: 12px;
+  }
+
+  .logo {
+    font-size: 18px;
+  }
+
+  .logoIcon {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    border-radius: 6px;
+  }
+
+  .menuButton {
+    padding: 10px 16px;
+    font-size: 12px;
+    border-radius: 6px;
+  }
+
+  .sidebarOverlay {
+    width: 260px;
+  }
+}
+
+/* Very small devices (375px) */
+@media (max-width: 375px) {
+  .heroTitle {
+    font-size: 26px;
+  }
+
+  .heroDescription {
+    font-size: 14px;
+  }
+
+  .statValue {
+    font-size: 32px;
+  }
+
+  .comingSoon h2 {
+    font-size: 24px;
+  }
+
+  .comingSoon p {
+    font-size: 14px;
   }
 }
 

@@ -17,8 +17,38 @@
   overflow-y: auto;
 }
 
+/* ===== Responsive Design ===== */
+
+/* Tablet and below (1024px) */
+@media (max-width: 1024px) {
+  .mainContent {
+    margin-left: 240px;
+  }
+
+  .content {
+    padding: 20px;
+  }
+}
+
+/* Mobile landscape and small tablets (768px) */
 @media (max-width: 768px) {
+  .adminLayout {
+    flex-direction: column;
+  }
+
   .mainContent {
     margin-left: 0;
+    padding-top: 60px;
+  }
+
+  .content {
+    padding: 16px;
+  }
+}
+
+/* Mobile portrait (480px) */
+@media (max-width: 480px) {
+  .content {
+    padding: 12px;
   }
 }

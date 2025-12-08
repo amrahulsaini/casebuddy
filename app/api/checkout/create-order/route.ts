@@ -146,6 +146,12 @@ export async function POST(request: NextRequest) {
         order_note: notes || `Order for ${orderItem.productName}`
       };
 
+      console.log('Creating Cashfree payment session:', {
+        url: `${CASHFREE_API_URL}/pg/orders`,
+        appId: CASHFREE_APP_ID,
+        request: paymentSessionRequest
+      });
+
       const response = await fetch(`${CASHFREE_API_URL}/pg/orders`, {
         method: 'POST',
         headers: {
@@ -159,9 +165,20 @@ export async function POST(request: NextRequest) {
 
       const responseData = await response.json();
       
+      console.log('Cashfree API Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        data: responseData
+      });
+      
       if (response.ok) {
         paymentSessionId = responseData.payment_session_id;
         paymentUrl = responseData.payment_link;
+
+        console.log('Payment session created successfully:', {
+          sessionId: paymentSessionId,
+          paymentUrl: paymentUrl
+        });
 
         // Update order with payment session ID
         await caseMainPool.query(

@@ -141,8 +141,7 @@ export async function POST(request: NextRequest) {
           customer_name: fullName
         },
         order_meta: {
-          return_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/checkout/payment-callback?order_id=${orderId}`,
-          notify_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/checkout/payment-webhook`,
+          return_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/checkout/payment-callback?order_id=${orderId}`
         },
         order_note: notes || `Order for ${orderItem.productName}`
       };

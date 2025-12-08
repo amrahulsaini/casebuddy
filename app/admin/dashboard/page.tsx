@@ -8,22 +8,37 @@ export default async function AdminDashboardPage() {
     // Get statistics
     const [productsCount] = await connection.execute('SELECT COUNT(*) as count FROM products');
     const [categoriesCount] = await connection.execute('SELECT COUNT(*) as count FROM categories');
-    const [ordersCount] = await connection.execute('SELECT COUNT(*) as count FROM orders');
-    const [pendingOrders] = await connection.execute(
-      "SELECT COUNT(*) as count FROM orders WHERE status = 'pending'"
-    );
+    
+    // Try to get orders count, but handle if table doesn't exist
+    let ordersCount = 0;
+    let pendingCount = 0;
+    let recentOrders: any[] = [];
+    
+    try {
+      const [ordersResult] = await connection.execute('SELECT COUNT(*) as count FROM orders');
+      ordersCount = (ordersResult as any[])[0].count;
+      
+      const [pendingResult] = await connection.execute(
+        "SELECT COUNT(*) as count FROM orders WHERE order_status = 'pending'"
+      );
+      pendingCount = (pendingResult as any[])[0].count;
+      
+      // Get recent orders
+      const [ordersData] = await connection.execute(
+        'SELECT * FROM orders ORDER BY created_at DESC LIMIT 5'
+      );
+      recentOrders = ordersData as any[];
+    } catch (ordersError) {
+      console.log('Orders table not found or error querying orders:', ordersError);
+      // Continue without orders data
+    }
 
     const stats = {
       products: (productsCount as any[])[0].count,
       categories: (categoriesCount as any[])[0].count,
-      orders: (ordersCount as any[])[0].count,
-      pending: (pendingOrders as any[])[0].count,
+      orders: ordersCount,
+      pending: pendingCount,
     };
-
-    // Get recent orders
-    const [recentOrders] = await connection.execute(
-      'SELECT * FROM orders ORDER BY created_at DESC LIMIT 5'
-    );
 
     return (
       <div className={styles.dashboard}>
@@ -123,7 +138,7 @@ export default async function AdminDashboardPage() {
 
         <div className={styles.recentOrders}>
           <h2>Recent Orders</h2>
-          {(recentOrders as any[]).length > 0 ? (
+          {recentOrders.length > 0 ? (
             <div className={styles.ordersTable}>
               <table>
                 <thead>
@@ -136,14 +151,14 @@ export default async function AdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {(recentOrders as any[]).map((order) => (
+                  {recentOrders.map((order) => (
                     <tr key={order.id}>
                       <td>{order.order_number}</td>
                       <td>{order.customer_name}</td>
-                      <td>₹{parseFloat(order.total).toFixed(2)}</td>
+                      <td>₹{parseFloat(order.total_amount).toFixed(2)}</td>
                       <td>
-                        <span className={`${styles.badge} ${styles[order.status]}`}>
-                          {order.status}
+                        <span className={`${styles.badge} ${styles[order.order_status]}`}>
+                          {order.order_status}
                         </span>
                       </td>
                       <td>{new Date(order.created_at).toLocaleDateString()}</td>

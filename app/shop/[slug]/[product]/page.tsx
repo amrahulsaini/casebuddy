@@ -94,11 +94,9 @@ export default function ProductDetailPage() {
         if (data.success) {
           setProduct(data.product);
           
-          // Check if customization is enabled (either from product or category)
-          if (data.product.customization?.enabled) {
-            // Phone brands and models are already included in customization object
+          // Customization is always enabled - load phone brands and models
+          if (data.product.customization) {
             setPhoneBrands(data.product.customization.phone_brands || []);
-            // Set all available models from the category/product
             if (data.product.customization.phone_models) {
               setPhoneModels(data.product.customization.phone_models);
             }

@@ -170,26 +170,6 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Features Bar */}
-      <section className={styles.features}>
-        <div className={styles.feature}>
-          <Truck size={32} className={styles.featureIcon} />
-          <span>Free Shipping</span>
-        </div>
-        <div className={styles.feature}>
-          <ShieldCheck size={32} className={styles.featureIcon} />
-          <span>Money Back Guarantee</span>
-        </div>
-        <div className={styles.feature}>
-          <Zap size={32} className={styles.featureIcon} />
-          <span>Fast Delivery</span>
-        </div>
-        <div className={styles.feature}>
-          <Headphones size={32} className={styles.featureIcon} />
-          <span>24/7 Support</span>
-        </div>
-      </section>
-
       {/* Dynamic Homepage Sections */}
       {sections.map((section, sectionIndex) => (
         <section 

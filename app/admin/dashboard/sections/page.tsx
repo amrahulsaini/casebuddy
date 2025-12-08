@@ -39,8 +39,11 @@ export default function SectionsPage() {
   });
 
   useEffect(() => {
-    fetchPages();
-    fetchSections();
+    const loadData = async () => {
+      await fetchPages();
+      await fetchSections();
+    };
+    loadData();
     
     // Auto-select page from URL query
     const pageParam = searchParams.get('page');
@@ -68,17 +71,7 @@ export default function SectionsPage() {
       const response = await fetch('/api/admin/page-sections');
       if (response.ok) {
         const data = await response.json();
-        // Fetch page names for each section
-        const sectionsWithPages = await Promise.all(
-          data.map(async (section: Section) => {
-            if (section.page_id) {
-              const page = pages.find((p) => p.id === section.page_id);
-              return { ...section, page_name: page?.page_name || 'Unknown' };
-            }
-            return { ...section, page_name: 'No Page' };
-          })
-        );
-        setSections(sectionsWithPages);
+        setSections(data);
       }
     } catch (error) {
       console.error('Error fetching sections:', error);
@@ -233,13 +226,15 @@ export default function SectionsPage() {
                 </td>
               </tr>
             ) : (
-              filteredSections.map((section) => (
+              filteredSections.map((section) => {
+                const page = pages.find((p) => p.id === section.page_id);
+                return (
                 <tr key={section.id}>
                   <td className={styles.titleCell}>{section.title}</td>
                   <td>{section.subtitle}</td>
                   <td>
                     <span className={styles.pageBadge}>
-                      {section.page_name || 'No Page'}
+                      {page?.page_name || 'Unknown'}
                     </span>
                   </td>
                   <td>{section.sort_order}</td>
@@ -267,7 +262,7 @@ export default function SectionsPage() {
                     </button>
                   </td>
                 </tr>
-              ))
+              )})
             )}
           </tbody>
         </table>

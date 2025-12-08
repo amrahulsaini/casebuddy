@@ -39,7 +39,15 @@ export default function CategoryPhonesPage() {
 
   useEffect(() => {
     if (selectedCategory) {
+      // Clear previous selections first
+      setSelectedBrands([]);
+      setSelectedModels([]);
+      // Then fetch new data
       fetchCategoryPhones(selectedCategory);
+    } else {
+      // If no category selected, clear everything
+      setSelectedBrands([]);
+      setSelectedModels([]);
     }
   }, [selectedCategory]);
 

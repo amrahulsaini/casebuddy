@@ -173,7 +173,15 @@ export async function POST(request: NextRequest) {
       
       if (response.ok) {
         paymentSessionId = responseData.payment_session_id;
-        paymentUrl = responseData.payment_link;
+        
+        // Construct payment URL using session ID
+        // Production: https://payments.cashfree.com/pay/{session_id}
+        // Sandbox: https://sandbox.cashfree.com/pg/view/{session_id}
+        const paymentBaseUrl = CASHFREE_ENV === 'PROD' 
+          ? 'https://payments.cashfree.com/pay' 
+          : 'https://sandbox.cashfree.com/pg/view';
+        
+        paymentUrl = `${paymentBaseUrl}/${paymentSessionId}`;
 
         console.log('Payment session created successfully:', {
           sessionId: paymentSessionId,

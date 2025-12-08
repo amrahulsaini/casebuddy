@@ -141,6 +141,9 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
       compare_price: formData.compare_price ? parseFloat(formData.compare_price) : null,
       stock_quantity: parseInt(formData.stock_quantity),
       categories: selectedCategories,
+      customization_override: false, // Customization is permanent for all products
+      customization_enabled: null,
+      customization_options: null,
     };
 
     try {
@@ -152,6 +155,10 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
 
       if (response.ok) {
         router.push('/admin/dashboard/products');
+      } else {
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
+        alert(`Error saving product: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error saving product:', error);

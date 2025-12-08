@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, ShoppingCart, Heart, Star, Truck, Shield, Package, ChevronLeft, ChevronRight, Plus, Minus } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import styles from './product.module.css';
 
 interface ProductImage {
@@ -272,13 +273,14 @@ export default function ProductDetailPage() {
             <Link href="/contact" className={styles.navLink}>Contact</Link>
           </div>
           <div className={styles.navActions}>
-            <button className={styles.iconButton}>
+            <Link href="/wishlist" className={styles.iconButton}>
               <Heart size={22} />
-            </button>
-            <button className={styles.iconButton}>
+              <WishlistBadge className={styles.cartBadge} />
+            </Link>
+            <Link href="/cart" className={styles.iconButton}>
               <ShoppingCart size={22} />
-              <span className={styles.cartBadge}>0</span>
-            </button>
+              <CartBadge className={styles.cartBadge} />
+            </Link>
           </div>
         </nav>
       </header>

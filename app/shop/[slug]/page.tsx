@@ -5,6 +5,8 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, ShoppingCart, Heart, Star, Filter, Grid3x3, List } from 'lucide-react';
+import { useCart } from '@/contexts/CartContext';
+import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import styles from './shop.module.css';
 
 interface Product {
@@ -29,6 +31,7 @@ interface Category {
 export default function ShopPage() {
   const params = useParams();
   const categorySlug = params?.slug as string;
+  const { toggleWishlist, isInWishlist } = useCart();
   
   const [products, setProducts] = useState<Product[]>([]);
   const [category, setCategory] = useState<Category | null>(null);
@@ -36,17 +39,7 @@ export default function ShopPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
-  const [cart, setCart] = useState<number[]>([]);
-  const [wishlist, setWishlist] = useState<number[]>([]);
   const productsPerPage = 24;
-
-  useEffect(() => {
-    // Load cart and wishlist from localStorage
-    const savedCart = localStorage.getItem('cart');
-    const savedWishlist = localStorage.getItem('wishlist');
-    if (savedCart) setCart(JSON.parse(savedCart));
-    if (savedWishlist) setWishlist(JSON.parse(savedWishlist));
-  }, []);
 
   useEffect(() => {
     if (!categorySlug) return;
@@ -74,24 +67,10 @@ export default function ShopPage() {
 
   const totalPages = Math.ceil(totalProducts / productsPerPage);
 
-  const toggleWishlist = (e: React.MouseEvent, productId: number) => {
+  const handleToggleWishlist = (e: React.MouseEvent, productId: number) => {
     e.preventDefault();
     e.stopPropagation();
-    const newWishlist = wishlist.includes(productId)
-      ? wishlist.filter(id => id !== productId)
-      : [...wishlist, productId];
-    setWishlist(newWishlist);
-    localStorage.setItem('wishlist', JSON.stringify(newWishlist));
-  };
-
-  const addToCart = (e: React.MouseEvent, productId: number) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!cart.includes(productId)) {
-      const newCart = [...cart, productId];
-      setCart(newCart);
-      localStorage.setItem('cart', JSON.stringify(newCart));
-    }
+    toggleWishlist(productId);
   };
 
   if (loading) {
@@ -117,14 +96,14 @@ export default function ShopPage() {
             <Link href="/contact" className={styles.navLink}>Contact</Link>
           </div>
           <div className={styles.navActions}>
-            <button className={styles.iconButton}>
+            <Link href="/wishlist" className={styles.iconButton}>
               <Heart size={22} />
-              {wishlist.length > 0 && <span className={styles.cartBadge}>{wishlist.length}</span>}
-            </button>
-            <button className={styles.iconButton}>
+              <WishlistBadge className={styles.cartBadge} />
+            </Link>
+            <Link href="/cart" className={styles.iconButton}>
               <ShoppingCart size={22} />
-              {cart.length > 0 && <span className={styles.cartBadge}>{cart.length}</span>}
-            </button>
+              <CartBadge className={styles.cartBadge} />
+            </Link>
           </div>
         </nav>
       </header>
@@ -185,10 +164,10 @@ export default function ShopPage() {
                 </div>
               )}
               <button 
-                className={`${styles.wishlistButton} ${wishlist.includes(product.id) ? styles.wishlisted : ''}`}
-                onClick={(e) => toggleWishlist(e, product.id)}
+                className={`${styles.wishlistButton} ${isInWishlist(product.id) ? styles.wishlisted : ''}`}
+                onClick={(e) => handleToggleWishlist(e, product.id)}
               >
-                <Heart size={20} fill={wishlist.includes(product.id) ? '#ff6b00' : 'none'} />
+                <Heart size={20} fill={isInWishlist(product.id) ? '#ff6b00' : 'none'} />
               </button>
             </div>
             <div className={styles.productInfo}>
@@ -214,13 +193,6 @@ export default function ShopPage() {
                 >
                   View Product
                 </Link>
-                <button 
-                  className={styles.addToCartButton}
-                  onClick={(e) => addToCart(e, product.id)}
-                >
-                  <ShoppingCart size={18} />
-                  <span>{cart.includes(product.id) ? 'In Cart' : 'Add to Cart'}</span>
-                </button>
               </div>
             </div>
           </Link>

@@ -40,6 +40,7 @@ export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [pages, setPages] = useState<Page[]>([]);
   const [sections, setSections] = useState<Section[]>([]);
+  const [allSections, setAllSections] = useState<Section[]>([]); // All sections for lookup
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
@@ -74,6 +75,7 @@ export default function CategoriesPage() {
 
   useEffect(() => {
     fetchPages();
+    fetchAllSections();
     fetchCategories();
   }, []);
 
@@ -101,6 +103,18 @@ export default function CategoriesPage() {
       }
     } catch (error) {
       console.error('Error fetching pages:', error);
+    }
+  };
+
+  const fetchAllSections = async () => {
+    try {
+      const response = await fetch('/api/admin/page-sections');
+      if (response.ok) {
+        const data = await response.json();
+        setAllSections(Array.isArray(data) ? data : []);
+      }
+    } catch (error) {
+      console.error('Error fetching all sections:', error);
     }
   };
 
@@ -237,42 +251,34 @@ export default function CategoriesPage() {
   const handleEdit = async (category: Category) => {
     setEditingCategory(category);
     
-    // If we have section_key, fetch all sections to find the page_id
+    // If we have section_key, find the page_id from allSections
     if (category.section_key) {
-      try {
-        const response = await fetch('/api/admin/page-sections');
-        if (response.ok) {
-          const allSections = await response.json();
-          const section = allSections.find((s: Section) => s.section_key === category.section_key);
-          if (section) {
-            const pageId = section.page_id.toString();
-            // Fetch sections for this page
-            await fetchSectionsForPage(pageId);
-            
-            setFormData({
-              name: category.name,
-              slug: category.slug,
-              description: category.description || '',
-              image_url: category.image_url || '',
-              section_key: category.section_key || '',
-              page_id: pageId,
-              sort_order: category.sort_order.toString(),
-              is_active: category.is_active,
-              customization_enabled: (category as any).customization_enabled || false,
-              fonts: (category as any).customization_options?.fonts || ['bold', 'cursive'],
-              placements: (category as any).customization_options?.placements || [
-                'bottom_of_case',
-                'centre_of_case',
-                'name_on_phone_holder',
-                'right_vertical_with_strings',
-                'right_vertical_with_heart',
-                'name_with_heart_at_bottom'
-              ],
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching section details:', error);
+      const section = allSections.find((s: Section) => s.section_key === category.section_key);
+      if (section) {
+        const pageId = section.page_id.toString();
+        // Fetch sections for this page for the dropdown
+        await fetchSectionsForPage(pageId);
+        
+        setFormData({
+          name: category.name,
+          slug: category.slug,
+          description: category.description || '',
+          image_url: category.image_url || '',
+          section_key: category.section_key || '',
+          page_id: pageId,
+          sort_order: category.sort_order.toString(),
+          is_active: category.is_active,
+          customization_enabled: (category as any).customization_enabled || false,
+          fonts: (category as any).customization_options?.fonts || ['bold', 'cursive'],
+          placements: (category as any).customization_options?.placements || [
+            'bottom_of_case',
+            'centre_of_case',
+            'name_on_phone_holder',
+            'right_vertical_with_strings',
+            'right_vertical_with_heart',
+            'name_with_heart_at_bottom'
+          ],
+        });
       }
     } else {
       setFormData({
@@ -370,13 +376,13 @@ export default function CategoriesPage() {
 
   const getSectionName = (sectionKey: string | null): string => {
     if (!sectionKey) return '-';
-    const section = sections.find(s => s.section_key === sectionKey);
+    const section = allSections.find(s => s.section_key === sectionKey);
     return section?.title || sectionKey;
   };
 
   const getPageName = (sectionKey: string | null): string => {
     if (!sectionKey) return '-';
-    const section = sections.find(s => s.section_key === sectionKey);
+    const section = allSections.find(s => s.section_key === sectionKey);
     if (!section) return '-';
     const page = pages.find(p => p.id === section.page_id);
     return page?.page_name || '-';

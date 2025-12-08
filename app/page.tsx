@@ -248,7 +248,31 @@ export default function HomePage() {
                   ))}
                   {section.categories.map((category) => (
                     <Link 
-                      key={`duplicate-${category.id}`}
+                      key={`duplicate-1-${category.id}`}
+                      href={`/shop/${category.slug}`}
+                      className={styles.horizontalCard}
+                      draggable={false}
+                      onClick={(e) => isDragging && e.preventDefault()}
+                    >
+                      <div className={styles.horizontalImageWrapper}>
+                        <Image 
+                          src={category.image_url} 
+                          alt={category.name}
+                          width={280}
+                          height={380}
+                          className={styles.horizontalImage}
+                          loading="lazy"
+                          draggable={false}
+                        />
+                      </div>
+                      <div className={styles.horizontalInfo}>
+                        <h3 className={styles.horizontalName}>{category.name}</h3>
+                      </div>
+                    </Link>
+                  ))}
+                  {section.categories.map((category) => (
+                    <Link 
+                      key={`duplicate-2-${category.id}`}
                       href={`/shop/${category.slug}`}
                       className={styles.horizontalCard}
                       draggable={false}

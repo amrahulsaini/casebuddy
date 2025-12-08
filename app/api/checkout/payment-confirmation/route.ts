@@ -137,6 +137,16 @@ export async function POST(request: Request) {
         );
         console.log('Order marked as:', paymentStatus);
 
+        // TRANSACTION ROLLBACK: Delete order if payment failed (not just pending)
+        if (paymentData.order_status !== 'ACTIVE') {
+          console.log('Payment failed, deleting order from database...');
+          await connection.execute(
+            'DELETE FROM orders WHERE id = ?',
+            [orderId]
+          );
+          console.log(`Order ${orderId} deleted due to payment failure`);
+        }
+
         return NextResponse.json({
           success: false,
           message: `Payment not completed. Status: ${paymentData.order_status}`,

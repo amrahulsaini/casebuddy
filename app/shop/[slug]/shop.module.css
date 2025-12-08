@@ -509,6 +509,14 @@
   box-shadow: 0 4px 16px rgba(255, 107, 0, 0.3);
 }
 
+.ellipsis {
+  color: #666;
+  font-weight: 600;
+  font-size: 16px;
+  padding: 0 4px;
+  user-select: none;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .nav {

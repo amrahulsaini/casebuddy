@@ -219,15 +219,67 @@ export default function ShopPage() {
             Previous
           </button>
           <div className={styles.pageNumbers}>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-              <button
-                key={page}
-                className={`${styles.pageNumber} ${currentPage === page ? styles.activePage : ''}`}
-                onClick={() => setCurrentPage(page)}
-              >
-                {page}
-              </button>
-            ))}
+            {(() => {
+              const pages = [];
+              const showEllipsisStart = currentPage > 3;
+              const showEllipsisEnd = currentPage < totalPages - 2;
+
+              // Always show first page
+              pages.push(
+                <button
+                  key={1}
+                  className={`${styles.pageNumber} ${currentPage === 1 ? styles.activePage : ''}`}
+                  onClick={() => setCurrentPage(1)}
+                >
+                  1
+                </button>
+              );
+
+              // Show ellipsis if current page is far from start
+              if (showEllipsisStart) {
+                pages.push(
+                  <span key="ellipsis-start" className={styles.ellipsis}>...</span>
+                );
+              }
+
+              // Show pages around current page
+              const start = Math.max(2, currentPage - 1);
+              const end = Math.min(totalPages - 1, currentPage + 1);
+
+              for (let i = start; i <= end; i++) {
+                pages.push(
+                  <button
+                    key={i}
+                    className={`${styles.pageNumber} ${currentPage === i ? styles.activePage : ''}`}
+                    onClick={() => setCurrentPage(i)}
+                  >
+                    {i}
+                  </button>
+                );
+              }
+
+              // Show ellipsis if current page is far from end
+              if (showEllipsisEnd) {
+                pages.push(
+                  <span key="ellipsis-end" className={styles.ellipsis}>...</span>
+                );
+              }
+
+              // Always show last page (if more than 1 page)
+              if (totalPages > 1) {
+                pages.push(
+                  <button
+                    key={totalPages}
+                    className={`${styles.pageNumber} ${currentPage === totalPages ? styles.activePage : ''}`}
+                    onClick={() => setCurrentPage(totalPages)}
+                  >
+                    {totalPages}
+                  </button>
+                );
+              }
+
+              return pages;
+            })()}
           </div>
           <button 
             className={styles.pageButton}

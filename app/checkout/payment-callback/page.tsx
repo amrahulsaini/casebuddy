@@ -100,8 +100,8 @@ function PaymentCallbackContent() {
             {orderDetails && (
               <div className={styles.orderInfo}>
                 <h3>Order Details</h3>
-                <p>Order Number: <strong>{orderDetails.orderNumber}</strong></p>
-                <p>Total Amount: <strong>₹{orderDetails.total}</strong></p>
+                <p>Order Number: <strong>{orderDetails.order_number}</strong></p>
+                <p>Total Amount: <strong>₹{orderDetails.total_amount}</strong></p>
               </div>
             )}
 

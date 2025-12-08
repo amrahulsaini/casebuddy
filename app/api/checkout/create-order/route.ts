@@ -92,10 +92,11 @@ export async function POST(request: NextRequest) {
         shipping_cost,
         total_amount,
         notes,
+        customization_data,
         order_status,
         payment_status,
         created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
       [
         orderNumber,
         email,
@@ -116,6 +117,7 @@ export async function POST(request: NextRequest) {
         shipping,
         total,
         notes || null,
+        orderItem.customizationOptions ? JSON.stringify(orderItem.customizationOptions) : null,
         'pending', // order_status
         'pending'  // payment_status
       ]

@@ -88,18 +88,24 @@ export default function CategoryPhonesPage() {
       // Fetch category brands
       const brandsResponse = await fetch(`/api/admin/categories/${categoryId}/phone-brands`);
       const brandsData = await brandsResponse.json();
-      if (brandsData.success) {
+      if (brandsData.success && brandsData.brands) {
         setSelectedBrands(brandsData.brands.map((b: any) => b.id));
+      } else {
+        setSelectedBrands([]);
       }
 
       // Fetch category models
       const modelsResponse = await fetch(`/api/admin/categories/${categoryId}/phone-models`);
       const modelsData = await modelsResponse.json();
-      if (modelsData.success) {
+      if (modelsData.success && modelsData.models) {
         setSelectedModels(modelsData.models.map((m: any) => m.id));
+      } else {
+        setSelectedModels([]);
       }
     } catch (error) {
       console.error('Error fetching category phones:', error);
+      setSelectedBrands([]);
+      setSelectedModels([]);
     }
   };
 

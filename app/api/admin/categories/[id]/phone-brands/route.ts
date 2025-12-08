@@ -21,7 +21,7 @@ export async function GET(
         [id]
       );
 
-      return NextResponse.json(brands);
+      return NextResponse.json({ success: true, brands });
     } finally {
       connection.release();
     }

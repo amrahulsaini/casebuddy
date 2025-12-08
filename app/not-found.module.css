@@ -216,10 +216,55 @@
   margin: 0;
 }
 
-/* ===== Responsive Design ===== */\n\n/* Tablet and below (1024px) */\n@media (max-width: 1024px) {\n  .content {\n    padding: 50px 16px;\n  }\n\n  .phoneCase {\n    width: 180px;\n    height: 250px;\n  }\n\n  .phone {\n    font-size: 64px;\n  }\n\n  .title {\n    font-size: 42px;\n  }\n\n  .description {\n    font-size: 19px;\n  }\n}\n\n/* Mobile landscape and small tablets (768px) */\n@media (max-width: 768px) {\n  .header {\n    padding: 1.2rem 1.5rem;\n  }\n\n  .content {\n    padding: 40px 16px;\n  }\n\n  .errorAnimation {\n    margin-bottom: 32px;\n  }\n\n  .phoneCase {\n    width: 150px;\n    height: 210px;\n  }\n\n  .phoneCase::before {\n    top: 16px;\n    width: 50px;\n    height: 5px;\n  }\n\n  .phone {\n    font-size: 56px;\n  }\n\n  .title {\n    font-size: 36px;\n    margin-bottom: 16px;\n  }\n\n  .description {\n    font-size: 18px;\n    margin-bottom: 32px;\n  }\n\n  .suggestions {\n    padding: 24px;\n    margin-bottom: 32px;\n  }\n\n  .suggestionTitle {\n    font-size: 17px;\n    margin-bottom: 14px;\n  }\n\n  .suggestionList li {\n    font-size: 15px;\n  }\n\n  .actions {\n    flex-direction: column;\n    width: 100%;\n    max-width: 300px;\n    gap: 12px;\n  }\n\n  .primaryButton,\n  .secondaryButton {\n    width: 100%;\n    justify-content: center;\n    padding: 14px 28px;\n    font-size: 15px;\n  }\n\n  .backLink {\n    font-size: 14px;\n    margin-top: 16px;\n  }\n\n  .footer {\n    padding: 24px 16px;\n  }\n\n  .footer p {\n    font-size: 13px;\n  }\n}\n\n/* Mobile portrait (480px) */\n@media (max-width: 480px) {\n  .header {\n    padding: 1rem 1rem;\n  }\n\n  .content {\n    padding: 32px 12px;\n  }\n\n  .errorAnimation {\n    margin-bottom: 28px;\n  }\n\n  .phoneCase {\n    width: 140px;\n    height: 200px;\n    border-radius: 25px;\n  }\n\n  .phoneCase::before {\n    top: 14px;\n    width: 45px;\n    height: 4px;\n  }\n\n  .phone {\n    font-size: 48px;\n  }\n\n  .title {\n    font-size: 32px;\n    margin-bottom: 14px;\n  }\n\n  .description {\n    font-size: 17px;\n    margin-bottom: 28px;\n  }\n\n  .suggestions {\n    padding: 20px;\n    margin-bottom: 28px;\n    border-radius: 14px;\n  }\n\n  .suggestionTitle {\n    font-size: 16px;\n    margin-bottom: 12px;\n  }\n\n  .suggestionList {\n    gap: 10px;\n  }\n\n  .suggestionList li {\n    font-size: 14px;\n  }\n\n  .actions {\n    gap: 10px;\n  }\n\n  .primaryButton,\n  .secondaryButton {\n    padding: 13px 24px;\n    font-size: 14px;\n    border-radius: 10px;\n  }\n\n  .backLink {\n    font-size: 13px;\n  }\n\n  .footer {\n    padding: 20px 12px;\n  }\n}\n\n/* Very small devices (375px) */\n@media (max-width: 375px) {\n  .phoneCase {\n    width: 120px;\n    height: 180px;\n  }\n\n  .phone {\n    font-size: 42px;\n  }\n\n  .title {\n    font-size: 28px;\n  }\n\n  .description {\n    font-size: 16px;\n  }\n\n  .suggestionList li {\n    font-size: 13px;\n  }\n\n  .primaryButton,\n  .secondaryButton {\n    padding: 12px 20px;\n    font-size: 13px;\n  }\n}\n\n@media (max-width: 768px) {
+/* ===== Responsive Design ===== */
+
+/* Tablet and below (1024px) */
+@media (max-width: 1024px) {
+  .content {
+    padding: 50px 16px;
+  }
+
+  .phoneCase {
+    width: 180px;
+    height: 250px;
+  }
+
+  .phone {
+    font-size: 64px;
+  }
+
+  .title {
+    font-size: 42px;
+  }
+
+  .description {
+    font-size: 19px;
+  }
+}
+
+/* Mobile landscape and small tablets (768px) */
+@media (max-width: 768px) {
+  .header {
+    padding: 1.2rem 1.5rem;
+  }
+
+  .content {
+    padding: 40px 16px;
+  }
+
+  .errorAnimation {
+    margin-bottom: 32px;
+  }
+
   .phoneCase {
     width: 150px;
     height: 210px;
+  }
+
+  .phoneCase::before {
+    top: 16px;
+    width: 50px;
+    height: 5px;
   }
 
   .phone {
@@ -228,25 +273,162 @@
 
   .title {
     font-size: 36px;
+    margin-bottom: 16px;
   }
 
   .description {
     font-size: 18px;
+    margin-bottom: 32px;
+  }
+
+  .suggestions {
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+
+  .suggestionTitle {
+    font-size: 17px;
+    margin-bottom: 14px;
+  }
+
+  .suggestionList li {
+    font-size: 15px;
   }
 
   .actions {
     flex-direction: column;
     width: 100%;
     max-width: 300px;
+    gap: 12px;
   }
 
   .primaryButton,
   .secondaryButton {
     width: 100%;
     justify-content: center;
+    padding: 14px 28px;
+    font-size: 15px;
+  }
+
+  .backLink {
+    font-size: 14px;
+    margin-top: 16px;
+  }
+
+  .footer {
+    padding: 24px 16px;
+  }
+
+  .footer p {
+    font-size: 13px;
+  }
+}
+
+/* Mobile portrait (480px) */
+@media (max-width: 480px) {
+  .header {
+    padding: 1rem 1rem;
+  }
+
+  .content {
+    padding: 32px 12px;
+  }
+
+  .errorAnimation {
+    margin-bottom: 28px;
+  }
+
+  .phoneCase {
+    width: 140px;
+    height: 200px;
+    border-radius: 25px;
+  }
+
+  .phoneCase::before {
+    top: 14px;
+    width: 45px;
+    height: 4px;
+  }
+
+  .phone {
+    font-size: 48px;
+  }
+
+  .title {
+    font-size: 32px;
+    margin-bottom: 14px;
+  }
+
+  .description {
+    font-size: 17px;
+    margin-bottom: 28px;
   }
 
   .suggestions {
     padding: 20px;
+    margin-bottom: 28px;
+    border-radius: 14px;
+  }
+
+  .suggestionTitle {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+
+  .suggestionList {
+    gap: 10px;
+  }
+
+  .suggestionList li {
+    font-size: 14px;
+  }
+
+  .actions {
+    gap: 10px;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    padding: 13px 24px;
+    font-size: 14px;
+    border-radius: 10px;
+  }
+
+  .backLink {
+    font-size: 13px;
+  }
+
+  .footer {
+    padding: 20px 12px;
+  }
+}
+
+/* Very small devices (375px) */
+@media (max-width: 375px) {
+  .phoneCase {
+    width: 120px;
+    height: 180px;
+  }
+
+  .phone {
+    font-size: 42px;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+
+  .description {
+    font-size: 16px;
+  }
+
+  .suggestionList li {
+    font-size: 13px;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    padding: 12px 20px;
+    font-size: 13px;
   }
 }

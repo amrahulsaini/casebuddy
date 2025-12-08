@@ -19,7 +19,7 @@ export async function GET(
       SELECT 
         s.*,
         COUNT(c.id) as category_count
-      FROM homepage_sections s
+      FROM page_sections s
       LEFT JOIN categories c ON c.section_key = s.section_key AND c.parent_id IS NULL
       WHERE s.page_id = ?
       GROUP BY s.id

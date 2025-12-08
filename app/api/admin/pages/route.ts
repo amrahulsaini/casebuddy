@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
         p.*,
         COUNT(s.id) as section_count
       FROM pages p
-      LEFT JOIN homepage_sections s ON s.page_id = p.id
+      LEFT JOIN page_sections s ON s.page_id = p.id
       GROUP BY p.id
       ORDER BY p.sort_order ASC
     `);

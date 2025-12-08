@@ -30,7 +30,7 @@ export async function GET(
     // Fetch sections for this page
     const [sectionRows]: any = await productsPool.query(
       `SELECT id, section_key, title, subtitle, sort_order, is_active
-       FROM homepage_sections
+       FROM page_sections
        WHERE page_id = ?
        ORDER BY sort_order ASC`,
       [page.id]

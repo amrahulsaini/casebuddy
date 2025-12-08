@@ -65,7 +65,7 @@ export default function SectionsPage() {
   const fetchSections = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/homepage-sections');
+      const response = await fetch('/api/admin/page-sections');
       if (response.ok) {
         const data = await response.json();
         // Fetch page names for each section
@@ -98,8 +98,8 @@ export default function SectionsPage() {
 
     try {
       const url = editingSection
-        ? `/api/admin/homepage-sections/${editingSection.id}`
-        : '/api/admin/homepage-sections';
+        ? `/api/admin/page-sections/${editingSection.id}`
+        : '/api/admin/page-sections';
       const method = editingSection ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -138,7 +138,7 @@ export default function SectionsPage() {
     if (!confirm('Are you sure you want to delete this section?')) return;
 
     try {
-      const response = await fetch(`/api/admin/homepage-sections/${id}`, {
+      const response = await fetch(`/api/admin/page-sections/${id}`, {
         method: 'DELETE',
       });
 

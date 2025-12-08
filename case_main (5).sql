@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Dec 06, 2025 at 02:44 PM
+-- Generation Time: Dec 08, 2025 at 06:45 AM
 -- Server version: 10.11.15-MariaDB
 -- PHP Version: 8.3.27
 
@@ -44,7 +44,7 @@ CREATE TABLE `admin_users` (
 --
 
 INSERT INTO `admin_users` (`id`, `username`, `password`, `email`, `full_name`, `role`, `is_active`, `last_login`, `created_at`) VALUES
-(1, 'admin', '$2b$10$lJ9n44NnUhzdCvpScGsQOumKsjTP321EntWzTDkSD7DfnSba2VWD6', 'admin@casebuddy.co.in', 'Ritesh Goyal', 'admin', 1, '2025-12-06 08:32:48', '2025-12-04 16:55:29');
+(1, 'admin', '$2b$10$lJ9n44NnUhzdCvpScGsQOumKsjTP321EntWzTDkSD7DfnSba2VWD6', 'admin@casebuddy.co.in', 'Ritesh Goyal', 'admin', 1, '2025-12-08 06:22:32', '2025-12-04 16:55:29');
 
 -- --------------------------------------------------------
 
@@ -73,7 +73,7 @@ CREATE TABLE `categories` (
 --
 
 INSERT INTO `categories` (`id`, `name`, `slug`, `description`, `image_url`, `parent_id`, `section_key`, `sort_order`, `is_active`, `created_at`, `updated_at`, `customization_enabled`, `customization_options`) VALUES
-(5, 'Silicone Cases', 'designer-slim-case', 'Browse our Silicone Cases collection', '/cdn/categories/designer-slim-case.jpg', NULL, 'custom_cases', 1, 1, '2025-12-03 18:42:23', '2025-12-05 13:22:29', 0, NULL),
+(5, 'Silicone Cases', 'designer-slim-case', 'Browse our Silicone Cases collection', '/cdn/categories/designer-slim-case.jpg', NULL, 'custom_cases', 1, 1, '2025-12-03 18:42:23', '2025-12-06 14:59:41', 1, '{\"text_enabled\":true,\"fonts\":[\"bold\",\"cursive\"],\"placements\":[\"bottom_of_case\",\"centre_of_case\",\"name_on_phone_holder\",\"right_vertical_with_strings\",\"right_vertical_with_heart\",\"name_with_heart_at_bottom\"]}'),
 (6, 'Protective Bumper Case', 'black-bumper-case', 'Browse our Protective Bumper Case collection', '/cdn/categories/black-bumper-case.jpg', NULL, 'custom_cases', 2, 1, '2025-12-03 18:42:24', '2025-12-05 13:22:29', 0, NULL),
 (7, 'Clear Bumper Cases', 'black-transparent-bumper-iphone-cases', 'Browse our Clear Bumper Cases collection', '/cdn/categories/black-transparent-bumper-iphone-cases.png', NULL, 'custom_cases', 3, 1, '2025-12-03 18:42:24', '2025-12-05 13:22:29', 0, NULL),
 (8, 'Best Sellers', 'best-sellers-custom-cases', 'Browse our Best Sellers collection', '/cdn/categories/best-sellers-custom-cases.jpg', NULL, 'custom_cases', 4, 1, '2025-12-03 18:42:25', '2025-12-05 13:22:29', 0, NULL),
@@ -97,8 +97,7 @@ INSERT INTO `categories` (`id`, `name`, `slug`, `description`, `image_url`, `par
 (26, 'Coffee Love', 'coffee-love-cases', 'Browse our Coffee Love collection', '/cdn/categories/coffee-love-cases.jpg', NULL, 'device_categories', 22, 1, '2025-12-03 18:42:38', '2025-12-05 13:22:29', 0, NULL),
 (27, 'Zodiac Cases', 'zodiac-phone-cases', 'Browse our Zodiac Cases collection', '/cdn/categories/zodiac-phone-cases.jpg', NULL, 'device_categories', 23, 1, '2025-12-03 18:42:39', '2025-12-05 13:22:29', 0, NULL),
 (28, 'Positive Quotes Cases', 'positive-quote-phone-cases', 'Browse our Positive Quotes Cases collection', '/cdn/categories/positive-quote-phone-cases.jpg', NULL, 'device_categories', 24, 1, '2025-12-03 18:42:40', '2025-12-05 13:22:29', 0, NULL),
-(29, 'Full Print Collection', 'full-print-collection', 'Browse our Full Print Collection collection', '/cdn/categories/full-print-collection.jpg', NULL, 'device_categories', 25, 1, '2025-12-03 18:42:40', '2025-12-05 13:22:29', 0, NULL),
-(39, 'panda cases', 'panda-cases', '', '/cdn/categories/category_1765004212634_chvqcz_download.webp', NULL, 'our-customized-panda-cases-', 0, 1, '2025-12-06 06:57:01', '2025-12-06 06:57:01', 0, NULL);
+(29, 'Full Print Collection', 'full-print-collection', 'Browse our Full Print Collection collection', '/cdn/categories/full-print-collection.jpg', NULL, 'device_categories', 25, 1, '2025-12-03 18:42:40', '2025-12-05 13:22:29', 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -116,6 +115,16 @@ CREATE TABLE `category_phone_brands` (
 --
 
 INSERT INTO `category_phone_brands` (`category_id`, `brand_id`) VALUES
+(5, 1),
+(5, 2),
+(5, 3),
+(5, 4),
+(5, 5),
+(5, 6),
+(5, 7),
+(5, 8),
+(5, 9),
+(5, 10),
 (9, 1),
 (9, 2),
 (9, 3),
@@ -125,11 +134,8 @@ INSERT INTO `category_phone_brands` (`category_id`, `brand_id`) VALUES
 (12, 2),
 (12, 3),
 (12, 4),
-(13, 1),
 (13, 2),
-(13, 3),
-(13, 4),
-(13, 5);
+(13, 3);
 
 -- --------------------------------------------------------
 
@@ -143,6 +149,32 @@ CREATE TABLE `category_phone_models` (
   `phone_model_id` int(11) NOT NULL,
   `created_at` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `category_phone_models`
+--
+
+INSERT INTO `category_phone_models` (`id`, `category_id`, `phone_model_id`, `created_at`) VALUES
+(21, 13, 49, '2025-12-08 06:34:10'),
+(22, 13, 48, '2025-12-08 06:34:10'),
+(23, 13, 47, '2025-12-08 06:34:10'),
+(24, 13, 46, '2025-12-08 06:34:10'),
+(25, 13, 51, '2025-12-08 06:34:10'),
+(26, 13, 50, '2025-12-08 06:34:10'),
+(27, 13, 41, '2025-12-08 06:34:10'),
+(28, 13, 39, '2025-12-08 06:34:10'),
+(29, 13, 40, '2025-12-08 06:34:10'),
+(30, 13, 37, '2025-12-08 06:34:10'),
+(31, 13, 38, '2025-12-08 06:34:10'),
+(32, 13, 35, '2025-12-08 06:34:10'),
+(33, 13, 36, '2025-12-08 06:34:10'),
+(34, 13, 34, '2025-12-08 06:34:10'),
+(35, 13, 32, '2025-12-08 06:34:10'),
+(36, 13, 33, '2025-12-08 06:34:10'),
+(37, 13, 45, '2025-12-08 06:34:10'),
+(38, 13, 43, '2025-12-08 06:34:10'),
+(39, 13, 44, '2025-12-08 06:34:10'),
+(40, 13, 42, '2025-12-08 06:34:10');
 
 -- --------------------------------------------------------
 
@@ -168,8 +200,7 @@ CREATE TABLE `homepage_sections` (
 
 INSERT INTO `homepage_sections` (`id`, `page_id`, `section_key`, `title`, `subtitle`, `sort_order`, `is_active`, `created_at`, `updated_at`) VALUES
 (1, 1, 'custom_cases', 'Our Custom Designed Cases', 'Exclusive designs you won\'t find anywhere else', 0, 1, '2025-12-05 13:22:29', '2025-12-05 14:35:12'),
-(2, 1, 'device_categories', 'Our Categories', 'Find the perfect case for your device', 1, 1, '2025-12-05 13:22:29', '2025-12-05 14:35:12'),
-(8, 6, 'our-customized-panda-cases-', 'Our customized panda cases ', 'Choose from our wide range', 0, 1, '2025-12-06 06:56:05', '2025-12-06 06:56:05');
+(2, 1, 'device_categories', 'Our Categories', 'Find the perfect case for your device', 1, 1, '2025-12-05 13:22:29', '2025-12-05 14:35:12');
 
 -- --------------------------------------------------------
 
@@ -238,8 +269,7 @@ CREATE TABLE `pages` (
 --
 
 INSERT INTO `pages` (`id`, `page_key`, `page_name`, `slug`, `description`, `is_active`, `sort_order`, `created_at`, `updated_at`) VALUES
-(1, 'homepage', 'Homepage', 'home', 'Main homepage of the website', 1, 0, '2025-12-05 14:33:55', '2025-12-05 14:33:55'),
-(6, 'panda_cases', 'panda cases', 'panda-cases', 'The best panda cases for you ', 1, 1, '2025-12-06 06:55:22', '2025-12-06 06:55:22');
+(1, 'homepage', 'Homepage', 'home', 'Main homepage of the website', 1, 0, '2025-12-05 14:33:55', '2025-12-05 14:33:55');
 
 -- --------------------------------------------------------
 
@@ -603,7 +633,7 @@ INSERT INTO `products` (`id`, `name`, `slug`, `description`, `short_description`
 (203, 'Name Initial Custom  Slim Soft Cases', 'name-initial-custom-hard-soft-cases', '', 'Name Initial Custom  Slim Soft Cases', 299.00, NULL, 'NAME-INITIAL-CUSTOM-HARD-SOFT-CASES', 999, 0, 1, '2025-12-04 14:35:39', '2025-12-04 14:35:39', 0, NULL, NULL),
 (204, 'Name Initial Clear Custom  Slim Case', 'name-initial-clear-custom-case', '', 'Name Initial Clear Custom  Slim Case', 299.00, NULL, 'NAME-INITIAL-CLEAR-CUSTOM-CASE', 999, 0, 1, '2025-12-04 14:35:39', '2025-12-04 14:35:39', 0, NULL, NULL),
 (205, 'Name Heart Bracelet Custom  Slim Soft Cases', 'name-heart-bracelet-strap-custom-soft-cases', '', 'Name Heart Bracelet Custom  Slim Soft Cases', 299.00, NULL, 'NAME-HEART-BRACELET-STRAP-CUSTOM-SOFT-CASES', 999, 0, 1, '2025-12-04 14:35:39', '2025-12-04 14:35:39', 0, NULL, NULL),
-(206, 'Monogram Initial Custom  Slim Soft Case', 'monogram-initial-custom-soft-case', '', 'Monogram Initial Custom  Slim Soft Case', 299.00, NULL, 'MONOGRAM-INITIAL-CUSTOM-SOFT-CASE', 999, 0, 1, '2025-12-04 14:35:39', '2025-12-04 14:35:39', 0, NULL, NULL),
+(206, 'Monogram Initial Custom  Slim Soft Case', 'monogram-initial-custom-soft-case', '', 'Monogram Initial Custom  Slim Soft Case', 299.00, NULL, 'MONOGRAM-INITIAL-CUSTOM-SOFT-CASE', 999, 0, 1, '2025-12-04 14:35:39', '2025-12-06 15:03:50', 1, 1, '{\"fonts\":[\"bold\"],\"placements\":[\"top_left\"]}'),
 (207, 'Monochrome Custom Slim Soft Cases', 'monochrome-custom-hard-soft-cases-2', '', 'Monochrome Custom Slim Soft Cases', 299.00, NULL, 'MONOCHROME-CUSTOM-HARD-SOFT-CASES-2', 999, 0, 1, '2025-12-04 14:35:39', '2025-12-04 14:35:39', 0, NULL, NULL),
 (208, 'Monochrome Custom Slim Soft Cases', 'monochrome-custom-hard-soft-cases', '', 'Monochrome Custom Slim Soft Cases', 299.00, NULL, 'MONOCHROME-CUSTOM-HARD-SOFT-CASES', 999, 0, 1, '2025-12-04 14:35:39', '2025-12-04 14:35:39', 0, NULL, NULL),
 (209, 'Mom Girl Boss Series Transparent Custom Slim  Soft Cases', 'mom-girl-boss-series-transparent-custom-soft-cases', '', 'Mom Girl Boss Series Transparent Custom Slim  Soft Cases', 299.00, NULL, 'MOM-GIRL-BOSS-SERIES-TRANSPARENT-CUSTOM-SOFT-CASES', 999, 0, 1, '2025-12-04 14:35:39', '2025-12-04 14:35:39', 0, NULL, NULL),
@@ -1059,7 +1089,7 @@ INSERT INTO `products` (`id`, `name`, `slug`, `description`, `short_description`
 (656, 'iPhone New Luxury Crocodile Leather Case With Custom Initial Name', 'iphone-new-luxury-crocodile-leather-case-with-custom-initial-name', '', 'iPhone New Luxury Crocodile Leather Case With Custom Initial Name', 299.00, NULL, 'IPHONE-NEW-LUXURY-CROCODILE-LEATHER-CASE-WITH-CUSTOM-INITIAL-NAME', 999, 0, 1, '2025-12-04 16:05:23', '2025-12-04 16:05:23', 0, NULL, NULL),
 (657, 'iPhone Luxury Crocodile Leather Hard Phone Case Cover With Custom Name Initial', 'iphone-luxury-crocodile-leather-hard-phone-case-cover-with-custom-name-initial', '', 'iPhone Luxury Crocodile Leather Hard Phone Case Cover With Custom Name Initial', 299.00, NULL, 'IPHONE-LUXURY-CROCODILE-LEATHER-HARD-PHONE-CASE-COVER-WITH-CUSTOM-NAME-INITIAL', 999, 0, 1, '2025-12-04 16:05:24', '2025-12-05 03:28:08', 0, NULL, NULL),
 (658, 'iPhone Basic New Crocodile Leather Case With Custom Initial Name', 'iphone-basic-new-crocodile-leather-case-with-custom-initial-name', '', 'iPhone Basic New Crocodile Leather Case With Custom Initial Name', 299.00, NULL, 'IPHONE-BASIC-NEW-CROCODILE-LEATHER-CASE-WITH-CUSTOM-INITIAL-NAME', 999, 0, 1, '2025-12-04 16:05:24', '2025-12-04 16:05:24', 0, NULL, NULL),
-(660, 'our panda case', 'our-panda-case', '', '', 399.00, 498.98, '', 999, 0, 1, '2025-12-06 06:59:06', '2025-12-06 06:59:06', 0, NULL, NULL);
+(661, 'panda', 'panda', '', '', 399.00, 498.99, '', 999, 0, 1, '2025-12-06 16:12:34', '2025-12-06 16:12:34', 0, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -3966,8 +3996,7 @@ INSERT INTO `product_categories` (`product_id`, `category_id`) VALUES
 (655, 10),
 (656, 10),
 (657, 10),
-(658, 10),
-(660, 39);
+(658, 10);
 
 -- --------------------------------------------------------
 
@@ -4650,7 +4679,7 @@ INSERT INTO `product_images` (`id`, `product_id`, `image_url`, `alt_text`, `sort
 (656, 656, '/products/initial-phone-cases/iphone-new-luxury-crocodile-leather-case-with-custom-initial-name-1764864322990.jpg', 'iPhone New Luxury Crocodile Leather Case With Custom Initial Name', 0, 1, '2025-12-04 16:05:23'),
 (657, 657, '/products/initial-phone-cases/iphone-luxury-crocodile-leather-hard-phone-case-cover-with-custom-name-initial-1764864323937.jpg', 'iPhone Luxury Crocodile Leather Hard Phone Case Cover With Custom Name Initial', 0, 1, '2025-12-04 16:05:24'),
 (658, 658, '/products/initial-phone-cases/iphone-basic-new-crocodile-leather-case-with-custom-initial-name-1764864324153.jpg', 'iPhone Basic New Crocodile Leather Case With Custom Initial Name', 0, 1, '2025-12-04 16:05:24'),
-(660, 660, 'https://casebuddy.co.in/cdn/products/product_1765004334256_6t0th5_download.webp', '', 0, 1, '2025-12-06 06:59:06');
+(661, 661, 'https://casebuddy.co.in/cdn/products/product_1765037542068_3j9246_download.webp', '', 0, 1, '2025-12-06 16:12:34');
 
 -- --------------------------------------------------------
 
@@ -4671,7 +4700,8 @@ CREATE TABLE `product_phone_brands` (
 
 INSERT INTO `product_phone_brands` (`id`, `product_id`, `phone_brand_id`, `created_at`) VALUES
 (4, 285, 1, '2025-12-06 14:26:27'),
-(5, 646, 1, '2025-12-06 14:34:39');
+(5, 646, 1, '2025-12-06 14:34:39'),
+(7, 206, 1, '2025-12-06 15:03:50');
 
 -- --------------------------------------------------------
 
@@ -4925,19 +4955,19 @@ ALTER TABLE `admin_users`
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `category_phone_models`
 --
 ALTER TABLE `category_phone_models`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT for table `homepage_sections`
 --
 ALTER TABLE `homepage_sections`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `orders`
@@ -4955,7 +4985,7 @@ ALTER TABLE `order_items`
 -- AUTO_INCREMENT for table `pages`
 --
 ALTER TABLE `pages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `phone_brands`
@@ -4973,19 +5003,19 @@ ALTER TABLE `phone_models`
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=661;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=662;
 
 --
 -- AUTO_INCREMENT for table `product_images`
 --
 ALTER TABLE `product_images`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=661;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=662;
 
 --
 -- AUTO_INCREMENT for table `product_phone_brands`
 --
 ALTER TABLE `product_phone_brands`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `product_phone_models`

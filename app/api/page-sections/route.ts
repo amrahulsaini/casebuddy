@@ -21,7 +21,7 @@ export async function GET() {
   try {
     // Get active homepage sections ONLY from the homepage (page_id = 1)
     const [sections] = await caseMainPool.execute<any[]>(
-      'SELECT * FROM homepage_sections WHERE is_active = TRUE AND (page_id = 1 OR page_id IS NULL) ORDER BY sort_order ASC'
+      'SELECT * FROM page_sections WHERE is_active = TRUE AND (page_id = 1 OR page_id IS NULL) ORDER BY sort_order ASC'
     );
 
     // For each section, get its categories

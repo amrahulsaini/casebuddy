@@ -38,10 +38,10 @@ export default async function AdminDashboardPage() {
             </div>
           </a>
 
-          <a href="/admin/dashboard/homepage-sections" className={styles.quickLink}>
+          <a href="/admin/dashboard/page-sections" className={styles.quickLink}>
             <div className={styles.linkIcon}>🏠</div>
             <div>
-              <div className={styles.linkTitle}>Homepage Sections</div>
+              <div className={styles.linkTitle}>Page Sections</div>
               <div className={styles.linkDesc}>Manage page sections</div>
             </div>
           </a>

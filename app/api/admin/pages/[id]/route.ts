@@ -116,7 +116,7 @@ export async function DELETE(
       );
     }
 
-    // Delete will cascade to homepage_sections due to foreign key
+    // Delete will cascade to page_sections due to foreign key
     await productsPool.query(
       'DELETE FROM pages WHERE id = ?',
       [id]

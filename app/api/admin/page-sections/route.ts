@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
       SELECT 
         s.*,
         COUNT(c.id) as category_count
-      FROM homepage_sections s
+      FROM page_sections s
       LEFT JOIN categories c ON c.section_key = s.section_key AND c.parent_id IS NULL
       GROUP BY s.id
       ORDER BY s.sort_order ASC
@@ -22,9 +22,9 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(sections);
   } catch (error) {
-    console.error('Error fetching homepage sections:', error);
+    console.error('Error fetching page sections:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch homepage sections' },
+      { error: 'Failed to fetch page sections' },
       { status: 500 }
     );
   }
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
 
     // Check if section_key already exists
     const [existing]: any = await productsPool.query(
-      'SELECT id FROM homepage_sections WHERE section_key = ?',
+      'SELECT id FROM page_sections WHERE section_key = ?',
       [section_key]
     );
 
@@ -64,8 +64,8 @@ export async function POST(req: NextRequest) {
 
     // Insert new section
     const [result]: any = await productsPool.query(
-      `INSERT INTO homepage_sections 
-       (page_id, section_key, title, subtitle, sort_order, is_active) 
+      `INSERT INTO page_sections 
+        (page_id, section_key, title, subtitle, sort_order, is_active) 
        VALUES (?, ?, ?, ?, ?, ?)`,
       [
         page_id,
@@ -79,15 +79,15 @@ export async function POST(req: NextRequest) {
 
     // Fetch and return the created section
     const [newSection]: any = await productsPool.query(
-      'SELECT * FROM homepage_sections WHERE id = ?',
+      'SELECT * FROM page_sections WHERE id = ?',
       [result.insertId]
     );
 
     return NextResponse.json(newSection[0], { status: 201 });
   } catch (error) {
-    console.error('Error creating homepage section:', error);
+    console.error('Error creating page section:', error);
     return NextResponse.json(
-      { error: 'Failed to create homepage section' },
+      { error: 'Failed to create page section' },
       { status: 500 }
     );
   }

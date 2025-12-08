@@ -35,7 +35,7 @@ export default function HomePage() {
   const [scrollLeft, setScrollLeft] = useState(0);
 
   useEffect(() => {
-    fetch('/api/homepage-sections')
+    fetch('/api/page-sections')
       .then(res => res.json())
       .then(data => {
         setSections(data);

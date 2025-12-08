@@ -27,7 +27,7 @@ export async function PUT(
 
     // Check if section exists
     const [existing]: any = await productsPool.query(
-      'SELECT id FROM homepage_sections WHERE id = ?',
+      'SELECT id FROM page_sections WHERE id = ?',
       [id]
     );
 
@@ -40,7 +40,7 @@ export async function PUT(
 
     // Update section (section_key cannot be changed)
     await productsPool.query(
-      `UPDATE homepage_sections 
+      `UPDATE page_sections 
        SET title = ?, subtitle = ?, sort_order = ?, is_active = ?
        WHERE id = ?`,
       [
@@ -54,15 +54,15 @@ export async function PUT(
 
     // Fetch and return the updated section
     const [updated]: any = await productsPool.query(
-      'SELECT * FROM homepage_sections WHERE id = ?',
+      'SELECT * FROM page_sections WHERE id = ?',
       [id]
     );
 
     return NextResponse.json(updated[0]);
   } catch (error) {
-    console.error('Error updating homepage section:', error);
+    console.error('Error updating page section:', error);
     return NextResponse.json(
-      { error: 'Failed to update homepage section' },
+      { error: 'Failed to update page section' },
       { status: 500 }
     );
   }
@@ -83,7 +83,7 @@ export async function DELETE(
 
     // Check if section exists and get its section_key
     const [section]: any = await productsPool.query(
-      'SELECT section_key FROM homepage_sections WHERE id = ?',
+      'SELECT section_key FROM page_sections WHERE id = ?',
       [id]
     );
 
@@ -107,7 +107,7 @@ export async function DELETE(
 
       // Delete the section
       await connection.query(
-        'DELETE FROM homepage_sections WHERE id = ?',
+        'DELETE FROM page_sections WHERE id = ?',
         [id]
       );
 
@@ -124,9 +124,9 @@ export async function DELETE(
       connection.release();
     }
   } catch (error) {
-    console.error('Error deleting homepage section:', error);
+    console.error('Error deleting page section:', error);
     return NextResponse.json(
-      { error: 'Failed to delete homepage section' },
+      { error: 'Failed to delete page section' },
       { status: 500 }
     );
   }

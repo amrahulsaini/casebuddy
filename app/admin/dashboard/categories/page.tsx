@@ -240,7 +240,7 @@ export default function CategoriesPage() {
     // If we have section_key, fetch all sections to find the page_id
     if (category.section_key) {
       try {
-        const response = await fetch('/api/admin/homepage-sections');
+        const response = await fetch('/api/admin/page-sections');
         if (response.ok) {
           const allSections = await response.json();
           const section = allSections.find((s: Section) => s.section_key === category.section_key);

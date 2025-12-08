@@ -36,7 +36,7 @@ export default function HomepageSectionsPage() {
   const fetchSections = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/homepage-sections');
+      const response = await fetch('/api/admin/page-sections');
       
       if (response.status === 401) {
         window.location.href = '/admin/login';
@@ -87,7 +87,7 @@ export default function HomepageSectionsPage() {
     if (!confirm('Delete this homepage section? All categories in this section will be unlinked.')) return;
 
     try {
-      const response = await fetch(`/api/admin/homepage-sections/${id}`, { method: 'DELETE' });
+      const response = await fetch(`/api/admin/page-sections/${id}`, { method: 'DELETE' });
       
       if (response.status === 401) {
         window.location.href = '/admin/login';
@@ -115,8 +115,8 @@ export default function HomepageSectionsPage() {
 
     try {
       const url = editingSection
-        ? `/api/admin/homepage-sections/${editingSection.id}`
-        : '/api/admin/homepage-sections';
+        ? `/api/admin/page-sections/${editingSection.id}`
+        : '/api/admin/page-sections';
       
       const method = editingSection ? 'PUT' : 'POST';
       
@@ -178,7 +178,7 @@ export default function HomepageSectionsPage() {
 
               <div className={styles.sectionActions}>
                 <Link 
-                  href={`/admin/dashboard/homepage-sections/${section.section_key}/categories`}
+                  href={`/admin/dashboard/page-sections/${section.section_key}/categories`}
                   className={styles.manageButton}
                 >
                   Manage Categories

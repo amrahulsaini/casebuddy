@@ -1,0 +1,433 @@
+.container {
+  min-height: 100vh;
+  padding-top: 130px;
+  background: #fff;
+}
+
+/* Hero Section */
+.hero {
+  background: linear-gradient(135deg, #ff6b00 0%, #ff9500 100%);
+  color: white;
+  padding: 6rem 2rem;
+  text-align: center;
+}
+
+.heroContent {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.heroTitle {
+  font-size: 4rem;
+  font-weight: 900;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.heroSubtitle {
+  font-size: 1.5rem;
+  opacity: 0.95;
+  line-height: 1.6;
+}
+
+/* Section Styles */
+.section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 5rem 2rem;
+}
+
+.sectionTitle {
+  font-size: 3rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 3rem;
+  color: #1f2937;
+}
+
+.contentWrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.textContent {
+  max-width: 600px;
+}
+
+.paragraph {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: #4b5563;
+  margin-bottom: 1.5rem;
+}
+
+.imageContent {
+  width: 100%;
+}
+
+.imageGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.gridItem {
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, #ff6b00 0%, #ff9500 100%);
+  border-radius: 16px;
+  opacity: 0.1;
+}
+
+/* Mission Section */
+.missionSection {
+  background: #f9fafb;
+  padding: 5rem 2rem;
+}
+
+.missionGrid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 3rem;
+}
+
+.missionCard {
+  background: white;
+  padding: 3rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.missionIcon {
+  color: #ff6b00;
+  margin-bottom: 1.5rem;
+}
+
+.missionTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #1f2937;
+}
+
+.missionText {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: #6b7280;
+}
+
+/* Offer Grid */
+.offerGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.offerCard {
+  padding: 2.5rem;
+  background: #f9fafb;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.offerCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(255, 107, 0, 0.15);
+  background: white;
+}
+
+.offerIcon {
+  color: #ff6b00;
+  margin-bottom: 1.5rem;
+}
+
+.offerTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #1f2937;
+}
+
+.offerText {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #6b7280;
+}
+
+/* Why Section */
+.whySection {
+  background: #f9fafb;
+  padding: 5rem 2rem;
+}
+
+.whyGrid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 3rem;
+}
+
+.whyCard {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.whyNumber {
+  display: inline-block;
+  font-size: 3rem;
+  font-weight: 900;
+  color: #ff6b00;
+  opacity: 0.3;
+  margin-bottom: 1rem;
+}
+
+.whyTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #1f2937;
+}
+
+.whyText {
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: #6b7280;
+}
+
+/* Stats Section */
+.statsSection {
+  background: linear-gradient(135deg, #ff6b00 0%, #ff9500 100%);
+  padding: 5rem 2rem;
+  color: white;
+}
+
+.statsGrid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3rem;
+}
+
+.statCard {
+  text-align: center;
+}
+
+.statIcon {
+  opacity: 0.8;
+  margin-bottom: 1rem;
+}
+
+.statNumber {
+  font-size: 3.5rem;
+  font-weight: 900;
+  margin-bottom: 0.5rem;
+}
+
+.statLabel {
+  font-size: 1.125rem;
+  opacity: 0.9;
+}
+
+/* Values Grid */
+.valuesGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.valueCard {
+  padding: 2rem;
+  background: #f9fafb;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.valueTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #1f2937;
+}
+
+.valueText {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #6b7280;
+}
+
+/* CTA Section */
+.ctaSection {
+  text-align: center;
+  padding: 6rem 2rem;
+  background: #1f2937;
+  color: white;
+}
+
+.ctaTitle {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+
+.ctaText {
+  font-size: 1.25rem;
+  opacity: 0.9;
+  margin-bottom: 3rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ctaButtons {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ctaButton {
+  padding: 1.25rem 3rem;
+  background: linear-gradient(135deg, #ff6b00 0%, #ff9500 100%);
+  color: white;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1.125rem;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.ctaButton:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px rgba(255, 107, 0, 0.4);
+}
+
+.ctaButtonOutline {
+  padding: 1.25rem 3rem;
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1.125rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.ctaButtonOutline:hover {
+  background: white;
+  color: #1f2937;
+  transform: translateY(-3px);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .heroTitle {
+    font-size: 3rem;
+  }
+
+  .offerGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .valuesGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding-top: 102px;
+  }
+
+  .hero {
+    padding: 4rem 1.5rem;
+  }
+
+  .heroTitle {
+    font-size: 2.5rem;
+  }
+
+  .heroSubtitle {
+    font-size: 1.125rem;
+  }
+
+  .section {
+    padding: 3rem 1.5rem;
+  }
+
+  .sectionTitle {
+    font-size: 2rem;
+  }
+
+  .contentWrapper {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .missionGrid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .offerGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .whyGrid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+
+  .valuesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .ctaTitle {
+    font-size: 2rem;
+  }
+
+  .ctaButtons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .ctaButton,
+  .ctaButtonOutline {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .heroTitle {
+    font-size: 2rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.75rem;
+  }
+
+  .statNumber {
+    font-size: 2.5rem;
+  }
+}

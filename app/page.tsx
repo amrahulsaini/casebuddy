@@ -136,7 +136,6 @@ export default function HomePage() {
           <div className={styles.navLinks}>
             <Link href="/" className={styles.navLink}>Home</Link>
             <Link href="/shop" className={styles.navLink}>Shop</Link>
-            <Link href="/templates" className={styles.navLink}>Templates</Link>
             <Link href="/about" className={styles.navLink}>About</Link>
             <Link href="/contact" className={styles.navLink}>Contact</Link>
           </div>

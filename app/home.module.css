@@ -909,6 +909,44 @@
   padding: 0.5rem;
 }
 
+.mobileNav {
+  position: fixed;
+  top: 90px;
+  left: 0;
+  right: 0;
+  background: white;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mobileNavLink {
+  padding: 1rem 1.5rem;
+  color: #333;
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background 0.2s ease;
+}
+
+.mobileNavLink:hover {
+  background: #f9f9f9;
+  color: #ff6b00;
+}
+
 /* ===== Testimonials ===== */
 .testimonials {
   padding: 6rem 2rem;
@@ -1475,9 +1513,7 @@
   }
   
   .features {
-    flex-direction: column;
-    gap: 1.5rem;
-    padding: 1.5rem 1rem;
+    display: none;
   }
   
   .feature {
@@ -1601,7 +1637,6 @@
   }
   
   .features {
-    flex-direction: column;
-    gap: 1.5rem;
+    display: none;
   }
 }

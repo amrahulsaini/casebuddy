@@ -140,14 +140,14 @@ export default function HomePage() {
             <Link href="/contact" className={styles.navLink}>Contact</Link>
           </div>
           <div className={styles.navActions}>
-            <button className={styles.iconButton}>
+            <Link href="/wishlist" className={styles.iconButton}>
               <Heart size={22} />
               <WishlistBadge className={styles.cartBadge} />
-            </button>
-            <button className={styles.iconButton}>
+            </Link>
+            <Link href="/cart" className={styles.iconButton}>
               <ShoppingCart size={22} />
               <CartBadge className={styles.cartBadge} />
-            </button>
+            </Link>
             <button className={styles.iconButton}>
               <User size={22} />
             </button>

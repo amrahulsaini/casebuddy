@@ -81,8 +81,9 @@ export default function ProductDetailPage() {
   const [selectedBrand, setSelectedBrand] = useState<number | null>(null);
   const [selectedModel, setSelectedModel] = useState<number | null>(null);
   const [customText, setCustomText] = useState('');
-  const [selectedFont, setSelectedFont] = useState<string>('');
+  const [selectedFont, setSelectedFont] = useState<string>('bold');
   const [selectedPlacement, setSelectedPlacement] = useState<string>('');
+  const [additionalNotes, setAdditionalNotes] = useState('');
 
   useEffect(() => {
     if (!productSlug) return;
@@ -327,122 +328,177 @@ export default function ProductDetailPage() {
             </span>
           </div>
 
-          {/* Customization Section - Check if customization is enabled */}
-          {product.customization?.enabled && (() => {
-            const customOptions = product.customization.options;
-            return (
-            <div className={styles.customizationSection}>
-              <h3 className={styles.customizationTitle}>🎨 Customize Your Case</h3>
-              
-              {/* Phone Brand Selection */}
+          {/* Customization Section - Always enabled for all products */}
+          <div className={styles.customizationSection}>
+            <h3 className={styles.customizationTitle}>🎨 Customize Your Case</h3>
+            
+            {/* Phone Brand Selection */}
+            <div className={styles.customizationGroup}>
+              <label className={styles.customizationLabel}>Select Phone Brand *</label>
+              <select
+                className={styles.customizationSelect}
+                value={selectedBrand || ''}
+                onChange={(e) => handleBrandChange(Number(e.target.value))}
+                required
+              >
+                <option value="">Choose your phone brand...</option>
+                {phoneBrands.map((brand) => (
+                  <option key={brand.id} value={brand.id}>
+                    {brand.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Phone Model Selection */}
+            {selectedBrand && (
               <div className={styles.customizationGroup}>
-                <label className={styles.customizationLabel}>Select Phone Brand *</label>
+                <label className={styles.customizationLabel}>Select Phone Model *</label>
                 <select
                   className={styles.customizationSelect}
-                  value={selectedBrand || ''}
-                  onChange={(e) => handleBrandChange(Number(e.target.value))}
+                  value={selectedModel || ''}
+                  onChange={(e) => setSelectedModel(Number(e.target.value))}
                   required
                 >
-                  <option value="">Choose your phone brand...</option>
-                  {phoneBrands.map((brand) => (
-                    <option key={brand.id} value={brand.id}>
-                      {brand.name}
-                    </option>
-                  ))}
+                  <option value="">Choose your phone model...</option>
+                  {phoneModels
+                    .filter(model => model.brand_id === selectedBrand)
+                    .map((model) => (
+                      <option key={model.id} value={model.id}>
+                        {model.model_name}
+                      </option>
+                    ))}
                 </select>
               </div>
+            )}
 
-              {/* Phone Model Selection */}
-              {selectedBrand && (
-                <div className={styles.customizationGroup}>
-                  <label className={styles.customizationLabel}>Select Phone Model *</label>
-                  <select
-                    className={styles.customizationSelect}
-                    value={selectedModel || ''}
-                    onChange={(e) => setSelectedModel(Number(e.target.value))}
-                    required
-                  >
-                    <option value="">Choose your phone model...</option>
-                    {phoneModels
-                      .filter(model => model.brand_id === selectedBrand)
-                      .map((model) => (
-                        <option key={model.id} value={model.id}>
-                          {model.model_name}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-              )}
-
-              {/* Custom Text */}
-              <div className={styles.customizationGroup}>
-                <label className={styles.customizationLabel}>
-                  Name / Text to be Customized
-                  <span className={styles.optionalLabel}>(Optional)</span>
-                </label>
-                <input
-                  type="text"
-                  className={styles.customizationInput}
-                  placeholder="Enter your custom text..."
-                  value={customText}
-                  onChange={(e) => setCustomText(e.target.value)}
-                  maxLength={30}
-                />
-                <span className={styles.charCount}>{customText.length}/30</span>
-              </div>
-
-              {/* Font Style */}
-              {customText && customOptions?.fonts && (
-                <div className={styles.customizationGroup}>
-                  <label className={styles.customizationLabel}>Choose Font Style</label>
-                  <div className={styles.fontOptions}>
-                    {customOptions.fonts.map((font) => (
-                      <button
-                        key={font}
-                        type="button"
-                        className={`${styles.fontOption} ${selectedFont === font ? styles.selected : ''}`}
-                        onClick={() => setSelectedFont(font)}
-                      >
-                        {font === 'bold' ? '𝐁𝐨𝐥𝐝' : '𝒞𝓊𝓇𝓈𝒾𝓋𝑒'}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Placement Options */}
-              {customText && customOptions?.placements && (
-                <div className={styles.customizationGroup}>
-                  <label className={styles.customizationLabel}>Choose Placement</label>
-                  <div className={styles.placementOptions}>
-                    {customOptions.placements.map((placement) => (
-                      <button
-                        key={placement}
-                        type="button"
-                        className={`${styles.placementOption} ${selectedPlacement === placement ? styles.selected : ''}`}
-                        onClick={() => setSelectedPlacement(placement)}
-                      >
-                        {placement.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Customization Summary */}
-              {selectedBrand && selectedModel && (
-                <div className={styles.customizationSummary}>
-                  <strong>Your Selection:</strong>
-                  <ul>
-                    <li>Phone: {phoneBrands.find(b => b.id === selectedBrand)?.name} - {phoneModels.find(m => m.id === selectedModel)?.model_name}</li>
-                    {customText && <li>Text: "{customText}" ({selectedFont || 'Default'})</li>}
-                    {customText && selectedPlacement && <li>Placement: {selectedPlacement.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</li>}
-                  </ul>
-                </div>
-              )}
+            {/* WhatsApp Preorder Message */}
+            <div className={styles.infoMessage}>
+              <span className={styles.infoIcon}>💬</span>
+              <p>If your model or preferred color isn't available, feel free to WhatsApp us — we'll be happy to preorder it for you!</p>
             </div>
-            );
-          })()}
+
+            {/* Custom Text */}
+            <div className={styles.customizationGroup}>
+              <label className={styles.customizationLabel}>
+                Name / Text to be Customized
+                <span className={styles.optionalLabel}>(Optional)</span>
+              </label>
+              <input
+                type="text"
+                className={styles.customizationInput}
+                placeholder="Enter your custom text..."
+                value={customText}
+                onChange={(e) => setCustomText(e.target.value)}
+                maxLength={30}
+              />
+              <span className={styles.charCount}>{customText.length}/30</span>
+            </div>
+
+            {/* Font Style */}
+            {customText && (
+              <div className={styles.customizationGroup}>
+                <label className={styles.customizationLabel}>Choose Font Style</label>
+                <div className={styles.fontOptions}>
+                  <button
+                    type="button"
+                    className={`${styles.fontOption} ${selectedFont === 'bold' ? styles.selected : ''}`}
+                    onClick={() => setSelectedFont('bold')}
+                  >
+                    𝐁𝐨𝐥𝐝
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.fontOption} ${selectedFont === 'cursive' ? styles.selected : ''}`}
+                    onClick={() => setSelectedFont('cursive')}
+                  >
+                    𝒞𝓊𝓇𝓈𝒾𝓋𝑒
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Placement Options */}
+            {customText && (
+              <div className={styles.customizationGroup}>
+                <label className={styles.customizationLabel}>Choose Placement</label>
+                <div className={styles.placementOptions}>
+                  <button
+                    type="button"
+                    className={`${styles.placementOption} ${selectedPlacement === 'bottom_of_case' ? styles.selected : ''}`}
+                    onClick={() => setSelectedPlacement('bottom_of_case')}
+                  >
+                    Bottom of Case
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.placementOption} ${selectedPlacement === 'centre_of_case' ? styles.selected : ''}`}
+                    onClick={() => setSelectedPlacement('centre_of_case')}
+                  >
+                    Centre of Case
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.placementOption} ${selectedPlacement === 'name_on_phone_holder' ? styles.selected : ''}`}
+                    onClick={() => setSelectedPlacement('name_on_phone_holder')}
+                  >
+                    Name on Phone Holder
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.placementOption} ${selectedPlacement === 'right_vertical_with_strings' ? styles.selected : ''}`}
+                    onClick={() => setSelectedPlacement('right_vertical_with_strings')}
+                  >
+                    Right Vertical Side with Strings (Cursive Lines)
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.placementOption} ${selectedPlacement === 'right_vertical_with_heart' ? styles.selected : ''}`}
+                    onClick={() => setSelectedPlacement('right_vertical_with_heart')}
+                  >
+                    Right Vertical Side with Heart
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.placementOption} ${selectedPlacement === 'name_with_heart_at_bottom' ? styles.selected : ''}`}
+                    onClick={() => setSelectedPlacement('name_with_heart_at_bottom')}
+                  >
+                    Name with a Heart at Bottom of the Case
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Additional Notes */}
+            <div className={styles.customizationGroup}>
+              <label className={styles.customizationLabel}>
+                Additional Notes for this Case
+                <span className={styles.optionalLabel}>(Optional)</span>
+              </label>
+              <textarea
+                className={styles.customizationTextarea}
+                placeholder="Any special instructions or requirements..."
+                value={additionalNotes}
+                onChange={(e) => setAdditionalNotes(e.target.value)}
+                rows={3}
+                maxLength={200}
+              />
+              <span className={styles.charCount}>{additionalNotes.length}/200</span>
+            </div>
+
+            {/* Customization Summary */}
+            {selectedBrand && selectedModel && (
+              <div className={styles.customizationSummary}>
+                <strong>Your Selection:</strong>
+                <ul>
+                  <li>Phone: {phoneBrands.find(b => b.id === selectedBrand)?.name} - {phoneModels.find(m => m.id === selectedModel)?.model_name}</li>
+                  {customText && <li>Text: "{customText}" ({selectedFont || 'Bold'})</li>}
+                  {customText && selectedPlacement && <li>Placement: {selectedPlacement.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</li>}
+                  {additionalNotes && <li>Notes: {additionalNotes}</li>}
+                </ul>
+              </div>
+            )}
+          </div>
 
           <div className={styles.actions}>
             <button className={styles.addToCartButton}>

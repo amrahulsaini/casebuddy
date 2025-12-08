@@ -638,6 +638,64 @@
   transform: translateY(-2px);
 }
 
+/* Info Message (WhatsApp Preorder) */
+.infoMessage {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, #fff9f0 0%, #fff5e8 100%);
+  border-radius: 12px;
+  border-left: 4px solid #ff6b00;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(255, 107, 0, 0.08);
+}
+
+.infoIcon {
+  font-size: 24px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.infoMessage p {
+  margin: 0;
+  color: #555;
+  font-size: 14px;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+/* Textarea for Additional Notes */
+.customizationTextarea {
+  width: 100%;
+  padding: 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #000;
+  background: white;
+  transition: all 0.3s ease;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.customizationTextarea:hover {
+  border-color: #ff6b00;
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.1);
+}
+
+.customizationTextarea:focus {
+  outline: none;
+  border-color: #ff6b00;
+  box-shadow: 0 4px 16px rgba(255, 107, 0, 0.2);
+  background: #fffbf7;
+}
+
+.customizationTextarea::placeholder {
+  color: #999;
+}
+
 .customizationSummary {
   margin-top: 28px;
   padding: 20px;

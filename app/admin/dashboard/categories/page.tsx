@@ -58,16 +58,6 @@ export default function CategoriesPage() {
     page_id: '',
     sort_order: '0',
     is_active: true,
-    customization_enabled: false,
-    fonts: ['bold', 'cursive'] as string[],
-    placements: [
-      'bottom_of_case',
-      'centre_of_case',
-      'name_on_phone_holder',
-      'right_vertical_with_strings',
-      'right_vertical_with_heart',
-      'name_with_heart_at_bottom'
-    ] as string[],
   });
 
   const [uploading, setUploading] = useState(false);
@@ -156,16 +146,6 @@ export default function CategoriesPage() {
       page_id: '',
       sort_order: '0',
       is_active: true,
-      customization_enabled: false,
-      fonts: ['bold', 'cursive'],
-      placements: [
-        'bottom_of_case',
-        'centre_of_case',
-        'name_on_phone_holder',
-        'right_vertical_with_strings',
-        'right_vertical_with_heart',
-        'name_with_heart_at_bottom'
-      ],
     });
     setImagePreview('');
     setShowModal(true);
@@ -268,16 +248,6 @@ export default function CategoriesPage() {
           page_id: pageId,
           sort_order: category.sort_order.toString(),
           is_active: category.is_active,
-          customization_enabled: (category as any).customization_enabled || false,
-          fonts: (category as any).customization_options?.fonts || ['bold', 'cursive'],
-          placements: (category as any).customization_options?.placements || [
-            'bottom_of_case',
-            'centre_of_case',
-            'name_on_phone_holder',
-            'right_vertical_with_strings',
-            'right_vertical_with_heart',
-            'name_with_heart_at_bottom'
-          ],
         });
       }
     } else {
@@ -290,16 +260,6 @@ export default function CategoriesPage() {
         page_id: '',
         sort_order: category.sort_order.toString(),
         is_active: category.is_active,
-        customization_enabled: (category as any).customization_enabled || false,
-        fonts: (category as any).customization_options?.fonts || ['bold', 'cursive'],
-        placements: (category as any).customization_options?.placements || [
-          'bottom_of_case',
-          'centre_of_case',
-          'name_on_phone_holder',
-          'right_vertical_with_strings',
-          'right_vertical_with_heart',
-          'name_with_heart_at_bottom'
-        ],
       });
     }
     
@@ -336,11 +296,6 @@ export default function CategoriesPage() {
       parent_id: null, // Always null - no subcategories
       section_key: formData.section_key,
       sort_order: parseInt(formData.sort_order),
-      customization_options: formData.customization_enabled ? {
-        text_enabled: true,
-        fonts: formData.fonts,
-        placements: formData.placements,
-      } : null,
     };
 
     try {
@@ -648,98 +603,17 @@ export default function CategoriesPage() {
                 </label>
               </div>
 
-              {/* Customization Section */}
-              <div className={styles.formSection}>
-                <h3>Product Customization</h3>
-                <div className={styles.formGroup}>
-                  <label className={styles.checkbox}>
-                    <input
-                      type="checkbox"
-                      checked={formData.customization_enabled}
-                      onChange={(e) =>
-                        setFormData({ ...formData, customization_enabled: e.target.checked })
-                      }
-                    />
-                    Enable Customization for this Category
-                  </label>
-                </div>
-
-                {formData.customization_enabled && (
-                  <>
-                    <div className={styles.infoBox}>
-                      <p>
-                        📱 <strong>Phone Compatibility:</strong> Manage compatible phone brands and models in the{' '}
-                        <a href="/admin/dashboard/category-phones" style={{color: '#3b82f6', textDecoration: 'underline'}}>
-                          Category Phones
-                        </a>{' '}
-                        section.
-                      </p>
-                    </div>
-
-                    <div className={styles.formGroup}>
-                      <label>Font Styles:</label>
-                      <div className={styles.checkboxGrid}>
-                        <label className={styles.checkbox}>
-                          <input
-                            type="checkbox"
-                            checked={formData.fonts.includes('bold')}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setFormData({ ...formData, fonts: [...formData.fonts, 'bold'] });
-                              } else {
-                                setFormData({ ...formData, fonts: formData.fonts.filter(f => f !== 'bold') });
-                              }
-                            }}
-                          />
-                          Bold
-                        </label>
-                        <label className={styles.checkbox}>
-                          <input
-                            type="checkbox"
-                            checked={formData.fonts.includes('cursive')}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setFormData({ ...formData, fonts: [...formData.fonts, 'cursive'] });
-                              } else {
-                                setFormData({ ...formData, fonts: formData.fonts.filter(f => f !== 'cursive') });
-                              }
-                            }}
-                          />
-                          Cursive
-                        </label>
-                      </div>
-                    </div>
-
-                    <div className={styles.formGroup}>
-                      <label>Placement Options:</label>
-                      <div className={styles.checkboxGrid}>
-                        {[
-                          { value: 'bottom_of_case', label: 'Bottom of Case' },
-                          { value: 'centre_of_case', label: 'Centre of Case' },
-                          { value: 'name_on_phone_holder', label: 'Name on Phone Holder' },
-                          { value: 'right_vertical_with_strings', label: 'Right Vertical Side with Strings (Cursive Lines)' },
-                          { value: 'right_vertical_with_heart', label: 'Right Vertical Side with Heart' },
-                          { value: 'name_with_heart_at_bottom', label: 'Name with a Heart at Bottom of the Case' },
-                        ].map((option) => (
-                          <label key={option.value} className={styles.checkbox}>
-                            <input
-                              type="checkbox"
-                              checked={formData.placements.includes(option.value)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setFormData({ ...formData, placements: [...formData.placements, option.value] });
-                                } else {
-                                  setFormData({ ...formData, placements: formData.placements.filter(p => p !== option.value) });
-                                }
-                              }}
-                            />
-                            {option.label}
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
+              <div className={styles.infoBox}>
+                <p>
+                  📱 <strong>Phone Compatibility:</strong> Manage compatible phone brands and models in the{' '}
+                  <a href="/admin/dashboard/category-phones" style={{color: '#3b82f6', textDecoration: 'underline'}}>
+                    Category Phones
+                  </a>{' '}
+                  section.
+                </p>
+                <p style={{marginTop: '12px'}}>
+                  ✨ <strong>Product Customization:</strong> All products have customization enabled by default with font styles and placement options.
+                </p>
               </div>
 
               <div className={styles.formActions}>

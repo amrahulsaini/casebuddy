@@ -3,10 +3,10 @@ import caseMainPool from '@/lib/db-main';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { orderId: string } }
+  { params }: { params: Promise<{ orderId: string }> }
 ) {
   try {
-    const orderId = params.orderId;
+    const { orderId } = await params;
 
     const [rows]: any = await caseMainPool.query(
       `SELECT * FROM orders WHERE id = ? LIMIT 1`,

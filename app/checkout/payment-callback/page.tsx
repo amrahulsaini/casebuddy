@@ -23,11 +23,13 @@ function PaymentCallbackContent() {
       return;
     }
 
-    // Determine payment status
+    // Determine payment status and send confirmation emails if paid
     if (orderStatus === 'PAID') {
       setStatus('success');
       setMessage('Payment successful! Your order has been confirmed.');
-      // TODO: Update order status in database
+      
+      // Send confirmation emails after successful payment
+      sendPaymentConfirmation(orderId);
       fetchOrderDetails(orderId);
     } else if (orderStatus === 'ACTIVE') {
       setStatus('pending');
@@ -37,6 +39,18 @@ function PaymentCallbackContent() {
       setMessage('Payment failed or was cancelled. Please try again.');
     }
   }, [searchParams]);
+
+  const sendPaymentConfirmation = async (orderId: string) => {
+    try {
+      await fetch('/api/checkout/payment-confirmation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId })
+      });
+    } catch (error) {
+      console.error('Error sending payment confirmation:', error);
+    }
+  };
 
   const fetchOrderDetails = async (orderId: string) => {
     try {

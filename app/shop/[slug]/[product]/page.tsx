@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, ShoppingCart, Heart, Star, Truck, Shield, Package, ChevronLeft, ChevronRight, Plus, Minus } from 'lucide-react';
@@ -56,6 +56,7 @@ interface Product {
 
 export default function ProductDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const categorySlug = params?.slug as string;
   const productSlug = params?.product as string;
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
@@ -179,6 +180,35 @@ export default function ProductDetailPage() {
   const handleToggleWishlist = () => {
     if (!product) return;
     toggleWishlist(product.id);
+  };
+
+  const handleBuyNow = () => {
+    if (!product) return;
+
+    // Validate customization
+    if (!validateCustomization()) {
+      return;
+    }
+
+    // Get brand and model names
+    const brandName = phoneBrands.find(b => b.id === selectedBrand)?.name || '';
+    const modelName = phoneModels.find(m => m.id === selectedModel)?.model_name || '';
+
+    // Build checkout URL with query params
+    const checkoutParams = new URLSearchParams({
+      productId: product.id.toString(),
+      productName: product.name,
+      phoneModel: `${brandName} ${modelName}`,
+      price: product.price.toString(),
+      image: product.images[0]?.image_url || '',
+      ...(customText.trim() && { customText: customText.trim() }),
+      ...(customText.trim() && selectedFont && { font: selectedFont }),
+      ...(customText.trim() && selectedPlacement && { placement: selectedPlacement }),
+      ...(additionalNotes.trim() && { notes: additionalNotes.trim() }),
+    });
+
+    // Redirect to checkout
+    router.push(`/checkout?${checkoutParams.toString()}`);
   };
 
   const nextImage = () => {
@@ -558,7 +588,7 @@ export default function ProductDetailPage() {
             </button>
             <button 
               className={styles.buyNowButton}
-              onClick={handleAddToCart}
+              onClick={handleBuyNow}
               disabled={!product || product.stock_quantity === 0}
             >
               Buy Now

@@ -157,13 +157,16 @@ export async function POST(request: Request) {
 
 async function sendOrderConfirmationEmails(order: Order) {
   const transporter = nodemailer.createTransport({
-    host: 'mail.casebuddy.co.in',
+    host: 'casebuddy.co.in', // Use main domain instead of mail.casebuddy.co.in
     port: 587,
     secure: false,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
+    tls: {
+      rejectUnauthorized: false // Accept self-signed certificates
+    }
   });
 
   // Customer email HTML

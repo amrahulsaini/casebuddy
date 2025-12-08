@@ -16,7 +16,6 @@ function PaymentCallbackContent() {
 
   useEffect(() => {
     const orderId = searchParams.get('order_id');
-    const orderStatus = searchParams.get('order_status');
     
     if (!orderId) {
       setStatus('failed');
@@ -24,25 +23,19 @@ function PaymentCallbackContent() {
       return;
     }
 
-    // Determine payment status and send confirmation emails if paid
-    if (orderStatus === 'PAID') {
-      setStatus('success');
-      setMessage('Payment successful! Your order has been confirmed.');
-      
-      // Send confirmation emails after successful payment
-      sendPaymentConfirmation(orderId);
-      fetchOrderDetails(orderId);
-    } else if (orderStatus === 'ACTIVE') {
-      setStatus('pending');
-      setMessage('Payment is pending. Please complete the payment.');
-    } else {
-      setStatus('failed');
-      setMessage('Payment failed or was cancelled. Please try again.');
-    }
+    // ALWAYS verify payment with Cashfree API - don't trust URL parameters
+    console.log('Payment callback received for order:', orderId);
+    setStatus('loading');
+    setMessage('Verifying payment with Cashfree...');
+    
+    // Verify payment status via API
+    sendPaymentConfirmation(orderId);
+    fetchOrderDetails(orderId);
   }, [searchParams]);
 
   const sendPaymentConfirmation = async (orderId: string) => {
     try {
+      console.log('Calling payment confirmation API for order:', orderId);
       const response = await fetch('/api/checkout/payment-confirmation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -57,7 +50,12 @@ function PaymentCallbackContent() {
         setStatus('failed');
         setMessage(`Payment verification failed: ${data.error || 'Unknown error'}`);
         setErrorDetails(JSON.stringify(data, null, 2));
-      } else if (!data.success) {
+      } else if (data.success) {
+        // Payment was successful
+        setStatus('success');
+        setMessage(data.message || 'Payment successful! Your order has been confirmed.');
+      } else {
+        // Payment not completed (pending or failed)
         setStatus('failed');
         setMessage(data.message || 'Payment not completed');
         setErrorDetails(`Cashfree Status: ${data.paymentStatus || 'Unknown'}`);

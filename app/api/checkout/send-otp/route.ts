@@ -4,11 +4,15 @@ import nodemailer from 'nodemailer';
 // Shared global OTP store
 declare global {
   var otpStore: Map<string, { otp: string; expires: number }> | undefined;
+  var otpRateLimit: Map<string, { count: number; resetTime: number }> | undefined;
 }
 
-// Initialize global OTP store
+// Initialize global stores
 if (!global.otpStore) {
   global.otpStore = new Map();
+}
+if (!global.otpRateLimit) {
+  global.otpRateLimit = new Map();
 }
 
 // Email transporter configuration from environment variables
@@ -40,6 +44,43 @@ export async function POST(request: NextRequest) {
         { error: 'Invalid request type' },
         { status: 400 }
       );
+    }
+
+    const identifier = type === 'email' ? email : mobile;
+    
+    if (!identifier) {
+      return NextResponse.json(
+        { error: `${type === 'email' ? 'Email' : 'Mobile'} is required` },
+        { status: 400 }
+      );
+    }
+
+    // RATE LIMITING: Max 3 OTPs per 10 minutes
+    const rateLimitKey = `${type}:${identifier}`;
+    const now = Date.now();
+    
+    if (!global.otpRateLimit) {
+      global.otpRateLimit = new Map();
+    }
+
+    const rateLimit = global.otpRateLimit.get(rateLimitKey);
+    
+    if (rateLimit) {
+      // Reset counter if 10 minutes passed
+      if (now > rateLimit.resetTime) {
+        global.otpRateLimit.set(rateLimitKey, { count: 1, resetTime: now + 10 * 60 * 1000 });
+      } else if (rateLimit.count >= 3) {
+        const minutesLeft = Math.ceil((rateLimit.resetTime - now) / 60000);
+        return NextResponse.json(
+          { error: `Too many OTP requests. Please try again in ${minutesLeft} minute${minutesLeft > 1 ? 's' : ''}.` },
+          { status: 429 }
+        );
+      } else {
+        rateLimit.count++;
+        global.otpRateLimit.set(rateLimitKey, rateLimit);
+      }
+    } else {
+      global.otpRateLimit.set(rateLimitKey, { count: 1, resetTime: now + 10 * 60 * 1000 });
     }
 
     const otp = generateOTP();

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import caseMainPool from '@/lib/db-main';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
+import DOMPurify from 'isomorphic-dompurify';
+import validator from 'validator';
 
 // Email transporter configuration from environment variables
 const transporter = nodemailer.createTransport({
@@ -61,9 +63,62 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!orderItem) {
+    if (!orderItem || !orderItem.productId) {
       return NextResponse.json(
         { error: 'Order item is required' },
+        { status: 400 }
+      );
+    }
+
+    // Sanitize user inputs to prevent XSS
+    const sanitizedName = DOMPurify.sanitize(fullName);
+    const sanitizedAddress1 = DOMPurify.sanitize(addressLine1);
+    const sanitizedAddress2 = addressLine2 ? DOMPurify.sanitize(addressLine2) : null;
+    const sanitizedCity = DOMPurify.sanitize(city);
+    const sanitizedState = DOMPurify.sanitize(state);
+    const sanitizedNotes = notes ? DOMPurify.sanitize(notes) : null;
+    
+    // Validate email format
+    if (!validator.isEmail(email)) {
+      return NextResponse.json(
+        { error: 'Invalid email format' },
+        { status: 400 }
+      );
+    }
+
+    // SERVER-SIDE PRICE VALIDATION: Get actual product price from database
+    const [productRows]: any = await caseMainPool.query(
+      'SELECT price FROM products WHERE id = ?',
+      [orderItem.productId]
+    );
+
+    if (!productRows || productRows.length === 0) {
+      return NextResponse.json(
+        { error: 'Product not found' },
+        { status: 404 }
+      );
+    }
+
+    const actualPrice = parseFloat(productRows[0].price);
+    const quantity = parseInt(orderItem.quantity) || 1;
+    
+    // Recalculate totals server-side (don't trust frontend)
+    const calculatedSubtotal = actualPrice * quantity;
+    const calculatedShipping = calculatedSubtotal < 499 ? 80 : 0;
+    const calculatedTotal = calculatedSubtotal + calculatedShipping;
+
+    // Verify frontend calculation matches (allow 1 rupee tolerance for rounding)
+    if (Math.abs(calculatedTotal - total) > 1) {
+      console.error('Price mismatch:', {
+        frontend: { subtotal, shipping, total },
+        backend: { 
+          subtotal: calculatedSubtotal, 
+          shipping: calculatedShipping, 
+          total: calculatedTotal 
+        }
+      });
+      return NextResponse.json(
+        { error: 'Price validation failed. Please refresh and try again.' },
         { status: 400 }
       );
     }
@@ -101,22 +156,22 @@ export async function POST(request: NextRequest) {
         orderNumber,
         email,
         mobile,
-        fullName,
-        addressLine1,
-        addressLine2 || null,
-        city,
-        state,
+        sanitizedName,
+        sanitizedAddress1,
+        sanitizedAddress2,
+        sanitizedCity,
+        sanitizedState,
         pincode,
         orderItem.productId,
         orderItem.productName,
         orderItem.phoneModel,
         orderItem.designName || null,
-        orderItem.quantity,
-        orderItem.price,
-        subtotal,
-        shipping,
-        total,
-        notes || null,
+        quantity,
+        actualPrice, // Use server-validated price
+        calculatedSubtotal, // Use server-calculated subtotal
+        calculatedShipping, // Use server-calculated shipping
+        calculatedTotal, // Use server-calculated total
+        sanitizedNotes,
         orderItem.customizationOptions ? JSON.stringify(orderItem.customizationOptions) : null,
         'pending', // order_status
         'pending'  // payment_status
@@ -134,13 +189,13 @@ export async function POST(request: NextRequest) {
       
       const paymentSessionRequest = {
         order_id: cashfreeOrderId,
-        order_amount: total,
+        order_amount: calculatedTotal, // Use server-validated total
         order_currency: 'INR',
         customer_details: {
           customer_id: `cust_${orderId}`,
           customer_email: email,
           customer_phone: mobile,
-          customer_name: fullName
+          customer_name: sanitizedName
         },
         order_meta: {
           return_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/checkout/payment-callback?order_id=${orderId}`

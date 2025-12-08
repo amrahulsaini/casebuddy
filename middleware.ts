@@ -5,6 +5,17 @@ export function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || '';
   const { pathname } = request.nextUrl;
   
+  // Protect admin dashboard routes
+  if (pathname.startsWith('/admin/dashboard')) {
+    const adminToken = request.cookies.get('admin_token');
+    
+    if (!adminToken) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/admin/login';
+      return NextResponse.redirect(url);
+    }
+  }
+  
   // Check if accessing /casetool routes (including subdomain)
   const isCasetoolRoute = pathname.startsWith('/casetool') || hostname.startsWith('casetool.');
   

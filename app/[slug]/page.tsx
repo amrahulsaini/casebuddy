@@ -65,6 +65,7 @@ async function getPageData(slug: string): Promise<PageData | null> {
 export default function DynamicPage({ params }: { params: Promise<{ slug: string }> }) {
   const [pageData, setPageData] = useState<PageData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [notFoundError, setNotFoundError] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
@@ -73,11 +74,12 @@ export default function DynamicPage({ params }: { params: Promise<{ slug: string
     async function loadPage() {
       const { slug } = await params;
       const data = await getPageData(slug);
-      if (!data || !data.page) {
-        notFound();
-      }
-      setPageData(data);
       setLoading(false);
+      if (!data || !data.page) {
+        setNotFoundError(true);
+      } else {
+        setPageData(data);
+      }
     }
     
     loadPage();
@@ -110,7 +112,7 @@ export default function DynamicPage({ params }: { params: Promise<{ slug: string
     );
   }
 
-  if (!pageData) {
+  if (notFoundError || !pageData) {
     notFound();
   }
 

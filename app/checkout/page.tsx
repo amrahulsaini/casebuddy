@@ -278,7 +278,7 @@ function CheckoutContent() {
     if (!orderItem) return { subtotal: 0, shipping: 0, total: 0 };
     
     const subtotal = orderItem.price * orderItem.quantity;
-    const shipping = 0; // Free shipping for now
+    const shipping = subtotal < 499 ? 80 : 0; // ₹80 shipping if order below ₹499
     const total = subtotal + shipping;
 
     return { subtotal, shipping, total };

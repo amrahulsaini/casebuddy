@@ -2,7 +2,10 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { User, Mail, Phone, MapPin, ShoppingBag, Lock, Check } from 'lucide-react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { User, Mail, Phone, MapPin, ShoppingBag, Lock, Check, Heart, ShoppingCart, Instagram, Facebook, MapPin as MapPinIcon } from 'lucide-react';
+import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import Toast from '@/components/Toast';
 import styles from './page.module.css';
 
@@ -61,13 +64,9 @@ function CheckoutContent() {
   
   // Verification states
   const [emailOtp, setEmailOtp] = useState('');
-  const [mobileOtp, setMobileOtp] = useState('');
   const [emailVerified, setEmailVerified] = useState(false);
-  const [mobileVerified, setMobileVerified] = useState(false);
   const [emailOtpSent, setEmailOtpSent] = useState(false);
-  const [mobileOtpSent, setMobileOtpSent] = useState(false);
   const [emailResendTimer, setEmailResendTimer] = useState(0);
-  const [mobileResendTimer, setMobileResendTimer] = useState(0);
   
   // Processing state
   const [processing, setProcessing] = useState(false);
@@ -95,15 +94,7 @@ function CheckoutContent() {
     return () => clearInterval(interval);
   }, [emailResendTimer]);
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (mobileResendTimer > 0) {
-      interval = setInterval(() => {
-        setMobileResendTimer((prev) => prev - 1);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [mobileResendTimer]);
+
 
   // Indian states
   const indianStates = [
@@ -194,16 +185,11 @@ function CheckoutContent() {
       setFormErrors(prev => ({ ...prev, [name]: '' }));
     }
     
-    // Reset verification if email/mobile changed
+    // Reset verification if email changed
     if (name === 'email' && emailVerified) {
       setEmailVerified(false);
       setEmailOtpSent(false);
       setEmailOtp('');
-    }
-    if (name === 'mobile' && mobileVerified) {
-      setMobileVerified(false);
-      setMobileOtpSent(false);
-      setMobileOtp('');
     }
   };
 
@@ -242,40 +228,7 @@ function CheckoutContent() {
     }
   };
 
-  // Send Mobile OTP
-  const sendMobileOtp = async () => {
-    const error = validateField('mobile', formData.mobile);
-    if (error) {
-      setFormErrors(prev => ({ ...prev, mobile: error }));
-      showToast('error', error);
-      return;
-    }
 
-    if (mobileResendTimer > 0) {
-      showToast('warning', `Please wait ${mobileResendTimer} seconds before resending`);
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/checkout/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mobile: formData.mobile, type: 'mobile' })
-      });
-
-      if (response.ok) {
-        setMobileOtpSent(true);
-        setMobileResendTimer(60);
-        showToast('success', 'OTP has been sent to your mobile number');
-      } else {
-        const data = await response.json();
-        showToast('error', data.error || 'Failed to send OTP');
-      }
-    } catch (error) {
-      console.error('Error sending mobile OTP:', error);
-      showToast('error', 'Failed to send OTP. Please try again.');
-    }
-  };
 
   // Verify Email OTP
   const verifyEmailOtp = async () => {
@@ -304,32 +257,7 @@ function CheckoutContent() {
     }
   };
 
-  // Verify Mobile OTP
-  const verifyMobileOtp = async () => {
-    if (!mobileOtp || mobileOtp.length !== 6) {
-      showToast('warning', 'Please enter a valid 6-digit OTP');
-      return;
-    }
 
-    try {
-      const response = await fetch('/api/checkout/verify-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mobile: formData.mobile, otp: mobileOtp, type: 'mobile' })
-      });
-
-      if (response.ok) {
-        setMobileVerified(true);
-        showToast('success', 'Mobile number verified successfully!');
-      } else {
-        const data = await response.json();
-        showToast('error', data.error || 'Invalid OTP. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error verifying mobile OTP:', error);
-      showToast('error', 'Verification failed. Please try again.');
-    }
-  };
 
   // Calculate totals
   const calculateTotals = () => {
@@ -364,10 +292,7 @@ function CheckoutContent() {
       return;
     }
 
-    if (!mobileVerified) {
-      showToast('warning', 'Please verify your mobile number');
-      return;
-    }
+
 
     if (!orderItem) {
       showToast('error', 'Order details not found');
@@ -386,8 +311,7 @@ function CheckoutContent() {
         subtotal,
         shipping,
         total,
-        emailVerified,
-        mobileVerified
+        emailVerified
       };
 
       const response = await fetch('/api/checkout/create-order', {
@@ -397,15 +321,21 @@ function CheckoutContent() {
       });
 
       if (response.ok) {
-        const { orderId } = await response.json();
+        const { orderId, orderNumber, paymentUrl, paymentSessionId } = await response.json();
         
         showToast('success', 'Order created successfully! Redirecting to payment...');
         
-        // TODO: Integrate Cashfree payment gateway
-        // For now, redirect to success page
-        setTimeout(() => {
-          router.push(`/order-confirmation?orderId=${orderId}`);
-        }, 1500);
+        // Redirect to Cashfree payment page
+        if (paymentUrl) {
+          setTimeout(() => {
+            window.location.href = paymentUrl;
+          }, 1000);
+        } else {
+          // Fallback if payment session creation failed
+          setTimeout(() => {
+            router.push(`/order-confirmation?orderId=${orderId}`);
+          }, 1500);
+        }
       } else {
         const data = await response.json();
         showToast('error', data.error || 'Failed to create order');
@@ -435,8 +365,34 @@ function CheckoutContent() {
   const { subtotal, shipping, total } = calculateTotals();
 
   return (
-    <div className={styles.container}>
-      <div className={styles.checkoutWrapper}>
+    <>
+      {/* Header */}
+      <header className={styles.header}>
+        <nav className={styles.nav}>
+          <Link href="/" className={styles.logo}>
+            <Image src="/casebuddy-logo.png" alt="CaseBuddy" width={180} height={50} className={styles.logoImg} priority />
+          </Link>
+          <div className={styles.navLinks}>
+            <Link href="/" className={styles.navLink}>Home</Link>
+            <Link href="/shop" className={styles.navLink}>Shop</Link>
+            <Link href="/about" className={styles.navLink}>About</Link>
+            <Link href="/contact" className={styles.navLink}>Contact</Link>
+          </div>
+          <div className={styles.navActions}>
+            <Link href="/wishlist" className={styles.iconButton}>
+              <Heart size={22} />
+              <WishlistBadge className={styles.cartBadge} />
+            </Link>
+            <Link href="/cart" className={styles.iconButton}>
+              <ShoppingCart size={22} />
+              <CartBadge className={styles.cartBadge} />
+            </Link>
+          </div>
+        </nav>
+      </header>
+
+      <div className={styles.container}>
+        <div className={styles.checkoutWrapper}>
         {/* Main Content */}
         <div className={styles.mainContent}>
           {/* Contact Information */}
@@ -510,60 +466,16 @@ function CheckoutContent() {
                 <label className={styles.label}>
                   Mobile Number <span className={styles.required}>*</span>
                 </label>
-                <div className={styles.inputGroup}>
-                  <input
-                    type="tel"
-                    name="mobile"
-                    className={styles.input}
-                    placeholder="10-digit mobile number"
-                    value={formData.mobile}
-                    onChange={handleInputChange}
-                    disabled={mobileVerified}
-                    maxLength={10}
-                  />
-                  {!mobileVerified && (
-                    <button
-                      type="button"
-                      className={styles.verifyBtn}
-                      onClick={sendMobileOtp}
-                      disabled={!formData.mobile || (mobileOtpSent && mobileResendTimer > 0)}
-                    >
-                      {mobileOtpSent && mobileResendTimer > 0 ? `Resend in ${mobileResendTimer}s` : mobileOtpSent ? 'Resend OTP' : 'Send OTP'}
-                    </button>
-                  )}
-                </div>
+                <input
+                  type="tel"
+                  name="mobile"
+                  className={styles.input}
+                  placeholder="10-digit mobile number"
+                  value={formData.mobile}
+                  onChange={handleInputChange}
+                  maxLength={10}
+                />
                 {formErrors.mobile && <span className={styles.error}>{formErrors.mobile}</span>}
-                
-                {mobileOtpSent && !mobileVerified && (
-                  <>
-                    <div className={styles.inputGroup} style={{ marginTop: '10px' }}>
-                      <input
-                        type="text"
-                        className={styles.input}
-                        placeholder="Enter 6-digit OTP"
-                        value={mobileOtp}
-                        onChange={(e) => setMobileOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                        maxLength={6}
-                      />
-                      <button
-                        type="button"
-                        className={styles.otpBtn}
-                        onClick={verifyMobileOtp}
-                        disabled={mobileOtp.length !== 6}
-                      >
-                        Verify
-                      </button>
-                    </div>
-                    <p className={styles.otpInfo}>Check your SMS for OTP</p>
-                  </>
-                )}
-                
-                {mobileVerified && (
-                  <div className={styles.verified}>
-                    <Check size={18} />
-                    Mobile verified
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -731,7 +643,7 @@ function CheckoutContent() {
           <button
             className={styles.checkoutBtn}
             onClick={handleCheckout}
-            disabled={processing || !emailVerified || !mobileVerified}
+            disabled={processing || !emailVerified}
           >
             {processing ? 'Processing...' : 'Proceed to Payment'}
             {!processing && <Lock size={18} />}
@@ -754,6 +666,81 @@ function CheckoutContent() {
         />
       )}
     </div>
+
+      {/* Footer */}
+      <footer className={styles.footer}>
+        <div className={styles.footerContent}>
+          <div className={styles.footerSection}>
+            <div className={styles.footerLogo}>
+              <div className={styles.footerLogoWrapper}>
+                <Image src="/casebuddy-logo.png" alt="CaseBuddy" width={160} height={45} />
+              </div>
+            </div>
+            <p className={styles.footerDesc}>
+              Your one-stop shop for premium custom phone cases. Protect your device with style.
+            </p>
+            <div className={styles.socialLinks}>
+              <a href="https://www.instagram.com/casebuddy25" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}>
+                <Instagram size={24} />
+              </a>
+              <a href="https://www.facebook.com/share/17fhSRLQR4/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}>
+                <Facebook size={24} />
+              </a>
+              <a href="https://wa.me/918107624752" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}>
+                <Mail size={24} />
+              </a>
+            </div>
+          </div>
+
+          <div className={styles.footerSection}>
+            <h4 className={styles.footerTitle}>Quick Links</h4>
+            <ul className={styles.footerLinks}>
+              <li><Link href="/shop">Shop All</Link></li>
+              <li><Link href="/about">About Us</Link></li>
+              <li><Link href="/contact">Contact</Link></li>
+            </ul>
+          </div>
+
+          <div className={styles.footerSection}>
+            <h4 className={styles.footerTitle}>Customer Service</h4>
+            <ul className={styles.footerLinks}>
+              <li><Link href="/shipping">Shipping Info</Link></li>
+              <li><Link href="/returns">Returns & Exchanges</Link></li>
+              <li><Link href="/faq">FAQ</Link></li>
+              <li><Link href="/privacy">Privacy Policy</Link></li>
+            </ul>
+          </div>
+
+          <div className={styles.footerSection}>
+            <h4 className={styles.footerTitle}>Contact Us</h4>
+            <ul className={styles.footerContact}>
+              <li>
+                <Phone size={20} />
+                <span>+918107624752</span>
+              </li>
+              <li>
+                <Mail size={20} />
+                <span>info@casebuddy.co.in</span>
+              </li>
+              <li>
+                <MapPin size={20} />
+                <span>Rajgarh, Rajasthan 331023</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className={styles.footerBottom}>
+          <p className={styles.footerText}>
+            © 2025 CaseBuddy. All rights reserved.
+          </p>
+          <div className={styles.paymentMethods}>
+            <span>We Accept:</span>
+            <div className={styles.paymentIcons}>💳 UPI | Cards | Wallets</div>
+          </div>
+        </div>
+      </footer>
+    </>
   );
 }
 

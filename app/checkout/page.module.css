@@ -1,7 +1,235 @@
 .container {
   min-height: 100vh;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  padding-top: 130px;
+  padding-top: 90px;
+  padding-bottom: 20px;
+}
+
+/* Header Styles */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.nav {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+.logo {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.logoImg {
+  height: auto;
+  width: auto;
+  max-height: 45px;
+}
+
+.navLinks {
+  display: flex;
+  gap: 35px;
+  align-items: center;
+}
+
+.navLink {
+  color: #333;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 15px;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.navLink:hover {
+  color: #ff6b00;
+}
+
+.navActions {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.iconButton {
+  background: none;
+  border: none;
+  color: #333;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconButton:hover {
+  background: rgba(255, 107, 0, 0.1);
+  color: #ff6b00;
+}
+
+.cartBadge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+}
+
+/* Footer Styles */
+.footer {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: #fff;
+  margin-top: 60px;
+}
+
+.footerContent {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 60px 20px 30px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 40px;
+}
+
+.footerSection {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.footerLogo {
+  margin-bottom: 10px;
+}
+
+.footerLogoWrapper {
+  display: inline-block;
+}
+
+.footerDesc {
+  color: #b3b3b3;
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 300px;
+}
+
+.socialLinks {
+  display: flex;
+  gap: 12px;
+  margin-top: 5px;
+}
+
+.socialIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 107, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ff6b00;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.socialIcon:hover {
+  background: #ff6b00;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.footerTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.footerLinks {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footerLinks a {
+  color: #b3b3b3;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.2s ease;
+  display: inline-block;
+}
+
+.footerLinks a:hover {
+  color: #ff6b00;
+}
+
+.footerContact {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.footerContact li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #b3b3b3;
+  font-size: 14px;
+}
+
+.footerContact svg {
+  flex-shrink: 0;
+  color: #ff6b00;
+}
+
+.footerBottom {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 25px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.footerText {
+  color: #888;
+  font-size: 14px;
+  margin: 0;
+}
+
+.paymentMethods {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #888;
+  font-size: 14px;
+}
+
+.paymentIcons {
+  color: #b3b3b3;
 }
 
 .checkoutWrapper {
@@ -320,7 +548,35 @@
 
 @media (max-width: 768px) {
   .container {
-    padding-top: 102px;
+    padding-top: 80px;
+  }
+
+  .nav {
+    padding: 12px 15px;
+  }
+
+  .logoImg {
+    max-height: 40px;
+  }
+
+  .navLinks {
+    display: none;
+  }
+
+  .navActions {
+    gap: 10px;
+  }
+
+  .footerContent {
+    grid-template-columns: 1fr;
+    gap: 35px;
+    padding: 40px 20px 25px;
+  }
+
+  .footerBottom {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
   }
 
   .checkoutWrapper {
@@ -376,6 +632,64 @@
 @media (max-width: 480px) {
   .container {
     background: #f8f9fa;
+    padding-top: 70px;
+  }
+
+  .nav {
+    padding: 10px 12px;
+  }
+
+  .logoImg {
+    max-height: 35px;
+  }
+
+  .iconButton {
+    padding: 6px;
+  }
+
+  .navActions {
+    gap: 8px;
+  }
+
+  .footerContent {
+    padding: 30px 15px 20px;
+    gap: 30px;
+  }
+
+  .footerDesc {
+    font-size: 13px;
+  }
+
+  .socialLinks {
+    gap: 10px;
+  }
+
+  .socialIcon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .footerTitle {
+    font-size: 16px;
+  }
+
+  .footerLinks,
+  .footerContact {
+    gap: 10px;
+  }
+
+  .footerLinks a,
+  .footerContact li {
+    font-size: 13px;
+  }
+
+  .footerBottom {
+    padding: 18px 15px;
+  }
+
+  .footerText,
+  .paymentMethods {
+    font-size: 13px;
   }
 
   .checkoutWrapper {

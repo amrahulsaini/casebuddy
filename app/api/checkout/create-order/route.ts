@@ -176,16 +176,17 @@ export async function POST(request: NextRequest) {
         
         // Construct payment URL using session ID
         // Production: https://payments.cashfree.com/pay/{session_id}
-        // Sandbox: https://sandbox.cashfree.com/pg/view/{session_id}
+        // Sandbox: https://sandbox.cashfree.com/pg/view/orders/{session_id}
         const paymentBaseUrl = CASHFREE_ENV === 'PROD' 
           ? 'https://payments.cashfree.com/pay' 
-          : 'https://sandbox.cashfree.com/pg/view';
+          : 'https://sandbox.cashfree.com/pg/view/orders';
         
         paymentUrl = `${paymentBaseUrl}/${paymentSessionId}`;
 
         console.log('Payment session created successfully:', {
           sessionId: paymentSessionId,
-          paymentUrl: paymentUrl
+          paymentUrl: paymentUrl,
+          environment: CASHFREE_ENV
         });
 
         // Update order with payment session ID

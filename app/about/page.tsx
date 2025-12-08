@@ -1,13 +1,92 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShieldCheck, Heart, Zap, Award, Users, Globe, Package, Sparkles } from 'lucide-react';
+import { ShieldCheck, Heart, Zap, Award, Users, Globe, Package, Sparkles, ShoppingCart, User, Menu, Truck, Instagram, Facebook, Twitter, Mail, Phone, MapPin } from 'lucide-react';
+import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import styles from './about.module.css';
 
 export default function AboutPage() {
+  const [scrollY, setScrollY] = useState(0);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setHeaderVisible(false);
+      } else {
+        setHeaderVisible(true);
+      }
+      
+      setScrollY(currentScrollY);
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
   return (
     <div className={styles.container}>
+      {/* Announcement Banner */}
+      <div className={`${styles.announcementBar} ${!headerVisible ? styles.hidden : ''}`}>
+        <div className={styles.marquee}>
+          <div className={styles.marqueeContent}>
+            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Package size={16} /> 7 Days Easy Return</span>
+            <span><Zap size={16} /> Delivery in 7-10 Days</span>
+            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Package size={16} /> 7 Days Easy Return</span>
+            <span><Zap size={16} /> Delivery in 7-10 Days</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Header */}
+      <header className={`${styles.header} ${scrollY > 50 ? styles.scrolled : ''} ${!headerVisible ? styles.hidden : ''}`}>
+        <nav className={styles.nav}>
+          <Link href="/" className={styles.logo}>
+            <Image src="/casebuddy-logo.png" alt="CaseBuddy" width={180} height={50} className={styles.logoImg} priority />
+          </Link>
+          <div className={styles.navLinks}>
+            <Link href="/" className={styles.navLink}>Home</Link>
+            <Link href="/shop" className={styles.navLink}>Shop</Link>
+            <Link href="/about" className={styles.navLink}>About</Link>
+            <Link href="/contact" className={styles.navLink}>Contact</Link>
+          </div>
+          <div className={styles.navActions}>
+            <Link href="/wishlist" className={styles.iconButton}>
+              <Heart size={22} />
+              <WishlistBadge className={styles.cartBadge} />
+            </Link>
+            <Link href="/cart" className={styles.iconButton}>
+              <ShoppingCart size={22} />
+              <CartBadge className={styles.cartBadge} />
+            </Link>
+            <button className={styles.iconButton}>
+              <User size={22} />
+            </button>
+            <button className={styles.mobileMenu} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              <Menu size={24} />
+            </button>
+          </div>
+        </nav>
+      </header>
+
+      {/* Mobile Navigation Menu */}
+      {mobileMenuOpen && (
+        <div className={styles.mobileNav}>
+          <Link href="/" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Home</Link>
+          <Link href="/shop" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Shop</Link>
+          <Link href="/about" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>About</Link>
+          <Link href="/contact" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Contact</Link>
+        </div>
+      )}
       {/* Hero Section */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
@@ -239,6 +318,80 @@ export default function AboutPage() {
           </Link>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className={styles.footer}>
+        <div className={styles.footerContent}>
+          <div className={styles.footerSection}>
+            <div className={styles.footerLogo}>
+              <div className={styles.footerLogoWrapper}>
+                <Image src="/casebuddy-logo.png" alt="CaseBuddy" width={160} height={45} />
+              </div>
+            </div>
+            <p className={styles.footerDesc}>
+              Your one-stop shop for premium custom phone cases. Protect your device with style.
+            </p>
+            <div className={styles.socialLinks}>
+              <a href="#" className={styles.socialIcon}>
+                <Instagram size={24} />
+              </a>
+              <a href="#" className={styles.socialIcon}>
+                <Facebook size={24} />
+              </a>
+              <a href="#" className={styles.socialIcon}>
+                <Twitter size={24} />
+              </a>
+            </div>
+          </div>
+
+          <div className={styles.footerSection}>
+            <h4 className={styles.footerTitle}>Quick Links</h4>
+            <ul className={styles.footerLinks}>
+              <li><Link href="/shop">Shop All</Link></li>
+              <li><Link href="/about">About Us</Link></li>
+              <li><Link href="/contact">Contact</Link></li>
+            </ul>
+          </div>
+
+          <div className={styles.footerSection}>
+            <h4 className={styles.footerTitle}>Customer Service</h4>
+            <ul className={styles.footerLinks}>
+              <li><Link href="/shipping">Shipping Info</Link></li>
+              <li><Link href="/returns">Returns & Exchanges</Link></li>
+              <li><Link href="/faq">FAQ</Link></li>
+              <li><Link href="/privacy">Privacy Policy</Link></li>
+            </ul>
+          </div>
+
+          <div className={styles.footerSection}>
+            <h4 className={styles.footerTitle}>Contact Us</h4>
+            <ul className={styles.footerContact}>
+              <li>
+                <Phone size={20} />
+                <span>+918107624752</span>
+              </li>
+              <li>
+                <Mail size={20} />
+                <span>info@casebuddy.co.in</span>
+              </li>
+              <li>
+                <MapPin size={20} />
+                <span>Rajgarh, Rajasthan 331023</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className={styles.footerBottom}>
+          <p className={styles.footerText}>
+            © 2025 CaseBuddy. All rights reserved.
+          </p>
+          <div className={styles.paymentMethods}>
+            <span>We Accept:</span>
+            <div className={styles.paymentIcons}>💳 UPI | Cards | Wallets</div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

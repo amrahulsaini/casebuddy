@@ -26,6 +26,13 @@
   background: #fff;
   overflow-x: hidden;
   overflow-y: visible;
+  padding-top: 130px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding-top: 102px;
+  }
 }
 
 /* ===== Announcement Banner ===== */
@@ -399,7 +406,7 @@
 }
 
 .sectionFullWidth:first-of-type {
-  padding-top: 10rem;
+  padding-top: 2rem;
 }
 
 .sectionFullWidth .sectionHeader {
@@ -1388,7 +1395,7 @@
   }
 
   .sectionFullWidth:first-of-type {
-    padding-top: 11rem;
+    padding-top: 2rem;
   }
   
   .sectionFullWidth .sectionHeader,
@@ -1574,7 +1581,7 @@
   }
 
   .sectionFullWidth:first-of-type {
-    padding-top: 10rem;
+    padding-top: 2rem;
   }
   
   .sectionFullWidth .sectionHeader,
@@ -1695,7 +1702,7 @@
   }
 
   .sectionFullWidth:first-of-type {
-    padding-top: 9.5rem;
+    padding-top: 2rem;
   }
 
   .sectionFullWidth .sectionHeader,

@@ -321,15 +321,31 @@ function CheckoutContent() {
       });
 
       if (response.ok) {
-        const { orderId, orderNumber, paymentUrl, paymentSessionId } = await response.json();
+        const { orderId, orderNumber, paymentSessionId } = await response.json();
         
-        showToast('success', 'Order created successfully! Redirecting to payment...');
-        
-        // Redirect to Cashfree payment page
-        if (paymentUrl) {
-          setTimeout(() => {
-            window.location.href = paymentUrl;
-          }, 1000);
+        if (paymentSessionId) {
+          showToast('success', 'Order created! Redirecting to payment...');
+          
+          // Load Cashfree SDK and initiate payment
+          const script = document.createElement('script');
+          script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
+          script.onload = () => {
+            // @ts-ignore
+            const cashfree = Cashfree({
+              mode: process.env.NEXT_PUBLIC_CASHFREE_ENV === 'PROD' ? 'production' : 'sandbox'
+            });
+            
+            const checkoutOptions = {
+              paymentSessionId: paymentSessionId,
+              returnUrl: `https://casebuddy.co.in/checkout/payment-callback?order_id=${orderId}`
+            };
+            
+            // @ts-ignore
+            cashfree.checkout(checkoutOptions).then(() => {
+              console.log('Payment initiated');
+            });
+          };
+          document.body.appendChild(script);
         } else {
           // Fallback if payment session creation failed
           setTimeout(() => {

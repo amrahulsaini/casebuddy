@@ -352,15 +352,7 @@
 
 /* ===== Features Bar ===== */
 .features {
-  background: #f9f9f9;
-  padding: 2rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 4rem;
-  flex-wrap: wrap;
-  border-top: 1px solid #e5e5e5;
-  border-bottom: 1px solid #e5e5e5;
+  display: none;
 }
 
 .feature {

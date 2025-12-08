@@ -16,9 +16,9 @@ export async function GET(request: NextRequest) {
     const [designs] = await connection.execute(
       'SELECT * FROM product_designs WHERE product_id = ? AND is_active = 1 ORDER BY sort_order ASC, id ASC',
       [productId]
-    );
+    ) as any;
 
-    return NextResponse.json(designs);
+    return NextResponse.json({ designs });
   } catch (error) {
     console.error('Error fetching product designs:', error);
     return NextResponse.json({ error: 'Failed to fetch product designs' }, { status: 500 });
@@ -45,11 +45,11 @@ export async function POST(request: NextRequest) {
     const [result] = await connection.execute(
       'INSERT INTO product_designs (product_id, design_name, design_image_url, sort_order) VALUES (?, ?, ?, ?)',
       [product_id, design_name, design_image_url, sort_order || 0]
-    );
+    ) as any;
 
     return NextResponse.json({
       message: 'Design added successfully',
-      id: (result as any).insertId
+      id: result.insertId
     }, { status: 201 });
   } catch (error) {
     console.error('Error creating product design:', error);

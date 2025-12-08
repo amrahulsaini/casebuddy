@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
 
     query += ' ORDER BY cv.sort_order, cv.value_name';
 
-    const [rows] = await connection.execute(query, params);
+    const [rows] = await connection.execute(query, params) as any;
 
     return NextResponse.json({ values: rows });
   } catch (error) {
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
        (customization_type_id, product_id, value_name, value_data, price_modifier, sort_order, is_active) 
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [customization_type_id, product_id, value_name, value_data, price_modifier, sort_order, is_active]
-    );
+    ) as any;
 
     return NextResponse.json({ 
       message: 'Customization value created successfully',

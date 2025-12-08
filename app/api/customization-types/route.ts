@@ -13,13 +13,13 @@ export async function GET(request: NextRequest) {
       const [rows] = await connection.execute(
         'SELECT * FROM customization_types WHERE id = ?',
         [id]
-      );
+      ) as any;
       return NextResponse.json({ type: rows[0] || null });
     }
 
     const [rows] = await connection.execute(
       'SELECT * FROM customization_types WHERE is_active = 1 ORDER BY type_name'
-    );
+    ) as any;
     return NextResponse.json({ types: rows });
   } catch (error) {
     console.error('Error fetching customization types:', error);
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     const [result] = await connection.execute(
       'INSERT INTO customization_types (type_name, display_name, input_type, is_active) VALUES (?, ?, ?, ?)',
       [type_name, display_name, input_type, is_active]
-    );
+    ) as any;
 
     return NextResponse.json({ 
       message: 'Customization type created successfully',

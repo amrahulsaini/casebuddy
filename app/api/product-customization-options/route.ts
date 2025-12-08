@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
       JOIN customization_types ct ON pco.customization_type_id = ct.id
       WHERE pco.product_id = ?
       ORDER BY pco.sort_order, ct.display_name
-    `, [productId]);
+    `, [productId]) as any;
 
     return NextResponse.json({ options: rows });
   } catch (error) {
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     const [result] = await connection.execute(
       'INSERT INTO product_customization_options (product_id, customization_type_id, is_required, sort_order) VALUES (?, ?, ?, ?)',
       [product_id, customization_type_id, is_required, sort_order]
-    );
+    ) as any;
 
     return NextResponse.json({ 
       message: 'Customization option added successfully',

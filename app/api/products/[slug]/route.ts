@@ -45,57 +45,44 @@ export async function GET(
       [product.id]
     );
 
-    // Get product categories with customization info
+    // Get product categories
     const [categories] = await pool.execute(
-      `SELECT c.id, c.name, c.slug, c.customization_enabled, c.customization_options
+      `SELECT c.id, c.name, c.slug
        FROM categories c
        JOIN product_categories pc ON c.id = pc.category_id
        WHERE pc.product_id = ?`,
       [product.id]
     );
 
-    // Determine effective customization settings
-    let effectiveCustomization: {
-      enabled: boolean;
-      options: any;
-      phone_brands: any[];
-      phone_models: any[];
-    } = {
-      enabled: false,
-      options: null,
-      phone_brands: [],
-      phone_models: []
-    };
+    // Get phone brands and models from category-phones (customization is always enabled)
+    const categoryIds = (categories as any[]).map(cat => cat.id);
+    let phoneBrands: any[] = [];
+    let phoneModels: any[] = [];
 
-    // Use category-level customization (from first category with customization enabled)
-    const customCategory = (categories as any[]).find((cat: any) => cat.customization_enabled);
-    if (customCategory) {
-      effectiveCustomization.enabled = true;
-      effectiveCustomization.options = customCategory.customization_options ? 
-        (typeof customCategory.customization_options === 'string' ? JSON.parse(customCategory.customization_options) : customCategory.customization_options) : 
-        null;
+    if (categoryIds.length > 0) {
+      const placeholders = categoryIds.map(() => '?').join(',');
       
-      // Get category phone brands (from category-phones management)
-      const [categoryBrands] = await pool.execute(
-        `SELECT pb.id, pb.name, pb.slug
+      // Get all phone brands from all categories this product belongs to
+      const [brands] = await pool.execute(
+        `SELECT DISTINCT pb.id, pb.name, pb.slug
          FROM phone_brands pb
          JOIN category_phone_brands cpb ON pb.id = cpb.brand_id
-         WHERE cpb.category_id = ?
+         WHERE cpb.category_id IN (${placeholders})
          ORDER BY pb.name`,
-        [customCategory.id]
+        categoryIds
       );
-      effectiveCustomization.phone_brands = categoryBrands as any[];
+      phoneBrands = brands as any[];
 
-      // Get category phone models (from category-phones management)
-      const [categoryModels] = await pool.execute(
-        `SELECT pm.id, pm.model_name, pm.brand_id, pm.slug
+      // Get all phone models from all categories this product belongs to
+      const [models] = await pool.execute(
+        `SELECT DISTINCT pm.id, pm.model_name, pm.brand_id, pm.slug
          FROM phone_models pm
          JOIN category_phone_models cpm ON pm.id = cpm.phone_model_id
-         WHERE cpm.category_id = ?
+         WHERE cpm.category_id IN (${placeholders})
          ORDER BY pm.model_name`,
-        [customCategory.id]
+        categoryIds
       );
-      effectiveCustomization.phone_models = categoryModels as any[];
+      phoneModels = models as any[];
     }
 
     // Get product variants
@@ -122,8 +109,6 @@ export async function GET(
       categories: Array.isArray(categories) ? categories.map((cat: any) => ({
         ...cat,
         id: Number(cat.id),
-        customization_enabled: Boolean(cat.customization_enabled),
-        customization_options: cat.customization_options ? JSON.parse(cat.customization_options) : null,
       })) : [],
       variants: Array.isArray(variants) ? variants.map((v: any) => ({
         ...v,
@@ -132,13 +117,10 @@ export async function GET(
         stock_quantity: Number(v.stock_quantity),
         is_active: Boolean(v.is_active),
       })) : [],
-      // Add effective customization data
+      // Customization is always enabled with phone brands/models from category-phones
       customization: {
-        enabled: effectiveCustomization.enabled,
-        options: effectiveCustomization.options,
-        phone_brands: effectiveCustomization.phone_brands,
-        phone_models: effectiveCustomization.phone_models,
-        source: 'category'
+        phone_brands: phoneBrands,
+        phone_models: phoneModels,
       }
     };
 

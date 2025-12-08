@@ -20,12 +20,6 @@ interface Category {
   id: number;
   name: string;
   slug: string;
-  customization_enabled?: boolean;
-  customization_options?: {
-    text_enabled: boolean;
-    fonts: string[];
-    placements: string[];
-  };
 }
 
 interface PhoneBrand {
@@ -54,16 +48,9 @@ interface Product {
   is_featured: boolean;
   images: ProductImage[];
   categories: Category[];
-  customization?: {
-    enabled: boolean;
-    options: {
-      text_enabled: boolean;
-      fonts: string[];
-      placements: string[];
-    } | null;
+  customization: {
     phone_brands: PhoneBrand[];
     phone_models: PhoneModel[];
-    source: 'product' | 'category';
   };
 }
 
@@ -99,12 +86,10 @@ export default function ProductDetailPage() {
         if (data.success) {
           setProduct(data.product);
           
-          // Customization is always enabled - load phone brands and models
+          // Load phone brands and models from category-phones
           if (data.product.customization) {
             setPhoneBrands(data.product.customization.phone_brands || []);
-            if (data.product.customization.phone_models) {
-              setPhoneModels(data.product.customization.phone_models);
-            }
+            setPhoneModels(data.product.customization.phone_models || []);
           }
         }
         setLoading(false);
@@ -114,30 +99,6 @@ export default function ProductDetailPage() {
         setLoading(false);
       });
   }, [productSlug]);
-
-  const fetchPhoneBrands = async (categoryId: number) => {
-    try {
-      const response = await fetch(`/api/phone-brands?category=${categoryId}`);
-      const data = await response.json();
-      if (data.success) {
-        setPhoneBrands(data.brands);
-      }
-    } catch (error) {
-      console.error('Error fetching phone brands:', error);
-    }
-  };
-
-  const fetchPhoneModels = async (brandId: number) => {
-    try {
-      const response = await fetch(`/api/phone-brands/${brandId}/models`);
-      const data = await response.json();
-      if (data.success) {
-        setPhoneModels(data.models);
-      }
-    } catch (error) {
-      console.error('Error fetching phone models:', error);
-    }
-  };
 
   const handleBrandChange = (brandId: number) => {
     setSelectedBrand(brandId);

@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import caseMainPool from '@/lib/db-main';
 import nodemailer from 'nodemailer';
 
-// Email transporter configuration
+// Email transporter configuration from environment variables
 const transporter = nodemailer.createTransport({
-  host: 'mail.casebuddy.co.in',
-  port: 587,
-  secure: false,
+  host: process.env.EMAIL_HOST || 'localhost',
+  port: parseInt(process.env.EMAIL_PORT || '587'),
+  secure: process.env.EMAIL_SECURE === 'true',
   auth: {
-    user: 'info@casebuddy.co.in',
-    pass: 'info@123'
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD
   },
   tls: {
     rejectUnauthorized: false
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
     // Send order confirmation email
     try {
       await transporter.sendMail({
-        from: '"CaseBuddy" <info@casebuddy.co.in>',
+        from: `"CaseBuddy" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: `Order Confirmation - ${orderNumber}`,
         html: `

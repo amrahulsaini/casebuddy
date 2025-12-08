@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { User, Mail, Phone, MapPin, ShoppingBag, Lock, Check } from 'lucide-react';
+import Toast from '@/components/Toast';
 import styles from './page.module.css';
 
 interface OrderItem {
@@ -65,9 +66,44 @@ function CheckoutContent() {
   const [mobileVerified, setMobileVerified] = useState(false);
   const [emailOtpSent, setEmailOtpSent] = useState(false);
   const [mobileOtpSent, setMobileOtpSent] = useState(false);
+  const [emailResendTimer, setEmailResendTimer] = useState(0);
+  const [mobileResendTimer, setMobileResendTimer] = useState(0);
   
   // Processing state
   const [processing, setProcessing] = useState(false);
+
+  // Toast notification state
+  const [toast, setToast] = useState<{
+    show: boolean;
+    type: 'success' | 'error' | 'info' | 'warning';
+    title?: string;
+    message: string;
+  }>({ show: false, type: 'info', message: '' });
+
+  const showToast = (type: 'success' | 'error' | 'info' | 'warning', message: string, title?: string) => {
+    setToast({ show: true, type, message, title });
+  };
+
+  // Resend timers
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (emailResendTimer > 0) {
+      interval = setInterval(() => {
+        setEmailResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [emailResendTimer]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (mobileResendTimer > 0) {
+      interval = setInterval(() => {
+        setMobileResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [mobileResendTimer]);
 
   // Indian states
   const indianStates = [
@@ -176,6 +212,12 @@ function CheckoutContent() {
     const error = validateField('email', formData.email);
     if (error) {
       setFormErrors(prev => ({ ...prev, email: error }));
+      showToast('error', error);
+      return;
+    }
+
+    if (emailResendTimer > 0) {
+      showToast('warning', `Please wait ${emailResendTimer} seconds before resending`);
       return;
     }
 
@@ -188,14 +230,15 @@ function CheckoutContent() {
 
       if (response.ok) {
         setEmailOtpSent(true);
-        alert('OTP sent to your email!');
+        setEmailResendTimer(60);
+        showToast('success', 'OTP has been sent to your email address');
       } else {
         const data = await response.json();
-        alert(data.error || 'Failed to send OTP');
+        showToast('error', data.error || 'Failed to send OTP');
       }
     } catch (error) {
       console.error('Error sending email OTP:', error);
-      alert('Failed to send OTP. Please try again.');
+      showToast('error', 'Failed to send OTP. Please try again.');
     }
   };
 
@@ -204,6 +247,12 @@ function CheckoutContent() {
     const error = validateField('mobile', formData.mobile);
     if (error) {
       setFormErrors(prev => ({ ...prev, mobile: error }));
+      showToast('error', error);
+      return;
+    }
+
+    if (mobileResendTimer > 0) {
+      showToast('warning', `Please wait ${mobileResendTimer} seconds before resending`);
       return;
     }
 
@@ -216,21 +265,22 @@ function CheckoutContent() {
 
       if (response.ok) {
         setMobileOtpSent(true);
-        alert('OTP sent to your mobile!');
+        setMobileResendTimer(60);
+        showToast('success', 'OTP has been sent to your mobile number');
       } else {
         const data = await response.json();
-        alert(data.error || 'Failed to send OTP');
+        showToast('error', data.error || 'Failed to send OTP');
       }
     } catch (error) {
       console.error('Error sending mobile OTP:', error);
-      alert('Failed to send OTP. Please try again.');
+      showToast('error', 'Failed to send OTP. Please try again.');
     }
   };
 
   // Verify Email OTP
   const verifyEmailOtp = async () => {
     if (!emailOtp || emailOtp.length !== 6) {
-      alert('Please enter valid 6-digit OTP');
+      showToast('warning', 'Please enter a valid 6-digit OTP');
       return;
     }
 
@@ -243,20 +293,21 @@ function CheckoutContent() {
 
       if (response.ok) {
         setEmailVerified(true);
-        alert('Email verified successfully!');
+        showToast('success', 'Email verified successfully!');
       } else {
-        alert('Invalid OTP. Please try again.');
+        const data = await response.json();
+        showToast('error', data.error || 'Invalid OTP. Please try again.');
       }
     } catch (error) {
       console.error('Error verifying email OTP:', error);
-      alert('Verification failed. Please try again.');
+      showToast('error', 'Verification failed. Please try again.');
     }
   };
 
   // Verify Mobile OTP
   const verifyMobileOtp = async () => {
     if (!mobileOtp || mobileOtp.length !== 6) {
-      alert('Please enter valid 6-digit OTP');
+      showToast('warning', 'Please enter a valid 6-digit OTP');
       return;
     }
 
@@ -269,13 +320,14 @@ function CheckoutContent() {
 
       if (response.ok) {
         setMobileVerified(true);
-        alert('Mobile verified successfully!');
+        showToast('success', 'Mobile number verified successfully!');
       } else {
-        alert('Invalid OTP. Please try again.');
+        const data = await response.json();
+        showToast('error', data.error || 'Invalid OTP. Please try again.');
       }
     } catch (error) {
       console.error('Error verifying mobile OTP:', error);
-      alert('Verification failed. Please try again.');
+      showToast('error', 'Verification failed. Please try again.');
     }
   };
 
@@ -303,22 +355,22 @@ function CheckoutContent() {
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
-      alert('Please fill all required fields correctly');
+      showToast('error', 'Please fill all required fields correctly');
       return;
     }
 
     if (!emailVerified) {
-      alert('Please verify your email address');
+      showToast('warning', 'Please verify your email address');
       return;
     }
 
     if (!mobileVerified) {
-      alert('Please verify your mobile number');
+      showToast('warning', 'Please verify your mobile number');
       return;
     }
 
     if (!orderItem) {
-      alert('Order details not found');
+      showToast('error', 'Order details not found');
       return;
     }
 
@@ -347,16 +399,20 @@ function CheckoutContent() {
       if (response.ok) {
         const { orderId } = await response.json();
         
+        showToast('success', 'Order created successfully! Redirecting to payment...');
+        
         // TODO: Integrate Cashfree payment gateway
         // For now, redirect to success page
-        router.push(`/order-confirmation?orderId=${orderId}`);
+        setTimeout(() => {
+          router.push(`/order-confirmation?orderId=${orderId}`);
+        }, 1500);
       } else {
         const data = await response.json();
-        alert(data.error || 'Failed to create order');
+        showToast('error', data.error || 'Failed to create order');
       }
     } catch (error) {
       console.error('Checkout error:', error);
-      alert('Failed to process checkout. Please try again.');
+      showToast('error', 'Failed to process checkout. Please try again.');
     } finally {
       setProcessing(false);
     }
@@ -410,9 +466,9 @@ function CheckoutContent() {
                       type="button"
                       className={styles.verifyBtn}
                       onClick={sendEmailOtp}
-                      disabled={!formData.email || emailOtpSent}
+                      disabled={!formData.email || (emailOtpSent && emailResendTimer > 0)}
                     >
-                      {emailOtpSent ? 'OTP Sent' : 'Send OTP'}
+                      {emailOtpSent && emailResendTimer > 0 ? `Resend in ${emailResendTimer}s` : emailOtpSent ? 'Resend OTP' : 'Send OTP'}
                     </button>
                   )}
                 </div>
@@ -470,9 +526,9 @@ function CheckoutContent() {
                       type="button"
                       className={styles.verifyBtn}
                       onClick={sendMobileOtp}
-                      disabled={!formData.mobile || mobileOtpSent}
+                      disabled={!formData.mobile || (mobileOtpSent && mobileResendTimer > 0)}
                     >
-                      {mobileOtpSent ? 'OTP Sent' : 'Send OTP'}
+                      {mobileOtpSent && mobileResendTimer > 0 ? `Resend in ${mobileResendTimer}s` : mobileOtpSent ? 'Resend OTP' : 'Send OTP'}
                     </button>
                   )}
                 </div>
@@ -687,6 +743,16 @@ function CheckoutContent() {
           </div>
         </div>
       </div>
+
+      {/* Toast Notifications */}
+      {toast.show && (
+        <Toast
+          type={toast.type}
+          title={toast.title}
+          message={toast.message}
+          onClose={() => setToast({ ...toast, show: false })}
+        />
+      )}
     </div>
   );
 }

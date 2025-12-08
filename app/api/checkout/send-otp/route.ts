@@ -1,17 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 
-// Store OTPs temporarily (in production, use Redis or database)
-const otpStore = new Map<string, { otp: string; expires: number }>();
+// Shared global OTP store
+declare global {
+  var otpStore: Map<string, { otp: string; expires: number }> | undefined;
+}
 
-// Email transporter configuration
+// Initialize global OTP store
+if (!global.otpStore) {
+  global.otpStore = new Map();
+}
+
+// Email transporter configuration from environment variables
 const transporter = nodemailer.createTransport({
-  host: 'mail.casebuddy.co.in',
-  port: 587,
-  secure: false,
+  host: process.env.EMAIL_HOST || 'localhost',
+  port: parseInt(process.env.EMAIL_PORT || '587'),
+  secure: process.env.EMAIL_SECURE === 'true',
   auth: {
-    user: 'info@casebuddy.co.in',
-    pass: 'info@123'
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD
   },
   tls: {
     rejectUnauthorized: false
@@ -47,11 +54,11 @@ export async function POST(request: NextRequest) {
       }
 
       // Store OTP
-      otpStore.set(`email:${email}`, { otp, expires });
+      global.otpStore.set(`email:${email}`, { otp, expires });
 
       // Send email
       await transporter.sendMail({
-        from: '"CaseBuddy" <info@casebuddy.co.in>',
+        from: `"CaseBuddy" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: 'Your OTP for Order Verification - CaseBuddy',
         html: `
@@ -108,7 +115,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Store OTP
-      otpStore.set(`mobile:${mobile}`, { otp, expires });
+      global.otpStore.set(`mobile:${mobile}`, { otp, expires });
 
       // TODO: Integrate SMS gateway (Twilio, MSG91, etc.)
       // For now, we'll just log it (in production, send actual SMS)
@@ -117,8 +124,8 @@ export async function POST(request: NextRequest) {
       // In development, send OTP via email as fallback
       if (process.env.NODE_ENV === 'development') {
         await transporter.sendMail({
-          from: '"CaseBuddy" <info@casebuddy.co.in>',
-          to: 'info@casebuddy.co.in',
+          from: `"CaseBuddy" <${process.env.EMAIL_USER}>`,
+          to: process.env.EMAIL_USER,
           subject: `Mobile OTP for ${mobile}`,
           text: `OTP for mobile ${mobile}: ${otp}`
         });

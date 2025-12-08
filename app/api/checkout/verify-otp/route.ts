@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Import the same OTP store (in production, use Redis or database)
-// For now, we'll use a global map
+// Shared OTP store (same reference as send-otp)
 declare global {
   var otpStore: Map<string, { otp: string; expires: number }> | undefined;
 }
 
+// Initialize global OTP store
 if (!global.otpStore) {
   global.otpStore = new Map();
 }
-
-const otpStore = global.otpStore;
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     const key = type === 'email' ? `email:${email}` : `mobile:${mobile}`;
-    const storedOtp = otpStore.get(key);
+    const storedOtp = global.otpStore.get(key);
 
     if (!storedOtp) {
       return NextResponse.json(
@@ -43,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     // Check if OTP is expired
     if (Date.now() > storedOtp.expires) {
-      otpStore.delete(key);
+      global.otpStore.delete(key);
       return NextResponse.json(
         { error: 'OTP has expired. Please request a new OTP.' },
         { status: 400 }
@@ -59,7 +57,7 @@ export async function POST(request: NextRequest) {
     }
 
     // OTP verified successfully, remove from store
-    otpStore.delete(key);
+    global.otpStore.delete(key);
 
     return NextResponse.json({ 
       success: true, 

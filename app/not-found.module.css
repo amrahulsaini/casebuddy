@@ -2,13 +2,13 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
 }
 
 .header {
   padding: 1.5rem 2rem;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
+  background: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .logo {
@@ -45,7 +45,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 20px 60px rgba(255, 107, 0, 0.4);
+  box-shadow: 0 20px 60px rgba(255, 107, 0, 0.3);
   position: relative;
   transform: perspective(1000px) rotateY(-15deg);
   animation: rotate 6s ease-in-out infinite;
@@ -91,35 +91,31 @@
 .title {
   font-size: 48px;
   font-weight: 800;
-  color: white;
+  color: #1a202c;
   margin: 0 0 20px 0;
-  background: linear-gradient(135deg, #fff 0%, #ff9500 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .description {
   font-size: 20px;
-  color: rgba(255, 255, 255, 0.8);
+  color: #4a5568;
   line-height: 1.6;
   margin: 0 0 40px 0;
   max-width: 600px;
 }
 
 .suggestions {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: white;
+  border: 1px solid #e2e8f0;
   border-radius: 16px;
   padding: 30px;
   margin-bottom: 40px;
-  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 .suggestionTitle {
   font-size: 18px;
   font-weight: 700;
-  color: #ff9500;
+  color: #ff6b00;
   margin: 0 0 16px 0;
 }
 
@@ -133,7 +129,7 @@
 }
 
 .suggestionList li {
-  color: rgba(255, 255, 255, 0.9);
+  color: #4a5568;
   font-size: 16px;
   display: flex;
   align-items: center;
@@ -166,7 +162,7 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .primaryButton {
@@ -176,24 +172,23 @@
 
 .primaryButton:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(255, 107, 0, 0.5);
+  box-shadow: 0 8px 25px rgba(255, 107, 0, 0.3);
 }
 
 .secondaryButton {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
+  background: white;
+  color: #ff6b00;
+  border: 2px solid #ff6b00;
 }
 
 .secondaryButton:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.4);
+  background: #ff6b00;
+  color: white;
   transform: translateY(-3px);
 }
 
 .backLink {
-  color: rgba(255, 255, 255, 0.6);
+  color: #718096;
   text-decoration: none;
   font-size: 15px;
   display: inline-flex;
@@ -204,19 +199,19 @@
 }
 
 .backLink:hover {
-  color: #ff9500;
+  color: #ff6b00;
   gap: 12px;
 }
 
 .footer {
   padding: 30px 20px;
   text-align: center;
-  background: rgba(0, 0, 0, 0.3);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: white;
+  border-top: 1px solid #e2e8f0;
 }
 
 .footer p {
-  color: rgba(255, 255, 255, 0.5);
+  color: #718096;
   font-size: 14px;
   margin: 0;
 }

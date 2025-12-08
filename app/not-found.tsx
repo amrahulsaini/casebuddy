@@ -41,9 +41,9 @@ export default function NotFound() {
             <Home size={20} />
             Back to Home
           </Link>
-          <Link href="/shop" className={styles.secondaryButton}>
+          <Link href="/#shop" className={styles.secondaryButton}>
             <ShoppingBag size={20} />
-            Browse Shop
+            Browse Collections
           </Link>
         </div>
 

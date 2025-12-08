@@ -3,10 +3,11 @@ import pool from '@/lib/db-main';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { email: string } }
+  { params }: { params: Promise<{ email: string }> }
 ) {
   try {
-    const email = decodeURIComponent(params.email);
+    const { email: encodedEmail } = await params;
+    const email = decodeURIComponent(encodedEmail);
 
     const [rows] = await pool.execute(
       `SELECT 

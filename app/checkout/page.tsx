@@ -264,13 +264,11 @@ function CheckoutContent() {
     if (!orderItem) return { subtotal: 0, shipping: 0, total: 0 };
     
     const subtotal = orderItem.price * orderItem.quantity;
-    const shipping = subtotal >= 499 ? 0 : 80;
+    const shipping = 0; // Free shipping for now
     const total = subtotal + shipping;
-    
-    return { subtotal, shipping, total };
-  };
 
-  // Handle checkout
+    return { subtotal, shipping, total };
+  };  // Handle checkout
   const handleCheckout = async () => {
     // Validate all fields
     const errors: FormErrors = {};

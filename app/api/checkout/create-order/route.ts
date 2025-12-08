@@ -189,16 +189,19 @@ export async function POST(request: NextRequest) {
 
         console.log('Payment session created successfully:', {
           sessionId: paymentSessionId,
+          cashfreeOrderId: cashfreeOrderId,
           paymentUrl: paymentUrl,
           environment: CASHFREE_ENV,
           hasPaymentLink: !!responseData.payment_link
         });
 
-        // Update order with Cashfree order ID (not session ID)
+        // Update order with Cashfree order ID (CRITICAL: Store order ID, not session ID)
         await caseMainPool.query(
           'UPDATE orders SET payment_id = ?, payment_method = ? WHERE id = ?',
           [cashfreeOrderId, 'Cashfree', orderId]
         );
+        
+        console.log(`Order ${orderId} updated with Cashfree order ID: ${cashfreeOrderId}`);
       } else {
         console.error('Cashfree API Error:', {
           status: response.status,

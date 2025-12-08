@@ -231,6 +231,8 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
               <input
                 type="number"
                 step="0.01"
+                min="0"
+                inputMode="decimal"
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 required
@@ -242,6 +244,8 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
               <input
                 type="number"
                 step="0.01"
+                min="0"
+                inputMode="decimal"
                 value={formData.compare_price}
                 onChange={(e) =>
                   setFormData({ ...formData, compare_price: e.target.value })

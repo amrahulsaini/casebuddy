@@ -186,7 +186,19 @@ export default function PagesManagementPage() {
                 </span>
               </div>
               
-              <p className={styles.pageSlug}>/{page.slug}</p>
+              <div className={styles.urlSection}>
+                <span className={styles.urlLabel}>URL:</span>
+                <a 
+                  href={page.page_key === 'homepage' ? 'https://casebuddy.co.in' : `https://casebuddy.co.in/${page.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.pageUrl}
+                >
+                  {page.page_key === 'homepage' ? 'https://casebuddy.co.in' : `https://casebuddy.co.in/${page.slug}`}
+                  <span className={styles.externalIcon}>↗</span>
+                </a>
+              </div>
+              
               <p className={styles.pageDesc}>{page.description || 'No description'}</p>
               
               <div className={styles.pageStats}>

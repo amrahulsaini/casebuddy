@@ -91,6 +91,55 @@
   font-weight: 600;
 }
 
+.urlSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 12px;
+  background: #f7fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.urlLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pageUrl {
+  font-size: 13px;
+  color: #667eea;
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  word-break: break-all;
+  flex: 1;
+}
+
+.pageUrl:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+.externalIcon {
+  font-size: 14px;
+  opacity: 0.6;
+  transition: all 0.2s;
+}
+
+.pageUrl:hover .externalIcon {
+  opacity: 1;
+  transform: translate(2px, -2px);
+}
+
 .pageDesc {
   font-size: 14px;
   color: #718096;

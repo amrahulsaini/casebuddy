@@ -216,8 +216,7 @@ export default function ReturnsPage() {
             We'll provide a prepaid return label or arrange free pickup.
           </p>
           <p className={styles.paragraph}>
-            <strong>For change of mind:</strong> Return shipping cost will be deducted from your refund amount 
-            (typically ₹50-100 depending on location).
+            <strong>For change of mind:</strong> Return shipping cost of ₹80 will be deducted from your refund amount.
           </p>
         </div>
 
@@ -260,14 +259,14 @@ export default function ReturnsPage() {
               Your one-stop shop for premium custom phone cases. Protect your device with style.
             </p>
             <div className={styles.socialLinks}>
-              <a href="#" className={styles.socialIcon}>
+              <a href="https://www.instagram.com/casebuddy25" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}>
                 <Instagram size={24} />
               </a>
-              <a href="#" className={styles.socialIcon}>
+              <a href="https://www.facebook.com/share/17fhSRLQR4/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}>
                 <Facebook size={24} />
               </a>
-              <a href="#" className={styles.socialIcon}>
-                <Twitter size={24} />
+              <a href="https://wa.me/918107624752" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}>
+                <Mail size={24} />
               </a>
             </div>
           </div>

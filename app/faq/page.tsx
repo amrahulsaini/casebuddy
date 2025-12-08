@@ -50,7 +50,7 @@ export default function FAQPage() {
         },
         {
           q: 'Can I cancel my order?',
-          a: 'Yes, you can cancel your order within 24 hours of placing it. Once the order is shipped, cancellation is not possible. Contact us at +918107624752 to cancel.'
+          a: 'Order cancellation is not available. However, you can return the product within 7 days of delivery as per our return policy. Please contact us at +918107624752 for assistance.'
         }
       ]
     },
@@ -63,7 +63,7 @@ export default function FAQPage() {
         },
         {
           q: 'Do you offer free shipping?',
-          a: 'Yes! We offer free shipping on all orders above ₹499. For orders below ₹499, a shipping fee of ₹49 applies.'
+          a: 'Yes! We offer free shipping on all orders above ₹499. For orders below ₹499, a shipping fee of ₹80 applies.'
         },
         {
           q: 'Do you ship internationally?',
@@ -113,7 +113,7 @@ export default function FAQPage() {
         },
         {
           q: 'Who pays for return shipping?',
-          a: 'For defective or wrong products, we cover return shipping. For other returns, shipping cost (₹50-100) is deducted from your refund.'
+          a: 'For defective or wrong products, we cover return shipping. For other returns, shipping cost of ₹80 is deducted from your refund.'
         }
       ]
     },
@@ -264,14 +264,14 @@ export default function FAQPage() {
               Your one-stop shop for premium custom phone cases. Protect your device with style.
             </p>
             <div className={styles.socialLinks}>
-              <a href="#" className={styles.socialIcon}>
+              <a href="https://www.instagram.com/casebuddy25" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}>
                 <Instagram size={24} />
               </a>
-              <a href="#" className={styles.socialIcon}>
+              <a href="https://www.facebook.com/share/17fhSRLQR4/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}>
                 <Facebook size={24} />
               </a>
-              <a href="#" className={styles.socialIcon}>
-                <Twitter size={24} />
+              <a href="https://wa.me/918107624752" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}>
+                <Mail size={24} />
               </a>
             </div>
           </div>

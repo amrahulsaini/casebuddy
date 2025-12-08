@@ -142,7 +142,7 @@ export default function ShippingPage() {
             </div>
             <div className={styles.tableRow}>
               <div className={styles.tableCell}>Below ₹499</div>
-              <div className={styles.tableCell}>₹49</div>
+              <div className={styles.tableCell}>₹80</div>
             </div>
             <div className={styles.tableRow}>
               <div className={styles.tableCell}>₹499 and above</div>
@@ -237,14 +237,14 @@ export default function ShippingPage() {
               Your one-stop shop for premium custom phone cases. Protect your device with style.
             </p>
             <div className={styles.socialLinks}>
-              <a href="#" className={styles.socialIcon}>
+              <a href="https://www.instagram.com/casebuddy25" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}>
                 <Instagram size={24} />
               </a>
-              <a href="#" className={styles.socialIcon}>
+              <a href="https://www.facebook.com/share/17fhSRLQR4/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}>
                 <Facebook size={24} />
               </a>
-              <a href="#" className={styles.socialIcon}>
-                <Twitter size={24} />
+              <a href="https://wa.me/918107624752" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}>
+                <Mail size={24} />
               </a>
             </div>
           </div>

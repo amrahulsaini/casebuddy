@@ -1,0 +1,348 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { Package, Search, Download, Filter, Eye, Edit, RefreshCw } from 'lucide-react';
+import styles from './orders.module.css';
+
+interface Order {
+  id: number;
+  order_number: string;
+  customer_email: string;
+  customer_mobile: string;
+  customer_name: string;
+  product_name: string;
+  phone_model: string;
+  quantity: number;
+  total_amount: number;
+  order_status: string;
+  payment_status: string;
+  created_at: string;
+}
+
+export default function AdminOrdersPage() {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [paymentFilter, setPaymentFilter] = useState('all');
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  useEffect(() => {
+    filterOrders();
+  }, [searchTerm, statusFilter, paymentFilter, orders]);
+
+  const fetchOrders = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/admin/orders');
+      if (response.ok) {
+        const data = await response.json();
+        setOrders(data);
+      }
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filterOrders = () => {
+    let filtered = [...orders];
+
+    // Search filter
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      filtered = filtered.filter(order =>
+        order.order_number.toLowerCase().includes(search) ||
+        order.customer_name.toLowerCase().includes(search) ||
+        order.customer_email.toLowerCase().includes(search) ||
+        order.customer_mobile.includes(search) ||
+        order.product_name.toLowerCase().includes(search)
+      );
+    }
+
+    // Status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(order => order.order_status === statusFilter);
+    }
+
+    // Payment filter
+    if (paymentFilter !== 'all') {
+      filtered = filtered.filter(order => order.payment_status === paymentFilter);
+    }
+
+    setFilteredOrders(filtered);
+  };
+
+  const updateOrderStatus = async (orderId: number, newStatus: string) => {
+    try {
+      const response = await fetch('/api/admin/orders/update-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, orderStatus: newStatus }),
+      });
+
+      if (response.ok) {
+        fetchOrders();
+      }
+    } catch (error) {
+      console.error('Error updating order status:', error);
+    }
+  };
+
+  const exportToCSV = () => {
+    const headers = ['Order Number', 'Customer Name', 'Email', 'Mobile', 'Product', 'Phone Model', 'Quantity', 'Amount', 'Order Status', 'Payment Status', 'Date'];
+    const rows = filteredOrders.map(order => [
+      order.order_number,
+      order.customer_name,
+      order.customer_email,
+      order.customer_mobile,
+      order.product_name,
+      order.phone_model,
+      order.quantity,
+      order.total_amount,
+      order.order_status,
+      order.payment_status,
+      new Date(order.created_at).toLocaleDateString()
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `orders_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+      case 'delivered':
+        return '#4CAF50';
+      case 'processing':
+      case 'shipped':
+        return '#2196F3';
+      case 'pending':
+        return '#FF9800';
+      case 'cancelled':
+      case 'failed':
+        return '#f44336';
+      default:
+        return '#757575';
+    }
+  };
+
+  const stats = {
+    total: orders.length,
+    pending: orders.filter(o => o.order_status === 'pending').length,
+    processing: orders.filter(o => o.order_status === 'processing').length,
+    completed: orders.filter(o => o.payment_status === 'completed').length,
+    revenue: orders.filter(o => o.payment_status === 'completed').reduce((sum, o) => sum + o.total_amount, 0)
+  };
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <div>
+          <h1 className={styles.title}>Orders Management</h1>
+          <p className={styles.subtitle}>View and manage all customer orders</p>
+        </div>
+        <div className={styles.headerActions}>
+          <button onClick={fetchOrders} className={styles.refreshBtn}>
+            <RefreshCw size={18} />
+            Refresh
+          </button>
+          <button onClick={exportToCSV} className={styles.exportBtn}>
+            <Download size={18} />
+            Export CSV
+          </button>
+        </div>
+      </div>
+
+      <div className={styles.statsGrid}>
+        <div className={styles.statCard}>
+          <div className={styles.statIcon} style={{ background: '#e3f2fd' }}>
+            <Package size={24} style={{ color: '#2196F3' }} />
+          </div>
+          <div className={styles.statContent}>
+            <div className={styles.statValue}>{stats.total}</div>
+            <div className={styles.statLabel}>Total Orders</div>
+          </div>
+        </div>
+        <div className={styles.statCard}>
+          <div className={styles.statIcon} style={{ background: '#fff3e0' }}>
+            <Package size={24} style={{ color: '#FF9800' }} />
+          </div>
+          <div className={styles.statContent}>
+            <div className={styles.statValue}>{stats.pending}</div>
+            <div className={styles.statLabel}>Pending</div>
+          </div>
+        </div>
+        <div className={styles.statCard}>
+          <div className={styles.statIcon} style={{ background: '#e1f5fe' }}>
+            <Package size={24} style={{ color: '#03A9F4' }} />
+          </div>
+          <div className={styles.statContent}>
+            <div className={styles.statValue}>{stats.processing}</div>
+            <div className={styles.statLabel}>Processing</div>
+          </div>
+        </div>
+        <div className={styles.statCard}>
+          <div className={styles.statIcon} style={{ background: '#e8f5e9' }}>
+            <Package size={24} style={{ color: '#4CAF50' }} />
+          </div>
+          <div className={styles.statContent}>
+            <div className={styles.statValue}>₹{stats.revenue.toLocaleString()}</div>
+            <div className={styles.statLabel}>Revenue</div>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.filtersBar}>
+        <div className={styles.searchBox}>
+          <Search size={20} />
+          <input
+            type="text"
+            placeholder="Search by order number, customer, email, or product..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={styles.searchInput}
+          />
+        </div>
+        <div className={styles.filters}>
+          <div className={styles.filterGroup}>
+            <Filter size={16} />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className={styles.filterSelect}
+            >
+              <option value="all">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="processing">Processing</option>
+              <option value="shipped">Shipped</option>
+              <option value="delivered">Delivered</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+          <div className={styles.filterGroup}>
+            <select
+              value={paymentFilter}
+              onChange={(e) => setPaymentFilter(e.target.value)}
+              className={styles.filterSelect}
+            >
+              <option value="all">All Payments</option>
+              <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
+              <option value="failed">Failed</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className={styles.loading}>
+          <div className={styles.spinner}></div>
+          <p>Loading orders...</p>
+        </div>
+      ) : filteredOrders.length === 0 ? (
+        <div className={styles.empty}>
+          <Package size={64} />
+          <h2>No Orders Found</h2>
+          <p>{searchTerm || statusFilter !== 'all' || paymentFilter !== 'all' 
+            ? 'Try adjusting your filters' 
+            : 'No orders have been placed yet'}</p>
+        </div>
+      ) : (
+        <div className={styles.tableContainer}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Order Number</th>
+                <th>Customer</th>
+                <th>Product</th>
+                <th>Amount</th>
+                <th>Order Status</th>
+                <th>Payment</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredOrders.map((order) => (
+                <tr key={order.id}>
+                  <td>
+                    <div className={styles.orderNumber}>#{order.order_number}</div>
+                  </td>
+                  <td>
+                    <div className={styles.customerInfo}>
+                      <div className={styles.customerName}>{order.customer_name}</div>
+                      <div className={styles.customerMeta}>{order.customer_email}</div>
+                      <div className={styles.customerMeta}>{order.customer_mobile}</div>
+                    </div>
+                  </td>
+                  <td>
+                    <div className={styles.productInfo}>
+                      <div className={styles.productName}>{order.product_name}</div>
+                      <div className={styles.productMeta}>{order.phone_model} × {order.quantity}</div>
+                    </div>
+                  </td>
+                  <td>
+                    <div className={styles.amount}>₹{order.total_amount}</div>
+                  </td>
+                  <td>
+                    <select
+                      value={order.order_status}
+                      onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                      className={styles.statusSelect}
+                      style={{ borderColor: getStatusColor(order.order_status) }}
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="processing">Processing</option>
+                      <option value="shipped">Shipped</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  </td>
+                  <td>
+                    <span
+                      className={styles.paymentBadge}
+                      style={{ backgroundColor: getStatusColor(order.payment_status) }}
+                    >
+                      {order.payment_status}
+                    </span>
+                  </td>
+                  <td>
+                    <div className={styles.date}>
+                      {new Date(order.created_at).toLocaleDateString()}
+                    </div>
+                  </td>
+                  <td>
+                    <Link href={`/admin/dashboard/orders/${order.id}`} className={styles.actionBtn}>
+                      <Eye size={16} />
+                      View
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <div className={styles.footer}>
+        <p>Showing {filteredOrders.length} of {orders.length} orders</p>
+      </div>
+    </div>
+  );
+}

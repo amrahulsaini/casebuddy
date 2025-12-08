@@ -38,9 +38,25 @@ export async function POST(request: Request) {
     const connection = await pool.getConnection();
 
     try {
-      // Verify payment with Cashfree API
+      // First, get the Cashfree order ID from our database
+      const [orderRows] = await connection.execute<Order[]>(
+        'SELECT payment_id FROM orders WHERE id = ?',
+        [orderId]
+      );
+
+      if (orderRows.length === 0) {
+        throw new Error('Order not found');
+      }
+
+      const cashfreeOrderId = orderRows[0].payment_id;
+
+      if (!cashfreeOrderId) {
+        throw new Error('Payment ID not found for this order');
+      }
+
+      // Verify payment with Cashfree API using the correct order ID
       const cashfreeResponse = await fetch(
-        `https://api.cashfree.com/pg/orders/${orderId}`,
+        `https://api.cashfree.com/pg/orders/${cashfreeOrderId}`,
         {
           method: 'GET',
           headers: {
@@ -53,11 +69,13 @@ export async function POST(request: Request) {
 
       const paymentData = await cashfreeResponse.json();
 
+      console.log('Cashfree payment verification:', paymentData);
+
       // Update order status based on payment verification
       if (paymentData.order_status === 'PAID') {
         await connection.execute(
-          'UPDATE orders SET payment_status = ?, order_status = ?, payment_id = ? WHERE id = ?',
-          ['paid', 'confirmed', paymentData.cf_order_id, orderId]
+          'UPDATE orders SET payment_status = ?, order_status = ? WHERE id = ?',
+          ['completed', 'processing', orderId]
         );
 
         // Fetch order details
@@ -87,13 +105,12 @@ export async function POST(request: Request) {
         });
       } else {
         // Payment failed or pending
+        const paymentStatus = paymentData.order_status === 'ACTIVE' ? 'pending' : 'failed';
+        const orderStatus = paymentData.order_status === 'ACTIVE' ? 'pending' : 'cancelled';
+        
         await connection.execute(
           'UPDATE orders SET payment_status = ?, order_status = ? WHERE id = ?',
-          [
-            paymentData.order_status === 'ACTIVE' ? 'pending' : 'failed',
-            paymentData.order_status === 'ACTIVE' ? 'pending' : 'cancelled',
-            orderId
-          ]
+          [paymentStatus, orderStatus, orderId]
         );
 
         return NextResponse.json({

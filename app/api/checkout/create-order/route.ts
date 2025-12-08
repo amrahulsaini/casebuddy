@@ -194,10 +194,10 @@ export async function POST(request: NextRequest) {
           hasPaymentLink: !!responseData.payment_link
         });
 
-        // Update order with payment session ID
+        // Update order with Cashfree order ID (not session ID)
         await caseMainPool.query(
-          'UPDATE orders SET payment_id = ? WHERE id = ?',
-          [paymentSessionId, orderId]
+          'UPDATE orders SET payment_id = ?, payment_method = ? WHERE id = ?',
+          [cashfreeOrderId, 'Cashfree', orderId]
         );
       } else {
         console.error('Cashfree API Error:', {

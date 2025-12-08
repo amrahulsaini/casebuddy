@@ -86,6 +86,7 @@ function CheckoutContent() {
     const phoneModel = searchParams.get('phoneModel');
     const designName = searchParams.get('designName');
     const price = searchParams.get('price');
+    const quantity = searchParams.get('quantity');
     const image = searchParams.get('image');
     const productName = searchParams.get('productName');
 
@@ -100,7 +101,7 @@ function CheckoutContent() {
       phoneModel,
       designName: designName || undefined,
       price: parseFloat(price),
-      quantity: 1,
+      quantity: quantity ? parseInt(quantity) : 1,
       image: decodeURIComponent(image)
     });
 
@@ -649,12 +650,15 @@ function CheckoutContent() {
                 {orderItem.phoneModel}
                 {orderItem.designName && ` • ${orderItem.designName}`}
               </div>
-              <div className={styles.productPrice}>₹{orderItem.price.toFixed(2)}</div>
+              <div className={styles.productVariant}>
+                Quantity: {orderItem.quantity}
+              </div>
+              <div className={styles.productPrice}>₹{orderItem.price.toFixed(2)} each</div>
             </div>
           </div>
 
           <div className={styles.summaryRow}>
-            <span>Subtotal</span>
+            <span>Subtotal ({orderItem.quantity} {orderItem.quantity === 1 ? 'item' : 'items'})</span>
             <span>₹{subtotal.toFixed(2)}</span>
           </div>
           

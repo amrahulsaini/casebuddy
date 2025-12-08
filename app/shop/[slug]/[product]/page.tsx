@@ -200,6 +200,7 @@ export default function ProductDetailPage() {
       productName: product.name,
       phoneModel: `${brandName} ${modelName}`,
       price: product.price.toString(),
+      quantity: quantity.toString(),
       image: product.images[0]?.image_url || '',
       ...(customText.trim() && { customText: customText.trim() }),
       ...(customText.trim() && selectedFont && { font: selectedFont }),

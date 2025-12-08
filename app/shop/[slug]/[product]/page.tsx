@@ -78,15 +78,15 @@ export default function ProductDetailPage() {
   const [additionalNotes, setAdditionalNotes] = useState('');
 
   useEffect(() => {
-    if (!productSlug) return;
+    if (!productSlug || !categorySlug) return;
     
-    fetch(`/api/products/${productSlug}`)
+    fetch(`/api/products/${productSlug}?category=${categorySlug}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {
           setProduct(data.product);
           
-          // Load phone brands and models from category-phones
+          // Load phone brands and models from category-phones for THIS category only
           if (data.product.customization) {
             setPhoneBrands(data.product.customization.phone_brands || []);
             setPhoneModels(data.product.customization.phone_models || []);
@@ -98,7 +98,7 @@ export default function ProductDetailPage() {
         console.error('❌ Error loading product:', error);
         setLoading(false);
       });
-  }, [productSlug]);
+  }, [productSlug, categorySlug]);
 
   const handleBrandChange = (brandId: number) => {
     setSelectedBrand(brandId);

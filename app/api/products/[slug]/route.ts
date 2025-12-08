@@ -7,6 +7,8 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
+    const { searchParams } = new URL(request.url);
+    const categorySlug = searchParams.get('category');
 
     // Get product details
     const [products]: any = await pool.execute(
@@ -54,35 +56,39 @@ export async function GET(
       [product.id]
     );
 
-    // Get phone brands and models from category-phones (customization is always enabled)
-    const categoryIds = (categories as any[]).map(cat => cat.id);
+    // Get phone brands and models ONLY from the specific category in the URL
     let phoneBrands: any[] = [];
     let phoneModels: any[] = [];
+    let targetCategoryId: number | null = null;
 
-    if (categoryIds.length > 0) {
-      const placeholders = categoryIds.map(() => '?').join(',');
-      
-      // Get all phone brands from all categories this product belongs to
-      const [brands] = await pool.execute(
-        `SELECT DISTINCT pb.id, pb.name, pb.slug
-         FROM phone_brands pb
-         JOIN category_phone_brands cpb ON pb.id = cpb.brand_id
-         WHERE cpb.category_id IN (${placeholders})
-         ORDER BY pb.name`,
-        categoryIds
-      );
-      phoneBrands = brands as any[];
+    if (categorySlug) {
+      // Find the category ID from the slug
+      const targetCategory = (categories as any[]).find(cat => cat.slug === categorySlug);
+      if (targetCategory) {
+        targetCategoryId = targetCategory.id;
 
-      // Get all phone models from all categories this product belongs to
-      const [models] = await pool.execute(
-        `SELECT DISTINCT pm.id, pm.model_name, pm.brand_id, pm.slug
-         FROM phone_models pm
-         JOIN category_phone_models cpm ON pm.id = cpm.phone_model_id
-         WHERE cpm.category_id IN (${placeholders})
-         ORDER BY pm.model_name`,
-        categoryIds
-      );
-      phoneModels = models as any[];
+        // Get phone brands for THIS category only
+        const [brands] = await pool.execute(
+          `SELECT DISTINCT pb.id, pb.name, pb.slug
+           FROM phone_brands pb
+           JOIN category_phone_brands cpb ON pb.id = cpb.brand_id
+           WHERE cpb.category_id = ?
+           ORDER BY pb.name`,
+          [targetCategoryId]
+        );
+        phoneBrands = brands as any[];
+
+        // Get phone models for THIS category only
+        const [models] = await pool.execute(
+          `SELECT DISTINCT pm.id, pm.model_name, pm.brand_id, pm.slug
+           FROM phone_models pm
+           JOIN category_phone_models cpm ON pm.id = cpm.phone_model_id
+           WHERE cpm.category_id = ?
+           ORDER BY pm.model_name`,
+          [targetCategoryId]
+        );
+        phoneModels = models as any[];
+      }
     }
 
     // Get product variants

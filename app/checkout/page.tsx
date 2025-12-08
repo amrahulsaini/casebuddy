@@ -364,7 +364,7 @@ function CheckoutContent() {
   if (loading) {
     return (
       <div className={styles.container}>
-        <div style={{ textAlign: 'center', padding: '100px 20px', color: '#fff' }}>
+        <div style={{ textAlign: 'center', padding: '100px 20px', color: '#333' }}>
           <p>Loading checkout...</p>
         </div>
       </div>
@@ -691,7 +691,7 @@ export default function CheckoutPage() {
   return (
     <Suspense fallback={
       <div className={styles.container}>
-        <div style={{ textAlign: 'center', padding: '100px 20px', color: '#fff' }}>
+        <div style={{ textAlign: 'center', padding: '100px 20px', color: '#333' }}>
           <p>Loading checkout...</p>
         </div>
       </div>

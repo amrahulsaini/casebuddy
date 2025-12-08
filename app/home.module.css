@@ -24,6 +24,8 @@
 .container {
   min-height: 100vh;
   background: #fff;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 /* ===== Announcement Banner ===== */
@@ -447,6 +449,9 @@
   margin-bottom: 4rem;
   opacity: 0;
   animation: headerSlideIn 1s ease-out 0.2s forwards;
+  overflow: visible;
+  position: relative;
+  z-index: 1;
 }
 
 @keyframes headerSlideIn {
@@ -1383,7 +1388,7 @@
   }
 
   .sectionFullWidth:first-of-type {
-    padding-top: 9rem;
+    padding-top: 11rem;
   }
   
   .sectionFullWidth .sectionHeader,
@@ -1569,7 +1574,7 @@
   }
 
   .sectionFullWidth:first-of-type {
-    padding-top: 8.5rem;
+    padding-top: 10rem;
   }
   
   .sectionFullWidth .sectionHeader,
@@ -1690,7 +1695,7 @@
   }
 
   .sectionFullWidth:first-of-type {
-    padding-top: 8rem;
+    padding-top: 9.5rem;
   }
 
   .sectionFullWidth .sectionHeader,

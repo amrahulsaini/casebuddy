@@ -113,8 +113,13 @@ export async function POST(request: Request) {
         console.log('Sending confirmation emails for order:', order.order_number);
 
         // Send emails (order has product info embedded, no separate items table)
-        await sendOrderConfirmationEmails(order);
-        console.log('Confirmation emails sent successfully');
+        try {
+          await sendOrderConfirmationEmails(order);
+          console.log('Confirmation emails sent successfully');
+        } catch (emailError) {
+          console.error('Failed to send emails, but payment was successful:', emailError);
+          // Don't fail the whole request if email fails
+        }
 
         return NextResponse.json({
           success: true,
@@ -156,6 +161,12 @@ export async function POST(request: Request) {
 }
 
 async function sendOrderConfirmationEmails(order: Order) {
+  // Check if email credentials are configured
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.warn('Email credentials not configured, skipping email sending');
+    return;
+  }
+
   const transporter = nodemailer.createTransport({
     host: 'casebuddy.co.in', // Use main domain instead of mail.casebuddy.co.in
     port: 587,

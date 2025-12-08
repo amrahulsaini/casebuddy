@@ -96,7 +96,6 @@ export default function ProductDetailPage() {
         setLoading(false);
       })
       .catch(error => {
-        console.error('❌ Error loading product:', error);
         setLoading(false);
       });
   }, [productSlug, categorySlug]);

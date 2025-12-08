@@ -40,7 +40,6 @@ interface OrderItem extends RowDataPacket {
 export async function POST(request: Request) {
   try {
     const { orderId } = await request.json();
-    console.log('Payment confirmation requested for order:', orderId);
 
     if (!orderId) {
       return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });

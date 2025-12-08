@@ -14,13 +14,23 @@ export default function CartPage() {
   const router = useRouter();
 
   const handleCheckout = () => {
-    // Build checkout URL with all cart items
+    // For now, we'll handle only the first item
+    // TODO: In future, support multiple products in single checkout
+    // or create separate orders for each product
+    
+    if (cart.length === 0) return;
+    
     const firstItem = cart[0];
+    
+    // Calculate total from all items
+    const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
     const params = new URLSearchParams({
       productName: firstItem.name,
       phoneModel: firstItem.phoneModel,
-      price: firstItem.price.toString(),
-      quantity: cart.reduce((sum, item) => sum + item.quantity, 0).toString(),
+      price: totalPrice.toString(),
+      quantity: totalQuantity.toString(),
       image: firstItem.image || '',
     });
 
@@ -34,6 +44,11 @@ export default function CartPage() {
     // Add notes if present
     if (firstItem.additionalNotes) {
       params.append('notes', firstItem.additionalNotes);
+    }
+    
+    // Add warning if multiple items
+    if (cart.length > 1) {
+      params.append('notes', `Multiple items: ${cart.map(item => `${item.name} (${item.quantity})`).join(', ')}`);
     }
 
     router.push(`/checkout?${params.toString()}`);

@@ -15,7 +15,7 @@ interface Order {
   product_name: string;
   phone_model: string;
   quantity: number;
-  price_per_unit: number;
+  unit_price: number;
   shipping_cost: number;
   total_amount: number;
   order_status: string;
@@ -169,10 +169,10 @@ export default function AdminOrderDetailPage() {
                 <h3>{order.product_name}</h3>
                 <p className={styles.itemMeta}>Phone Model: {order.phone_model}</p>
                 <p className={styles.itemMeta}>Quantity: {order.quantity}</p>
-                <p className={styles.itemMeta}>Price per unit: ₹{order.price_per_unit}</p>
+                <p className={styles.itemMeta}>Price per unit: ₹{order.unit_price}</p>
               </div>
               <div className={styles.itemPrice}>
-                ₹{order.price_per_unit * order.quantity}
+                ₹{order.unit_price * order.quantity}
               </div>
             </div>
 
@@ -195,7 +195,7 @@ export default function AdminOrderDetailPage() {
             <div className={styles.priceSummary}>
               <div className={styles.priceRow}>
                 <span>Subtotal</span>
-                <span>₹{order.price_per_unit * order.quantity}</span>
+                <span>₹{order.unit_price * order.quantity}</span>
               </div>
               <div className={styles.priceRow}>
                 <span>Shipping</span>

@@ -156,9 +156,9 @@ export default function ShopPage() {
               <ShoppingCart size={22} />
               <CartBadge className={styles.cartBadge} />
             </Link>
-            <button className={styles.iconButton}>
+            <Link href="/orders" className={styles.iconButton}>
               <User size={22} />
-            </button>
+            </Link>
             <button className={styles.mobileMenu} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               <Menu size={24} />
             </button>

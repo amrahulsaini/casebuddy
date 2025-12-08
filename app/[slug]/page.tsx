@@ -39,25 +39,19 @@ async function getPageData(slug: string): Promise<PageData | null> {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
     const url = `${baseUrl}/api/pages/${slug}`;
-    console.log('Fetching page data from:', url);
     
     const response = await fetch(url, {
       cache: 'no-store'
     });
 
-    console.log('Response status:', response.status);
-
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error('Failed to fetch page:', response.status, errorData);
       return null;
     }
 
     const data = await response.json();
-    console.log('Page data received:', data);
     return data;
   } catch (error) {
-    console.error('Error fetching page data:', error);
     return null;
   }
 }
@@ -149,17 +143,17 @@ export default function DynamicPage({ params }: { params: Promise<{ slug: string
             <Link href="/contact" className={styles.navLink}>Contact</Link>
           </div>
           <div className={styles.navActions}>
-            <button className={styles.iconButton}>
+            <Link href="/wishlist" className={styles.iconButton}>
               <Heart size={22} />
               <WishlistBadge className={styles.cartBadge} />
-            </button>
-            <button className={styles.iconButton}>
+            </Link>
+            <Link href="/cart" className={styles.iconButton}>
               <ShoppingCart size={22} />
               <CartBadge className={styles.cartBadge} />
-            </button>
-            <button className={styles.iconButton}>
+            </Link>
+            <Link href="/orders" className={styles.iconButton}>
               <User size={22} />
-            </button>
+            </Link>
             <button className={styles.mobileMenu} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               <Menu size={24} />
             </button>

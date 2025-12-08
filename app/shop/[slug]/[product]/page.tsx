@@ -622,7 +622,7 @@ export default function ProductDetailPage() {
               <Package size={24} />
               <div>
                 <h4>Easy Returns</h4>
-                <p>30-day return policy</p>
+                <p>7-day return policy</p>
               </div>
             </div>
           </div>

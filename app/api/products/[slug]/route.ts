@@ -21,9 +21,6 @@ export async function GET(
         p.sku,
         p.stock_quantity,
         p.is_featured,
-        p.customization_override,
-        p.customization_enabled,
-        p.customization_options,
         p.created_at
       FROM products p
       WHERE p.slug = ? AND p.is_active = TRUE`,
@@ -70,65 +67,35 @@ export async function GET(
       phone_models: []
     };
 
-    if (product.customization_override) {
-      // Use product-level customization
-      effectiveCustomization.enabled = Boolean(product.customization_enabled);
-      effectiveCustomization.options = product.customization_options ? 
-        (typeof product.customization_options === 'string' ? JSON.parse(product.customization_options) : product.customization_options) : 
+    // Use category-level customization (from first category with customization enabled)
+    const customCategory = (categories as any[]).find((cat: any) => cat.customization_enabled);
+    if (customCategory) {
+      effectiveCustomization.enabled = true;
+      effectiveCustomization.options = customCategory.customization_options ? 
+        (typeof customCategory.customization_options === 'string' ? JSON.parse(customCategory.customization_options) : customCategory.customization_options) : 
         null;
       
-      // Get product-specific phone brands
-      const [productBrands] = await pool.execute(
+      // Get category phone brands (from category-phones management)
+      const [categoryBrands] = await pool.execute(
         `SELECT pb.id, pb.name, pb.slug
          FROM phone_brands pb
-         JOIN product_phone_brands ppb ON pb.id = ppb.phone_brand_id
-         WHERE ppb.product_id = ?
+         JOIN category_phone_brands cpb ON pb.id = cpb.brand_id
+         WHERE cpb.category_id = ?
          ORDER BY pb.name`,
-        [product.id]
+        [customCategory.id]
       );
-      effectiveCustomization.phone_brands = productBrands as any[];
+      effectiveCustomization.phone_brands = categoryBrands as any[];
 
-      // Get product-specific phone models
-      const [productModels] = await pool.execute(
+      // Get category phone models (from category-phones management)
+      const [categoryModels] = await pool.execute(
         `SELECT pm.id, pm.model_name, pm.brand_id, pm.slug
          FROM phone_models pm
-         JOIN product_phone_models ppm ON pm.id = ppm.phone_model_id
-         WHERE ppm.product_id = ?
+         JOIN category_phone_models cpm ON pm.id = cpm.phone_model_id
+         WHERE cpm.category_id = ?
          ORDER BY pm.model_name`,
-        [product.id]
+        [customCategory.id]
       );
-      effectiveCustomization.phone_models = productModels as any[];
-    } else {
-      // Use category-level customization (from first category with customization enabled)
-      const customCategory = (categories as any[]).find((cat: any) => cat.customization_enabled);
-      if (customCategory) {
-        effectiveCustomization.enabled = true;
-        effectiveCustomization.options = customCategory.customization_options ? 
-          (typeof customCategory.customization_options === 'string' ? JSON.parse(customCategory.customization_options) : customCategory.customization_options) : 
-          null;
-        
-        // Get category phone brands
-        const [categoryBrands] = await pool.execute(
-          `SELECT pb.id, pb.name, pb.slug
-           FROM phone_brands pb
-           JOIN category_phone_brands cpb ON pb.id = cpb.brand_id
-           WHERE cpb.category_id = ?
-           ORDER BY pb.name`,
-          [customCategory.id]
-        );
-        effectiveCustomization.phone_brands = categoryBrands as any[];
-
-        // Get category phone models
-        const [categoryModels] = await pool.execute(
-          `SELECT pm.id, pm.model_name, pm.brand_id, pm.slug
-           FROM phone_models pm
-           JOIN category_phone_models cpm ON pm.id = cpm.phone_model_id
-           WHERE cpm.category_id = ?
-           ORDER BY pm.model_name`,
-          [customCategory.id]
-        );
-        effectiveCustomization.phone_models = categoryModels as any[];
-      }
+      effectiveCustomization.phone_models = categoryModels as any[];
     }
 
     // Get product variants
@@ -147,7 +114,6 @@ export async function GET(
       compare_price: product.compare_price ? parseFloat(product.compare_price) : null,
       stock_quantity: Number(product.stock_quantity),
       is_featured: Boolean(product.is_featured),
-      customization_override: Boolean(product.customization_override),
       images: Array.isArray(images) ? images.map((img: any) => ({
         ...img,
         sort_order: Number(img.sort_order),
@@ -172,7 +138,7 @@ export async function GET(
         options: effectiveCustomization.options,
         phone_brands: effectiveCustomization.phone_brands,
         phone_models: effectiveCustomization.phone_models,
-        source: product.customization_override ? 'product' : 'category'
+        source: 'category'
       }
     };
 

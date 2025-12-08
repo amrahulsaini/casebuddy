@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db-main';
+import caseMainPool from '@/lib/db-main';
 import nodemailer from 'nodemailer';
 
 // Email transporter configuration
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     // Create order in database
     const orderNumber = `CB${Date.now()}${Math.floor(Math.random() * 1000)}`;
     
-    const result = await db.query(
+    const [result]: any = await caseMainPool.query(
       `INSERT INTO orders (
         order_number,
         customer_email,

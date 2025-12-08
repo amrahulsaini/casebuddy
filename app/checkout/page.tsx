@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { User, Mail, Phone, MapPin, ShoppingBag, Lock, Check } from 'lucide-react';
 import styles from './page.module.css';
@@ -37,7 +37,7 @@ interface FormErrors {
   [key: string]: string;
 }
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
@@ -684,5 +684,19 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={
+      <div className={styles.container}>
+        <div style={{ textAlign: 'center', padding: '100px 20px', color: '#fff' }}>
+          <p>Loading checkout...</p>
+        </div>
+      </div>
+    }>
+      <CheckoutContent />
+    </Suspense>
   );
 }

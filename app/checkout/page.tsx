@@ -116,6 +116,10 @@ function CheckoutContent() {
     const quantity = searchParams.get('quantity');
     const image = searchParams.get('image');
     const productName = searchParams.get('productName');
+    const customText = searchParams.get('customText');
+    const font = searchParams.get('font');
+    const placement = searchParams.get('placement');
+    const urlNotes = searchParams.get('notes');
 
     if (!productId || !phoneModel || !price || !image) {
       router.push('/shop');
@@ -129,8 +133,18 @@ function CheckoutContent() {
       designName: designName || undefined,
       price: parseFloat(price),
       quantity: quantity ? parseInt(quantity) : 1,
-      image: decodeURIComponent(image)
+      image: decodeURIComponent(image),
+      customizationOptions: (customText || font || placement) ? {
+        customText: customText || undefined,
+        font: font || undefined,
+        placement: placement || undefined
+      } : undefined
     });
+
+    // Set notes from URL if provided
+    if (urlNotes) {
+      setFormData(prev => ({ ...prev, notes: urlNotes }));
+    }
 
     setLoading(false);
   }, [searchParams, router]);
@@ -632,6 +646,17 @@ function CheckoutContent() {
                 {orderItem.phoneModel}
                 {orderItem.designName && ` • ${orderItem.designName}`}
               </div>
+              {orderItem.customizationOptions?.customText && (
+                <div className={styles.productVariant}>
+                  Custom Text: "{orderItem.customizationOptions.customText}"
+                  {orderItem.customizationOptions.font && ` (${orderItem.customizationOptions.font})`}
+                  {orderItem.customizationOptions.placement && (
+                    <div style={{ fontSize: '12px', marginTop: '4px' }}>
+                      Placement: {orderItem.customizationOptions.placement.replace(/_/g, ' ')}
+                    </div>
+                  )}
+                </div>
+              )}
               <div className={styles.productVariant}>
                 Quantity: {orderItem.quantity}
               </div>

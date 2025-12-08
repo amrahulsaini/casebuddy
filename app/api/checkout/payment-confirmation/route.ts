@@ -25,6 +25,7 @@ interface Order extends RowDataPacket {
   order_status: string;
   payment_id: string | null;
   notes: string | null;
+  customization_data: string | null;
   created_at: Date;
 }
 
@@ -192,6 +193,7 @@ async function sendOrderConfirmationEmails(order: Order) {
         .content { padding: 20px; background: #f9f9f9; }
         .order-details { background: white; padding: 15px; margin: 15px 0; border-radius: 5px; }
         .item { border-bottom: 1px solid #eee; padding: 10px 0; }
+        .customization { background: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107; }
         .total { font-size: 18px; font-weight: bold; margin-top: 15px; }
         .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
       </style>
@@ -216,6 +218,21 @@ async function sendOrderConfirmationEmails(order: Order) {
               <p><strong>${order.product_name}</strong></p>
               <p>Phone Model: ${order.phone_model}</p>
               ${order.design_name ? `<p>Design: ${order.design_name}</p>` : ''}
+              ${order.customization_data ? (() => {
+                try {
+                  const customData = JSON.parse(order.customization_data);
+                  return `
+                    <div class="customization">
+                      <strong>🎨 Customization:</strong><br/>
+                      ${customData.customText ? `Text: "${customData.customText}"<br/>` : ''}
+                      ${customData.font ? `Font: ${customData.font}<br/>` : ''}
+                      ${customData.placement ? `Placement: ${customData.placement.replace(/_/g, ' ')}` : ''}
+                    </div>
+                  `;
+                } catch (e) {
+                  return '';
+                }
+              })() : ''}
               <p>Quantity: ${order.quantity} × ₹${order.unit_price}</p>
             </div>
             
@@ -287,6 +304,21 @@ async function sendOrderConfirmationEmails(order: Order) {
               <p><strong>${order.product_name}</strong></p>
               <p>Phone Model: ${order.phone_model}</p>
               ${order.design_name ? `<p>Design: ${order.design_name}</p>` : ''}
+              ${order.customization_data ? (() => {
+                try {
+                  const customData = JSON.parse(order.customization_data);
+                  return `
+                    <div style="background: #e3f2fd; padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3;">
+                      <strong>🎨 CUSTOMIZATION:</strong><br/>
+                      ${customData.customText ? `<strong>Text:</strong> "${customData.customText}"<br/>` : ''}
+                      ${customData.font ? `<strong>Font:</strong> ${customData.font}<br/>` : ''}
+                      ${customData.placement ? `<strong>Placement:</strong> ${customData.placement.replace(/_/g, ' ')}` : ''}
+                    </div>
+                  `;
+                } catch (e) {
+                  return '';
+                }
+              })() : ''}
               <p>Quantity: ${order.quantity} × ₹${order.unit_price} = ₹${order.subtotal}</p>
             </div>
             

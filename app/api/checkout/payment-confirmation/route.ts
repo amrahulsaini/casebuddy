@@ -162,18 +162,18 @@ export async function POST(request: Request) {
 
 async function sendOrderConfirmationEmails(order: Order) {
   // Check if email credentials are configured
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
     console.warn('Email credentials not configured, skipping email sending');
     return;
   }
 
   const transporter = nodemailer.createTransport({
-    host: 'casebuddy.co.in', // Use main domain instead of mail.casebuddy.co.in
-    port: 587,
-    secure: false,
+    host: process.env.EMAIL_HOST || 'casebuddy.co.in',
+    port: parseInt(process.env.EMAIL_PORT || '587'),
+    secure: process.env.EMAIL_SECURE === 'true',
     auth: {
       user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
+      pass: process.env.EMAIL_PASSWORD,
     },
     tls: {
       rejectUnauthorized: false // Accept self-signed certificates

@@ -141,9 +141,6 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
       compare_price: formData.compare_price ? parseFloat(formData.compare_price) : null,
       stock_quantity: parseInt(formData.stock_quantity),
       categories: selectedCategories,
-      customization_override: false, // Customization is permanent for all products
-      customization_enabled: null,
-      customization_options: null,
     };
 
     try {

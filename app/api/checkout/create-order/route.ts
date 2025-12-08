@@ -174,19 +174,24 @@ export async function POST(request: NextRequest) {
       if (response.ok) {
         paymentSessionId = responseData.payment_session_id;
         
-        // Construct payment URL using session ID
-        // Production: https://payments.cashfree.com/pay/{session_id}
-        // Sandbox: https://sandbox.cashfree.com/pg/view/orders/{session_id}
-        const paymentBaseUrl = CASHFREE_ENV === 'PROD' 
-          ? 'https://payments.cashfree.com/pay' 
-          : 'https://sandbox.cashfree.com/pg/view/orders';
-        
-        paymentUrl = `${paymentBaseUrl}/${paymentSessionId}`;
+        // Use the payment_link from response if available, otherwise construct URL
+        if (responseData.payment_link) {
+          paymentUrl = responseData.payment_link;
+        } else {
+          // Construct payment URL using session ID
+          // For both production and sandbox, use the checkout URL format
+          const paymentBaseUrl = CASHFREE_ENV === 'PROD' 
+            ? 'https://payments.cashfree.com/forms' 
+            : 'https://payments-test.cashfree.com/forms';
+          
+          paymentUrl = `${paymentBaseUrl}/${paymentSessionId}`;
+        }
 
         console.log('Payment session created successfully:', {
           sessionId: paymentSessionId,
           paymentUrl: paymentUrl,
-          environment: CASHFREE_ENV
+          environment: CASHFREE_ENV,
+          hasPaymentLink: !!responseData.payment_link
         });
 
         // Update order with payment session ID

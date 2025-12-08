@@ -2,7 +2,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Gift, Star, Truck, ShieldCheck, Heart, ShoppingCart, User, Menu, Instagram, Facebook, Twitter, Mail, Phone, MapPin } from 'lucide-react';
+import { ArrowRight, Gift, Star, Truck, ShieldCheck, Heart, ShoppingCart, User, Menu, Instagram, Facebook, Twitter, Mail, Phone, MapPin, Package, Zap } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import styles from './dynamic-page.module.css';
@@ -124,12 +124,12 @@ export default function DynamicPage({ params }: { params: Promise<{ slug: string
       <div className={`${styles.announcementBar} ${!headerVisible ? styles.hidden : ''}`}>
         <div className={styles.marquee}>
           <div className={styles.marqueeContent}>
-            <span><Gift size={16} /> First Time Order? Get FREE SHIPPING with code: CASEBUDDY100</span>
-            <span><Star size={16} /> Buy 2 Get 10% OFF • Buy 3 Get 20% OFF</span>
-            <span><Truck size={16} /> Express Delivery Available • Track Your Order</span>
-            <span><ShieldCheck size={16} /> Premium Quality Cases • 30-Day Money Back</span>
-            <span><Gift size={16} /> First Time Order? Get FREE SHIPPING with code: CASEBUDDY100</span>
-            <span><Star size={16} /> Buy 2 Get 10% OFF • Buy 3 Get 20% OFF</span>
+            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Package size={16} /> 7 Days Easy Return</span>
+            <span><Zap size={16} /> Delivery in 7-10 Days</span>
+            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Package size={16} /> 7 Days Easy Return</span>
+            <span><Zap size={16} /> Delivery in 7-10 Days</span>
           </div>
         </div>
       </div>

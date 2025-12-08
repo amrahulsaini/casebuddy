@@ -396,6 +396,10 @@
   animation: sectionFadeIn 1s ease-out forwards;
 }
 
+.sectionFullWidth:first-of-type {
+  padding-top: 10rem;
+}
+
 .sectionFullWidth .sectionHeader {
   margin-bottom: 4rem;
   padding: 0 2rem;
@@ -1377,6 +1381,10 @@
   .sectionAltFullWidth {
     padding: 4rem 0;
   }
+
+  .sectionFullWidth:first-of-type {
+    padding-top: 8rem;
+  }
   
   .sectionFullWidth .sectionHeader,
   .sectionAltFullWidth .sectionHeader {
@@ -1559,6 +1567,10 @@
   .sectionAltFullWidth {
     padding: 3rem 0;
   }
+
+  .sectionFullWidth:first-of-type {
+    padding-top: 7rem;
+  }
   
   .sectionFullWidth .sectionHeader,
   .sectionAltFullWidth .sectionHeader {
@@ -1675,6 +1687,10 @@
 
   .floralDecor {
     font-size: 1.75rem;
+  }
+
+  .sectionFullWidth:first-of-type {
+    padding-top: 6.5rem;
   }
 
   .sectionFullWidth .sectionHeader,

@@ -54,6 +54,9 @@ export async function POST(request: NextRequest) {
       }
 
       // Store OTP
+      if (!global.otpStore) {
+        global.otpStore = new Map();
+      }
       global.otpStore.set(`email:${email}`, { otp, expires });
 
       // Send email
@@ -115,6 +118,9 @@ export async function POST(request: NextRequest) {
       }
 
       // Store OTP
+      if (!global.otpStore) {
+        global.otpStore = new Map();
+      }
       global.otpStore.set(`mobile:${mobile}`, { otp, expires });
 
       // TODO: Integrate SMS gateway (Twilio, MSG91, etc.)

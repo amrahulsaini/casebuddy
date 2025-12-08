@@ -30,6 +30,14 @@ export async function POST(request: NextRequest) {
     }
 
     const key = type === 'email' ? `email:${email}` : `mobile:${mobile}`;
+    
+    if (!global.otpStore) {
+      return NextResponse.json(
+        { error: 'OTP not found or expired. Please request a new OTP.' },
+        { status: 400 }
+      );
+    }
+    
     const storedOtp = global.otpStore.get(key);
 
     if (!storedOtp) {

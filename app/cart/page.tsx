@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, Trash2, Plus, Minus, ShoppingBag, X } from 'lucide-react';
@@ -10,6 +11,33 @@ import styles from './cart.module.css';
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity, cartTotal, clearCart } = useCart();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const router = useRouter();
+
+  const handleCheckout = () => {
+    // Build checkout URL with all cart items
+    const firstItem = cart[0];
+    const params = new URLSearchParams({
+      productName: firstItem.name,
+      phoneModel: firstItem.phoneModel,
+      price: firstItem.price.toString(),
+      quantity: cart.reduce((sum, item) => sum + item.quantity, 0).toString(),
+      image: firstItem.image || '',
+    });
+
+    // Add customization if present
+    if (firstItem.customText) {
+      params.append('customText', firstItem.customText);
+      params.append('font', firstItem.font || 'Arial');
+      params.append('placement', firstItem.placement || 'center');
+    }
+
+    // Add notes if present
+    if (firstItem.additionalNotes) {
+      params.append('notes', firstItem.additionalNotes);
+    }
+
+    router.push(`/checkout?${params.toString()}`);
+  };
 
   if (cart.length === 0) {
     return (
@@ -125,7 +153,7 @@ export default function CartPage() {
             <span>₹{cartTotal.toFixed(2)}</span>
           </div>
 
-          <button className={styles.checkoutButton}>
+          <button className={styles.checkoutButton} onClick={handleCheckout}>
             Proceed to Checkout
           </button>
 

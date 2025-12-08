@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, ShoppingCart, Heart, Star, Truck, Shield, Package, ChevronLeft, ChevronRight, Plus, Minus } from 'lucide-react';
+import { useCart } from '@/contexts/CartContext';
 import styles from './product.module.css';
 
 interface ProductImage {
@@ -69,11 +70,14 @@ export default function ProductDetailPage() {
   const params = useParams();
   const categorySlug = params?.slug as string;
   const productSlug = params?.product as string;
+  const { addToCart, toggleWishlist, isInWishlist } = useCart();
   
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [validationError, setValidationError] = useState<string>('');
+  const [showSuccess, setShowSuccess] = useState(false);
   
   // Customization state
   const [phoneBrands, setPhoneBrands] = useState<PhoneBrand[]>([]);
@@ -137,7 +141,7 @@ export default function ProductDetailPage() {
   const handleBrandChange = (brandId: number) => {
     setSelectedBrand(brandId);
     setSelectedModel(null);
-    // Models are already loaded from the category, just filter by brand
+    setValidationError('');
   };
 
   const handleQuantityChange = (change: number) => {
@@ -145,6 +149,74 @@ export default function ProductDetailPage() {
     if (newQuantity >= 1 && newQuantity <= (product?.stock_quantity || 999)) {
       setQuantity(newQuantity);
     }
+  };
+
+  const validateCustomization = (): boolean => {
+    // Reset error
+    setValidationError('');
+
+    // Phone brand and model are required
+    if (!selectedBrand || !selectedModel) {
+      setValidationError('Please select your phone brand and model');
+      return false;
+    }
+
+    // If custom text is entered, font and placement are required
+    if (customText.trim()) {
+      if (!selectedFont) {
+        setValidationError('Please select a font style for your custom text');
+        return false;
+      }
+      if (!selectedPlacement) {
+        setValidationError('Please select a placement for your custom text');
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  const handleAddToCart = () => {
+    if (!product) return;
+
+    // Validate customization
+    if (!validateCustomization()) {
+      return;
+    }
+
+    // Get brand and model names
+    const brandName = phoneBrands.find(b => b.id === selectedBrand)?.name || '';
+    const modelName = phoneModels.find(m => m.id === selectedModel)?.model_name || '';
+
+    // Add to cart with all customization data
+    for (let i = 0; i < quantity; i++) {
+      addToCart({
+        id: 0, // Will be replaced with unique ID in context
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.images[0]?.image_url || '',
+        slug: product.slug,
+        phoneBrand: brandName,
+        phoneModel: modelName,
+        customText: customText.trim() || undefined,
+        font: customText.trim() ? selectedFont : undefined,
+        placement: customText.trim() ? selectedPlacement : undefined,
+        additionalNotes: additionalNotes.trim() || undefined,
+      });
+    }
+
+    // Show success message
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 3000);
+
+    // Reset quantity
+    setQuantity(1);
+  };
+
+  const handleToggleWishlist = () => {
+    if (!product) return;
+    toggleWishlist(product.id);
   };
 
   const nextImage = () => {
@@ -498,16 +570,42 @@ export default function ProductDetailPage() {
             )}
           </div>
 
+          {/* Validation Error */}
+          {validationError && (
+            <div className={styles.errorMessage}>
+              ⚠️ {validationError}
+            </div>
+          )}
+
+          {/* Success Message */}
+          {showSuccess && (
+            <div className={styles.successMessage}>
+              ✓ Added to cart successfully!
+            </div>
+          )}
+
           <div className={styles.actions}>
-            <button className={styles.addToCartButton}>
+            <button 
+              className={styles.addToCartButton}
+              onClick={handleAddToCart}
+              disabled={!product || product.stock_quantity === 0}
+            >
               <ShoppingCart size={20} />
-              Add to Cart
+              {product?.stock_quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
             </button>
-            <button className={styles.buyNowButton}>
+            <button 
+              className={styles.buyNowButton}
+              onClick={handleAddToCart}
+              disabled={!product || product.stock_quantity === 0}
+            >
               Buy Now
             </button>
-            <button className={styles.wishlistButton}>
-              <Heart size={20} />
+            <button 
+              className={`${styles.wishlistButton} ${product && isInWishlist(product.id) ? styles.active : ''}`}
+              onClick={handleToggleWishlist}
+              title={product && isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+            >
+              <Heart size={20} fill={product && isInWishlist(product.id) ? '#ff6b00' : 'none'} />
             </button>
           </div>
 

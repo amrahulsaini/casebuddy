@@ -3,21 +3,29 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 
 interface CartItem {
   id: number;
+  productId: number;
   name: string;
   price: number;
   image: string;
   quantity: number;
   slug: string;
+  // Customization data
+  phoneBrand: string;
+  phoneModel: string;
+  customText?: string;
+  font?: string;
+  placement?: string;
+  additionalNotes?: string;
 }
 
 interface CartContextType {
   cart: CartItem[];
   wishlist: number[];
   addToCart: (item: Omit<CartItem, 'quantity'>) => void;
-  removeFromCart: (id: number) => void;
-  updateQuantity: (id: number, quantity: number) => void;
-  toggleWishlist: (id: number) => void;
-  isInWishlist: (id: number) => boolean;
+  removeFromCart: (uniqueId: number) => void;
+  updateQuantity: (uniqueId: number, quantity: number) => void;
+  toggleWishlist: (productId: number) => void;
+  isInWishlist: (productId: number) => boolean;
   clearCart: () => void;
   cartTotal: number;
   cartCount: number;
@@ -90,43 +98,43 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addToCart = (item: Omit<CartItem, 'quantity'>) => {
     setCart((prevCart) => {
-      const existingItem = prevCart.find((i) => i.id === item.id);
-      if (existingItem) {
-        return prevCart.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
-        );
-      }
-      return [...prevCart, { ...item, quantity: 1 }];
+      // Generate unique ID based on product + customization
+      const uniqueId = Date.now() + Math.random();
+      const newItem = { ...item, id: uniqueId, quantity: 1 };
+      console.log('Adding to cart:', newItem);
+      return [...prevCart, newItem];
     });
   };
 
-  const removeFromCart = (id: number) => {
-    setCart((prevCart) => prevCart.filter((item) => item.id !== id));
+  const removeFromCart = (uniqueId: number) => {
+    setCart((prevCart) => prevCart.filter((item) => item.id !== uniqueId));
   };
 
-  const updateQuantity = (id: number, quantity: number) => {
+  const updateQuantity = (uniqueId: number, quantity: number) => {
     if (quantity <= 0) {
-      removeFromCart(id);
+      removeFromCart(uniqueId);
       return;
     }
     setCart((prevCart) =>
       prevCart.map((item) =>
-        item.id === id ? { ...item, quantity } : item
+        item.id === uniqueId ? { ...item, quantity } : item
       )
     );
   };
 
-  const toggleWishlist = (id: number) => {
+  const toggleWishlist = (productId: number) => {
     setWishlist((prevWishlist) => {
-      if (prevWishlist.includes(id)) {
-        return prevWishlist.filter((itemId) => itemId !== id);
+      if (prevWishlist.includes(productId)) {
+        console.log('Removing from wishlist:', productId);
+        return prevWishlist.filter((id) => id !== productId);
       }
-      return [...prevWishlist, id];
+      console.log('Adding to wishlist:', productId);
+      return [...prevWishlist, productId];
     });
   };
 
-  const isInWishlist = (id: number) => {
-    return wishlist.includes(id);
+  const isInWishlist = (productId: number) => {
+    return wishlist.includes(productId);
   };
 
   const clearCart = () => {

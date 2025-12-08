@@ -158,16 +158,23 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify(paymentSessionRequest)
       });
 
+      const responseData = await response.json();
+      
       if (response.ok) {
-        const paymentData = await response.json();
-        paymentSessionId = paymentData.payment_session_id;
-        paymentUrl = paymentData.payment_link;
+        paymentSessionId = responseData.payment_session_id;
+        paymentUrl = responseData.payment_link;
 
         // Update order with payment session ID
         await caseMainPool.query(
           'UPDATE orders SET payment_id = ? WHERE id = ?',
           [paymentSessionId, orderId]
         );
+      } else {
+        console.error('Cashfree API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: responseData
+        });
       }
     } catch (paymentError) {
       console.error('Error creating Cashfree payment session:', paymentError);

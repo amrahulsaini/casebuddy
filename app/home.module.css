@@ -482,12 +482,18 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 .sectionSubtitle {
   font-size: 1.2rem;
   color: #666;
   font-weight: 400;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 /* ===== Horizontal Scroll Section ===== */
@@ -1353,10 +1359,14 @@
   
   .sectionTitle {
     font-size: 2rem;
+    line-height: 1.2;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
   
   .sectionSubtitle {
     font-size: 1rem;
+    line-height: 1.4;
   }
   
   .floralDecor {
@@ -1372,6 +1382,7 @@
   .sectionAltFullWidth .sectionHeader {
     padding: 0 1.5rem;
     margin-bottom: 3rem;
+    max-width: 100%;
   }
   
   .horizontalScroll {
@@ -1528,10 +1539,16 @@
   
   .sectionTitle {
     font-size: 1.75rem;
+    line-height: 1.3;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    padding: 0 0.5rem;
   }
   
   .sectionSubtitle {
     font-size: 0.95rem;
+    line-height: 1.4;
+    padding: 0 0.5rem;
   }
   
   .floralDecor {
@@ -1547,6 +1564,7 @@
   .sectionAltFullWidth .sectionHeader {
     padding: 0 1rem;
     margin-bottom: 2.5rem;
+    max-width: 100%;
   }
   
   .horizontalScroll {
@@ -1638,5 +1656,51 @@
   
   .features {
     display: none;
+  }
+}
+
+/* Very small devices (375px) */
+@media (max-width: 375px) {
+  .sectionTitle {
+    font-size: 1.5rem;
+    line-height: 1.3;
+    padding: 0 0.5rem;
+  }
+
+  .sectionSubtitle {
+    font-size: 0.875rem;
+    line-height: 1.4;
+    padding: 0 0.5rem;
+  }
+
+  .floralDecor {
+    font-size: 1.75rem;
+  }
+
+  .sectionFullWidth .sectionHeader,
+  .sectionAltFullWidth .sectionHeader {
+    padding: 0 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .horizontalCard {
+    width: 200px;
+  }
+
+  .horizontalImageWrapper {
+    width: 200px;
+    height: 280px;
+  }
+
+  .verticalCard {
+    width: 280px;
+  }
+
+  .heroTitle {
+    font-size: 2rem;
+  }
+
+  .heroSubtitle {
+    font-size: 0.9rem;
   }
 }

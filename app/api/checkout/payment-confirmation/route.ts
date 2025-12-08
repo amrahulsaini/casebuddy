@@ -39,6 +39,7 @@ interface OrderItem extends RowDataPacket {
 export async function POST(request: Request) {
   try {
     const { orderId } = await request.json();
+    console.log('Payment confirmation requested for order:', orderId);
 
     if (!orderId) {
       return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
@@ -53,17 +54,23 @@ export async function POST(request: Request) {
         [orderId]
       );
 
+      console.log('Order query result:', orderRows);
+
       if (orderRows.length === 0) {
+        console.error('Order not found in database:', orderId);
         throw new Error('Order not found');
       }
 
       const cashfreeOrderId = orderRows[0].payment_id;
+      console.log('Cashfree order ID from DB:', cashfreeOrderId);
 
       if (!cashfreeOrderId) {
+        console.error('Payment ID not found for order:', orderId);
         throw new Error('Payment ID not found for this order');
       }
 
       // Verify payment with Cashfree API using the correct order ID
+      console.log('Verifying payment with Cashfree for order ID:', cashfreeOrderId);
       const cashfreeResponse = await fetch(
         `https://api.cashfree.com/pg/orders/${cashfreeOrderId}`,
         {
@@ -78,14 +85,19 @@ export async function POST(request: Request) {
 
       const paymentData = await cashfreeResponse.json();
 
-      console.log('Cashfree payment verification:', paymentData);
+      console.log('Cashfree payment verification response:', {
+        status: cashfreeResponse.status,
+        data: paymentData
+      });
 
       // Update order status based on payment verification
       if (paymentData.order_status === 'PAID') {
+        console.log('Payment verified as PAID, updating order status...');
         await connection.execute(
           'UPDATE orders SET payment_status = ?, order_status = ? WHERE id = ?',
           ['completed', 'processing', orderId]
         );
+        console.log('Order status updated successfully');
 
         // Fetch order details
         const [orderRows] = await connection.execute<Order[]>(
@@ -98,15 +110,18 @@ export async function POST(request: Request) {
         }
 
         const order = orderRows[0];
+        console.log('Sending confirmation emails for order:', order.order_number);
 
         // Send emails (order has product info embedded, no separate items table)
         await sendOrderConfirmationEmails(order);
+        console.log('Confirmation emails sent successfully');
 
         return NextResponse.json({
           success: true,
           message: 'Payment confirmed and emails sent'
         });
       } else {
+        console.log('Payment not completed, status:', paymentData.order_status);
         // Payment failed or pending
         const paymentStatus = paymentData.order_status === 'ACTIVE' ? 'pending' : 'failed';
         const orderStatus = paymentData.order_status === 'ACTIVE' ? 'pending' : 'cancelled';
@@ -115,10 +130,12 @@ export async function POST(request: Request) {
           'UPDATE orders SET payment_status = ?, order_status = ? WHERE id = ?',
           [paymentStatus, orderStatus, orderId]
         );
+        console.log('Order marked as:', paymentStatus);
 
         return NextResponse.json({
           success: false,
-          message: 'Payment not completed'
+          message: `Payment not completed. Status: ${paymentData.order_status}`,
+          paymentStatus: paymentData.order_status
         });
       }
     } finally {
@@ -126,8 +143,13 @@ export async function POST(request: Request) {
     }
   } catch (error) {
     console.error('Payment confirmation error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error details:', errorMessage);
     return NextResponse.json(
-      { error: 'Failed to confirm payment' },
+      { 
+        error: 'Failed to confirm payment',
+        details: errorMessage 
+      },
       { status: 500 }
     );
   }

@@ -11,6 +11,7 @@ function PaymentCallbackContent() {
   const router = useRouter();
   const [status, setStatus] = useState<'loading' | 'success' | 'failed' | 'pending'>('loading');
   const [message, setMessage] = useState('');
+  const [errorDetails, setErrorDetails] = useState('');
   const [orderDetails, setOrderDetails] = useState<any>(null);
 
   useEffect(() => {
@@ -42,13 +43,30 @@ function PaymentCallbackContent() {
 
   const sendPaymentConfirmation = async (orderId: string) => {
     try {
-      await fetch('/api/checkout/payment-confirmation', {
+      const response = await fetch('/api/checkout/payment-confirmation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderId })
       });
+      
+      const data = await response.json();
+      console.log('Payment confirmation response:', data);
+      
+      if (!response.ok) {
+        console.error('Payment confirmation failed:', data);
+        setStatus('failed');
+        setMessage(`Payment verification failed: ${data.error || 'Unknown error'}`);
+        setErrorDetails(JSON.stringify(data, null, 2));
+      } else if (!data.success) {
+        setStatus('failed');
+        setMessage(data.message || 'Payment not completed');
+        setErrorDetails(`Cashfree Status: ${data.paymentStatus || 'Unknown'}`);
+      }
     } catch (error) {
       console.error('Error sending payment confirmation:', error);
+      setStatus('failed');
+      setMessage(`Error verifying payment: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setErrorDetails(error instanceof Error ? error.stack || '' : '');
     }
   };
 
@@ -105,6 +123,24 @@ function PaymentCallbackContent() {
             <XCircle size={64} className={`${styles.icon} ${styles.failed}`} />
             <h1 className={styles.title}>Payment Failed</h1>
             <p className={styles.message}>{message}</p>
+            
+            {errorDetails && (
+              <div style={{ 
+                marginTop: '20px', 
+                padding: '15px', 
+                background: '#fff3cd', 
+                border: '1px solid #ffc107',
+                borderRadius: '5px',
+                fontSize: '12px',
+                textAlign: 'left',
+                maxWidth: '500px',
+                margin: '20px auto',
+                overflowX: 'auto'
+              }}>
+                <strong>Error Details:</strong>
+                <pre style={{ margin: '10px 0', whiteSpace: 'pre-wrap' }}>{errorDetails}</pre>
+              </div>
+            )}
             
             <div className={styles.actions}>
               <Link href="/cart" className={styles.primaryBtn}>

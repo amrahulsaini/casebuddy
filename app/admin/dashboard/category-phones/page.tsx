@@ -157,6 +157,22 @@ export default function CategoryPhonesPage() {
     );
   };
 
+  const selectAllModelsForBrand = (brandId: number) => {
+    const brandModels = allPhoneModels.filter(m => m.brand_id === brandId);
+    const brandModelIds = brandModels.map(m => m.id);
+    
+    // Check if all models of this brand are already selected
+    const allSelected = brandModelIds.every(id => selectedModels.includes(id));
+    
+    if (allSelected) {
+      // Deselect all models of this brand
+      setSelectedModels(prev => prev.filter(id => !brandModelIds.includes(id)));
+    } else {
+      // Select all models of this brand
+      setSelectedModels(prev => [...new Set([...prev, ...brandModelIds])]);
+    }
+  };
+
   if (loading) {
     return <div className={styles.loading}>Loading...</div>;
   }
@@ -247,9 +263,22 @@ export default function CategoryPhonesPage() {
                       );
                       if (brandModels.length === 0) return null;
 
+                      const allBrandModelsSelected = brandModels.every(m => 
+                        selectedModels.includes(m.id)
+                      );
+
                       return (
                         <div key={brand.id} className={styles.brandModelsGroup}>
-                          <h4 className={styles.brandGroupTitle}>{brand.name}</h4>
+                          <div className={styles.brandGroupHeader}>
+                            <h4 className={styles.brandGroupTitle}>{brand.name}</h4>
+                            <button
+                              type="button"
+                              onClick={() => selectAllModelsForBrand(brand.id)}
+                              className={styles.selectAllBtn}
+                            >
+                              {allBrandModelsSelected ? 'Deselect All' : 'Select All'}
+                            </button>
+                          </div>
                           <div className={styles.modelGrid}>
                             {brandModels.map(model => (
                               <label key={model.id} className={styles.checkbox}>

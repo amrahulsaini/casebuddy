@@ -168,13 +168,36 @@
   padding: 1rem;
 }
 
+.brandGroupHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
 .brandGroupTitle {
   font-size: 1.1rem;
   font-weight: 600;
   color: #1a1a1a;
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  margin: 0;
+}
+
+.selectAllBtn {
+  padding: 0.5rem 1rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.selectAllBtn:hover {
+  background: #2563eb;
 }
 
 .modelGrid {

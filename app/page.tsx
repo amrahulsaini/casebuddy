@@ -5,6 +5,7 @@ import { Sparkles, ShieldCheck, Truck, Gift, Star, TrendingUp, Zap, ArrowRight, 
 import { useEffect, useState, useRef } from 'react';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import HeroSlider from '@/components/HeroSlider';
+import SearchBar from '@/components/SearchBar';
 import styles from './home.module.css';
 
 interface Category {
@@ -141,6 +142,7 @@ export default function HomePage() {
             <Link href="/contact" className={styles.navLink}>Contact</Link>
           </div>
           <div className={styles.navActions}>
+            <SearchBar />
             <Link href="/wishlist" className={styles.iconButton}>
               <Heart size={22} />
               <WishlistBadge className={styles.cartBadge} />

@@ -1,6 +1,7 @@
 import './globals.css';
 import { Sora } from 'next/font/google';
 import { CartProvider } from '@/contexts/CartContext';
+import WhatsAppButton from '@/components/WhatsAppButton';
 
 const sora = Sora({ subsets: ['latin'] });
 
@@ -19,6 +20,7 @@ export default function RootLayout({
       <body className={sora.className}>
         <CartProvider>
           {children}
+          <WhatsAppButton />
         </CartProvider>
       </body>
     </html>

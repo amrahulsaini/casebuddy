@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { Sparkles, ShieldCheck, Truck, Gift, Star, TrendingUp, Zap, ArrowRight, Package, Headphones, ShoppingCart, User, Menu, Heart, Instagram, Facebook, Twitter, Mail, Phone, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
+import HeroSlider from '@/components/HeroSlider';
 import styles from './home.module.css';
 
 interface Category {
@@ -168,6 +169,11 @@ export default function HomePage() {
           <Link href="/contact" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Contact</Link>
         </div>
       )}
+
+      {/* Hero Slider */}
+      <div style={{ padding: '0 20px', maxWidth: '1400px', margin: '0 auto' }}>
+        <HeroSlider />
+      </div>
 
       {/* Dynamic Homepage Sections */}
       {sections.map((section, sectionIndex) => (

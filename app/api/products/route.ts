@@ -6,8 +6,6 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const categorySlug = searchParams.get('category');
     const featured = searchParams.get('featured');
-    const limit = parseInt(searchParams.get('limit') || '24');
-    const offset = parseInt(searchParams.get('offset') || '0');
 
     let query = `
       SELECT 
@@ -66,8 +64,7 @@ export async function GET(request: NextRequest) {
     const [countResult]: any = await pool.execute(countQuery, countParams);
     const total = Number(countResult[0]?.total || 0);
 
-    query += ` ORDER BY p.created_at DESC LIMIT ? OFFSET ?`;
-    params.push(limit, offset);
+    query += ` ORDER BY p.created_at DESC`;
 
     const [products]: any = await pool.execute(query, params);
 
@@ -85,8 +82,6 @@ export async function GET(request: NextRequest) {
       products: sanitizedProducts,
       count: sanitizedProducts.length,
       total: total,
-      limit: limit,
-      offset: offset,
     });
   } catch (error: any) {
     console.error('Products API error:', error);

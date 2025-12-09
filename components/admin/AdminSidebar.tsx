@@ -14,6 +14,7 @@ export default function AdminSidebar({ user }: AdminSidebarProps) {
 
   const menuItems = [
     { href: '/admin/dashboard', label: 'Dashboard' },
+    { href: '/admin/dashboard/banners', label: 'Hero Banners' },
     { href: '/admin/dashboard/pages', label: 'Pages' },
     { href: '/admin/dashboard/sections', label: 'Sections' },
     { href: '/admin/dashboard/categories', label: 'Categories' },

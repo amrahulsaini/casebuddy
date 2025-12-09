@@ -13,6 +13,7 @@ interface Slide {
   cta_text: string;
   cta_link: string;
   gradient: string;
+  image_url?: string;
   sort_order: number;
 }
 
@@ -72,7 +73,11 @@ export default function HeroSlider() {
               <div
                 key={slide.id}
                 className={`${styles.slide} ${index === currentSlide ? styles.active : ''}`}
-                style={{ background: slide.gradient }}
+                style={{ 
+                  background: slide.image_url 
+                    ? `url(${slide.image_url}) center/cover no-repeat` 
+                    : slide.gradient 
+                }}
               >
                 <div className={styles.slideContent}>
                   <h1 className={styles.title}>{slide.title}</h1>

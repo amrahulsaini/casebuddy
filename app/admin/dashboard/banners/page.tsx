@@ -12,6 +12,7 @@ interface Banner {
   cta_text: string;
   cta_link: string;
   gradient: string;
+  image_url?: string;
   sort_order: number;
   is_active: boolean;
 }
@@ -89,6 +90,7 @@ export default function HeroBannersPage() {
       cta_text: 'Click Here',
       cta_link: '/shop',
       gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      image_url: '',
       sort_order: banners.length + 1,
       is_active: true
     };
@@ -167,6 +169,21 @@ export default function HeroBannersPage() {
                       rows={3}
                     />
                   </div>
+                  <div className={styles.formGroup}>
+                    <label>Background Image URL (optional - overrides gradient)</label>
+                    <input
+                      type="text"
+                      value={formData.image_url || ''}
+                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                      className={styles.input}
+                      placeholder="https://example.com/image.jpg or /cdn/banner.jpg"
+                    />
+                    {formData.image_url && (
+                      <div className={styles.imagePreview}>
+                        <img src={formData.image_url} alt="Preview" />
+                      </div>
+                    )}
+                  </div>
                   <div className={styles.formRow}>
                     <div className={styles.formGroup}>
                       <label>Button Text</label>
@@ -221,7 +238,14 @@ export default function HeroBannersPage() {
                 </div>
               ) : (
                 <>
-                  <div className={styles.preview} style={{ background: banner.gradient }}>
+                  <div 
+                    className={styles.preview} 
+                    style={{ 
+                      background: banner.image_url 
+                        ? `url(${banner.image_url}) center/cover no-repeat` 
+                        : banner.gradient 
+                    }}
+                  >
                     <h3>{banner.title}</h3>
                     <p>{banner.subtitle}</p>
                   </div>

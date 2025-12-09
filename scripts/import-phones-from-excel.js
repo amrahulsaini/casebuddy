@@ -37,7 +37,7 @@ async function importPhonesFromExcel() {
   try {
     // Read the Excel file
     console.log('📖 Reading Excel file...');
-    const workbook = XLSX.readFile('./scripts/phones.xlsx');
+    const workbook = XLSX.readFile('./all-brands-and-models.xlsx');
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     
@@ -66,15 +66,14 @@ async function importPhonesFromExcel() {
 
       const trimmedValue = cellValue.trim();
 
-      // Check if this is a brand header (usually bold in Excel, but we detect by checking if next rows are indented or start with brand name)
-      // In your case, brand names are: Apple, OnePlus, etc.
-      // Models are: Apple iPhone 11, OnePlus 10 Pro 5G, etc.
+      // Brand names are in bold (we detect by pattern: if it doesn't start with the current brand name, it's a new brand)
+      // For example: "Apple" is brand, "Apple iPhone 11" is model
+      // "OnePlus" is brand, "OnePlus 10 Pro 5G" is model
+      
+      const startsWithBrand = currentBrand && trimmedValue.toLowerCase().startsWith(currentBrand.toLowerCase());
 
-      // If the value doesn't contain the previous brand name at the start, it's a new brand
-      const isNewBrand = !currentBrand || !trimmedValue.includes(currentBrand);
-
-      if (isNewBrand) {
-        // This is a brand header
+      if (!startsWithBrand) {
+        // This is a new brand header
         currentBrand = trimmedValue;
         const brandSlug = createSlug(currentBrand);
 
@@ -99,7 +98,7 @@ async function importPhonesFromExcel() {
           console.log(`   ✅ Brand created (ID: ${currentBrandId})`);
         }
       } else {
-        // This is a phone model
+        // This is a phone model (starts with brand name)
         if (!currentBrandId) {
           console.log(`   ⚠️  Skipping model "${trimmedValue}" - no brand context`);
           continue;

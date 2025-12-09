@@ -22,6 +22,7 @@ export default function HeroBannersPage() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState<Partial<Banner>>({});
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetchBanners();
@@ -64,6 +65,52 @@ export default function HeroBannersPage() {
     } catch (error) {
       console.error('Error updating banner:', error);
     }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file');
+      return;
+    }
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size should be less than 5MB');
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+      formDataUpload.append('folder', 'banners');
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formDataUpload,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setFormData({ ...formData, image_url: data.url });
+      } else {
+        alert('Failed to upload image');
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Error uploading image');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setFormData({ ...formData, image_url: '' });
   };
 
   const handleDelete = async (id: number) => {
@@ -170,17 +217,25 @@ export default function HeroBannersPage() {
                     />
                   </div>
                   <div className={styles.formGroup}>
-                    <label>Background Image URL (optional - overrides gradient)</label>
+                    <label>Background Image (optional - overrides gradient)</label>
                     <input
-                      type="text"
-                      value={formData.image_url || ''}
-                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                      className={styles.input}
-                      placeholder="https://example.com/image.jpg or /cdn/banner.jpg"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className={styles.fileInput}
+                      disabled={uploading}
                     />
+                    {uploading && <p className={styles.uploadingText}>Uploading...</p>}
                     {formData.image_url && (
                       <div className={styles.imagePreview}>
                         <img src={formData.image_url} alt="Preview" />
+                        <button 
+                          type="button"
+                          onClick={handleRemoveImage} 
+                          className={styles.removeImageBtn}
+                        >
+                          Remove Image
+                        </button>
                       </div>
                     )}
                   </div>

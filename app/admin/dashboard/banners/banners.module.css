@@ -97,12 +97,54 @@
   max-width: 100%;
   max-height: 200px;
   border: 2px solid #e5e7eb;
+  position: relative;
 }
 
 .imagePreview img {
   width: 100%;
   height: auto;
   display: block;
+}
+
+.fileInput {
+  width: 100%;
+  padding: 10px;
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  background: #f9fafb;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.fileInput:hover {
+  border-color: #667eea;
+  background: #f3f4f6;
+}
+
+.uploadingText {
+  margin-top: 8px;
+  color: #667eea;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.removeImageBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.removeImageBtn:hover {
+  background: rgb(220, 38, 38);
 }
 
 .bannerInfo {

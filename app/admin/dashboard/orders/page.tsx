@@ -346,71 +346,71 @@ export default function AdminOrdersPage() {
             </tbody>
           </table>
         </div>
+      )}
 
-        {/* Pagination */}
-        {!loading && filteredOrders.length > 0 && (
-          <div className={styles.pagination}>
-            <div className={styles.paginationInfo}>
-              Showing {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, totalOrders)} of {totalOrders} orders
-            </div>
-            <div className={styles.paginationControls}>
-              <button
-                onClick={() => setCurrentPage(1)}
-                disabled={currentPage === 1}
-                className={styles.paginationBtn}
-              >
-                First
-              </button>
-              <button
-                onClick={() => setCurrentPage(p => p - 1)}
-                disabled={currentPage === 1}
-                className={styles.paginationBtn}
-              >
-                Previous
-              </button>
-              
-              <div className={styles.pageNumbers}>
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum;
-                  if (totalPages <= 5) {
-                    pageNum = i + 1;
-                  } else if (currentPage <= 3) {
-                    pageNum = i + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNum = totalPages - 4 + i;
-                  } else {
-                    pageNum = currentPage - 2 + i;
-                  }
-                  
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setCurrentPage(pageNum)}
-                      className={`${styles.pageBtn} ${currentPage === pageNum ? styles.activePage : ''}`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <button
-                onClick={() => setCurrentPage(p => p + 1)}
-                disabled={currentPage === totalPages}
-                className={styles.paginationBtn}
-              >
-                Next
-              </button>
-              <button
-                onClick={() => setCurrentPage(totalPages)}
-                disabled={currentPage === totalPages}
-                className={styles.paginationBtn}
-              >
-                Last
-              </button>
-            </div>
+      {/* Pagination */}
+      {!loading && filteredOrders.length > 0 && (
+        <div className={styles.pagination}>
+          <div className={styles.paginationInfo}>
+            Showing {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, totalOrders)} of {totalOrders} orders
           </div>
-        )}
+          <div className={styles.paginationControls}>
+            <button
+              onClick={() => setCurrentPage(1)}
+              disabled={currentPage === 1}
+              className={styles.paginationBtn}
+            >
+              First
+            </button>
+            <button
+              onClick={() => setCurrentPage(p => p - 1)}
+              disabled={currentPage === 1}
+              className={styles.paginationBtn}
+            >
+              Previous
+            </button>
+            
+            <div className={styles.pageNumbers}>
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
+                
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`${styles.pageBtn} ${currentPage === pageNum ? styles.activePage : ''}`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => setCurrentPage(p => p + 1)}
+              disabled={currentPage === totalPages}
+              className={styles.paginationBtn}
+            >
+              Next
+            </button>
+            <button
+              onClick={() => setCurrentPage(totalPages)}
+              disabled={currentPage === totalPages}
+              className={styles.paginationBtn}
+            >
+              Last
+            </button>
+          </div>
+        </div>
       )}
 
       <div className={styles.footer}>

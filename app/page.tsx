@@ -171,9 +171,7 @@ export default function HomePage() {
       )}
 
       {/* Hero Slider */}
-      <div style={{ padding: '0 20px', maxWidth: '1400px', margin: '0 auto' }}>
-        <HeroSlider />
-      </div>
+      <HeroSlider />
 
       {/* Dynamic Homepage Sections */}
       {sections.map((section, sectionIndex) => (

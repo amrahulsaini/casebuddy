@@ -5,87 +5,38 @@ import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from './HeroSlider.module.css';
 
-const slides = [
-  {
-    id: 1,
-    title: 'Premium Phone Cases',
-    subtitle: 'Protect Your Device in Style',
-    description: 'Discover our collection of high-quality phone cases designed for every lifestyle',
-    cta: 'Shop Now',
-    link: '/shop',
-    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-  },
-  {
-    id: 2,
-    title: 'Custom Design Cases',
-    subtitle: 'Make It Uniquely Yours',
-    description: 'Add your own text and choose from various fonts and placements',
-    cta: 'Customize Now',
-    link: '/shop',
-    gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
-  },
-  {
-    id: 3,
-    title: 'Free Shipping',
-    subtitle: 'On Orders Above ₹499',
-    description: 'Get your favorite phone case delivered to your doorstep at no extra cost',
-    cta: 'Browse Collection',
-    link: '/shop',
-    gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
-  },
-  {
-    id: 4,
-    title: 'Exclusive Designs',
-    subtitle: 'Limited Edition Collection',
-    description: 'Stand out with our unique and trending phone case designs',
-    cta: 'View Designs',
-    link: '/shop',
-    gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
-  },
-  {
-    id: 5,
-    title: 'Premium Quality',
-    subtitle: '100% Satisfaction Guaranteed',
-    description: 'Durable materials, perfect fit, and 7-day return policy',
-    cta: 'Learn More',
-    link: '/shop',
-    gradient: 'linear-gradient(135deg, #30cfd0 0%, #330867 100%)'
-  },
-  {
-    id: 6,
-    title: 'Trending Styles',
-    subtitle: 'Stay Ahead of Fashion',
-    description: 'Explore the latest phone case trends and styles for 2025',
-    cta: 'See Trends',
-    link: '/shop',
-    gradient: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)'
-  },
-  {
-    id: 7,
-    title: 'Durable Protection',
-    subtitle: 'Military-Grade Drop Protection',
-    description: 'Advanced shock-absorption technology keeps your phone safe',
-    cta: 'Shop Protection',
-    link: '/shop',
-    gradient: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)'
-  },
-  {
-    id: 8,
-    title: 'Special Offers',
-    subtitle: 'Limited Time Deals',
-    description: 'Get up to 30% off on selected phone cases this week only',
-    cta: 'Grab Deals',
-    link: '/shop',
-    gradient: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)'
-  }
-];
+interface Slide {
+  id: number;
+  title: string;
+  subtitle: string;
+  description: string;
+  cta_text: string;
+  cta_link: string;
+  gradient: string;
+  sort_order: number;
+}
 
 export default function HeroSlider() {
+  const [slides, setSlides] = useState<Slide[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (isPaused) return;
+    fetch('/api/hero-banners')
+      .then(res => res.json())
+      .then(data => {
+        setSlides(data);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error fetching banners:', error);
+        setLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (isPaused || slides.length === 0) return;
 
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -112,52 +63,58 @@ export default function HeroSlider() {
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      <div className={styles.slidesWrapper}>
-        {slides.map((slide, index) => (
-          <div
-            key={slide.id}
-            className={`${styles.slide} ${index === currentSlide ? styles.active : ''}`}
-            style={{ background: slide.gradient }}
-          >
-            <div className={styles.slideContent}>
-              <h1 className={styles.title}>{slide.title}</h1>
-              <h2 className={styles.subtitle}>{slide.subtitle}</h2>
-              <p className={styles.description}>{slide.description}</p>
-              <Link href={slide.link} className={styles.ctaButton}>
-                {slide.cta}
-              </Link>
-            </div>
+      {loading ? (
+        <div className={styles.loading}>Loading...</div>
+      ) : (
+        <>
+          <div className={styles.slidesWrapper}>
+            {slides.map((slide, index) => (
+              <div
+                key={slide.id}
+                className={`${styles.slide} ${index === currentSlide ? styles.active : ''}`}
+                style={{ background: slide.gradient }}
+              >
+                <div className={styles.slideContent}>
+                  <h1 className={styles.title}>{slide.title}</h1>
+                  <h2 className={styles.subtitle}>{slide.subtitle}</h2>
+                  <p className={styles.description}>{slide.description}</p>
+                  <Link href={slide.cta_link} className={styles.ctaButton}>
+                    {slide.cta_text}
+                  </Link>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      {/* Navigation Arrows */}
-      <button 
-        className={`${styles.navButton} ${styles.prevButton}`}
-        onClick={prevSlide}
-        aria-label="Previous slide"
-      >
-        <ChevronLeft size={32} />
-      </button>
-      <button 
-        className={`${styles.navButton} ${styles.nextButton}`}
-        onClick={nextSlide}
-        aria-label="Next slide"
-      >
-        <ChevronRight size={32} />
-      </button>
+          {/* Navigation Arrows */}
+          <button 
+            className={`${styles.navButton} ${styles.prevButton}`}
+            onClick={prevSlide}
+            aria-label="Previous slide"
+          >
+            <ChevronLeft size={32} />
+          </button>
+          <button 
+            className={`${styles.navButton} ${styles.nextButton}`}
+            onClick={nextSlide}
+            aria-label="Next slide"
+          >
+            <ChevronRight size={32} />
+          </button>
 
-      {/* Dot Indicators */}
-      <div className={styles.indicators}>
-        {slides.map((_, index) => (
-          <button
-            key={index}
-            className={`${styles.indicator} ${index === currentSlide ? styles.activeIndicator : ''}`}
-            onClick={() => goToSlide(index)}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </div>
+          {/* Dot Indicators */}
+          <div className={styles.indicators}>
+            {slides.map((_, index) => (
+              <button
+                key={index}
+                className={`${styles.indicator} ${index === currentSlide ? styles.activeIndicator : ''}`}
+                onClick={() => goToSlide(index)}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

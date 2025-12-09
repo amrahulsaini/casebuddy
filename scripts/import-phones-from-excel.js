@@ -37,17 +37,25 @@ async function importPhonesFromExcel() {
   try {
     // Read the Excel file
     console.log('📖 Reading Excel file...');
+    console.log('Looking for file at: ./all-brands-and-models.xlsx');
+    
     const workbook = XLSX.readFile('./all-brands-and-models.xlsx');
     const sheetName = workbook.SheetNames[0];
+    console.log(`📄 Reading sheet: ${sheetName}`);
+    
     const worksheet = workbook.Sheets[sheetName];
     
     // Convert to JSON
     const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
     
     console.log(`✅ Found ${data.length} rows in Excel`);
+    console.log('First 10 rows:');
+    data.slice(0, 10).forEach((row, idx) => {
+      console.log(`  Row ${idx + 1}: ${row[0]}`);
+    });
 
     // Connect to database
-    console.log('🔌 Connecting to database...');
+    console.log('\n🔌 Connecting to database...');
     connection = await mysql.createConnection(DB_CONFIG);
     console.log('✅ Database connected');
 
@@ -55,12 +63,14 @@ async function importPhonesFromExcel() {
     let currentBrandId = null;
     let totalBrands = 0;
     let totalModels = 0;
+    let skippedRows = 0;
 
     for (let i = 0; i < data.length; i++) {
       const row = data[i];
       const cellValue = row[0]; // First column
 
       if (!cellValue || cellValue.trim() === '') {
+        skippedRows++;
         continue; // Skip empty rows
       }
 
@@ -128,11 +138,17 @@ async function importPhonesFromExcel() {
 
     console.log('\n🎉 Import completed!');
     console.log(`📊 Summary:`);
+    console.log(`   - Total rows processed: ${data.length}`);
+    console.log(`   - Empty rows skipped: ${skippedRows}`);
     console.log(`   - Brands processed/created: ${totalBrands}`);
     console.log(`   - Models added: ${totalModels}`);
 
   } catch (error) {
     console.error('❌ Error during import:', error);
+    console.error('Error details:', error.message);
+    if (error.stack) {
+      console.error('Stack trace:', error.stack);
+    }
     process.exit(1);
   } finally {
     if (connection) {

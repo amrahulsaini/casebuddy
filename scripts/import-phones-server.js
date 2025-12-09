@@ -23,6 +23,23 @@ const DB_CONFIG = {
   database: 'case_main',
 };
 
+// Known brand names - UPDATE THIS LIST WITH ALL YOUR BRANDS
+const KNOWN_BRANDS = [
+  'Apple', 'Samsung', 'OnePlus', 'Xiaomi', 'Redmi', 'Poco', 'Vivo', 'Oppo', 
+  'Realme', 'Nokia', 'Motorola', 'Google', 'Asus', 'Honor', 'Huawei', 
+  'Nothing', 'iQOO', 'Infinix', 'Tecno', 'Lava', 'Micromax', 'Sony'
+];
+
+// Function to extract brand from model name
+function extractBrand(modelName) {
+  for (const brand of KNOWN_BRANDS) {
+    if (modelName.toLowerCase().startsWith(brand.toLowerCase())) {
+      return brand;
+    }
+  }
+  return null;
+}
+
 // Function to create slug from name
 function createSlug(name) {
   return name
@@ -66,6 +83,7 @@ async function importPhonesFromExcel() {
     let totalBrands = 0;
     let totalModels = 0;
     let skippedRows = 0;
+    const brandCache = {}; // Cache to store brand IDs
 
     for (let i = 0; i < data.length; i++) {
       const row = data[i];
@@ -78,63 +96,68 @@ async function importPhonesFromExcel() {
 
       const trimmedValue = cellValue.trim();
 
-      // Brand names are in bold in Excel
-      // If value doesn't start with current brand name, it's a new brand
-      // Example: "Apple" is brand, "Apple iPhone 11" is model
+      // Extract brand from the model name
+      const brandName = extractBrand(trimmedValue);
       
-      const startsWithBrand = currentBrand && trimmedValue.toLowerCase().startsWith(currentBrand.toLowerCase());
+      if (!brandName) {
+        console.log(`   ⚠️  Could not detect brand for: "${trimmedValue}"`);
+        continue;
+      }
 
-      if (!startsWithBrand) {
-        // This is a new brand header
-        currentBrand = trimmedValue;
-        const brandSlug = createSlug(currentBrand);
-
-        console.log(`\n📱 Processing brand: ${currentBrand}`);
-
-        // Insert or get brand
-        const [existingBrand] = await connection.execute(
-          'SELECT id FROM phone_brands WHERE slug = ?',
-          [brandSlug]
-        );
-
-        if (existingBrand.length > 0) {
-          currentBrandId = existingBrand[0].id;
-          console.log(`   ℹ️  Brand already exists (ID: ${currentBrandId})`);
+      // Check if we need to switch to a different brand
+      if (brandName !== currentBrand) {
+        currentBrand = brandName;
+        
+        // Check cache first
+        if (brandCache[brandName]) {
+          currentBrandId = brandCache[brandName];
+          console.log(`\n📱 Switching to brand: ${brandName} (ID: ${currentBrandId})`);
         } else {
-          const [result] = await connection.execute(
-            'INSERT INTO phone_brands (name, slug, is_active, sort_order) VALUES (?, ?, 1, ?)',
-            [currentBrand, brandSlug, totalBrands]
+          const brandSlug = createSlug(brandName);
+          console.log(`\n📱 Processing brand: ${brandName}`);
+
+          // Insert or get brand
+          const [existingBrand] = await connection.execute(
+            'SELECT id FROM phone_brands WHERE slug = ?',
+            [brandSlug]
           );
-          currentBrandId = result.insertId;
-          totalBrands++;
-          console.log(`   ✅ Brand created (ID: ${currentBrandId})`);
+
+          if (existingBrand.length > 0) {
+            currentBrandId = existingBrand[0].id;
+            console.log(`   ℹ️  Brand already exists (ID: ${currentBrandId})`);
+          } else {
+            const [result] = await connection.execute(
+              'INSERT INTO phone_brands (name, slug, is_active, sort_order) VALUES (?, ?, 1, ?)',
+              [brandName, brandSlug, totalBrands]
+            );
+            currentBrandId = result.insertId;
+            totalBrands++;
+            console.log(`   ✅ Brand created (ID: ${currentBrandId})`);
+          }
+          
+          brandCache[brandName] = currentBrandId;
         }
+      }
+
+      // This is a phone model
+      const modelName = trimmedValue;
+      const modelSlug = createSlug(modelName);
+
+      // Check if model already exists
+      const [existingModel] = await connection.execute(
+        'SELECT id FROM phone_models WHERE brand_id = ? AND slug = ?',
+        [currentBrandId, modelSlug]
+      );
+
+      if (existingModel.length > 0) {
+        console.log(`   ⏭️  Model already exists: ${modelName}`);
       } else {
-        // This is a phone model (starts with brand name)
-        if (!currentBrandId) {
-          console.log(`   ⚠️  Skipping model "${trimmedValue}" - no brand context`);
-          continue;
-        }
-
-        const modelName = trimmedValue;
-        const modelSlug = createSlug(modelName);
-
-        // Check if model already exists
-        const [existingModel] = await connection.execute(
-          'SELECT id FROM phone_models WHERE brand_id = ? AND slug = ?',
-          [currentBrandId, modelSlug]
+        await connection.execute(
+          'INSERT INTO phone_models (brand_id, model_name, slug, is_active, sort_order) VALUES (?, ?, ?, 1, ?)',
+          [currentBrandId, modelName, modelSlug, totalModels]
         );
-
-        if (existingModel.length > 0) {
-          console.log(`   ⏭️  Model already exists: ${modelName}`);
-        } else {
-          await connection.execute(
-            'INSERT INTO phone_models (brand_id, model_name, slug, is_active, sort_order) VALUES (?, ?, ?, 1, ?)',
-            [currentBrandId, modelName, modelSlug, totalModels]
-          );
-          totalModels++;
-          console.log(`   ✅ Added model: ${modelName}`);
-        }
+        totalModels++;
+        console.log(`   ✅ Added model: ${modelName}`);
       }
     }
 

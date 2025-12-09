@@ -50,6 +50,33 @@ const slides = [
     cta: 'Learn More',
     link: '/shop',
     gradient: 'linear-gradient(135deg, #30cfd0 0%, #330867 100%)'
+  },
+  {
+    id: 6,
+    title: 'Trending Styles',
+    subtitle: 'Stay Ahead of Fashion',
+    description: 'Explore the latest phone case trends and styles for 2025',
+    cta: 'See Trends',
+    link: '/shop',
+    gradient: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)'
+  },
+  {
+    id: 7,
+    title: 'Durable Protection',
+    subtitle: 'Military-Grade Drop Protection',
+    description: 'Advanced shock-absorption technology keeps your phone safe',
+    cta: 'Shop Protection',
+    link: '/shop',
+    gradient: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)'
+  },
+  {
+    id: 8,
+    title: 'Special Offers',
+    subtitle: 'Limited Time Deals',
+    description: 'Get up to 30% off on selected phone cases this week only',
+    cta: 'Grab Deals',
+    link: '/shop',
+    gradient: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)'
   }
 ];
 

@@ -90,6 +90,21 @@
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
+.imagePreview {
+  margin-top: 12px;
+  border-radius: 8px;
+  overflow: hidden;
+  max-width: 100%;
+  max-height: 200px;
+  border: 2px solid #e5e7eb;
+}
+
+.imagePreview img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
 .bannerInfo {
   padding: 16px;
   display: flex;

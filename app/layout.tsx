@@ -6,8 +6,8 @@ import WhatsAppButton from '@/components/WhatsAppButton';
 const sora = Sora({ subsets: ['latin'] });
 
 export const metadata = {
-  title: 'CaseBuddy - AI Phone Case Mockup Studio',
-  description: 'Generate professional phone case mockups with AI',
+  title: 'CaseBuddy - Premium Custom Phone Cases Online',
+  description: 'Shop premium custom phone cases with personalized designs. Protect your phone with style - custom printed cases, bumper cases, and more.',
 };
 
 export default function RootLayout({

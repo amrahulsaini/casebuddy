@@ -46,6 +46,8 @@ export default function ProductsPage() {
   const [filterCategory, setFilterCategory] = useState<string>('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [selectedProducts, setSelectedProducts] = useState<Set<number>>(new Set());
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchPages();
@@ -148,13 +150,63 @@ export default function ProductsPage() {
     setPage(1);
   };
 
+  const toggleSelectAll = () => {
+    if (selectedProducts.size === products.length) {
+      setSelectedProducts(new Set());
+    } else {
+      setSelectedProducts(new Set(products.map(p => p.id)));
+    }
+  };
+
+  const toggleSelectProduct = (id: number) => {
+    const newSelected = new Set(selectedProducts);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedProducts(newSelected);
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedProducts.size === 0) return;
+    
+    if (!confirm(`Are you sure you want to delete ${selectedProducts.size} product(s)?`)) return;
+
+    setDeleting(true);
+    try {
+      const deletePromises = Array.from(selectedProducts).map(id =>
+        fetch(`/api/admin/products/${id}`, { method: 'DELETE' })
+      );
+      await Promise.all(deletePromises);
+      setSelectedProducts(new Set());
+      fetchProducts();
+    } catch (error) {
+      console.error('Error deleting products:', error);
+      alert('Some products failed to delete');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <h1>Products</h1>
-        <Link href="/admin/dashboard/products/new" className={styles.addButton}>
-          + Add Product
-        </Link>
+        <div className={styles.headerActions}>
+          {selectedProducts.size > 0 && (
+            <button
+              onClick={handleBulkDelete}
+              className={styles.bulkDeleteButton}
+              disabled={deleting}
+            >
+              {deleting ? 'Deleting...' : `Delete Selected (${selectedProducts.size})`}
+            </button>
+          )}
+          <Link href="/admin/dashboard/products/new" className={styles.addButton}>
+            + Add Product
+          </Link>
+        </div>
       </div>
 
       <div className={styles.filters}>
@@ -249,6 +301,14 @@ export default function ProductsPage() {
             <table className={styles.table}>
               <thead>
                 <tr>
+                  <th>
+                    <input
+                      type="checkbox"
+                      checked={products.length > 0 && selectedProducts.size === products.length}
+                      onChange={toggleSelectAll}
+                      className={styles.checkbox}
+                    />
+                  </th>
                   <th>Image</th>
                   <th>Name</th>
                   <th>SKU</th>
@@ -262,6 +322,14 @@ export default function ProductsPage() {
               <tbody>
                 {products.map((product) => (
                   <tr key={product.id}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={selectedProducts.has(product.id)}
+                        onChange={() => toggleSelectProduct(product.id)}
+                        className={styles.checkbox}
+                      />
+                    </td>
                     <td>
                       {product.primary_image ? (
                         <img

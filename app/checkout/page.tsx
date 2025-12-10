@@ -479,7 +479,7 @@ function CheckoutContent() {
                       </button>
                     </div>
                     <p className={styles.otpInfo}>
-                      Check your email for OTP (also check <span className={styles.highlight}>inbox</span> and <span className={styles.highlight}>spam</span> folder)
+                      Check your <span className={styles.highlight}>inbox</span> and <span className={styles.highlight}>spam</span> folder for OTP
                     </p>
                   </>
                 )}

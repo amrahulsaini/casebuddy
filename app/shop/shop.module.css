@@ -877,6 +877,13 @@
   background: #ff6b00;
   color: white;
   border-color: #ff6b00;
+  pointer-events: none;
+}
+
+.pageSeparator {
+  color: #666;
+  font-weight: 600;
+  padding: 0 0.5rem;
 }
 
 @media (max-width: 1024px) {

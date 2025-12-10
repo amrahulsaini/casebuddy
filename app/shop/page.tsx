@@ -55,7 +55,9 @@ export default function ShopPage() {
   }, [lastScrollY]);
 
   useEffect(() => {
-    filterAndSortProducts();
+    if (products.length > 0) {
+      filterAndSortProducts();
+    }
   }, [products, searchQuery, sortBy, priceRange]);
 
   const fetchProducts = async () => {
@@ -316,15 +318,18 @@ export default function ShopPage() {
               Previous
             </button>
             <div className={styles.pageNumbers}>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-                <button
-                  key={pageNum}
-                  className={`${styles.pageNumber} ${currentPage === pageNum ? styles.active : ''}`}
-                  onClick={() => handlePageChange(pageNum)}
-                >
-                  {pageNum}
-                </button>
-              ))}
+              <button
+                className={`${styles.pageNumber} ${styles.active}`}
+              >
+                {currentPage}
+              </button>
+              <span className={styles.pageSeparator}>of</span>
+              <button
+                className={styles.pageNumber}
+                onClick={() => handlePageChange(totalPages)}
+              >
+                {totalPages}
+              </button>
             </div>
             <button
               className={styles.pageButton}

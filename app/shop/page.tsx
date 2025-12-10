@@ -31,6 +31,8 @@ export default function ShopPage() {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 24;
 
   useEffect(() => {
     fetchProducts();
@@ -103,6 +105,17 @@ export default function ShopPage() {
     }
 
     setFilteredProducts(filtered);
+  };
+
+  // Get current products for pagination
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const calculateDiscount = (price: number, salePrice: number | null) => {
@@ -234,8 +247,9 @@ export default function ShopPage() {
           <p>Try adjusting your search or filters</p>
         </div>
       ) : (
+        <>
         <div className={styles.productsGrid}>
-          {filteredProducts.map((product) => {
+          {currentProducts.map((product) => {
             const discount = calculateDiscount(product.price, product.sale_price);
             const finalPrice = product.sale_price || product.price;
             const isOnSale = product.sale_price && product.sale_price < product.price;
@@ -290,6 +304,38 @@ export default function ShopPage() {
             );
           })}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className={styles.pagination}>
+            <button
+              className={styles.pageButton}
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            <div className={styles.pageNumbers}>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                <button
+                  key={pageNum}
+                  className={`${styles.pageNumber} ${currentPage === pageNum ? styles.active : ''}`}
+                  onClick={() => handlePageChange(pageNum)}
+                >
+                  {pageNum}
+                </button>
+              ))}
+            </div>
+            <button
+              className={styles.pageButton}
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+        )}
+        </>
       )}
 
       {/* Footer */}

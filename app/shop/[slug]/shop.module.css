@@ -363,9 +363,31 @@
 
 .productActions {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   margin-top: auto;
+  justify-content: center;
+}
+
+.productActions .iconButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 50%;
+  color: #333;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.productActions .iconButton:hover {
+  background: #ff6b00;
+  color: white;
+  border-color: #ff6b00;
+  transform: scale(1.1);
 }
 
 .viewProductButton {

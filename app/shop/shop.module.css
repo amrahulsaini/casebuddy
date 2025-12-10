@@ -341,8 +341,8 @@
 }
 
 .productCard:hover {
-  transform: translateY(-12px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
 }
 
 .imageWrapper {
@@ -364,7 +364,7 @@
 }
 
 .productCard:hover .productImage {
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 .imageOverlay {
@@ -373,12 +373,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 107, 0, 0.95), rgba(255, 149, 0, 0.95));
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.3s ease;
 }
 
 .productCard:hover .imageOverlay {
@@ -388,16 +388,18 @@
 .viewButton {
   padding: 0.875rem 2rem;
   background: white;
-  color: #ff6b00;
+  color: #333;
   border-radius: 50px;
   font-weight: 700;
   font-size: 0.95rem;
-  transform: translateY(20px);
-  transition: transform 0.4s ease;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
 }
 
 .productCard:hover .viewButton {
   transform: translateY(0);
+  background: #ff6b00;
+  color: white;
 }
 
 .badge {
@@ -815,6 +817,66 @@
 .paymentIcons {
   display: flex;
   gap: 0.5rem;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 4rem 0 2rem;
+  padding: 0 2rem;
+}
+
+.pageButton {
+  padding: 0.75rem 1.5rem;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pageButton:hover:not(:disabled) {
+  background: #ff6b00;
+  color: white;
+  border-color: #ff6b00;
+}
+
+.pageButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pageNumbers {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pageNumber {
+  width: 40px;
+  height: 40px;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pageNumber:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.pageNumber.active {
+  background: #ff6b00;
+  color: white;
+  border-color: #ff6b00;
 }
 
 @media (max-width: 1024px) {

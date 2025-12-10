@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, ShoppingCart, Heart, Star, Filter, Grid3x3, List } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Heart, Star, Filter, Grid3x3, List, Eye } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import styles from './shop.module.css';
@@ -187,11 +187,15 @@ export default function ShopPage() {
                 )}
               </div>
               <div className={styles.productActions}>
+                <button className={styles.iconButton} title="Add to Cart">
+                  <ShoppingCart size={20} />
+                </button>
                 <Link 
                   href={`/shop/${categorySlug}/${product.slug}`}
-                  className={styles.viewProductButton}
+                  className={styles.iconButton}
+                  title="View Product"
                 >
-                  View Product
+                  <Eye size={20} />
                 </Link>
               </div>
             </div>

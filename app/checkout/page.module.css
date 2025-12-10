@@ -408,6 +408,11 @@
   margin-top: 4px;
 }
 
+.highlight {
+  color: #dc2626;
+  font-weight: 600;
+}
+
 /* Order Summary Sidebar */
 .orderSummary {
   background: #ffffff;

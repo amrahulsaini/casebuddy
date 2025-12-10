@@ -280,8 +280,8 @@ export default function ProductDetailPage() {
       <div className={styles.breadcrumb}>
         <Link href="/">Home</Link>
         <span>/</span>
-        <Link href={`/shop/${categorySlug}`}>
-          {product.categories[0]?.name || 'Shop'}
+        <Link href={`/shop?category=${categorySlug}`}>
+          {product.categories.find(c => c.slug === categorySlug)?.name || 'Shop'}
         </Link>
         <span>/</span>
         <span>{product.name}</span>

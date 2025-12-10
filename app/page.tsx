@@ -171,34 +171,6 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Instagram Follow Banner */}
-      <div className={styles.instagramBanner}>
-        <div className={styles.bannerContent}>
-          <div className={styles.bannerLeft}>
-            <div className={styles.bannerIcon}>
-              <Instagram size={40} />
-            </div>
-            <div className={styles.bannerText}>
-              <h3 className={styles.bannerTitle}>Follow Us on Instagram</h3>
-              <p className={styles.bannerSubtitle}>Join our community for exclusive designs, offers & daily inspiration!</p>
-            </div>
-          </div>
-          <a 
-            href="https://www.instagram.com/casebuddy25" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className={styles.bannerButton}
-          >
-            Follow Now
-            <ArrowRight size={20} />
-          </a>
-        </div>
-        <div className={styles.bannerBackground}>
-          <div className={styles.bannerGradient}></div>
-          <div className={styles.bannerPattern}></div>
-        </div>
-      </div>
-
       {/* Hero Slider */}
       <HeroSlider />
 

@@ -31,7 +31,7 @@ interface Category {
 export default function ShopPage() {
   const params = useParams();
   const categorySlug = params?.slug as string;
-  const { toggleWishlist, isInWishlist, addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useCart();
   
   const [products, setProducts] = useState<Product[]>([]);
   const [category, setCategory] = useState<Category | null>(null);
@@ -71,19 +71,6 @@ export default function ShopPage() {
     e.preventDefault();
     e.stopPropagation();
     toggleWishlist(productId);
-  };
-
-  const handleAddToCart = (e: React.MouseEvent, product: Product) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addToCart({
-      id: 0,
-      productId: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image_url,
-      slug: product.slug,
-    });
   };
 
   if (loading) {
@@ -200,17 +187,17 @@ export default function ShopPage() {
                 )}
               </div>
               <div className={styles.productActions}>
-                <button 
-                  className={styles.iconButton} 
-                  title="Add to Cart"
-                  onClick={(e) => handleAddToCart(e, product)}
-                >
-                  <ShoppingCart size={20} />
-                </button>
                 <Link 
                   href={`/shop/${categorySlug}/${product.slug}`}
                   className={styles.iconButton}
-                  title="View Product"
+                  title="Quick Buy"
+                >
+                  <ShoppingCart size={20} />
+                </Link>
+                <Link 
+                  href={`/shop/${categorySlug}/${product.slug}`}
+                  className={styles.iconButton}
+                  title="View Details"
                 >
                   <Eye size={20} />
                 </Link>

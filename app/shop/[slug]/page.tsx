@@ -190,13 +190,6 @@ export default function ShopPage() {
                 <Link 
                   href={`/shop/${categorySlug}/${product.slug}`}
                   className={styles.iconButton}
-                  title="Quick Buy"
-                >
-                  <ShoppingCart size={20} />
-                </Link>
-                <Link 
-                  href={`/shop/${categorySlug}/${product.slug}`}
-                  className={styles.iconButton}
                   title="View Details"
                 >
                   <Eye size={20} />

@@ -22,12 +22,14 @@ export async function GET(request: NextRequest) {
       [searchTerm, searchTerm]
     );
 
-    // Search products
+    // Search products with their primary category
     const [products]: any = await productsPool.execute(
-      `SELECT id, name, slug, 'product' as type 
-       FROM products 
-       WHERE (name LIKE ? OR slug LIKE ?) AND is_active = 1
-       ORDER BY name ASC
+      `SELECT DISTINCT p.id, p.name, p.slug, 'product' as type, c.slug as category_slug
+       FROM products p
+       LEFT JOIN product_categories pc ON p.id = pc.product_id
+       LEFT JOIN categories c ON pc.category_id = c.id
+       WHERE (p.name LIKE ? OR p.slug LIKE ?) AND p.is_active = 1
+       ORDER BY p.name ASC
        LIMIT 10`,
       [searchTerm, searchTerm]
     );

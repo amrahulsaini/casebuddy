@@ -166,7 +166,6 @@ export default function HomePage() {
         <div className={styles.mobileNav}>
           <Link href="/" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Home</Link>
           <Link href="/shop" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Shop</Link>
-          <Link href="/templates" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Templates</Link>
           <Link href="/about" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>About</Link>
           <Link href="/contact" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Contact</Link>
         </div>

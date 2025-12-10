@@ -10,6 +10,7 @@ interface SearchResult {
   name: string;
   slug: string;
   type: 'category' | 'product';
+  category_slug?: string;
 }
 
 export default function SearchBar() {
@@ -68,7 +69,12 @@ export default function SearchBar() {
     if (result.type === 'category') {
       router.push(`/shop?category=${result.slug}`);
     } else {
-      router.push(`/shop/${result.slug}`);
+      // For products, use category_slug if available, otherwise go to shop
+      if (result.category_slug) {
+        router.push(`/shop/${result.category_slug}/${result.slug}`);
+      } else {
+        router.push(`/shop`);
+      }
     }
     setIsOpen(false);
     setQuery('');

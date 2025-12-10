@@ -115,14 +115,6 @@ export default function AboutPage() {
               phone cases for all major brands including iPhone, Samsung, OnePlus, Xiaomi, Vivo, Oppo, Realme, and more.
             </p>
           </div>
-          <div className={styles.imageContent}>
-            <div className={styles.imageGrid}>
-              <div className={styles.gridItem}></div>
-              <div className={styles.gridItem}></div>
-              <div className={styles.gridItem}></div>
-              <div className={styles.gridItem}></div>
-            </div>
-          </div>
         </div>
       </section>
 

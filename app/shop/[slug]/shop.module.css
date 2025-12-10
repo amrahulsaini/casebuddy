@@ -208,6 +208,27 @@
   gap: 24px;
 }
 
+.productsList .productCard {
+  flex-direction: row;
+  max-height: 200px;
+}
+
+.productsList .productImageWrapper {
+  width: 200px;
+  min-width: 200px;
+  padding-top: 0;
+  height: 200px;
+}
+
+.productsList .productImage {
+  position: relative;
+}
+
+.productsList .productInfo {
+  flex: 1;
+  padding: 20px;
+}
+
 .productCard {
   background: #ffffff;
   border-radius: 20px;

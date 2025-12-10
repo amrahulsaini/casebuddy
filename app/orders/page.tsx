@@ -165,6 +165,9 @@ export default function OrdersPage() {
     <div className={styles.container}>
       <div className={styles.header}>
         <div>
+          <Link href="/" className={styles.backBtn}>
+            ← Back to Home
+          </Link>
           <h1 className={styles.title}>My Orders</h1>
           <p className={styles.subtitle}>Logged in as: {email}</p>
         </div>

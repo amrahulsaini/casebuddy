@@ -231,7 +231,7 @@ function CheckoutContent() {
       if (response.ok) {
         setEmailOtpSent(true);
         setEmailResendTimer(60);
-        showToast('success', 'OTP has been sent to your email address');
+        showToast('success', 'OTP sent! Please check your inbox or spam folder');
       } else {
         const data = await response.json();
         showToast('error', data.error || 'Failed to send OTP');

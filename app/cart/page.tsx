@@ -14,7 +14,12 @@ export default function CartPage() {
   const router = useRouter();
 
   const handleCheckout = () => {
-    if (cart.length === 0) return;
+    console.log('Checkout button clicked!');
+    
+    if (cart.length === 0) {
+      console.log('Cart is empty, returning');
+      return;
+    }
     
     const firstItem = cart[0];
     
@@ -49,8 +54,11 @@ export default function CartPage() {
       params.append('notes', `Multiple items: ${cart.map(item => `${item.name} (${item.quantity})`).join(', ')}`);
     }
 
+    const checkoutUrl = `/checkout?${params.toString()}`;
+    console.log('Navigating to:', checkoutUrl);
+    
     // Navigate to checkout
-    window.location.href = `/checkout?${params.toString()}`;
+    window.location.href = checkoutUrl;
   };
 
   if (cart.length === 0) {

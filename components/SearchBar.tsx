@@ -69,11 +69,11 @@ export default function SearchBar() {
     if (result.type === 'category') {
       router.push(`/shop?category=${result.slug}`);
     } else {
-      // For products, use category_slug if available, otherwise go to shop
+      // For products, use category_slug if available, otherwise search in shop
       if (result.category_slug) {
         router.push(`/shop/${result.category_slug}/${result.slug}`);
       } else {
-        router.push(`/shop`);
+        router.push(`/shop?search=${encodeURIComponent(result.name)}`);
       }
     }
     setIsOpen(false);

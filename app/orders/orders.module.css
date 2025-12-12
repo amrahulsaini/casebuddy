@@ -1,8 +1,15 @@
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 160px 20px 40px;
+  padding: 130px 20px 40px;
   min-height: 100vh;
+  background: #fff;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding-top: 102px;
+  }
 }
 
 .loginCard {

@@ -166,7 +166,7 @@ export default function OrdersPage() {
         </div>
 
         {/* Header */}
-        <header className={`${styles.header} ${!headerVisible ? styles.hidden : ''}`}>
+        <header className={`${styles.header} ${scrollY > 50 ? styles.scrolled : ''} ${!headerVisible ? styles.hidden : ''}`}>
           <nav className={styles.nav}>
             <Link href="/" className={styles.logo}>
               <Image src="/casebuddy-logo.png" alt="CaseBuddy" width={180} height={50} className={styles.logoImg} priority />

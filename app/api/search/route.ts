@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
 
     // Search products with their primary category - case insensitive
     const [products]: any = await productsPool.execute(
-      `SELECT DISTINCT p.id, p.name, p.slug, p.image_url, 'product' as type, c.slug as category_slug, c.name as category_name
+      `SELECT DISTINCT p.id, p.name, p.slug, p.image as image_url, 'product' as type, c.slug as category_slug, c.name as category_name
        FROM products p
        LEFT JOIN product_categories pc ON p.id = pc.product_id AND pc.is_primary = 1
        LEFT JOIN categories c ON pc.category_id = c.id

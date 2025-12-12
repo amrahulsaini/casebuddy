@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Package, Mail, Eye, CheckCircle, Clock, XCircle, Truck, ShoppingCart, User, Menu, Heart, Instagram, Facebook, Twitter, Phone, MapPin, Zap } from 'lucide-react';
+import { Package, Mail, Eye, CheckCircle, Clock, XCircle, Truck, ShoppingCart, User, Menu, Heart, Instagram, Facebook, Phone, MapPin, Zap } from 'lucide-react';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import SearchBar from '@/components/SearchBar';
 import styles from './orders.module.css';
+import homeStyles from '../home.module.css';
 
 interface Order {
   id: number;
@@ -36,7 +36,6 @@ export default function OrdersPage() {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
     // Check if user is already logged in
@@ -152,9 +151,9 @@ export default function OrdersPage() {
     return (
       <div className={styles.container}>
         {/* Announcement Banner */}
-        <div className={`${styles.announcementBar} ${!headerVisible ? styles.hidden : ''}`}>
-          <div className={styles.marquee}>
-            <div className={styles.marqueeContent}>
+        <div className={`${homeStyles.announcementBar} ${!headerVisible ? homeStyles.hidden : ''}`}>
+          <div className={homeStyles.marquee}>
+            <div className={homeStyles.marqueeContent}>
               <span><Truck size={16} /> Free Shipping Above ₹499</span>
               <span><Package size={16} /> 7 Days Easy Return</span>
               <span><Zap size={16} /> Delivery in 7-10 Days</span>
@@ -166,31 +165,31 @@ export default function OrdersPage() {
         </div>
 
         {/* Header */}
-        <header className={`${styles.header} ${scrollY > 50 ? styles.scrolled : ''} ${!headerVisible ? styles.hidden : ''}`}>
-          <nav className={styles.nav}>
-            <Link href="/" className={styles.logo}>
-              <Image src="/casebuddy-logo.png" alt="CaseBuddy" width={180} height={50} className={styles.logoImg} priority />
+        <header className={`${homeStyles.header} ${scrollY > 50 ? homeStyles.scrolled : ''} ${!headerVisible ? homeStyles.hidden : ''}`}>
+          <nav className={homeStyles.nav}>
+            <Link href="/" className={homeStyles.logo}>
+              <Image src="/casebuddy-logo.png" alt="CaseBuddy" width={180} height={50} className={homeStyles.logoImg} priority />
             </Link>
-            <div className={styles.navLinks}>
-              <Link href="/" className={styles.navLink}>Home</Link>
-              <Link href="/shop" className={styles.navLink}>Shop</Link>
-              <Link href="/about" className={styles.navLink}>About</Link>
-              <Link href="/contact" className={styles.navLink}>Contact</Link>
+            <div className={homeStyles.navLinks}>
+              <Link href="/" className={homeStyles.navLink}>Home</Link>
+              <Link href="/shop" className={homeStyles.navLink}>Shop</Link>
+              <Link href="/about" className={homeStyles.navLink}>About</Link>
+              <Link href="/contact" className={homeStyles.navLink}>Contact</Link>
             </div>
-            <div className={styles.navActions}>
+            <div className={homeStyles.navActions}>
               <SearchBar />
-              <Link href="/wishlist" className={styles.iconButton}>
+              <Link href="/wishlist" className={homeStyles.iconButton}>
                 <Heart size={22} />
-                <WishlistBadge className={styles.cartBadge} />
+                <WishlistBadge className={homeStyles.cartBadge} />
               </Link>
-              <Link href="/cart" className={styles.iconButton}>
+              <Link href="/cart" className={homeStyles.iconButton}>
                 <ShoppingCart size={22} />
-                <CartBadge className={styles.cartBadge} />
+                <CartBadge className={homeStyles.cartBadge} />
               </Link>
-              <Link href="/orders" className={styles.iconButton}>
+              <Link href="/orders" className={homeStyles.iconButton}>
                 <User size={22} />
               </Link>
-              <button className={styles.mobileMenu} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              <button className={homeStyles.mobileMenu} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                 <Menu size={24} />
               </button>
             </div>
@@ -199,11 +198,11 @@ export default function OrdersPage() {
 
         {/* Mobile Navigation Menu */}
         {mobileMenuOpen && (
-          <div className={styles.mobileNav}>
-            <Link href="/" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Home</Link>
-            <Link href="/shop" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Shop</Link>
-            <Link href="/about" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>About</Link>
-            <Link href="/contact" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Contact</Link>
+          <div className={homeStyles.mobileNav}>
+            <Link href="/" className={homeStyles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Home</Link>
+            <Link href="/shop" className={homeStyles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Shop</Link>
+            <Link href="/about" className={homeStyles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>About</Link>
+            <Link href="/contact" className={homeStyles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Contact</Link>
           </div>
         )}
 
@@ -239,7 +238,7 @@ export default function OrdersPage() {
           </form>
           
           <div className={styles.loginFooter}>
-            <p>Don't have an account? Orders are automatically saved when you checkout.</p>
+            <p>Don&apos;t have an account? Orders are automatically saved when you checkout.</p>
           </div>
         </div>
         </div>
@@ -324,9 +323,9 @@ export default function OrdersPage() {
   return (
     <div className={styles.container}>
       {/* Announcement Banner */}
-      <div className={`${styles.announcementBar} ${!headerVisible ? styles.hidden : ''}`}>
-        <div className={styles.marquee}>
-          <div className={styles.marqueeContent}>
+      <div className={`${homeStyles.announcementBar} ${!headerVisible ? homeStyles.hidden : ''}`}>
+        <div className={homeStyles.marquee}>
+          <div className={homeStyles.marqueeContent}>
             <span><Truck size={16} /> Free Shipping Above ₹499</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
@@ -338,31 +337,31 @@ export default function OrdersPage() {
       </div>
 
       {/* Header */}
-      <header className={`${styles.header} ${scrollY > 50 ? styles.scrolled : ''} ${!headerVisible ? styles.hidden : ''}`}>
-        <nav className={styles.nav}>
-          <Link href="/" className={styles.logo}>
-            <Image src="/casebuddy-logo.png" alt="CaseBuddy" width={180} height={50} className={styles.logoImg} priority />
+      <header className={`${homeStyles.header} ${scrollY > 50 ? homeStyles.scrolled : ''} ${!headerVisible ? homeStyles.hidden : ''}`}>
+        <nav className={homeStyles.nav}>
+          <Link href="/" className={homeStyles.logo}>
+            <Image src="/casebuddy-logo.png" alt="CaseBuddy" width={180} height={50} className={homeStyles.logoImg} priority />
           </Link>
-          <div className={styles.navLinks}>
-            <Link href="/" className={styles.navLink}>Home</Link>
-            <Link href="/shop" className={styles.navLink}>Shop</Link>
-            <Link href="/about" className={styles.navLink}>About</Link>
-            <Link href="/contact" className={styles.navLink}>Contact</Link>
+          <div className={homeStyles.navLinks}>
+            <Link href="/" className={homeStyles.navLink}>Home</Link>
+            <Link href="/shop" className={homeStyles.navLink}>Shop</Link>
+            <Link href="/about" className={homeStyles.navLink}>About</Link>
+            <Link href="/contact" className={homeStyles.navLink}>Contact</Link>
           </div>
-          <div className={styles.navActions}>
+          <div className={homeStyles.navActions}>
             <SearchBar />
-            <Link href="/wishlist" className={styles.iconButton}>
+            <Link href="/wishlist" className={homeStyles.iconButton}>
               <Heart size={22} />
-              <WishlistBadge className={styles.cartBadge} />
+              <WishlistBadge className={homeStyles.cartBadge} />
             </Link>
-            <Link href="/cart" className={styles.iconButton}>
+            <Link href="/cart" className={homeStyles.iconButton}>
               <ShoppingCart size={22} />
-              <CartBadge className={styles.cartBadge} />
+              <CartBadge className={homeStyles.cartBadge} />
             </Link>
-            <Link href="/orders" className={styles.iconButton}>
+            <Link href="/orders" className={homeStyles.iconButton}>
               <User size={22} />
             </Link>
-            <button className={styles.mobileMenu} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <button className={homeStyles.mobileMenu} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               <Menu size={24} />
             </button>
           </div>
@@ -371,11 +370,11 @@ export default function OrdersPage() {
 
       {/* Mobile Navigation Menu */}
       {mobileMenuOpen && (
-        <div className={styles.mobileNav}>
-          <Link href="/" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Home</Link>
-          <Link href="/shop" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Shop</Link>
-          <Link href="/about" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>About</Link>
-          <Link href="/contact" className={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Contact</Link>
+        <div className={homeStyles.mobileNav}>
+          <Link href="/" className={homeStyles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Home</Link>
+          <Link href="/shop" className={homeStyles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Shop</Link>
+          <Link href="/about" className={homeStyles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>About</Link>
+          <Link href="/contact" className={homeStyles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Contact</Link>
         </div>
       )}
 
@@ -402,7 +401,7 @@ export default function OrdersPage() {
         <div className={styles.empty}>
           <Package size={64} />
           <h2>No Orders Found</h2>
-          <p>You haven't placed any orders yet.</p>
+          <p>You haven&apos;t placed any orders yet.</p>
           <Link href="/shop" className={styles.shopBtn}>
             Start Shopping
           </Link>
@@ -413,7 +412,7 @@ export default function OrdersPage() {
             let customData = null;
             try {
               customData = order.customization_data ? JSON.parse(order.customization_data) : null;
-            } catch (e) {}
+            } catch {}
 
             return (
               <div key={order.id} className={styles.orderCard}>
@@ -455,7 +454,7 @@ export default function OrdersPage() {
                     {customData && (
                       <div className={styles.customization}>
                         <strong>Customization:</strong>
-                        {customData.customText && <p>Text: "{customData.customText}"</p>}
+                        {customData.customText && <p>Text: &quot;{customData.customText}&quot;</p>}
                         {customData.font && <p>Font: {customData.font}</p>}
                         {customData.placement && <p>Placement: {customData.placement.replace(/_/g, ' ')}</p>}
                       </div>

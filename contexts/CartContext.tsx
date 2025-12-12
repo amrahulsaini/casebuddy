@@ -98,11 +98,32 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addToCart = (item: Omit<CartItem, 'quantity'>) => {
     setCart((prevCart) => {
-      // Generate unique ID based on product + customization
-      const uniqueId = Date.now() + Math.random();
-      const newItem = { ...item, id: uniqueId, quantity: 1 };
-      console.log('Adding to cart:', newItem);
-      return [...prevCart, newItem];
+      // Check if item with same product and customization already exists
+      const existingItemIndex = prevCart.findIndex((cartItem) => 
+        cartItem.productId === item.productId &&
+        cartItem.phoneBrand === item.phoneBrand &&
+        cartItem.phoneModel === item.phoneModel &&
+        cartItem.customText === item.customText &&
+        cartItem.font === item.font &&
+        cartItem.placement === item.placement
+      );
+
+      if (existingItemIndex > -1) {
+        // Item exists, increase quantity
+        const updatedCart = [...prevCart];
+        updatedCart[existingItemIndex] = {
+          ...updatedCart[existingItemIndex],
+          quantity: updatedCart[existingItemIndex].quantity + 1
+        };
+        console.log('Increasing quantity for existing item:', updatedCart[existingItemIndex]);
+        return updatedCart;
+      } else {
+        // New item, add to cart
+        const uniqueId = Date.now() + Math.random();
+        const newItem = { ...item, id: uniqueId, quantity: 1 };
+        console.log('Adding new item to cart:', newItem);
+        return [...prevCart, newItem];
+      }
     });
   };
 

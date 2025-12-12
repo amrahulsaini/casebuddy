@@ -26,7 +26,7 @@ export default function CartPage() {
     // Calculate total from all items
     const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const shipping = 80;
+    const shipping = subtotal >= 499 ? 0 : 80;
     const totalPrice = subtotal + shipping;
     
     const params = new URLSearchParams({
@@ -166,14 +166,18 @@ export default function CartPage() {
           
           <div className={styles.summaryRow}>
             <span>Shipping</span>
-            <span>₹80</span>
+            {cartTotal >= 499 ? (
+              <span className={styles.free}>FREE</span>
+            ) : (
+              <span>₹80</span>
+            )}
           </div>
 
           <div className={styles.summaryDivider}></div>
 
           <div className={styles.summaryTotal}>
             <span>Total</span>
-            <span>₹{(cartTotal + 80).toFixed(2)}</span>
+            <span>₹{(cartTotal + (cartTotal >= 499 ? 0 : 80)).toFixed(2)}</span>
           </div>
 
           <button 

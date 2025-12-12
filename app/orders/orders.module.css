@@ -764,6 +764,7 @@
   }
 }
 
+/* Tablets */
 @media (max-width: 1024px) {
   .navLinks {
     display: none;
@@ -773,40 +774,90 @@
     display: block;
   }
 
-  .mobileNav {
-    display: block;
-  }
-
   .nav {
     padding: 1.2rem 1.5rem;
   }
+
+  .orderCard {
+    padding: 1.5rem;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .logoutBtn {
+    align-self: flex-start;
+  }
 }
 
+/* Mobile landscape and small tablets */
 @media (max-width: 768px) {
+  .announcementBar {
+    padding: 0.6rem 0;
+    font-size: 0.85rem;
+    height: 42px;
+  }
+
+  .header {
+    top: 42px;
+  }
+
+  .nav {
+    padding: 1rem 1.5rem;
+  }
+
   .container {
-    padding: 150px 16px 20px;
+    padding-top: 110px;
+    padding-left: 16px;
+    padding-right: 16px;
   }
 
   .title {
     font-size: 24px;
   }
 
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .loginCard {
+    margin: 40px auto;
+  }
+
+  .loginHeader {
+    padding: 30px;
+  }
+
+  .loginHeader h1 {
+    font-size: 24px;
+  }
+
+  .loginForm {
+    padding: 30px;
+  }
+
   .orderHeader,
   .orderBody {
     flex-direction: column;
+    gap: 1rem;
   }
 
   .orderTotal {
     text-align: left;
   }
 
+  .orderStatus {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
   .statusBadge {
     font-size: 12px;
     padding: 6px 12px;
-  }
-
-  .nav {
-    padding: 1.2rem 1rem;
   }
 
   .footer {
@@ -820,11 +871,147 @@
 
   .footerBottom {
     flex-direction: column;
+    gap: 1rem;
     text-align: center;
   }
 
+  .orderCard {
+    padding: 1.2rem;
+  }
+
+  .backBtn {
+    font-size: 14px;
+  }
+}
+
+/* Mobile portrait */
+@media (max-width: 480px) {
   .announcementBar {
-    font-size: 0.85rem;
-    height: 45px;
+    font-size: 0.8rem;
+    padding: 0.5rem 0;
+    height: 38px;
+  }
+
+  .header {
+    top: 38px;
+  }
+
+  .nav {
+    padding: 0.8rem 1rem;
+  }
+
+  .logoImg {
+    width: 130px !important;
+    height: auto !important;
+  }
+
+  .navActions {
+    gap: 0.5rem;
+  }
+
+  .iconButton {
+    padding: 0.4rem;
+  }
+
+  .container {
+    padding-top: 95px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .loginCard {
+    margin: 20px auto;
+  }
+
+  .loginHeader {
+    padding: 24px;
+  }
+
+  .loginHeader h1 {
+    font-size: 20px;
+  }
+
+  .loginHeader p {
+    font-size: 14px;
+  }
+
+  .loginForm {
+    padding: 24px;
+  }
+
+  .loginFooter {
+    padding: 16px 24px;
+  }
+
+  .loginFooter p {
+    font-size: 13px;
+  }
+
+  .orderCard {
+    padding: 1rem;
+  }
+
+  .orderHeader h3 {
+    font-size: 16px;
+  }
+
+  .orderDate {
+    font-size: 13px;
+  }
+
+  .statusBadge {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+
+  .productInfo h4 {
+    font-size: 16px;
+  }
+
+  .productInfo p {
+    font-size: 14px;
+  }
+
+  .totalAmount {
+    font-size: 20px;
+  }
+
+  .viewBtn {
+    font-size: 14px;
+    padding: 10px 16px;
+  }
+
+  .pageHeader {
+    gap: 0.8rem;
+  }
+
+  .logoutBtn {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+
+  .backBtn {
+    font-size: 13px;
+  }
+
+  .footerSection {
+    text-align: center;
+  }
+
+  .footerLogo {
+    justify-content: center;
+  }
+
+  .socialLinks {
+    justify-content: center;
+  }
+
+  .footerLinks,
+  .footerContact {
+    align-items: center;
   }
 }

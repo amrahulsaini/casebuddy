@@ -251,7 +251,7 @@ export default function ContactPage() {
 
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
-                <label htmlFor="phone" className={styles.label}>Phone Number</label>
+                <label htmlFor="phone" className={styles.label}>Mobile Number</label>
                 <input
                   type="tel"
                   id="phone"
@@ -259,7 +259,7 @@ export default function ContactPage() {
                   value={formData.phone}
                   onChange={handleChange}
                   className={styles.input}
-                  placeholder="+91 98765 43210"
+                  placeholder="+91 xxx-xxx-xxxx"
                 />
               </div>
 

@@ -446,7 +446,7 @@ export default function HomePage() {
               </li>
               <li>
                 <Mail size={20} />
-                <span>info@casebuddy.co.in</span>
+                <a href="mailto:info@casebuddy.co.in">info@casebuddy.co.in</a>
               </li>
               <li>
                 <MapPin size={20} />

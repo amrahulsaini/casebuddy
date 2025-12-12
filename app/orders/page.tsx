@@ -150,7 +150,7 @@ export default function OrdersPage() {
 
   if (!isLoggedIn) {
     return (
-      <>
+      <div className={styles.container}>
         {/* Announcement Banner */}
         <div className={`${styles.announcementBar} ${!headerVisible ? styles.hidden : ''}`}>
           <div className={styles.marquee}>
@@ -207,9 +207,8 @@ export default function OrdersPage() {
           </div>
         )}
 
-        <div className={styles.container}>
-          <div className={styles.contentWrapper}>
-            <div className={styles.loginCard}>
+        <div className={styles.contentWrapper}>
+          <div className={styles.loginCard}>
           <div className={styles.loginHeader}>
             <Package size={48} />
             <h1>Track Your Orders</h1>
@@ -243,7 +242,6 @@ export default function OrdersPage() {
             <p>Don't have an account? Orders are automatically saved when you checkout.</p>
           </div>
         </div>
-      </div>
         </div>
 
       {/* Footer */}
@@ -319,12 +317,12 @@ export default function OrdersPage() {
           </div>
         </div>
       </footer>
-    </>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className={styles.container}>
       {/* Announcement Banner */}
       <div className={`${styles.announcementBar} ${!headerVisible ? styles.hidden : ''}`}>
         <div className={styles.marquee}>
@@ -381,9 +379,8 @@ export default function OrdersPage() {
         </div>
       )}
 
-      <div className={styles.container}>
-        <div className={styles.contentWrapper}>
-          <div className={styles.pageHeader}>
+      <div className={styles.contentWrapper}>
+        <div className={styles.pageHeader}>
           <div>
             <Link href="/" className={styles.backBtn}>
               ← Back to Home
@@ -489,7 +486,6 @@ export default function OrdersPage() {
           })}
         </div>
       )}
-        </div>
       </div>
 
     {/* Footer */}
@@ -565,6 +561,6 @@ export default function OrdersPage() {
         </div>
       </div>
     </footer>
-  </>
+    </div>
   );
 }

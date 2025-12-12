@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { MapPin, Phone, Mail, Clock, Send, MessageSquare, ShoppingCart, User, Menu, Heart, Truck, Package, Zap, Instagram, Facebook, Twitter } from 'lucide-react';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
+import SearchBar from '@/components/SearchBar';
 import styles from './contact.module.css';
 
 export default function ContactPage() {
@@ -16,6 +17,8 @@ export default function ContactPage() {
     message: ''
   });
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [scrollY, setScrollY] = useState(0);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
@@ -117,6 +120,7 @@ export default function ContactPage() {
             <Link href="/contact" className={styles.navLink}>Contact</Link>
           </div>
           <div className={styles.navActions}>
+            <SearchBar />
             <Link href="/wishlist" className={styles.iconButton}>
               <Heart size={22} />
               <WishlistBadge className={styles.cartBadge} />
@@ -288,14 +292,20 @@ export default function ContactPage() {
               />
             </div>
 
-            <button type="submit" className={styles.submitButton}>
+            <button type="submit" className={styles.submitButton} disabled={loading}>
               <Send size={20} />
-              Send Message
+              {loading ? 'Sending...' : 'Send Message'}
             </button>
 
             {submitted && (
               <div className={styles.successMessage}>
                 ✓ Message sent successfully! We'll get back to you soon.
+              </div>
+            )}
+
+            {error && (
+              <div className={styles.errorMessage}>
+                ✗ {error}
               </div>
             )}
           </form>

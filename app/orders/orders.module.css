@@ -1,19 +1,19 @@
 .container {
   min-height: 100vh;
   background: #fff;
-  padding-top: 130px;
+  padding-top: 110px;
 }
 
 @media (max-width: 768px) {
   .container {
-    padding-top: 102px;
+    padding-top: 95px;
   }
 }
 
 .contentWrapper {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px 40px;
+  padding: 20px 20px 40px;
 }
 
 .loginCard {
@@ -456,10 +456,10 @@
 .nav {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 1.2rem 2rem;
+  padding: 1rem 2rem;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
 }
 
 .logo {
@@ -467,6 +467,7 @@
   align-items: center;
   text-decoration: none;
   transition: transform 0.3s ease;
+  flex-shrink: 0;
 }
 
 .logo:hover {
@@ -474,13 +475,17 @@
 }
 
 .logoImg {
-  height: auto;
+  height: 50px;
+  width: auto;
   object-fit: contain;
 }
 
 .navLinks {
   display: flex;
-  gap: 2rem;
+  gap: 2.5rem;
+  align-items: center;
+  flex: 1;
+  justify-content: center;
 }
 
 .navLink {
@@ -515,6 +520,7 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-shrink: 0;
 }
 
 .iconButton {

@@ -457,18 +457,15 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 1rem 2rem;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .logo {
-  display: flex !important;
-  align-items: center !important;
+  font-size: 1.75rem;
+  font-weight: 900;
   text-decoration: none;
-  transition: transform 0.3s ease;
-  flex-shrink: 0 !important;
-  margin-right: auto;
 }
 
 .logo:hover {
@@ -478,16 +475,12 @@
 .logoImg {
   height: 50px;
   width: auto;
-  object-fit: contain;
 }
 
 .navLinks {
-  display: flex !important;
+  display: flex;
   gap: 2.5rem;
-  align-items: center !important;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  align-items: center;
 }
 
 .navLink {
@@ -519,11 +512,9 @@
 }
 
 .navActions {
-  display: flex !important;
-  align-items: center !important;
+  display: flex;
   gap: 1rem;
-  flex-shrink: 0 !important;
-  margin-left: auto;
+  align-items: center;
 }
 
 .iconButton {

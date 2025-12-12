@@ -14,10 +14,6 @@ export default function CartPage() {
   const router = useRouter();
 
   const handleCheckout = () => {
-    // For now, we'll handle only the first item
-    // TODO: In future, support multiple products in single checkout
-    // or create separate orders for each product
-    
     if (cart.length === 0) return;
     
     const firstItem = cart[0];
@@ -53,7 +49,8 @@ export default function CartPage() {
       params.append('notes', `Multiple items: ${cart.map(item => `${item.name} (${item.quantity})`).join(', ')}`);
     }
 
-    router.push(`/checkout?${params.toString()}`);
+    // Navigate to checkout
+    window.location.href = `/checkout?${params.toString()}`;
   };
 
   if (cart.length === 0) {
@@ -170,7 +167,11 @@ export default function CartPage() {
             <span>₹{(cartTotal + 80).toFixed(2)}</span>
           </div>
 
-          <button className={styles.checkoutButton} onClick={handleCheckout}>
+          <button 
+            type="button"
+            className={styles.checkoutButton} 
+            onClick={handleCheckout}
+          >
             Proceed to Checkout
           </button>
 

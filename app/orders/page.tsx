@@ -32,8 +32,6 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [scrollY, setScrollY] = useState(0);
-  const [lastScrollY, setLastScrollY] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
@@ -46,18 +44,21 @@ export default function OrdersPage() {
       setIsLoggedIn(true);
       fetchOrders(savedEmail);
     }
+  }, []);
 
+  useEffect(() => {
+    let lastScroll = 0;
+    
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+      if (currentScrollY > lastScroll && currentScrollY > 100) {
         setHeaderVisible(false);
       } else {
         setHeaderVisible(true);
       }
       
-      setScrollY(currentScrollY);
-      setLastScrollY(currentScrollY);
+      lastScroll = currentScrollY;
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -65,7 +66,7 @@ export default function OrdersPage() {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [lastScrollY]);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -164,7 +165,7 @@ export default function OrdersPage() {
         </div>
 
         {/* Header */}
-        <header className={`${styles.header} ${scrollY > 50 ? styles.scrolled : ''} ${!headerVisible ? styles.hidden : ''}`}>
+        <header className={`${styles.header} ${!headerVisible ? styles.hidden : ''}`}>
           <nav className={styles.nav}>
             <Link href="/" className={styles.logo}>
               <Image src="/casebuddy-logo.png" alt="CaseBuddy" width={180} height={50} className={styles.logoImg} priority />
@@ -336,7 +337,7 @@ export default function OrdersPage() {
       </div>
 
       {/* Header */}
-      <header className={`${styles.header} ${scrollY > 50 ? styles.scrolled : ''} ${!headerVisible ? styles.hidden : ''}`}>
+      <header className={`${styles.header} ${!headerVisible ? styles.hidden : ''}`}>
         <nav className={styles.nav}>
           <Link href="/" className={styles.logo}>
             <Image src="/casebuddy-logo.png" alt="CaseBuddy" width={180} height={50} className={styles.logoImg} priority />

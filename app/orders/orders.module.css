@@ -533,6 +533,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  text-decoration: none;
 }
 
 .iconButton:hover {
@@ -574,10 +575,10 @@
   z-index: 999;
   display: flex;
   flex-direction: column;
-  animation: slideDownMobile 0.3s ease-out;
+  animation: slideDown 0.3s ease-out;
 }
 
-@keyframes slideDownMobile {
+@keyframes slideDown {
   from {
     opacity: 0;
     transform: translateY(-20px);
@@ -770,6 +771,11 @@
     display: none;
   }
 
+  .logoImg {
+    width: 150px;
+    height: auto;
+  }
+
   .mobileMenu {
     display: block;
   }
@@ -798,7 +804,6 @@
   .announcementBar {
     padding: 0.6rem 0;
     font-size: 0.85rem;
-    height: 42px;
   }
 
   .header {
@@ -889,7 +894,6 @@
   .announcementBar {
     font-size: 0.8rem;
     padding: 0.5rem 0;
-    height: 38px;
   }
 
   .header {
@@ -901,8 +905,7 @@
   }
 
   .logoImg {
-    width: 130px !important;
-    height: auto !important;
+    width: 130px;
   }
 
   .navActions {

@@ -10,6 +10,7 @@ import {
   Instagram,
   Mail,
   MapPin,
+  MessageCircle,
   Menu,
   Minus,
   Package,
@@ -365,7 +366,7 @@ export default function CartPage() {
                 rel="noopener noreferrer"
                 className={homeStyles.socialIcon}
               >
-                <Mail size={24} />
+                <MessageCircle size={24} />
               </a>
             </div>
           </div>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Shield, ShoppingCart, User, Menu, Heart, Truck, Package, Zap, Instagram, Facebook, Twitter, Mail, Phone, MapPin } from 'lucide-react';
+import { Shield, ShoppingCart, User, Menu, Heart, Truck, Package, Zap, Instagram, Facebook, Twitter, Mail, Phone, MapPin, MessageCircle } from 'lucide-react';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import styles from './privacy.module.css';
 
@@ -294,7 +294,7 @@ export default function PrivacyPage() {
                 <Facebook size={24} />
               </a>
               <a href="https://wa.me/918107624752" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}>
-                <Mail size={24} />
+                <MessageCircle size={24} />
               </a>
             </div>
           </div>

@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Sparkles, ShieldCheck, Truck, Gift, Star, TrendingUp, Zap, ArrowRight, Package, Headphones, ShoppingCart, User, Menu, Heart, Instagram, Facebook, Twitter, Mail, Phone, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Sparkles, ShieldCheck, Truck, Gift, Star, TrendingUp, Zap, ArrowRight, Package, Headphones, ShoppingCart, User, Menu, Heart, Instagram, Facebook, Twitter, Mail, Phone, MapPin, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import HeroSlider from '@/components/HeroSlider';
@@ -413,7 +413,7 @@ export default function HomePage() {
                 <Facebook size={24} />
               </a>
               <a href="https://wa.me/918107624752" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}>
-                <Mail size={24} />
+                <MessageCircle size={24} />
               </a>
             </div>
           </div>

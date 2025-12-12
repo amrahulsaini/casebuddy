@@ -10,6 +10,7 @@ import {
   Instagram,
   Mail,
   MapPin,
+  MessageCircle,
   Menu,
   Package,
   Phone,
@@ -268,7 +269,7 @@ export default function WishlistPage() {
                 rel="noopener noreferrer"
                 className={homeStyles.socialIcon}
               >
-                <Mail size={24} />
+                <MessageCircle size={24} />
               </a>
             </div>
           </div>

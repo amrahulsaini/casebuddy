@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { User, Mail, Phone, MapPin, ShoppingBag, Lock, Check, Heart, ShoppingCart, Instagram, Facebook, MapPin as MapPinIcon, Menu, Truck, Package, Zap } from 'lucide-react';
+import { User, Mail, Phone, MapPin, ShoppingBag, Lock, Check, Heart, ShoppingCart, Instagram, Facebook, MapPin as MapPinIcon, Menu, Truck, Package, Zap, MessageCircle } from 'lucide-react';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import SearchBar from '@/components/SearchBar';
 import Toast from '@/components/Toast';
@@ -786,7 +786,7 @@ function CheckoutContent() {
                 <Facebook size={24} />
               </a>
               <a href="https://wa.me/918107624752" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}>
-                <Mail size={24} />
+                 <MessageCircle size={24} />
               </a>
             </div>
           </div>

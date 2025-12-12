@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Package, Mail, Eye, CheckCircle, Clock, XCircle, Truck, ShoppingCart, User, Menu, Heart, Instagram, Facebook, Phone, MapPin, Zap } from 'lucide-react';
+import { Package, Mail, Eye, CheckCircle, Clock, XCircle, Truck, ShoppingCart, User, Menu, Heart, Instagram, Facebook, Phone, MapPin, Zap, MessageCircle } from 'lucide-react';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import SearchBar from '@/components/SearchBar';
 import styles from './orders.module.css';
@@ -263,7 +263,7 @@ export default function OrdersPage() {
                 <Facebook size={24} />
               </a>
               <a href="https://wa.me/918107624752" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}>
-                <Mail size={24} />
+                <MessageCircle size={24} />
               </a>
             </div>
           </div>
@@ -507,7 +507,7 @@ export default function OrdersPage() {
               <Facebook size={24} />
             </a>
             <a href="https://wa.me/918107624752" target="_blank" rel="noopener noreferrer" className={styles.socialIcon}>
-              <Mail size={24} />
+              <MessageCircle size={24} />
             </a>
           </div>
         </div>

@@ -208,7 +208,8 @@ export default function OrdersPage() {
         )}
 
         <div className={styles.container}>
-          <div className={styles.loginCard}>
+          <div className={styles.contentWrapper}>
+            <div className={styles.loginCard}>
           <div className={styles.loginHeader}>
             <Package size={48} />
             <h1>Track Your Orders</h1>
@@ -243,6 +244,7 @@ export default function OrdersPage() {
           </div>
         </div>
       </div>
+        </div>
 
       {/* Footer */}
       <footer className={styles.footer}>
@@ -380,7 +382,8 @@ export default function OrdersPage() {
       )}
 
       <div className={styles.container}>
-        <div className={styles.pageHeader}>
+        <div className={styles.contentWrapper}>
+          <div className={styles.pageHeader}>
           <div>
             <Link href="/" className={styles.backBtn}>
               ← Back to Home
@@ -486,7 +489,8 @@ export default function OrdersPage() {
           })}
         </div>
       )}
-    </div>
+        </div>
+      </div>
 
     {/* Footer */}
     <footer className={styles.footer}>

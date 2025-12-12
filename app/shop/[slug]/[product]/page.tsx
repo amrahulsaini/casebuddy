@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, ShoppingCart, Heart, Star, Truck, Shield, Package, ChevronLeft, ChevronRight, Plus, Minus } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Heart, Star, Truck, Shield, Package, ChevronLeft, ChevronRight, Plus, Minus, User, Menu, Zap } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
+import SearchBar from '@/components/SearchBar';
 import styles from './product.module.css';
+import homeStyles from '../../../home.module.css';
 
 interface ProductImage {
   image_url: string;
@@ -60,6 +62,11 @@ export default function ProductDetailPage() {
   const categorySlug = params?.slug as string;
   const productSlug = params?.product as string;
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
+
+  const [scrollY, setScrollY] = useState(0);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -99,6 +106,27 @@ export default function ProductDetailPage() {
         setLoading(false);
       });
   }, [productSlug, categorySlug]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setHeaderVisible(false);
+      } else {
+        setHeaderVisible(true);
+      }
+
+      setScrollY(currentScrollY);
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [lastScrollY]);
 
   const handleBrandChange = (brandId: number) => {
     setSelectedBrand(brandId);
@@ -251,30 +279,61 @@ export default function ProductDetailPage() {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <header className={styles.header}>
-        <nav className={styles.nav}>
-          <Link href="/" className={styles.logo}>
-            <Image src="/casebuddy-logo.png" alt="CaseBuddy" width={180} height={50} priority />
-          </Link>
-          <div className={styles.navLinks}>
-            <Link href="/" className={styles.navLink}>Home</Link>
-            <Link href="/shop" className={styles.navLink}>Shop</Link>
-            <Link href="/templates" className={styles.navLink}>Templates</Link>
-            <Link href="/contact" className={styles.navLink}>Contact</Link>
+      {/* Announcement Banner */}
+      <div className={`${homeStyles.announcementBar} ${!headerVisible ? homeStyles.hidden : ''}`}>
+        <div className={homeStyles.marquee}>
+          <div className={homeStyles.marqueeContent}>
+            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Package size={16} /> 7 Days Easy Return</span>
+            <span><Zap size={16} /> Delivery in 7-10 Days</span>
+            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Package size={16} /> 7 Days Easy Return</span>
+            <span><Zap size={16} /> Delivery in 7-10 Days</span>
           </div>
-          <div className={styles.navActions}>
-            <Link href="/wishlist" className={styles.iconButton}>
+        </div>
+      </div>
+
+      {/* Header */}
+      <header className={`${homeStyles.header} ${scrollY > 50 ? homeStyles.scrolled : ''} ${!headerVisible ? homeStyles.hidden : ''}`}>
+        <nav className={homeStyles.nav}>
+          <Link href="/" className={homeStyles.logo}>
+            <Image src="/casebuddy-logo.png" alt="CaseBuddy" width={180} height={50} className={homeStyles.logoImg} priority />
+          </Link>
+          <div className={homeStyles.navLinks}>
+            <Link href="/" className={homeStyles.navLink}>Home</Link>
+            <Link href="/shop" className={homeStyles.navLink}>Shop</Link>
+            <Link href="/about" className={homeStyles.navLink}>About</Link>
+            <Link href="/contact" className={homeStyles.navLink}>Contact</Link>
+          </div>
+          <div className={homeStyles.navActions}>
+            <SearchBar />
+            <Link href="/wishlist" className={homeStyles.iconButton}>
               <Heart size={22} />
-              <WishlistBadge className={styles.cartBadge} />
+              <WishlistBadge className={homeStyles.cartBadge} />
             </Link>
-            <Link href="/cart" className={styles.iconButton}>
+            <Link href="/cart" className={homeStyles.iconButton}>
               <ShoppingCart size={22} />
-              <CartBadge className={styles.cartBadge} />
+              <CartBadge className={homeStyles.cartBadge} />
             </Link>
+            <Link href="/orders" className={homeStyles.iconButton}>
+              <User size={22} />
+            </Link>
+            <button className={homeStyles.mobileMenu} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              <Menu size={24} />
+            </button>
           </div>
         </nav>
       </header>
+
+      {/* Mobile Navigation Menu */}
+      {mobileMenuOpen && (
+        <div className={homeStyles.mobileNav}>
+          <Link href="/" className={homeStyles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Home</Link>
+          <Link href="/shop" className={homeStyles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Shop</Link>
+          <Link href="/about" className={homeStyles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>About</Link>
+          <Link href="/contact" className={homeStyles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>Contact</Link>
+        </div>
+      )}
 
       {/* Breadcrumb */}
       <div className={styles.breadcrumb}>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Search, X } from 'lucide-react';
 import styles from './SearchBar.module.css';
 
@@ -11,6 +12,7 @@ interface SearchResult {
   slug: string;
   type: 'category' | 'product';
   category_slug?: string;
+  image_url?: string;
 }
 
 export default function SearchBar() {
@@ -67,7 +69,8 @@ export default function SearchBar() {
 
   const handleResultClick = (result: SearchResult) => {
     if (result.type === 'category') {
-      router.push(`/shop?category=${result.slug}`);
+      // Navigate to category page
+      router.push(`/shop/${result.slug}`);
     } else {
       // For products, use category_slug if available, otherwise search in shop
       if (result.category_slug) {
@@ -130,13 +133,25 @@ export default function SearchBar() {
                   className={styles.resultItem}
                   onClick={() => handleResultClick(result)}
                 >
-                  <div className={styles.resultType}>
-                    {result.type === 'category' ? '📁' : '📦'}
+                  <div className={styles.resultImage}>
+                    {result.image_url ? (
+                      <Image 
+                        src={result.image_url} 
+                        alt={result.name}
+                        width={50}
+                        height={50}
+                        className={styles.thumbnail}
+                      />
+                    ) : (
+                      <div className={styles.placeholderImage}>
+                        {result.type === 'category' ? '📁' : '📦'}
+                      </div>
+                    )}
                   </div>
                   <div className={styles.resultInfo}>
                     <div className={styles.resultName}>{result.name}</div>
-                    <div className={styles.resultSlug}>
-                      {result.type === 'category' ? 'Category' : 'Product'} · {result.slug}
+                    <div className={styles.resultMeta}>
+                      {result.type === 'category' ? 'Category' : 'Product'}
                     </div>
                   </div>
                 </div>

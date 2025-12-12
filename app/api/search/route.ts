@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 
     // Search categories
     const [categories]: any = await productsPool.execute(
-      `SELECT id, name, slug, 'category' as type 
+      `SELECT id, name, slug, image_url, 'category' as type 
        FROM categories 
        WHERE (name LIKE ? OR slug LIKE ?) AND is_active = 1
        ORDER BY name ASC
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 
     // Search products with their primary category
     const [products]: any = await productsPool.execute(
-      `SELECT DISTINCT p.id, p.name, p.slug, 'product' as type, c.slug as category_slug
+      `SELECT DISTINCT p.id, p.name, p.slug, p.image_url, 'product' as type, c.slug as category_slug
        FROM products p
        LEFT JOIN product_categories pc ON p.id = pc.product_id
        LEFT JOIN categories c ON pc.category_id = c.id

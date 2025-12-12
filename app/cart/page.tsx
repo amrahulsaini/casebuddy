@@ -30,6 +30,7 @@ export default function CartPage() {
     const totalPrice = subtotal + shipping;
     
     const params = new URLSearchParams({
+      productId: firstItem.productId.toString(),
       productName: firstItem.name,
       phoneModel: firstItem.phoneModel,
       price: totalPrice.toString(),

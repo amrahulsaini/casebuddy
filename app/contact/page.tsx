@@ -166,9 +166,16 @@ export default function ContactPage() {
             </div>
             <h3 className={styles.infoTitle}>Our Location</h3>
             <p className={styles.infoText}>
-              CaseBuddy<br />
-              Rajgarh, Rajasthan<br />
-              331023, India
+              <a
+                href="https://www.google.com/maps?q=CaseBuddy%2C%20Rajgarh%2C%20Rajasthan%20331023%2C%20India"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.link}
+              >
+                CaseBuddy<br />
+                Rajgarh, Rajasthan<br />
+                331023, India
+              </a>
             </p>
           </div>
 

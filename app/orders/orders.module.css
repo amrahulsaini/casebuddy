@@ -477,16 +477,19 @@
 
 .navLinks {
   display: flex;
-  gap: 2rem;
+  gap: 1.5rem;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .navLink {
   color: #333;
   text-decoration: none;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.95rem;
   transition: all 0.3s ease;
   position: relative;
+  white-space: nowrap;
 }
 
 .navLink::after {
@@ -744,6 +747,24 @@
   }
 }
 
+@media (max-width: 1024px) {
+  .navLinks {
+    display: none;
+  }
+
+  .mobileMenu {
+    display: block;
+  }
+
+  .mobileNav {
+    display: block;
+  }
+
+  .nav {
+    padding: 1.2rem 1.5rem;
+  }
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 150px 16px 20px;
@@ -767,16 +788,8 @@
     padding: 6px 12px;
   }
 
-  .navLinks {
-    display: none;
-  }
-
-  .mobileMenu {
-    display: block;
-  }
-
-  .mobileNav {
-    display: block;
+  .nav {
+    padding: 1.2rem 1rem;
   }
 
   .footer {

@@ -298,6 +298,7 @@ export default function HomePage() {
               className={styles.verticalCard}
               data-index={index}
             >
+              <div className={styles.categoryNameTop}>{category.name}</div>
               <div className={styles.verticalImageWrapper}>
                 <Image 
                   src={category.image_url} 
@@ -309,12 +310,9 @@ export default function HomePage() {
                   placeholder="blur"
                   blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjQyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzIwIiBoZWlnaHQ9IjQyMCIgZmlsbD0iI2Y1ZjVmNSIvPjwvc3ZnPg=="
                 />
-                <div className={styles.verticalOverlay}>
-                  <span className={styles.overlayText}>{category.name}</span>
-                  <div className={styles.overlayButton}>
-                    View Collection <ArrowRight size={20} />
-                  </div>
-                </div>
+              </div>
+              <div className={styles.viewCollectionButton}>
+                View Collection <ArrowRight size={20} />
               </div>
             </Link>
           ))}

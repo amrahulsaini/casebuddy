@@ -244,10 +244,10 @@ export default function DynamicPage({ params }: { params: Promise<{ slug: string
               Your one-stop shop for premium custom phone cases. Protect your device with style.
             </p>
             <div className={styles.socialLinks}>
-              <a href="#" className={styles.socialIcon}>
+              <a href="https://www.instagram.com/casebuddy6" className={styles.socialIcon}>
                 <Instagram size={24} />
               </a>
-              <a href="#" className={styles.socialIcon}>
+              <a href="https://www.facebook.com/casebuddy6" className={styles.socialIcon}>
                 <Facebook size={24} />
               </a>
               <a href="#" className={styles.socialIcon}>

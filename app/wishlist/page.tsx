@@ -248,7 +248,7 @@ export default function WishlistPage() {
             </p>
             <div className={homeStyles.socialLinks}>
               <a
-                href="https://www.instagram.com/casebuddy25"
+                href="https://www.instagram.com/casebuddy6"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={homeStyles.socialIcon}
@@ -256,7 +256,7 @@ export default function WishlistPage() {
                 <Instagram size={24} />
               </a>
               <a
-                href="https://www.facebook.com/share/17fhSRLQR4/?mibextid=wwXIfr"
+                href="https://www.facebook.com/casebuddy6"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={homeStyles.socialIcon}

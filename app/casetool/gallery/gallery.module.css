@@ -375,6 +375,18 @@
   white-space: nowrap;
 }
 
+.originalFileLink {
+  color: inherit;
+  text-decoration: underline;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.originalFileLink:hover {
+  color: #000000;
+}
+
 .userEmail {
   display: flex;
   align-items: center;

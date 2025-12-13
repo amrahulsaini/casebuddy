@@ -22,6 +22,23 @@ const TEXT_MODEL = process.env.TEXT_MODEL || 'gemini-2.0-flash';
 const IMAGE_MODEL = process.env.IMAGE_MODEL || 'gemini-2.5-flash-image';
 const IMAGE_ENHANCE_MODEL = process.env.IMAGE_ENHANCE_MODEL || 'gemini-3-pro-image-preview';
 
+function sanitizeFileName(name: string) {
+  return name
+    .replace(/\s+/g, '_')
+    .replace(/[^a-zA-Z0-9._-]/g, '')
+    .replace(/_+/g, '_')
+    .slice(0, 120);
+}
+
+function extensionFromMime(mimeType: string | undefined) {
+  const type = (mimeType || '').toLowerCase();
+  if (type.includes('png')) return 'png';
+  if (type.includes('webp')) return 'webp';
+  if (type.includes('gif')) return 'gif';
+  if (type.includes('bmp')) return 'bmp';
+  return 'jpg';
+}
+
 export async function POST(request: NextRequest) {
   const stream = new ReadableStream({
     async start(controller) {
@@ -52,18 +69,47 @@ export async function POST(request: NextRequest) {
           throw new Error('Image upload failed');
         }
 
-        // Create initial log entry with user_id
-        const [result]: any = await pool.execute(
-          'INSERT INTO generation_logs (session_id, user_id, phone_model, original_image_name, status) VALUES (?, ?, ?, ?, ?)',
-          [sessionId, userId, phoneModel, caseImage.name, 'generating']
-        );
-        logId = result.insertId;
-
         // 1. Read uploaded image
         writer.send('status', 'Processing upload...', 10);
         const arrayBuffer = await caseImage.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
         const imgB64 = buffer.toString('base64');
+
+        // Persist uploaded image so gallery can link to it
+        const uploadsDir = join(process.cwd(), 'public', 'uploads', 'casetool');
+        if (!existsSync(uploadsDir)) {
+          await mkdir(uploadsDir, { recursive: true });
+          console.log('Created uploads directory:', uploadsDir);
+        }
+
+        const originalBaseName = sanitizeFileName(caseImage.name || 'upload');
+        const hasExt = /\.[a-z0-9]{2,5}$/i.test(originalBaseName);
+        const ext = hasExt ? '' : `.${extensionFromMime(caseImage.type)}`;
+        const originalFileName = `${sessionId}_${Date.now()}_${originalBaseName}${ext}`;
+        const originalFilePath = join(uploadsDir, originalFileName);
+        await writeFile(originalFilePath, buffer);
+        const originalImageUrl = `/uploads/casetool/${originalFileName}`;
+
+        // Create initial log entry with user_id (+ optional original_image_url)
+        try {
+          const [result]: any = await pool.execute(
+            'INSERT INTO generation_logs (session_id, user_id, phone_model, original_image_name, original_image_url, status) VALUES (?, ?, ?, ?, ?, ?)',
+            [sessionId, userId, phoneModel, caseImage.name, originalImageUrl, 'generating']
+          );
+          logId = result.insertId;
+        } catch (e: any) {
+          // Backward-compatible fallback if DB schema isn't migrated yet
+          const message = String(e?.message || '');
+          if (message.toLowerCase().includes('unknown column') && message.includes('original_image_url')) {
+            const [result]: any = await pool.execute(
+              'INSERT INTO generation_logs (session_id, user_id, phone_model, original_image_name, status) VALUES (?, ?, ?, ?, ?)',
+              [sessionId, userId, phoneModel, caseImage.name, 'generating']
+            );
+            logId = result.insertId;
+          } else {
+            throw e;
+          }
+        }
 
         let finalPrompt: string;
         let phoneDesc: string;

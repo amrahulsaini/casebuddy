@@ -23,6 +23,7 @@ interface GenerationLog {
   user_email: string | null;
   phone_model: string;
   original_image_name: string;
+  original_image_url?: string | null;
   ai_prompt: string;
   generated_image_url: string;
   generation_time: number;
@@ -221,11 +222,25 @@ export default function GalleryPage() {
                 <div className={styles.cardFooter}>
                   <div className={styles.originalFile}>
                     <ImageIcon size={14} />
-                    <span title={log.original_image_name}>
-                      {log.original_image_name.length > 25 
-                        ? log.original_image_name.substring(0, 25) + '...' 
-                        : log.original_image_name}
-                    </span>
+                    {log.original_image_url ? (
+                      <a
+                        href={log.original_image_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={styles.originalFileLink}
+                        title={log.original_image_url}
+                      >
+                        {log.original_image_name.length > 25
+                          ? log.original_image_name.substring(0, 25) + '...'
+                          : log.original_image_name}
+                      </a>
+                    ) : (
+                      <span title={log.original_image_name}>
+                        {log.original_image_name.length > 25 
+                          ? log.original_image_name.substring(0, 25) + '...' 
+                          : log.original_image_name}
+                      </span>
+                    )}
                   </div>
                   {log.user_email && (
                     <div className={styles.userEmail} title={log.user_email}>

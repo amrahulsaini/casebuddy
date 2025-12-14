@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     await caseMainPool.execute(
       `UPDATE shipments
        SET status = 'cancelled',
-           response_json = CAST(? AS JSON)
+           response_json = ?
        WHERE order_id = ?`,
       [JSON.stringify(response), orderId]
     );

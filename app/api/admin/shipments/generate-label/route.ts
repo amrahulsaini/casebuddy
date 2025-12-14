@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       `UPDATE shipments
        SET label_url = COALESCE(?, label_url),
            status = 'label_generated',
-           response_json = CAST(? AS JSON)
+           response_json = ?
        WHERE order_id = ?`,
       [labelUrl ? String(labelUrl) : null, JSON.stringify(response), orderId]
     );

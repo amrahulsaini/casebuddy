@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
            shiprocket_courier_id = COALESCE(?, shiprocket_courier_id),
            shiprocket_courier_name = COALESCE(?, shiprocket_courier_name),
            status = 'awb_assigned',
-           response_json = CAST(? AS JSON)
+           response_json = ?
        WHERE order_id = ?`,
       [
         awb ? String(awb) : null,

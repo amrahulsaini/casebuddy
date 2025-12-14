@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       `UPDATE shipments
        SET tracking_url = COALESCE(?, tracking_url),
            status = COALESCE(?, status),
-           response_json = CAST(? AS JSON)
+           response_json = ?
        WHERE order_id = ?`,
       [trackingUrl ? String(trackingUrl) : null, status ? String(status) : null, JSON.stringify(response), orderId]
     );

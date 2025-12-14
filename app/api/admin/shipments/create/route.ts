@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
         pickup_location,
         payload_json,
         response_json
-      ) VALUES (?, 'shiprocket', ?, ?, ?, ?, CAST(? AS JSON), CAST(? AS JSON))`,
+      ) VALUES (?, 'shiprocket', ?, ?, ?, ?, ?, ?)`,
       [
         order.id,
         shiprocketOrderId ? String(shiprocketOrderId) : null,

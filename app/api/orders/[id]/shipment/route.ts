@@ -164,11 +164,15 @@ export async function GET(
 
     const parsed = safeJsonParse(shipment.response_json);
     const events = parsed ? extractTrackingEvents(parsed) : [];
-    const currentStatus =
+    let currentStatus =
       pickString(parsed?.tracking_data?.shipment_track?.[0]?.current_status) ||
       pickString(parsed?.current_status) ||
       pickString(parsed?.tracking_data?.shipment_status) ||
       null;
+
+    if (currentStatus && /^\d+$/.test(String(currentStatus).trim())) {
+      currentStatus = null;
+    }
 
     const customerStatus = mapCustomerShipmentStatus(currentStatus || shipment.status);
 

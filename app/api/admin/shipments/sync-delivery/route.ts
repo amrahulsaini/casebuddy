@@ -40,18 +40,27 @@ function normalizeText(value: any) {
 }
 
 function pickMeaningfulStatusFromTracking(response: any, fallback: any): string | null {
-  const statusText = firstNonEmpty(
+  const candidate = firstNonEmpty(
     response?.tracking_data?.shipment_track?.[0]?.current_status,
     response?.current_status,
     response?.tracking_data?.shipment_status,
     fallback
   );
 
-  if (statusText === undefined || statusText === null) return null;
+  if (candidate === undefined || candidate === null) return null;
 
-  // Prefer text like "Pickup Generated" over numeric codes like 3.
-  const asString = String(statusText).trim();
+  const asString = String(candidate).trim();
   if (!asString) return null;
+
+  // If Shiprocket gives only a numeric code, prefer any previous human status.
+  const isNumeric = /^\d+$/.test(asString);
+  const fallbackString = fallback != null ? String(fallback).trim() : '';
+  const fallbackIsHuman = !!fallbackString && !/^\d+$/.test(fallbackString);
+  if (isNumeric && fallbackIsHuman) return fallbackString;
+
+  // Still numeric? Store a readable placeholder instead of just "27".
+  if (isNumeric) return `Tracking in progress (code ${asString})`;
+
   return asString;
 }
 

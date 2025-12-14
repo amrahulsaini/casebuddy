@@ -40,8 +40,15 @@ type Shipment = {
   tracking_url: string | null;
   updated_at?: string;
   current_status?: string | null;
+  customer_status?: 'shipped' | 'cancelled' | null;
   events?: Array<{ date: string | null; location: string | null; status: string | null; message: string | null }>;
 };
+
+function formatCustomerShipmentStatus(status: Shipment['customer_status']) {
+  if (status === 'cancelled') return 'Cancelled';
+  if (status === 'shipped') return 'Shipped';
+  return '—';
+}
 
 export default function OrderDetailPage() {
   const params = useParams();
@@ -279,7 +286,7 @@ export default function OrderDetailPage() {
               <div className={styles.infoList}>
                 <div className={styles.infoItem}>
                   <span className={styles.label}>Status:</span>
-                  <span className={styles.value}>{shipment.current_status || shipment.status || '—'}</span>
+                  <span className={styles.value}>{formatCustomerShipmentStatus(shipment.customer_status)}</span>
                 </div>
                 <div className={styles.infoItem}>
                   <span className={styles.label}>Courier:</span>

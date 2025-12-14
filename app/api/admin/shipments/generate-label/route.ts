@@ -14,6 +14,14 @@ export async function POST(request: NextRequest) {
     const shipment = rows?.[0];
     if (!shipment) return NextResponse.json({ error: 'Shipment not found' }, { status: 404 });
 
+    const currentStatus = String(shipment.status || '').trim().toLowerCase();
+    if (currentStatus === 'cancelled') {
+      return NextResponse.json(
+        { error: 'Shipment is cancelled. Cannot generate label.' },
+        { status: 400 }
+      );
+    }
+
     const shipmentId = shipment.shiprocket_shipment_id;
     if (!shipmentId) return NextResponse.json({ error: 'Missing shiprocket_shipment_id' }, { status: 400 });
 

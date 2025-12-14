@@ -60,6 +60,13 @@ function shouldRefresh(updatedAt: any, minutes: number) {
   return Date.now() - t > minutes * 60 * 1000;
 }
 
+function mapCustomerShipmentStatus(raw: any): 'shipped' | 'cancelled' | null {
+  const s = String(raw || '').trim().toLowerCase();
+  if (!s) return null;
+  if (s.includes('cancel')) return 'cancelled';
+  return 'shipped';
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -161,6 +168,8 @@ export async function GET(
       pickString(parsed?.tracking_data?.shipment_track?.[0]?.current_status) ||
       null;
 
+    const customerStatus = mapCustomerShipmentStatus(currentStatus || shipment.status);
+
     return NextResponse.json({
       id: shipment.id,
       order_id: shipment.order_id,
@@ -170,6 +179,7 @@ export async function GET(
       tracking_url: shipment.tracking_url,
       updated_at: shipment.updated_at,
       current_status: currentStatus,
+      customer_status: customerStatus,
       events,
     });
   } catch (error) {

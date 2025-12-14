@@ -71,7 +71,11 @@ export async function getShiprocketToken(): Promise<string> {
 
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    throw new Error(`Shiprocket auth failed (${res.status}) at ${cfg.baseUrl}/v1/external/auth/login: ${text}`);
+    const pwd = cfg.password || '';
+    const safeDiag = `email=${cfg.email} passwordLen=${pwd.length} hasHash=${pwd.includes('#')}`;
+    throw new Error(
+      `Shiprocket auth failed (${res.status}) at ${cfg.baseUrl}/v1/external/auth/login: ${text} (${safeDiag})`
+    );
   }
 
   const json = await res.json();

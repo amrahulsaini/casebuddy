@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import pool from '@/lib/db-main';
+import caseMainPool from '@/lib/db-main';
 
 export async function GET(
   request: NextRequest,
@@ -8,7 +8,7 @@ export async function GET(
   try {
     const { id: orderId } = await params;
 
-    const [rows]: any = await pool.execute(
+    const [rows]: any = await caseMainPool.execute(
       `SELECT * FROM orders WHERE id = ?`,
       [orderId]
     );

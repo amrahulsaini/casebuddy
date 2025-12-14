@@ -32,12 +32,21 @@ interface Order {
   updated_at: string;
 }
 
+type Shipment = {
+  id: number;
+  order_id: number;
+  status: string | null;
+  shiprocket_awb: string | null;
+  tracking_url: string | null;
+};
+
 export default function OrderDetailPage() {
   const params = useParams();
   const router = useRouter();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [shipment, setShipment] = useState<Shipment | null>(null);
 
   useEffect(() => {
     const userEmail = localStorage.getItem('userEmail');
@@ -63,6 +72,17 @@ export default function OrderDetailPage() {
         }
         
         setOrder(data);
+
+        // Try to fetch shipment info for tracking (if available)
+        try {
+          const shipRes = await fetch(`/api/orders/${params.id}/shipment`);
+          if (shipRes.ok) {
+            const shipData = await shipRes.json();
+            setShipment(shipData);
+          }
+        } catch (e) {
+          // ignore
+        }
       } else {
         setError('Order not found');
       }
@@ -243,6 +263,30 @@ export default function OrderDetailPage() {
         </div>
 
         <div className={styles.sidebar}>
+          {shipment && (shipment.tracking_url || shipment.shiprocket_awb || shipment.status) && (
+            <div className={styles.card}>
+              <h2 className={styles.cardTitle}>
+                <Truck size={20} />
+                Shipping Tracking
+              </h2>
+              <div className={styles.infoList}>
+                <div className={styles.infoItem}>
+                  <span className={styles.label}>Status:</span>
+                  <span className={styles.value}>{shipment.status || '—'}</span>
+                </div>
+                <div className={styles.infoItem}>
+                  <span className={styles.label}>AWB:</span>
+                  <span className={styles.valueSmall}>{shipment.shiprocket_awb || '—'}</span>
+                </div>
+                {shipment.tracking_url && (
+                  <a href={shipment.tracking_url} target="_blank" rel="noreferrer" className={styles.backBtn}>
+                    Open Tracking
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className={styles.card}>
             <h2 className={styles.cardTitle}>
               <User size={20} />

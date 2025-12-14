@@ -6,6 +6,22 @@ import Link from 'next/link';
 import { ArrowLeft, Package, User, Phone, Mail, MapPin, CreditCard, Clock, Save, Edit } from 'lucide-react';
 import styles from './order-detail.module.css';
 
+type Shipment = {
+  id: number;
+  order_id: number;
+  provider: string;
+  shiprocket_order_id: string | null;
+  shiprocket_shipment_id: string | null;
+  shiprocket_awb: string | null;
+  shiprocket_courier_id: string | null;
+  shiprocket_courier_name: string | null;
+  status: string | null;
+  tracking_url: string | null;
+  label_url: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 interface Order {
   id: number;
   order_number: string;
@@ -42,9 +58,31 @@ export default function AdminOrderDetailPage() {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
+  const [shipment, setShipment] = useState<Shipment | null>(null);
+  const [shipLoading, setShipLoading] = useState(false);
+  const [shipError, setShipError] = useState('');
+  const [shipSuccess, setShipSuccess] = useState('');
+
   useEffect(() => {
     fetchOrderDetails();
   }, [params.id]);
+
+  useEffect(() => {
+    fetchShipment();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.id]);
+
+  const fetchShipment = async () => {
+    try {
+      setShipError('');
+      const res = await fetch(`/api/admin/shipments?orderId=${params.id}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setShipment(data);
+    } catch (e) {
+      // ignore
+    }
+  };
 
   const fetchOrderDetails = async () => {
     try {
@@ -85,6 +123,30 @@ export default function AdminOrderDetailPage() {
       setError('An error occurred');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const shipAction = async (path: string, body: any) => {
+    setShipLoading(true);
+    setShipError('');
+    setShipSuccess('');
+    try {
+      const res = await fetch(path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setShipError(data?.error || 'Shiprocket action failed');
+        return;
+      }
+      if (data?.shipment) setShipment(data.shipment);
+      setShipSuccess('Done');
+    } catch (e) {
+      setShipError('Shiprocket action failed');
+    } finally {
+      setShipLoading(false);
     }
   };
 
@@ -223,6 +285,89 @@ export default function AdminOrderDetailPage() {
         </div>
 
         <div className={styles.sidebar}>
+          <div className={styles.card}>
+            <h2 className={styles.cardTitle}>
+              <Package size={20} />
+              Shiprocket Shipment
+            </h2>
+
+            {shipError && <div className={styles.errorMsg}>{shipError}</div>}
+            {shipSuccess && <div className={styles.success}>{shipSuccess}</div>}
+
+            {!shipment ? (
+              <button
+                onClick={() => shipAction('/api/admin/shipments/create', { orderId: order.id })}
+                disabled={shipLoading}
+                className={styles.saveBtn}
+              >
+                {shipLoading ? 'Working...' : 'Create Shipment'}
+              </button>
+            ) : (
+              <div className={styles.infoList}>
+                <div className={styles.infoRow}>
+                  <span className={styles.label}>Status:</span>
+                  <span className={styles.valueSmall}>{shipment.status || '—'}</span>
+                </div>
+                <div className={styles.infoRow}>
+                  <span className={styles.label}>Shipment ID:</span>
+                  <span className={styles.valueSmall}>{shipment.shiprocket_shipment_id || '—'}</span>
+                </div>
+                <div className={styles.infoRow}>
+                  <span className={styles.label}>AWB:</span>
+                  <span className={styles.valueSmall}>{shipment.shiprocket_awb || '—'}</span>
+                </div>
+                <div className={styles.infoRow}>
+                  <span className={styles.label}>Courier:</span>
+                  <span className={styles.valueSmall}>{shipment.shiprocket_courier_name || '—'}</span>
+                </div>
+
+                <button
+                  onClick={() => shipAction('/api/admin/shipments/assign-awb', { orderId: order.id })}
+                  disabled={shipLoading || !!shipment.shiprocket_awb}
+                  className={styles.saveBtn}
+                >
+                  {shipLoading ? 'Working...' : shipment.shiprocket_awb ? 'AWB Assigned' : 'Assign AWB'}
+                </button>
+
+                <button
+                  onClick={() => shipAction('/api/admin/shipments/generate-label', { orderId: order.id })}
+                  disabled={shipLoading || !shipment.shiprocket_shipment_id}
+                  className={styles.saveBtn}
+                >
+                  {shipLoading ? 'Working...' : 'Generate Label'}
+                </button>
+
+                {shipment.label_url && (
+                  <a href={shipment.label_url} target="_blank" rel="noreferrer" className={styles.backBtn}>
+                    Download Label
+                  </a>
+                )}
+
+                <button
+                  onClick={() => shipAction('/api/admin/shipments/track', { orderId: order.id })}
+                  disabled={shipLoading || !shipment.shiprocket_awb}
+                  className={styles.saveBtn}
+                >
+                  {shipLoading ? 'Working...' : 'Refresh Tracking'}
+                </button>
+
+                {shipment.tracking_url && (
+                  <a href={shipment.tracking_url} target="_blank" rel="noreferrer" className={styles.backBtn}>
+                    Open Tracking
+                  </a>
+                )}
+
+                <button
+                  onClick={() => shipAction('/api/admin/shipments/cancel', { orderId: order.id })}
+                  disabled={shipLoading}
+                  className={styles.saveBtn}
+                >
+                  {shipLoading ? 'Working...' : 'Cancel Shipment'}
+                </button>
+              </div>
+            )}
+          </div>
+
           <div className={styles.card}>
             <h2 className={styles.cardTitle}>
               <Edit size={20} />

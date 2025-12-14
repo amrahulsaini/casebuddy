@@ -207,6 +207,20 @@ export default function AdminOrderDetailPage() {
     customData = order.customization_data ? JSON.parse(order.customization_data) : null;
   } catch (e) {}
 
+  const formatPlacement = (placement: unknown) => {
+    if (typeof placement !== 'string') return null;
+    return placement.replace(/_/g, ' ');
+  };
+
+  const getCustomizationFields = (value: any) => {
+    if (!value || typeof value !== 'object') return null;
+    const customText = typeof value.customText === 'string' ? value.customText : null;
+    const font = typeof value.font === 'string' ? value.font : null;
+    const placement = formatPlacement(value.placement);
+    if (!customText && !font && !placement) return null;
+    return { customText, font, placement };
+  };
+
   return (
     <div className={styles.container}>
       <Link href="/admin/dashboard/orders" className={styles.backLink}>
@@ -248,9 +262,38 @@ export default function AdminOrderDetailPage() {
             {customData && (
               <div className={styles.customization}>
                 <strong>🎨 Customization Details</strong>
-                {customData.customText && <p>Custom Text: "{customData.customText}"</p>}
-                {customData.font && <p>Font Style: {customData.font}</p>}
-                {customData.placement && <p>Text Placement: {customData.placement.replace(/_/g, ' ')}</p>}
+                {Array.isArray(customData?.items) ? (
+                  customData.items.map((it: any, idx: number) => {
+                    const titleParts: string[] = [];
+                    if (typeof it?.productName === 'string' && it.productName.trim()) titleParts.push(it.productName.trim());
+                    if (typeof it?.phoneModel === 'string' && it.phoneModel.trim()) titleParts.push(it.phoneModel.trim());
+                    const title = titleParts.join(' — ') || `Item ${idx + 1}`;
+
+                    const customizationCandidate = it?.customizationOptions ?? it?.customization ?? it;
+                    const fields = getCustomizationFields(customizationCandidate);
+
+                    return (
+                      <div key={idx}>
+                        <p><strong>{title}</strong>{it?.quantity ? ` (Qty: ${it.quantity})` : ''}</p>
+                        {fields?.customText && <p>Custom Text: "{fields.customText}"</p>}
+                        {fields?.font && <p>Font Style: {fields.font}</p>}
+                        {fields?.placement && <p>Text Placement: {fields.placement}</p>}
+                      </div>
+                    );
+                  })
+                ) : (
+                  (() => {
+                    const fields = getCustomizationFields(customData);
+                    if (!fields) return null;
+                    return (
+                      <>
+                        {fields.customText && <p>Custom Text: "{fields.customText}"</p>}
+                        {fields.font && <p>Font Style: {fields.font}</p>}
+                        {fields.placement && <p>Text Placement: {fields.placement}</p>}
+                      </>
+                    );
+                  })()
+                )}
               </div>
             )}
 

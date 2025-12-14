@@ -2,12 +2,20 @@ export type ShiprocketConfig = {
   baseUrl: string;
   email: string;
   password: string;
+  token?: string;
 };
 
 function getConfig(): ShiprocketConfig {
   const baseUrl = process.env.SHIPROCKET_BASE_URL || 'https://apiv2.shiprocket.in';
   const email = process.env.SHIPROCKET_EMAIL || '';
   const password = process.env.SHIPROCKET_PASSWORD || '';
+  const token = process.env.SHIPROCKET_TOKEN || '';
+
+  // Allow manual token for debugging/temporary use.
+  // Note: Shiprocket tokens expire; prefer EMAIL+PASSWORD in production.
+  if (token) {
+    return { baseUrl, email, password, token };
+  }
 
   if (!email || !password) {
     throw new Error('Missing SHIPROCKET_EMAIL or SHIPROCKET_PASSWORD');
@@ -31,22 +39,31 @@ function nowMs() {
 }
 
 export async function getShiprocketToken(): Promise<string> {
+  const cfg = getConfig();
+  if (cfg.token) {
+    return cfg.token;
+  }
+
   const cached = globalThis.__shiprocketToken;
   if (cached && cached.expiresAtMs > nowMs()) {
     return cached.token;
   }
 
-  const cfg = getConfig();
   const res = await fetch(`${cfg.baseUrl}/v1/external/auth/login`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      // Some gateways reject requests without a UA.
+      'User-Agent': 'casebuddy/1.0',
+    },
     body: JSON.stringify({ email: cfg.email, password: cfg.password }),
     cache: 'no-store',
   });
 
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    throw new Error(`Shiprocket auth failed (${res.status}): ${text}`);
+    throw new Error(`Shiprocket auth failed (${res.status}) at ${cfg.baseUrl}/v1/external/auth/login: ${text}`);
   }
 
   const json = await res.json();

@@ -3,6 +3,43 @@ import caseMainPool from '@/lib/db-main';
 import { requireRole } from '@/lib/auth';
 import { shiprocketRequest } from '@/lib/shiprocket';
 
+function getByPath(obj: any, path: string) {
+  return path.split('.').reduce((acc: any, key: string) => (acc == null ? undefined : acc[key]), obj);
+}
+
+function firstNonEmpty(...values: any[]) {
+  for (const v of values) {
+    if (v === undefined || v === null) continue;
+    if (typeof v === 'string' && v.trim() === '') continue;
+    return v;
+  }
+  return null;
+}
+
+function extractAwbAndCourierFromTracking(response: any) {
+  const td = response?.tracking_data;
+  const awb = firstNonEmpty(
+    response?.awb,
+    response?.awb_code,
+    getByPath(response, 'tracking_data.awb'),
+    getByPath(response, 'tracking_data.awb_code'),
+    getByPath(response, 'tracking_data.shipment_track.0.awb'),
+    getByPath(response, 'tracking_data.shipment_track.0.awb_code')
+  );
+
+  const courier = firstNonEmpty(
+    response?.courier_name,
+    getByPath(response, 'tracking_data.courier_name'),
+    getByPath(response, 'tracking_data.shipment_track.0.courier_name'),
+    getByPath(response, 'tracking_data.shipment_track.0.courier_company_name')
+  );
+
+  return {
+    awb: awb != null ? String(awb) : null,
+    courier: courier != null ? String(courier) : null,
+  };
+}
+
 export async function POST(request: NextRequest) {
   try {
     await requireRole(['admin', 'manager', 'staff']);
@@ -28,13 +65,24 @@ export async function POST(request: NextRequest) {
       shipment.status ||
       null;
 
+    const extracted = extractAwbAndCourierFromTracking(response);
+
     await caseMainPool.execute(
       `UPDATE shipments
        SET tracking_url = COALESCE(?, tracking_url),
            status = COALESCE(?, status),
+           shiprocket_awb = COALESCE(shiprocket_awb, ?),
+           shiprocket_courier_name = COALESCE(shiprocket_courier_name, ?),
            response_json = ?
        WHERE order_id = ?`,
-      [trackingUrl ? String(trackingUrl) : null, status ? String(status) : null, JSON.stringify(response), orderId]
+      [
+        trackingUrl ? String(trackingUrl) : null,
+        status ? String(status) : null,
+        extracted.awb,
+        extracted.courier,
+        JSON.stringify(response),
+        orderId,
+      ]
     );
 
     const [updated]: any = await caseMainPool.execute('SELECT * FROM shipments WHERE order_id = ? LIMIT 1', [orderId]);

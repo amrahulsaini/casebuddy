@@ -59,6 +59,24 @@ function extractAwbAndCourier(response: any) {
   };
 }
 
+function tryParseShiprocketErrorPayload(message: string): any | null {
+  // shiprocketRequest throws: `Shiprocket request failed (400) /path: {...json...}`
+  const idx = message.indexOf(':');
+  if (idx === -1) return null;
+  const tail = message.slice(idx + 1).trim();
+  if (!tail.startsWith('{') || !tail.endsWith('}')) return null;
+  try {
+    return JSON.parse(tail);
+  } catch {
+    return null;
+  }
+}
+
+function extractAwbFromText(text: string): string | null {
+  const m = /Current\s+AWB\s+([0-9A-Za-z-]+)/i.exec(text || '');
+  return m?.[1] ? String(m[1]) : null;
+}
+
 export async function POST(request: NextRequest) {
   try {
     await requireRole(['admin', 'manager']);
@@ -76,32 +94,61 @@ export async function POST(request: NextRequest) {
     const payload: any = { shipment_id: Number(shipmentId) };
     if (courierId) payload.courier_id = Number(courierId);
 
-    const response = await shiprocketRequest<any>('/v1/external/courier/assign/awb', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
+    try {
+      const response = await shiprocketRequest<any>('/v1/external/courier/assign/awb', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
 
-    const { awb, courier } = extractAwbAndCourier(response);
+      const { awb, courier } = extractAwbAndCourier(response);
 
-    await caseMainPool.execute(
-      `UPDATE shipments
-       SET shiprocket_awb = COALESCE(?, shiprocket_awb),
-           shiprocket_courier_id = COALESCE(?, shiprocket_courier_id),
-           shiprocket_courier_name = COALESCE(?, shiprocket_courier_name),
-           status = 'awb_assigned',
-           response_json = ?
-       WHERE order_id = ?`,
-      [
-        awb,
-        courierId ? String(courierId) : null,
-        courier,
-        JSON.stringify(response),
-        orderId,
-      ]
-    );
+      await caseMainPool.execute(
+        `UPDATE shipments
+         SET shiprocket_awb = COALESCE(?, shiprocket_awb),
+             shiprocket_courier_id = COALESCE(?, shiprocket_courier_id),
+             shiprocket_courier_name = COALESCE(?, shiprocket_courier_name),
+             status = 'awb_assigned',
+             response_json = ?
+         WHERE order_id = ?`,
+        [
+          awb,
+          courierId ? String(courierId) : null,
+          courier,
+          JSON.stringify(response),
+          orderId,
+        ]
+      );
 
-    const [updated]: any = await caseMainPool.execute('SELECT * FROM shipments WHERE order_id = ? LIMIT 1', [orderId]);
-    return NextResponse.json({ success: true, shipment: updated?.[0] || null, shiprocket: response });
+      const [updated]: any = await caseMainPool.execute('SELECT * FROM shipments WHERE order_id = ? LIMIT 1', [orderId]);
+      return NextResponse.json({ success: true, shipment: updated?.[0] || null, shiprocket: response });
+    } catch (inner: any) {
+      const errMsg = inner?.message || 'Failed to assign AWB';
+      const payload = tryParseShiprocketErrorPayload(errMsg);
+      const shiprocketMessage = typeof payload?.message === 'string' ? payload.message : '';
+      const currentAwb = extractAwbFromText(shiprocketMessage) || extractAwbFromText(errMsg);
+
+      // If Shiprocket says AWB is already assigned and cannot be reassigned, we still store/display it.
+      if (currentAwb) {
+        await caseMainPool.execute(
+          `UPDATE shipments
+           SET shiprocket_awb = COALESCE(shiprocket_awb, ?),
+               status = 'awb_assigned',
+               response_json = ?
+           WHERE order_id = ?`,
+          [currentAwb, JSON.stringify(payload || { error: errMsg }), orderId]
+        );
+
+        const [updated]: any = await caseMainPool.execute('SELECT * FROM shipments WHERE order_id = ? LIMIT 1', [orderId]);
+        return NextResponse.json({
+          success: true,
+          shipment: updated?.[0] || null,
+          shiprocket: payload || { message: shiprocketMessage || errMsg },
+          note: 'AWB already assigned in Shiprocket; reassignment blocked by courier restriction.',
+        });
+      }
+
+      throw inner;
+    }
   } catch (error: any) {
     const message = error?.message || 'Failed to assign AWB';
     const status = message === 'Unauthorized' ? 401 : message === 'Forbidden' ? 403 : 500;

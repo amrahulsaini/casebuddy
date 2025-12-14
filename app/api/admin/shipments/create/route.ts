@@ -105,9 +105,15 @@ export async function POST(request: NextRequest) {
       'SELECT id, shiprocket_shipment_id, shiprocket_awb FROM shipments WHERE order_id = ? LIMIT 1',
       [orderId]
     );
-    if (existing?.length) {
+    const existingShipment = existing?.[0] || null;
+    const canRetryExisting =
+      existingShipment &&
+      !existingShipment.shiprocket_shipment_id &&
+      !existingShipment.shiprocket_awb;
+
+    if (existingShipment && !canRetryExisting) {
       return NextResponse.json(
-        { error: 'Shipment already exists for this order', shipment: existing[0] },
+        { error: 'Shipment already exists for this order', shipment: existingShipment },
         { status: 409 }
       );
     }
@@ -196,27 +202,95 @@ export async function POST(request: NextRequest) {
 
     const { shiprocketOrderId, shiprocketShipmentId } = extractShiprocketIds(response);
 
-    await caseMainPool.execute(
-      `INSERT INTO shipments (
-        order_id,
-        provider,
-        shiprocket_order_id,
-        shiprocket_shipment_id,
-        status,
-        pickup_location,
-        payload_json,
-        response_json
-      ) VALUES (?, 'shiprocket', ?, ?, ?, ?, ?, ?)`,
-      [
-        order.id,
-        shiprocketOrderId,
-        shiprocketShipmentId,
-        'created',
-        defaults.pickup_location,
-        JSON.stringify(payload),
-        JSON.stringify(response),
-      ]
-    );
+    // Shiprocket sometimes returns 200 OK with an error message and no IDs.
+    // Treat that as a failure so admin can retry after fixing config.
+    if (!shiprocketOrderId && !shiprocketShipmentId) {
+      const message =
+        typeof response?.message === 'string' && response.message.trim()
+          ? response.message
+          : 'Shiprocket did not return order/shipment ids';
+
+      const pickupList =
+        response?.data?.data?.data && Array.isArray(response.data.data.data)
+          ? response.data.data.data
+          : response?.data?.data && Array.isArray(response.data.data)
+            ? response.data.data
+            : null;
+
+      const pickupLocations = Array.isArray(pickupList)
+        ? pickupList
+            .map((x: any) => x?.pickup_location)
+            .filter((x: any) => typeof x === 'string' && x.trim())
+        : [];
+
+      if (canRetryExisting) {
+        await caseMainPool.execute(
+          `UPDATE shipments
+           SET status = 'error',
+               pickup_location = ?,
+               payload_json = ?,
+               response_json = ?
+           WHERE id = ?`,
+          [defaults.pickup_location, JSON.stringify(payload), JSON.stringify(response), existingShipment.id]
+        );
+      }
+
+      return NextResponse.json(
+        {
+          error: message,
+          hint:
+            pickupLocations.length > 0
+              ? `Set SHIPROCKET_PICKUP_LOCATION to one of: ${pickupLocations.join(', ')}`
+              : 'Check SHIPROCKET_PICKUP_LOCATION (must exactly match a Shiprocket pickup_location).',
+          pickupLocations,
+          attemptedPickupLocation: defaults.pickup_location,
+        },
+        { status: 400 }
+      );
+    }
+
+    if (canRetryExisting) {
+      await caseMainPool.execute(
+        `UPDATE shipments
+         SET shiprocket_order_id = ?,
+             shiprocket_shipment_id = ?,
+             status = 'created',
+             pickup_location = ?,
+             payload_json = ?,
+             response_json = ?
+         WHERE id = ?`,
+        [
+          shiprocketOrderId,
+          shiprocketShipmentId,
+          defaults.pickup_location,
+          JSON.stringify(payload),
+          JSON.stringify(response),
+          existingShipment.id,
+        ]
+      );
+    } else {
+      await caseMainPool.execute(
+        `INSERT INTO shipments (
+          order_id,
+          provider,
+          shiprocket_order_id,
+          shiprocket_shipment_id,
+          status,
+          pickup_location,
+          payload_json,
+          response_json
+        ) VALUES (?, 'shiprocket', ?, ?, ?, ?, ?, ?)`,
+        [
+          order.id,
+          shiprocketOrderId,
+          shiprocketShipmentId,
+          'created',
+          defaults.pickup_location,
+          JSON.stringify(payload),
+          JSON.stringify(response),
+        ]
+      );
+    }
 
     const [rows]: any = await caseMainPool.execute('SELECT * FROM shipments WHERE order_id = ? LIMIT 1', [order.id]);
 

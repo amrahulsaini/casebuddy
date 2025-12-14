@@ -304,6 +304,22 @@ export default function AdminOrderDetailPage() {
               </button>
             ) : (
               <div className={styles.infoList}>
+                {!shipment.shiprocket_shipment_id && (
+                  <div className={styles.notes}>
+                    <strong>Shipment not created in Shiprocket</strong>
+                    <p>
+                      Fix <code>SHIPROCKET_PICKUP_LOCATION</code> (must exactly match a Shiprocket pickup location),
+                      then click Retry.
+                    </p>
+                    <button
+                      onClick={() => shipAction('/api/admin/shipments/create', { orderId: order.id })}
+                      disabled={shipLoading}
+                      className={styles.saveBtn}
+                    >
+                      {shipLoading ? 'Working...' : 'Retry Create Shipment'}
+                    </button>
+                  </div>
+                )}
                 <div className={styles.infoRow}>
                   <span className={styles.label}>Status:</span>
                   <span className={styles.valueSmall}>{shipment.status || '—'}</span>

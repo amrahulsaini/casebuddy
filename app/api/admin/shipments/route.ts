@@ -84,6 +84,9 @@ export async function GET(request: NextRequest) {
       const parsed = safeJsonParse(shipment.response_json);
       const { shiprocketOrderId, shiprocketShipmentId } = extractShiprocketIds(parsed);
 
+      const message = typeof parsed?.message === 'string' ? parsed.message : '';
+      const looksLikePickupError = message.toLowerCase().includes('pickup location');
+
       if (shiprocketOrderId || shiprocketShipmentId) {
         await caseMainPool.execute(
           `UPDATE shipments
@@ -95,6 +98,9 @@ export async function GET(request: NextRequest) {
 
         shipment.shiprocket_order_id = shipment.shiprocket_order_id || shiprocketOrderId;
         shipment.shiprocket_shipment_id = shipment.shiprocket_shipment_id || shiprocketShipmentId;
+      } else if (looksLikePickupError && shipment.status !== 'error') {
+        await caseMainPool.execute('UPDATE shipments SET status = ? WHERE id = ?', ['error', shipment.id]);
+        shipment.status = 'error';
       }
     }
 

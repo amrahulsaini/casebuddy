@@ -59,6 +59,11 @@ export default function OrderDetailPage() {
       return;
     }
 
+    const normalized = userEmail.trim().toLowerCase();
+    if (normalized && normalized !== userEmail) {
+      localStorage.setItem('userEmail', normalized);
+    }
+
     fetchOrderDetails();
   }, [params.id]);
 
@@ -68,9 +73,11 @@ export default function OrderDetailPage() {
       if (response.ok) {
         const data = await response.json();
         const userEmail = localStorage.getItem('userEmail');
+        const expected = (userEmail || '').trim().toLowerCase();
+        const actual = String(data.customer_email || '').trim().toLowerCase();
         
         // Verify this order belongs to the logged-in user
-        if (data.customer_email !== userEmail) {
+        if (!expected || !actual || actual !== expected) {
           setError('Unauthorized access');
           return;
         }

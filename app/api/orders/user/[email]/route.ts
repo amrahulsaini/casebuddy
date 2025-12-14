@@ -7,7 +7,7 @@ export async function GET(
 ) {
   try {
     const { email: encodedEmail } = await params;
-    const email = decodeURIComponent(encodedEmail);
+    const email = decodeURIComponent(encodedEmail).trim().toLowerCase();
 
     const [rows] = await pool.execute(
       `SELECT 
@@ -26,7 +26,7 @@ export async function GET(
         notes,
         created_at
       FROM orders 
-      WHERE customer_email = ? 
+      WHERE LOWER(customer_email) = ? 
       ORDER BY created_at DESC`,
       [email]
     );

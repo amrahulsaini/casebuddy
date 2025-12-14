@@ -41,9 +41,13 @@ export default function OrdersPage() {
     // Check if user is already logged in
     const savedEmail = localStorage.getItem('userEmail');
     if (savedEmail) {
-      setEmail(savedEmail);
+      const normalized = savedEmail.trim().toLowerCase();
+      if (normalized && normalized !== savedEmail) {
+        localStorage.setItem('userEmail', normalized);
+      }
+      setEmail(normalized || savedEmail);
       setIsLoggedIn(true);
-      fetchOrders(savedEmail);
+      fetchOrders(normalized || savedEmail);
     }
   }, []);
 
@@ -82,9 +86,10 @@ export default function OrdersPage() {
       return;
     }
 
-    localStorage.setItem('userEmail', email);
+    const normalized = email.trim().toLowerCase();
+    localStorage.setItem('userEmail', normalized);
     setIsLoggedIn(true);
-    fetchOrders(email);
+    fetchOrders(normalized);
   };
 
   const fetchOrders = async (userEmail: string) => {

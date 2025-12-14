@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import caseMainPool from '@/lib/db-main';
 import { requireRole } from '@/lib/auth';
 import { shiprocketRequest } from '@/lib/shiprocket';
+import { shiprocketStatusCodeToLabel } from '@/lib/shiprocket-status';
 
 function getByPath(obj: any, path: string) {
   return path.split('.').reduce((acc: any, key: string) => (acc == null ? undefined : acc[key]), obj);
@@ -76,7 +77,7 @@ function extractAwbCourierStatus(response: any) {
     awb: awb != null ? String(awb) : null,
     courierName: courierName != null ? String(courierName) : null,
     courierId: courierId != null ? String(courierId) : null,
-    status: status != null ? String(status) : null,
+    status: status != null ? String(shiprocketStatusCodeToLabel(status) || status) : null,
     trackingUrl: trackingUrl != null ? String(trackingUrl) : null,
   };
 }

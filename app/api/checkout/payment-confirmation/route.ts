@@ -223,17 +223,7 @@ export async function POST(request: Request) {
 
         // TRANSACTION ROLLBACK: Delete order if payment failed (not just pending)
         if (paymentData.order_status !== 'ACTIVE') {
-          try {
-            const [failedOrderRows] = await connection.execute<Order[]>(
-              'SELECT * FROM orders WHERE id = ?',
-              [orderId]
-            );
-            if (failedOrderRows.length > 0) {
-              await sendPaymentFailedEmails(failedOrderRows[0], String(paymentData.order_status));
-            }
-          } catch (emailError) {
-            console.error('Failed to send payment failed emails:', emailError);
-          }
+          // Emails disabled (confirmation-only policy)
 
           console.log('Payment failed, deleting order from database...');
           await connection.execute(
@@ -489,56 +479,5 @@ async function sendOrderConfirmationEmails(order: Order) {
     to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
     subject: `New Order ${order.order_number} - ${order.customer_name}`,
     html: adminEmailHtml,
-  });
-}
-
-async function sendPaymentFailedEmails(order: Order, rawStatus: string) {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) return;
-
-  const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST || 'casebuddy.co.in',
-    port: parseInt(process.env.EMAIL_PORT || '587'),
-    secure: process.env.EMAIL_SECURE === 'true',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD,
-    },
-    tls: {
-      rejectUnauthorized: false,
-    },
-  });
-
-  const status = rawStatus || 'FAILED';
-  const customerHtml = `
-    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
-      <h2>Payment Failed</h2>
-      <p>Hi ${escapeHtml(order.customer_name)},</p>
-      <p>Unfortunately, the payment for your order <strong>${escapeHtml(order.order_number)}</strong> did not complete.</p>
-      <p>Status: ${escapeHtml(status)}</p>
-      <p>If you need help, contact us at info@casebuddy.co.in</p>
-    </div>
-  `;
-
-  const adminHtml = `
-    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
-      <h2>Payment Failed</h2>
-      <p>Order <strong>${escapeHtml(order.order_number)}</strong> payment did not complete.</p>
-      <p>Status: ${escapeHtml(status)}</p>
-      <p>Customer: ${escapeHtml(order.customer_email)}</p>
-    </div>
-  `;
-
-  await transporter.sendMail({
-    from: `"CaseBuddy" <${process.env.EMAIL_USER}>`,
-    to: order.customer_email,
-    subject: `Payment Failed - Order ${order.order_number}`,
-    html: customerHtml,
-  });
-
-  await transporter.sendMail({
-    from: `"CaseBuddy Orders" <${process.env.EMAIL_USER}>`,
-    to: process.env.ADMIN_EMAIL || 'info@casebuddy.co.in',
-    subject: `❌ PAYMENT FAILED - ${order.order_number}`,
-    html: adminHtml,
   });
 }

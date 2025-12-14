@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import caseMainPool from '@/lib/db-main';
 import { requireRole } from '@/lib/auth';
 import { shiprocketRequest } from '@/lib/shiprocket';
+import { shiprocketStatusCodeToLabel } from '@/lib/shiprocket-status';
 
 function getByPath(obj: any, path: string) {
   return path.split('.').reduce((acc: any, key: string) => (acc == null ? undefined : acc[key]), obj);
@@ -60,10 +61,13 @@ export async function POST(request: NextRequest) {
 
     const trackingUrl = response?.tracking_url ?? response?.trackingUrl ?? shipment.tracking_url ?? null;
     const status =
-      response?.tracking_data?.shipment_status ||
       response?.tracking_data?.shipment_track?.[0]?.current_status ||
+      response?.current_status ||
+      response?.tracking_data?.shipment_status ||
       shipment.status ||
       null;
+
+    const statusToSave = shiprocketStatusCodeToLabel(status) || status;
 
     const extracted = extractAwbAndCourierFromTracking(response);
 
@@ -77,7 +81,7 @@ export async function POST(request: NextRequest) {
        WHERE order_id = ?`,
       [
         trackingUrl ? String(trackingUrl) : null,
-        status ? String(status) : null,
+        statusToSave ? String(statusToSave) : null,
         extracted.awb,
         extracted.courier,
         JSON.stringify(response),

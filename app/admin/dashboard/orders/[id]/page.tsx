@@ -99,6 +99,10 @@ export default function AdminOrderDetailPage() {
   };
 
   const shipAction = async (path: string, body: any) => {
+    if (String(order?.order_status || '').toLowerCase().includes('cancel')) {
+      setShipError('Order is cancelled. Shipping actions are disabled.');
+      return;
+    }
     setShipLoading(true);
     setShipError('');
     setShipSuccess('');
@@ -170,6 +174,12 @@ export default function AdminOrderDetailPage() {
   }
 
   if (!order) return null;
+
+  const isOrderCancelled = (() => {
+    const os = String(order.order_status || '').toLowerCase();
+    const ps = String(order.payment_status || '').toLowerCase();
+    return os.includes('cancel') || ps.includes('cancel') || ps === 'failed';
+  })();
 
   const shipNowTriggered = !!shipment?.shiprocket_awb;
   const canProceedInAdmin = shipNowTriggered;
@@ -333,7 +343,7 @@ export default function AdminOrderDetailPage() {
             {!shipment ? (
               <button
                 onClick={() => shipAction('/api/admin/shipments/create', { orderId: order.id })}
-                disabled={shipLoading}
+                disabled={shipLoading || isOrderCancelled}
                 className={styles.saveBtn}
               >
                 {shipLoading ? 'Working...' : 'Create Shipment'}
@@ -349,7 +359,7 @@ export default function AdminOrderDetailPage() {
                     </p>
                     <button
                       onClick={() => shipAction('/api/admin/shipments/create', { orderId: order.id })}
-                      disabled={shipLoading}
+                      disabled={shipLoading || isOrderCancelled}
                       className={styles.saveBtn}
                     >
                       {shipLoading ? 'Working...' : 'Retry Create Shipment'}
@@ -365,7 +375,7 @@ export default function AdminOrderDetailPage() {
                     </p>
                     <button
                       onClick={() => shipAction('/api/admin/shipments/sync', { orderId: order.id })}
-                      disabled={shipLoading}
+                      disabled={shipLoading || isOrderCancelled}
                       className={styles.saveBtn}
                     >
                       {shipLoading ? 'Working...' : 'Sync From Shiprocket'}
@@ -391,7 +401,7 @@ export default function AdminOrderDetailPage() {
 
                 <button
                   onClick={() => shipAction('/api/admin/shipments/assign-awb', { orderId: order.id })}
-                  disabled={shipLoading || !canProceedInAdmin || !!shipment.shiprocket_awb}
+                  disabled={shipLoading || isOrderCancelled || !canProceedInAdmin || !!shipment.shiprocket_awb}
                   className={styles.saveBtn}
                 >
                   {shipLoading ? 'Working...' : shipment.shiprocket_awb ? 'AWB Assigned' : 'Assign AWB'}
@@ -399,7 +409,7 @@ export default function AdminOrderDetailPage() {
 
                 <button
                   onClick={() => shipAction('/api/admin/shipments/generate-label', { orderId: order.id })}
-                  disabled={shipLoading || !canProceedInAdmin || !shipment.shiprocket_shipment_id}
+                  disabled={shipLoading || isOrderCancelled || !canProceedInAdmin || !shipment.shiprocket_shipment_id}
                   className={styles.saveBtn}
                 >
                   {shipLoading ? 'Working...' : 'Generate Label'}
@@ -413,7 +423,7 @@ export default function AdminOrderDetailPage() {
 
                 <button
                   onClick={() => shipAction('/api/admin/shipments/track', { orderId: order.id })}
-                  disabled={shipLoading || !canProceedInAdmin || !shipment.shiprocket_awb}
+                  disabled={shipLoading || isOrderCancelled || !canProceedInAdmin || !shipment.shiprocket_awb}
                   className={styles.saveBtn}
                 >
                   {shipLoading ? 'Working...' : 'Refresh Tracking'}
@@ -427,7 +437,7 @@ export default function AdminOrderDetailPage() {
 
                 <button
                   onClick={() => shipAction('/api/admin/shipments/cancel', { orderId: order.id })}
-                  disabled={shipLoading}
+                  disabled={shipLoading || isOrderCancelled}
                   className={styles.saveBtn}
                 >
                   {shipLoading ? 'Working...' : 'Cancel Shipment'}

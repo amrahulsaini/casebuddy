@@ -2,20 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import caseMainPool from '@/lib/db-main';
 import { requireRole } from '@/lib/auth';
 import { shiprocketRequest } from '@/lib/shiprocket';
-import nodemailer from 'nodemailer';
-
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'localhost',
-  port: parseInt(process.env.EMAIL_PORT || '587'),
-  secure: process.env.EMAIL_SECURE === 'true',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-});
+import { shiprocketStatusCodeToLabel, isNumericOnly } from '@/lib/shiprocket-status';
 
 function escapeHtml(value: unknown) {
   return String(value ?? '')
@@ -53,13 +40,16 @@ function pickMeaningfulStatusFromTracking(response: any, fallback: any): string 
   if (!asString) return null;
 
   // If Shiprocket gives only a numeric code, prefer any previous human status.
-  const isNumeric = /^\d+$/.test(asString);
+  const isNumeric = isNumericOnly(asString);
   const fallbackString = fallback != null ? String(fallback).trim() : '';
-  const fallbackIsHuman = !!fallbackString && !/^\d+$/.test(fallbackString);
+  const fallbackIsHuman = !!fallbackString && !isNumericOnly(fallbackString);
   if (isNumeric && fallbackIsHuman) return fallbackString;
 
-  // Still numeric? Store a readable placeholder instead of just "27".
-  if (isNumeric) return `Tracking in progress (code ${asString})`;
+  // Still numeric? Try to map via known Shiprocket status-code table.
+  if (isNumeric) {
+    const mapped = shiprocketStatusCodeToLabel(asString);
+    return mapped || `Tracking in progress (code ${asString})`;
+  }
 
   return asString;
 }
@@ -133,75 +123,6 @@ type ShipmentRow = {
   customer_name: string;
   customer_email: string;
 };
-
-async function sendShipmentStatusEmail(params: {
-  to: string;
-  customerName: string;
-  orderNumber: string;
-  status: 'shipped' | 'delivered' | 'cancelled';
-}) {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) return;
-
-  const subject =
-    params.status === 'shipped'
-      ? `Your order has been shipped - ${params.orderNumber}`
-      : params.status === 'delivered'
-        ? `Your order has been delivered - ${params.orderNumber}`
-      : `Your order has been cancelled - ${params.orderNumber}`;
-
-  const statusLine =
-    params.status === 'shipped'
-      ? 'Your order has been shipped.'
-      : params.status === 'delivered'
-        ? 'Your order has been delivered.'
-      : 'Your order has been cancelled.';
-
-  const html = `
-    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
-      <h2>${params.status === 'shipped' ? 'Shipped' : params.status === 'delivered' ? 'Delivered' : 'Cancelled'}</h2>
-      <p>Hi ${escapeHtml(params.customerName)},</p>
-      <p>${statusLine}</p>
-      <p>Order: <strong>${escapeHtml(params.orderNumber)}</strong></p>
-      <p>You can track your order anytime at <a href="https://casebuddy.co.in/orders" target="_blank" rel="noreferrer">https://casebuddy.co.in/orders</a></p>
-      <p>Questions? Contact us at info@casebuddy.co.in</p>
-    </div>
-  `;
-
-  await transporter.sendMail({
-    from: `"CaseBuddy" <${process.env.EMAIL_USER}>`,
-    to: params.to,
-    subject,
-    html,
-  });
-}
-
-async function sendShipmentStatusAdminEmail(params: {
-  orderNumber: string;
-  customerEmail: string;
-  status: 'shipped' | 'delivered' | 'cancelled';
-}) {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) return;
-  const to = process.env.ADMIN_EMAIL || 'info@casebuddy.co.in';
-  const subject =
-    params.status === 'shipped'
-      ? `📦 SHIPPED - ${params.orderNumber}`
-      : params.status === 'delivered'
-        ? `✅ DELIVERED - ${params.orderNumber}`
-      : `🛑 CANCELLED - ${params.orderNumber}`;
-  const html = `
-    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
-      <h2>${params.status === 'shipped' ? 'Shipped' : params.status === 'delivered' ? 'Delivered' : 'Cancelled'}</h2>
-      <p>Order <strong>${escapeHtml(params.orderNumber)}</strong> is now <strong>${escapeHtml(params.status)}</strong>.</p>
-      <p>Customer: ${escapeHtml(params.customerEmail)}</p>
-    </div>
-  `;
-  await transporter.sendMail({
-    from: `"CaseBuddy Orders" <${process.env.EMAIL_USER}>`,
-    to,
-    subject,
-    html,
-  });
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -297,23 +218,7 @@ export async function POST(request: NextRequest) {
           );
           orderUpdatedTo = mapped;
 
-          if (mapped === 'shipped' || mapped === 'delivered' || mapped === 'cancelled') {
-            try {
-              await sendShipmentStatusEmail({
-                to: sh.customer_email,
-                customerName: sh.customer_name,
-                orderNumber: sh.order_number,
-                status: mapped,
-              });
-              await sendShipmentStatusAdminEmail({
-                orderNumber: sh.order_number,
-                customerEmail: sh.customer_email,
-                status: mapped,
-              });
-            } catch {
-              // ignore email errors
-            }
-          }
+          // Emails disabled (confirmation-only policy)
         }
 
         results.push({

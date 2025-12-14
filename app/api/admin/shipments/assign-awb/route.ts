@@ -2,27 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import caseMainPool from '@/lib/db-main';
 import { requireRole } from '@/lib/auth';
 import { shiprocketRequest } from '@/lib/shiprocket';
-import nodemailer from 'nodemailer';
-import {
-  buildEmailShell,
-  buildItemsHtml,
-  escapeHtml,
-  fetchPrimaryImagesByProductId,
-  parseItemsFromCustomizationJson,
-} from '@/lib/order-email-utils';
-
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'localhost',
-  port: parseInt(process.env.EMAIL_PORT || '587'),
-  secure: process.env.EMAIL_SECURE === 'true',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-});
 
 function getByPath(obj: any, path: string) {
   return path.split('.').reduce((acc: any, key: string) => (acc == null ? undefined : acc[key]), obj);
@@ -109,104 +88,6 @@ type OrderRow = {
   customization_data: string | null;
 };
 
-async function sendAwbAssignedEmails(args: {
-  order: OrderRow;
-  awb: string;
-  courierName?: string | null;
-  trackingUrl?: string | null;
-}) {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) return;
-
-  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'https://casebuddy.co.in').replace(/\/+$/, '');
-
-  const fallbackItem = {
-    productId: null,
-    productName: args.order.product_name,
-    phoneModel: args.order.phone_model,
-    designName: null,
-    quantity: Number(args.order.quantity) || 1,
-  };
-
-  const items = parseItemsFromCustomizationJson({
-    customizationData: args.order.customization_data,
-    fallback: fallbackItem,
-  });
-
-  const productIds = items
-    .map((it) => it.productId)
-    .filter((v): v is number => v != null && Number.isFinite(v));
-  const imageByProductId = await fetchPrimaryImagesByProductId({
-    pool: caseMainPool as any,
-    productIds,
-    baseUrl,
-  });
-
-  const itemsHtml = buildItemsHtml({ items, imageByProductId });
-
-  const trackingLine = args.trackingUrl
-    ? `<p style="margin:0;">Tracking link: <a href="${escapeHtml(args.trackingUrl)}" target="_blank" rel="noreferrer">${escapeHtml(args.trackingUrl)}</a></p>`
-    : `<p style="margin:0;">Tracking will appear on your orders page shortly.</p>`;
-
-  const customerBody = `
-    <p>Hi ${escapeHtml(args.order.customer_name)},</p>
-    <p>Tracking is now available for your order <strong>${escapeHtml(args.order.order_number)}</strong>.</p>
-    <div class="card">
-      <h3 style="margin:0 0 10px 0;">Shipment Details</h3>
-      <p style="margin:0 0 6px 0;"><strong>AWB:</strong> ${escapeHtml(args.awb)}</p>
-      ${args.courierName ? `<p style="margin:0 0 6px 0;"><strong>Courier:</strong> ${escapeHtml(args.courierName)}</p>` : ''}
-      ${trackingLine}
-    </div>
-    <div class="card">
-      <h3 style="margin:0 0 10px 0;">Items</h3>
-      ${itemsHtml}
-    </div>
-    <div class="card">
-      <h3 style="margin:0 0 10px 0;">Track Your Order</h3>
-      <p style="margin:0;">You can also track your order anytime at <a href="https://casebuddy.co.in/orders" target="_blank" rel="noreferrer">https://casebuddy.co.in/orders</a></p>
-    </div>
-  `;
-
-  const customerHtml = buildEmailShell({
-    title: 'Tracking Available',
-    subtitle: `Order ${args.order.order_number}`,
-    bodyHtml: customerBody,
-    theme: 'success',
-  });
-
-  const adminBody = `
-    <p><strong>AWB assigned</strong> for order <strong>${escapeHtml(args.order.order_number)}</strong></p>
-    <div class="card">
-      <p style="margin:0 0 6px 0;"><strong>AWB:</strong> ${escapeHtml(args.awb)}</p>
-      ${args.courierName ? `<p style="margin:0 0 6px 0;"><strong>Courier:</strong> ${escapeHtml(args.courierName)}</p>` : ''}
-      ${args.trackingUrl ? `<p style="margin:0;">Tracking: <a href="${escapeHtml(args.trackingUrl)}" target="_blank" rel="noreferrer">${escapeHtml(args.trackingUrl)}</a></p>` : ''}
-    </div>
-    <div class="card">
-      <p style="margin:0;">Customer: ${escapeHtml(args.order.customer_name)} (${escapeHtml(args.order.customer_email)})</p>
-    </div>
-  `;
-
-  const adminHtml = buildEmailShell({
-    title: 'AWB Assigned',
-    subtitle: `Order ${args.order.order_number}`,
-    bodyHtml: adminBody,
-    theme: 'success',
-  });
-
-  await transporter.sendMail({
-    from: `"CaseBuddy" <${process.env.EMAIL_USER}>`,
-    to: args.order.customer_email,
-    subject: `Tracking available - ${args.order.order_number}`,
-    html: customerHtml,
-  });
-
-  await transporter.sendMail({
-    from: `"CaseBuddy Orders" <${process.env.EMAIL_USER}>`,
-    to: process.env.ADMIN_EMAIL || 'info@casebuddy.co.in',
-    subject: `✅ AWB assigned - ${args.order.order_number}`,
-    html: adminHtml,
-  });
-}
-
 export async function POST(request: NextRequest) {
   try {
     await requireRole(['admin', 'manager']);
@@ -255,23 +136,7 @@ export async function POST(request: NextRequest) {
 
       // Email customer/admin only when AWB becomes available (avoid duplicates on retry)
       try {
-        const newAwb = awb || updated?.[0]?.shiprocket_awb || null;
-        const becameAvailable = !!newAwb && !prevAwb;
-        if (becameAvailable) {
-          const [orderRows]: any = await caseMainPool.execute(
-            'SELECT id, order_number, customer_name, customer_email, product_name, phone_model, quantity, customization_data FROM orders WHERE id = ? LIMIT 1',
-            [orderId]
-          );
-          const order = orderRows?.[0] as OrderRow | undefined;
-          if (order) {
-            await sendAwbAssignedEmails({
-              order,
-              awb: String(newAwb),
-              courierName: courier || updated?.[0]?.shiprocket_courier_name || null,
-              trackingUrl: updated?.[0]?.tracking_url || null,
-            });
-          }
-        }
+        // Emails disabled (confirmation-only policy)
       } catch {
         // ignore email errors
       }
@@ -298,22 +163,7 @@ export async function POST(request: NextRequest) {
 
         // Email when AWB becomes available from an "already assigned" error case
         try {
-          const becameAvailable = !prevAwb;
-          if (becameAvailable) {
-            const [orderRows]: any = await caseMainPool.execute(
-              'SELECT id, order_number, customer_name, customer_email, product_name, phone_model, quantity, customization_data FROM orders WHERE id = ? LIMIT 1',
-              [orderId]
-            );
-            const order = orderRows?.[0] as OrderRow | undefined;
-            if (order) {
-              await sendAwbAssignedEmails({
-                order,
-                awb: String(currentAwb),
-                courierName: updated?.[0]?.shiprocket_courier_name || null,
-                trackingUrl: updated?.[0]?.tracking_url || null,
-              });
-            }
-          }
+          // Emails disabled (confirmation-only policy)
         } catch {
           // ignore email errors
         }

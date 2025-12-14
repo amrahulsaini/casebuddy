@@ -45,24 +45,9 @@ interface Order {
 }
 
 type Shipment = {
-  id: number;
-  order_id: number;
-  status: string | null;
   shiprocket_awb: string | null;
-  shiprocket_courier_name?: string | null;
   tracking_url: string | null;
-  updated_at?: string;
-  current_status?: string | null;
-  customer_status?: 'shipped' | 'delivered' | 'cancelled' | null;
-  events?: Array<{ date: string | null; location: string | null; status: string | null; message: string | null }>;
 };
-
-function formatCustomerShipmentStatus(status: Shipment['customer_status']) {
-  if (status === 'cancelled') return 'Cancelled';
-  if (status === 'delivered') return 'Delivered';
-  if (status === 'shipped') return 'Shipped';
-  return '—';
-}
 
 function normalizePlacement(value: unknown) {
   if (!value) return null;
@@ -318,7 +303,7 @@ export default function OrderDetailPage() {
         </div>
 
         <div className={styles.sidebar}>
-          {shipment && (shipment.tracking_url || shipment.shiprocket_awb || shipment.status) && (
+          {shipment && (shipment.tracking_url || shipment.shiprocket_awb) && (
             <div className={styles.card}>
               <h2 className={styles.cardTitle}>
                 <Truck size={20} />
@@ -326,45 +311,15 @@ export default function OrderDetailPage() {
               </h2>
               <div className={styles.infoList}>
                 <div className={styles.infoItem}>
-                  <span className={styles.label}>Status:</span>
-                  <span className={styles.value}>{formatCustomerShipmentStatus(shipment.customer_status)}</span>
-                </div>
-                <div className={styles.infoItem}>
-                  <span className={styles.label}>Courier:</span>
-                  <span className={styles.valueSmall}>{shipment.shiprocket_courier_name || '—'}</span>
-                </div>
-                <div className={styles.infoItem}>
                   <span className={styles.label}>AWB:</span>
                   <span className={styles.valueSmall}>{shipment.shiprocket_awb || '—'}</span>
                 </div>
-                {shipment.updated_at && (
-                  <div className={styles.infoItem}>
-                    <span className={styles.label}>Last Update:</span>
-                    <span className={styles.valueSmall}>{new Date(shipment.updated_at).toLocaleString()}</span>
-                  </div>
-                )}
                 {shipment.tracking_url && (
                   <a href={shipment.tracking_url} target="_blank" rel="noreferrer" className={styles.backBtn}>
                     Open Tracking
                   </a>
                 )}
               </div>
-
-              {shipment.events && shipment.events.length > 0 && (
-                <div className={styles.timeline}>
-                  {shipment.events.map((ev, idx) => (
-                    <div className={styles.timelineItem} key={idx}>
-                      <div className={styles.timelineDot}></div>
-                      <div>
-                        <p className={styles.timelineLabel}>{ev.status || ev.message || 'Update'}</p>
-                        <p className={styles.timelineDate}>
-                          {[ev.location, ev.date].filter(Boolean).join(' • ')}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           )}
 

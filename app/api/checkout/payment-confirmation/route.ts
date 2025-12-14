@@ -37,6 +37,79 @@ interface OrderItem extends RowDataPacket {
   preview_url: string | null;
 }
 
+type EmailItem = {
+  productName: string;
+  phoneModel: string;
+  designName?: string | null;
+  quantity: number;
+  customization?: {
+    customText?: string;
+    font?: string;
+    placement?: string;
+  };
+};
+
+function escapeHtml(value: unknown) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function parseEmailItemsFromOrder(order: Order): { items: EmailItem[]; singleCustomizationHtml: string } {
+  const fallbackItem: EmailItem = {
+    productName: order.product_name,
+    phoneModel: order.phone_model,
+    designName: order.design_name,
+    quantity: Number(order.quantity) || 1,
+  };
+
+  if (!order.customization_data) {
+    return { items: [fallbackItem], singleCustomizationHtml: '' };
+  }
+
+  try {
+    const parsed = JSON.parse(order.customization_data);
+    if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
+      const items: EmailItem[] = parsed.items.map((it: any) => ({
+        productName: it.productName || it.product_name || 'Item',
+        phoneModel: it.phoneModel || it.phone_model || '',
+        designName: it.designName || it.design_name || null,
+        quantity: Math.max(1, parseInt(it.quantity) || 1),
+        customization: it.customizationOptions ? {
+          customText: it.customizationOptions.customText,
+          font: it.customizationOptions.font,
+          placement: it.customizationOptions.placement,
+        } : undefined,
+      }));
+
+      return { items, singleCustomizationHtml: '' };
+    }
+
+    // Backward-compatible single-item customization payload
+    const customText = parsed?.customText;
+    const font = parsed?.font;
+    const placement = parsed?.placement;
+    const hasAny = !!(customText || font || placement);
+    const singleCustomizationHtml = hasAny
+      ? `
+        <div class="customization">
+          <strong>🎨 Customization:</strong><br/>
+          ${customText ? `Text: "${escapeHtml(customText)}"<br/>` : ''}
+          ${font ? `Font: ${escapeHtml(font)}<br/>` : ''}
+          ${placement ? `Placement: ${escapeHtml(String(placement).replace(/_/g, ' '))}` : ''}
+        </div>
+      `
+      : '';
+
+    return { items: [fallbackItem], singleCustomizationHtml };
+  } catch {
+    return { items: [fallbackItem], singleCustomizationHtml: '' };
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const { orderId } = await request.json();
@@ -190,6 +263,31 @@ async function sendOrderConfirmationEmails(order: Order) {
     }
   });
 
+  const { items, singleCustomizationHtml } = parseEmailItemsFromOrder(order);
+
+  const itemsHtml = items
+    .map((item) => {
+      const customization = item.customization;
+      const hasCustomization = !!(customization?.customText || customization?.font || customization?.placement);
+      return `
+        <div class="item">
+          <p><strong>${escapeHtml(item.productName)}</strong></p>
+          ${item.phoneModel ? `<p>Phone Model: ${escapeHtml(item.phoneModel)}</p>` : ''}
+          ${item.designName ? `<p>Design: ${escapeHtml(item.designName)}</p>` : ''}
+          ${hasCustomization ? `
+            <div class="customization">
+              <strong>🎨 Customization:</strong><br/>
+              ${customization?.customText ? `Text: "${escapeHtml(customization.customText)}"<br/>` : ''}
+              ${customization?.font ? `Font: ${escapeHtml(customization.font)}<br/>` : ''}
+              ${customization?.placement ? `Placement: ${escapeHtml(String(customization.placement).replace(/_/g, ' '))}` : ''}
+            </div>
+          ` : ''}
+          <p>Quantity: ${escapeHtml(item.quantity)}</p>
+        </div>
+      `;
+    })
+    .join('');
+
   // Customer email HTML
   const customerEmailHtml = `
     <!DOCTYPE html>
@@ -221,29 +319,10 @@ async function sendOrderConfirmationEmails(order: Order) {
             <h2>Order Details</h2>
             <p><strong>Order Number:</strong> ${order.order_number}</p>
             <p><strong>Date:</strong> ${new Date(order.created_at).toLocaleDateString()}</p>
-            
-            <h3>Product:</h3>
-            <div class="item">
-              <p><strong>${order.product_name}</strong></p>
-              <p>Phone Model: ${order.phone_model}</p>
-              ${order.design_name ? `<p>Design: ${order.design_name}</p>` : ''}
-              ${order.customization_data ? (() => {
-                try {
-                  const customData = JSON.parse(order.customization_data);
-                  return `
-                    <div class="customization">
-                      <strong>🎨 Customization:</strong><br/>
-                      ${customData.customText ? `Text: "${customData.customText}"<br/>` : ''}
-                      ${customData.font ? `Font: ${customData.font}<br/>` : ''}
-                      ${customData.placement ? `Placement: ${customData.placement.replace(/_/g, ' ')}` : ''}
-                    </div>
-                  `;
-                } catch (e) {
-                  return '';
-                }
-              })() : ''}
-              <p>Quantity: ${order.quantity} × ₹${order.unit_price}</p>
-            </div>
+
+            <h3>Items:</h3>
+            ${itemsHtml}
+            ${items.length === 1 ? singleCustomizationHtml : ''}
             
             <p class="total">Total: ₹${order.total_amount}</p>
           </div>
@@ -309,27 +388,8 @@ async function sendOrderConfirmationEmails(order: Order) {
           
           <div class="order-details">
             <h2>Product Details</h2>
-            <div class="item">
-              <p><strong>${order.product_name}</strong></p>
-              <p>Phone Model: ${order.phone_model}</p>
-              ${order.design_name ? `<p>Design: ${order.design_name}</p>` : ''}
-              ${order.customization_data ? (() => {
-                try {
-                  const customData = JSON.parse(order.customization_data);
-                  return `
-                    <div style="background: #e3f2fd; padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3;">
-                      <strong>🎨 CUSTOMIZATION:</strong><br/>
-                      ${customData.customText ? `<strong>Text:</strong> "${customData.customText}"<br/>` : ''}
-                      ${customData.font ? `<strong>Font:</strong> ${customData.font}<br/>` : ''}
-                      ${customData.placement ? `<strong>Placement:</strong> ${customData.placement.replace(/_/g, ' ')}` : ''}
-                    </div>
-                  `;
-                } catch (e) {
-                  return '';
-                }
-              })() : ''}
-              <p>Quantity: ${order.quantity} × ₹${order.unit_price} = ₹${order.subtotal}</p>
-            </div>
+            ${itemsHtml}
+            ${items.length === 1 ? singleCustomizationHtml : ''}
             
             <p class="total">Total Amount: ₹${order.total_amount}</p>
           </div>

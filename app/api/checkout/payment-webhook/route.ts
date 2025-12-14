@@ -19,6 +19,60 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+type EmailItem = {
+  productName: string;
+  phoneModel: string;
+  designName?: string | null;
+  quantity: number;
+  customization?: {
+    customText?: string;
+    font?: string;
+    placement?: string;
+  };
+};
+
+function escapeHtml(value: unknown) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function parseEmailItemsFromOrderRow(orderDetails: any): EmailItem[] {
+  const fallbackItem: EmailItem = {
+    productName: orderDetails.product_name,
+    phoneModel: orderDetails.phone_model,
+    designName: orderDetails.design_name || null,
+    quantity: parseInt(orderDetails.quantity) || 1,
+  };
+
+  const raw = orderDetails.customization_data;
+  if (!raw) return [fallbackItem];
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
+      return parsed.items.map((it: any) => ({
+        productName: it.productName || it.product_name || 'Item',
+        phoneModel: it.phoneModel || it.phone_model || '',
+        designName: it.designName || it.design_name || null,
+        quantity: Math.max(1, parseInt(it.quantity) || 1),
+        customization: it.customizationOptions ? {
+          customText: it.customizationOptions.customText,
+          font: it.customizationOptions.font,
+          placement: it.customizationOptions.placement,
+        } : undefined,
+      }));
+    }
+  } catch {
+    // ignore
+  }
+
+  return [fallbackItem];
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -67,6 +121,29 @@ export async function POST(request: NextRequest) {
       
       if (orderRows.length > 0) {
         const orderDetails = orderRows[0];
+
+        const emailItems = parseEmailItemsFromOrderRow(orderDetails);
+        const itemsHtml = emailItems
+          .map((item) => {
+            const customization = item.customization;
+            const hasCustomization = !!(customization?.customText || customization?.font || customization?.placement);
+            return `
+              <div class="product-item">
+                <strong>${escapeHtml(item.productName)}</strong><br>
+                ${item.phoneModel ? `${escapeHtml(item.phoneModel)}${item.designName ? ` • ${escapeHtml(item.designName)}` : ''}<br>` : ''}
+                Quantity: ${escapeHtml(item.quantity)}
+                ${hasCustomization ? `
+                  <div style="margin-top: 8px; padding: 10px; background: #fff3cd; border-radius: 6px; border-left: 4px solid #ffc107;">
+                    <strong>Customization:</strong><br>
+                    ${customization?.customText ? `Text: "${escapeHtml(customization.customText)}"<br>` : ''}
+                    ${customization?.font ? `Font: ${escapeHtml(customization.font)}<br>` : ''}
+                    ${customization?.placement ? `Placement: ${escapeHtml(String(customization.placement).replace(/_/g, ' '))}` : ''}
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          })
+          .join('');
         
         // Send emails now that payment is confirmed
         try {
@@ -99,12 +176,8 @@ export async function POST(request: NextRequest) {
                   
                   <div class="order-details">
                     <h3>Order #${orderDetails.order_number}</h3>
-                    
-                    <div class="product-item">
-                      <strong>${orderDetails.product_name}</strong><br>
-                      ${orderDetails.phone_model}${orderDetails.design_name ? ` • ${orderDetails.design_name}` : ''}<br>
-                      Quantity: ${orderDetails.quantity}
-                    </div>
+
+                    ${itemsHtml}
                     
                     <div class="summary-row">
                       <span>Subtotal:</span>
@@ -211,13 +284,7 @@ export async function POST(request: NextRequest) {
 
                   <h3>Product Details</h3>
                   <div class="product-section">
-                    <strong>${orderDetails.product_name}</strong><br>
-                    <div style="margin-top: 8px;">
-                      Phone Model: ${orderDetails.phone_model}<br>
-                      ${orderDetails.design_name ? `Design: ${orderDetails.design_name}<br>` : ''}
-                      Quantity: ${orderDetails.quantity}<br>
-                      Unit Price: ₹${parseFloat(orderDetails.unit_price).toFixed(2)}
-                    </div>
+                    ${itemsHtml}
                   </div>
 
                   <div class="total-amount">

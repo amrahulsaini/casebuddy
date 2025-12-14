@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Package, User, Phone, Mail, MapPin, CreditCard, Clock, Save, Edit } from 'lucide-react';
+import { ArrowLeft, Package, User, Phone, Mail, MapPin, CreditCard, Clock } from 'lucide-react';
 import styles from './order-detail.module.css';
 
 type Shipment = {
@@ -53,8 +53,6 @@ export default function AdminOrderDetailPage() {
   const router = useRouter();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [orderStatus, setOrderStatus] = useState('');
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -90,7 +88,6 @@ export default function AdminOrderDetailPage() {
       if (response.ok) {
         const data = await response.json();
         setOrder(data);
-        setOrderStatus(data.order_status);
       } else {
         setError('Order not found');
       }
@@ -98,31 +95,6 @@ export default function AdminOrderDetailPage() {
       setError('Failed to load order details');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleUpdateStatus = async () => {
-    setSaving(true);
-    setSuccessMessage('');
-    setError('');
-
-    try {
-      const response = await fetch('/api/admin/orders/update-status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: order?.id, orderStatus }),
-      });
-
-      if (response.ok) {
-        setSuccessMessage('Order status updated successfully');
-        fetchOrderDetails();
-      } else {
-        setError('Failed to update order status');
-      }
-    } catch (err) {
-      setError('An error occurred');
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -201,6 +173,20 @@ export default function AdminOrderDetailPage() {
 
   const shipNowTriggered = !!shipment?.shiprocket_awb;
   const canProceedInAdmin = shipNowTriggered;
+
+  const isPaid = ['paid', 'completed', 'success'].includes(String(order.payment_status || '').toLowerCase());
+  const trackingLabel = (() => {
+    if (!isPaid) return 'Pending Payment';
+    if (!shipment) return 'Pending Dispatch';
+    if (!shipment.shiprocket_shipment_id && !shipment.shiprocket_order_id) return 'Pending Dispatch';
+    if (!shipment.shiprocket_awb) return 'Pending AWB (Ship Now)';
+    const combined = `${String(shipment.status || '')}`.toLowerCase();
+    if (combined.includes('deliver')) return 'Delivered';
+    if (combined.includes('cancel')) return 'Cancelled';
+    if (combined.includes('rto')) return 'RTO';
+    if (combined.includes('in transit') || combined.includes('shipped')) return 'In Transit';
+    return shipment.status || 'Shipped';
+  })();
 
   let customData = null;
   try {
@@ -452,30 +438,29 @@ export default function AdminOrderDetailPage() {
 
           <div className={styles.card}>
             <h2 className={styles.cardTitle}>
-              <Edit size={20} />
-              Order Status
+              <Package size={20} />
+              Tracking Status
             </h2>
-            <div className={styles.statusControl}>
-              <label className={styles.label}>Update Order Status</label>
-              <select
-                value={orderStatus}
-                onChange={(e) => setOrderStatus(e.target.value)}
-                className={styles.statusSelect}
-              >
-                <option value="pending">Pending</option>
-                <option value="processing">Processing</option>
-                <option value="shipped">Shipped</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-              <button
-                onClick={handleUpdateStatus}
-                disabled={saving || orderStatus === order.order_status}
-                className={styles.saveBtn}
-              >
-                <Save size={16} />
-                {saving ? 'Saving...' : 'Update Status'}
-              </button>
+            <div className={styles.infoList}>
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Status:</span>
+                <span
+                  className={styles.badge}
+                  style={{ backgroundColor: getStatusColor(trackingLabel) }}
+                >
+                  {trackingLabel}
+                </span>
+              </div>
+              {shipment?.updated_at && (
+                <div className={styles.infoRow}>
+                  <span className={styles.label}>Last Sync:</span>
+                  <span>{new Date(shipment.updated_at).toLocaleString()}</span>
+                </div>
+              )}
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Sync:</span>
+                <span>Use “Sync From Shiprocket” to update customer view.</span>
+              </div>
             </div>
           </div>
 

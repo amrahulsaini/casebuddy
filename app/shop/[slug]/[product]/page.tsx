@@ -8,6 +8,7 @@ import { ArrowLeft, ShoppingCart, Heart, Star, Truck, Shield, Package, ChevronLe
 import { useCart } from '@/contexts/CartContext';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import SearchBar from '@/components/SearchBar';
+import { getShippingConfig } from '@/lib/shipping';
 import styles from './product.module.css';
 import homeStyles from '../../../home.module.css';
 
@@ -57,6 +58,7 @@ interface Product {
 }
 
 export default function ProductDetailPage() {
+  const { freeShippingThreshold } = getShippingConfig();
   const params = useParams();
   const router = useRouter();
   const categorySlug = params?.slug as string;
@@ -283,10 +285,10 @@ export default function ProductDetailPage() {
       <div className={`${homeStyles.announcementBar} ${!headerVisible ? homeStyles.hidden : ''}`}>
         <div className={homeStyles.marquee}>
           <div className={homeStyles.marqueeContent}>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
           </div>
@@ -667,7 +669,7 @@ export default function ProductDetailPage() {
               <Truck size={24} />
               <div>
                 <h4>Free Delivery</h4>
-                <p>On orders above ₹499</p>
+                <p>On orders above ₹{freeShippingThreshold}</p>
               </div>
             </div>
             <div className={styles.feature}>

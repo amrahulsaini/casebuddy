@@ -5,9 +5,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Shield, ShoppingCart, User, Menu, Heart, Truck, Package, Zap, Instagram, Facebook, Twitter, Mail, Phone, MapPin, MessageCircle } from 'lucide-react';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
+import { getShippingConfig } from '@/lib/shipping';
 import styles from './privacy.module.css';
 
 export default function PrivacyPage() {
+  const { freeShippingThreshold } = getShippingConfig();
   const [scrollY, setScrollY] = useState(0);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
@@ -37,10 +39,10 @@ export default function PrivacyPage() {
       <div className={`${styles.announcementBar} ${!headerVisible ? styles.hidden : ''}`}>
         <div className={styles.marquee}>
           <div className={styles.marqueeContent}>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
           </div>

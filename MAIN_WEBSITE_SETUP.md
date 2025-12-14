@@ -85,6 +85,11 @@ MAIN_DB_HOST=localhost
 MAIN_DB_USER=case_main
 MAIN_DB_PASSWORD=main
 MAIN_DB_NAME=case_main
+
+# Shipping Configuration
+# (NEXT_PUBLIC_* is required for UI banners/labels; server also supports these)
+NEXT_PUBLIC_SHIPPING_FREE_THRESHOLD=499
+NEXT_PUBLIC_SHIPPING_FLAT_RATE=80
 ```
 
 ## Troubleshooting

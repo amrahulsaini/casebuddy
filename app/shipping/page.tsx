@@ -5,9 +5,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Truck, Package, MapPin, Clock, ShieldCheck, Heart, ShoppingCart, User, Menu, Zap, Instagram, Facebook, Twitter, Mail, Phone, MessageCircle } from 'lucide-react';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
+import { getShippingConfig } from '@/lib/shipping';
 import styles from './shipping.module.css';
 
 export default function ShippingPage() {
+  const { freeShippingThreshold, flatRate } = getShippingConfig();
   const [scrollY, setScrollY] = useState(0);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
@@ -37,10 +39,10 @@ export default function ShippingPage() {
       <div className={`${styles.announcementBar} ${!headerVisible ? styles.hidden : ''}`}>
         <div className={styles.marquee}>
           <div className={styles.marqueeContent}>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
           </div>
@@ -104,7 +106,7 @@ export default function ShippingPage() {
             <Package className={styles.cardIcon} size={48} />
             <h3 className={styles.cardTitle}>Free Shipping</h3>
             <p className={styles.cardText}>
-              On all orders above ₹499. Shop more, save more on delivery!
+              On all orders above ₹{freeShippingThreshold}. Shop more, save more on delivery!
             </p>
           </div>
 
@@ -141,11 +143,11 @@ export default function ShippingPage() {
               <div className={styles.tableCell}>Shipping Charge</div>
             </div>
             <div className={styles.tableRow}>
-              <div className={styles.tableCell}>Below ₹499</div>
-              <div className={styles.tableCell}>₹80</div>
+              <div className={styles.tableCell}>Below ₹{freeShippingThreshold}</div>
+              <div className={styles.tableCell}>₹{flatRate}</div>
             </div>
             <div className={styles.tableRow}>
-              <div className={styles.tableCell}>₹499 and above</div>
+              <div className={styles.tableCell}>₹{freeShippingThreshold} and above</div>
               <div className={styles.tableCell}><strong>FREE</strong></div>
             </div>
           </div>

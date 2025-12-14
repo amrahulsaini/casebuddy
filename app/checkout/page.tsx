@@ -9,6 +9,7 @@ import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import SearchBar from '@/components/SearchBar';
 import Toast from '@/components/Toast';
 import { useCart } from '@/contexts/CartContext';
+import { calculateShipping, getShippingConfig } from '@/lib/shipping';
 import styles from './page.module.css';
 import homeStyles from '../home.module.css';
 
@@ -347,7 +348,7 @@ function CheckoutContent() {
     if (!orderItems || orderItems.length === 0) return { subtotal: 0, shipping: 0, total: 0 };
 
     const subtotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const shipping = subtotal < 499 ? 80 : 0; // ₹80 shipping if order below ₹499
+    const shipping = calculateShipping(subtotal);
     const total = subtotal + shipping;
 
     return { subtotal, shipping, total };
@@ -461,6 +462,7 @@ function CheckoutContent() {
 
   const { subtotal, shipping, total } = calculateTotals();
   const totalQuantity = orderItems.reduce((sum, item) => sum + item.quantity, 0);
+  const { freeShippingThreshold } = getShippingConfig();
 
   return (
     <>
@@ -468,10 +470,10 @@ function CheckoutContent() {
       <div className={`${homeStyles.announcementBar} ${!headerVisible ? homeStyles.hidden : ''}`}>
         <div className={homeStyles.marquee}>
           <div className={homeStyles.marqueeContent}>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
           </div>

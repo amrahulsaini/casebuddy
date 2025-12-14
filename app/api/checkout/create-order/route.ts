@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import caseMainPool from '@/lib/db-main';
+import { calculateShipping } from '@/lib/shipping';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import DOMPurify from 'isomorphic-dompurify';
@@ -148,7 +149,7 @@ export async function POST(request: NextRequest) {
       (sum: number, it: any) => sum + it.lineSubtotal,
       0
     );
-    const calculatedShipping = calculatedSubtotal < 499 ? 80 : 0;
+    const calculatedShipping = calculateShipping(calculatedSubtotal);
     const calculatedTotal = calculatedSubtotal + calculatedShipping;
 
     // Verify frontend calculation matches (allow 1 rupee tolerance for rounding)

@@ -8,6 +8,7 @@ import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import SearchBar from '@/components/SearchBar';
 import styles from './orders.module.css';
 import homeStyles from '../home.module.css';
+import { getShippingConfig } from '@/lib/shipping';
 
 interface Order {
   id: number;
@@ -26,6 +27,7 @@ interface Order {
 }
 
 export default function OrdersPage() {
+  const { freeShippingThreshold } = getShippingConfig();
   const [email, setEmail] = useState('');
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
@@ -158,10 +160,10 @@ export default function OrdersPage() {
         <div className={`${homeStyles.announcementBar} ${!headerVisible ? homeStyles.hidden : ''}`}>
           <div className={homeStyles.marquee}>
             <div className={homeStyles.marqueeContent}>
-              <span><Truck size={16} /> Free Shipping Above ₹499</span>
+              <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
               <span><Package size={16} /> 7 Days Easy Return</span>
               <span><Zap size={16} /> Delivery in 7-10 Days</span>
-              <span><Truck size={16} /> Free Shipping Above ₹499</span>
+              <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
               <span><Package size={16} /> 7 Days Easy Return</span>
               <span><Zap size={16} /> Delivery in 7-10 Days</span>
             </div>
@@ -330,10 +332,10 @@ export default function OrdersPage() {
       <div className={`${homeStyles.announcementBar} ${!headerVisible ? homeStyles.hidden : ''}`}>
         <div className={homeStyles.marquee}>
           <div className={homeStyles.marqueeContent}>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
           </div>

@@ -25,12 +25,14 @@ import {
   Zap,
 } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { calculateShipping, getShippingConfig } from '@/lib/shipping';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import SearchBar from '@/components/SearchBar';
 import styles from './cart.module.css';
 import homeStyles from '../home.module.css';
 
 export default function CartPage() {
+  const { freeShippingThreshold } = getShippingConfig();
   const { cart, removeFromCart, updateQuantity, cartTotal, clearCart } = useCart();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [scrollY, setScrollY] = useState(0);
@@ -79,10 +81,10 @@ export default function CartPage() {
       <div className={`${homeStyles.announcementBar} ${!headerVisible ? homeStyles.hidden : ''}`}>
         <div className={homeStyles.marquee}>
           <div className={homeStyles.marqueeContent}>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
           </div>
@@ -232,10 +234,10 @@ export default function CartPage() {
 
                 <div className={styles.summaryRow}>
                   <span>Shipping</span>
-                  {cartTotal >= 499 ? (
+                  {calculateShipping(cartTotal) === 0 ? (
                     <span className={styles.free}>FREE</span>
                   ) : (
-                    <span>₹80</span>
+                    <span>₹{calculateShipping(cartTotal)}</span>
                   )}
                 </div>
 
@@ -243,7 +245,7 @@ export default function CartPage() {
 
                 <div className={styles.summaryTotal}>
                   <span>Total</span>
-                  <span>₹{(cartTotal + (cartTotal >= 499 ? 0 : 80)).toFixed(2)}</span>
+                  <span>₹{(cartTotal + calculateShipping(cartTotal)).toFixed(2)}</span>
                 </div>
 
                 <button

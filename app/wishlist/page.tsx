@@ -36,8 +36,10 @@ interface Product {
   stock_quantity: number;
   category_slug: string;
 }
+import { getShippingConfig } from '@/lib/shipping';
 
 export default function WishlistPage() {
+  const { freeShippingThreshold } = getShippingConfig();
   const { wishlist, toggleWishlist } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,10 +93,10 @@ export default function WishlistPage() {
       <div className={`${homeStyles.announcementBar} ${!headerVisible ? homeStyles.hidden : ''}`}>
         <div className={homeStyles.marquee}>
           <div className={homeStyles.marqueeContent}>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
           </div>

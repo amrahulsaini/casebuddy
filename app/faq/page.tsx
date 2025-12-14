@@ -5,9 +5,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { HelpCircle, ChevronDown, ShoppingCart, User, Menu, Heart, Truck, Package, Zap, Instagram, Facebook, Twitter, Mail, Phone, MapPin, MessageCircle } from 'lucide-react';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
+import { getShippingConfig } from '@/lib/shipping';
 import styles from './faq.module.css';
 
 export default function FAQPage() {
+  const { freeShippingThreshold, flatRate } = getShippingConfig();
   const [scrollY, setScrollY] = useState(0);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
@@ -63,7 +65,7 @@ export default function FAQPage() {
         },
         {
           q: 'Do you offer free shipping?',
-          a: 'Yes! We offer free shipping on all orders above ₹499. For orders below ₹499, a shipping fee of ₹80 applies.'
+          a: `Yes! We offer free shipping on all orders above ₹${freeShippingThreshold}. For orders below ₹${freeShippingThreshold}, a shipping fee of ₹${flatRate} applies.`
         },
         {
           q: 'Do you ship internationally?',
@@ -113,7 +115,7 @@ export default function FAQPage() {
         },
         {
           q: 'Who pays for return shipping?',
-          a: 'For defective or wrong products, we cover return shipping. For other returns, shipping cost of ₹80 is deducted from your refund.'
+          a: `For defective or wrong products, we cover return shipping. For other returns, shipping cost of ₹${flatRate} is deducted from your refund.`
         }
       ]
     },
@@ -146,10 +148,10 @@ export default function FAQPage() {
       <div className={`${styles.announcementBar} ${!headerVisible ? styles.hidden : ''}`}>
         <div className={styles.marquee}>
           <div className={styles.marqueeContent}>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
           </div>

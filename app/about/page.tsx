@@ -5,10 +5,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ShieldCheck, Heart, Zap, Award, Users, Globe, Package, Sparkles, ShoppingCart, User, Menu, Truck, Instagram, Facebook, Twitter, Mail, Phone, MapPin, MessageCircle } from 'lucide-react';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
+import { getShippingConfig } from '@/lib/shipping';
 import styles from './about.module.css';
 import homeStyles from '../home.module.css';
 
 export default function AboutPage() {
+  const { freeShippingThreshold } = getShippingConfig();
   const [scrollY, setScrollY] = useState(0);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
@@ -38,10 +40,10 @@ export default function AboutPage() {
       <div className={`${styles.announcementBar} ${!headerVisible ? styles.hidden : ''}`}>
         <div className={styles.marquee}>
           <div className={styles.marqueeContent}>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
           </div>

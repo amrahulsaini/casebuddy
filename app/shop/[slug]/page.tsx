@@ -8,6 +8,7 @@ import { ArrowLeft, ShoppingCart, Heart, Star, Grid3x3, List, Eye, User, Menu, T
 import { useCart } from '@/contexts/CartContext';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import SearchBar from '@/components/SearchBar';
+import { getShippingConfig } from '@/lib/shipping';
 import styles from './shop.module.css';
 import homeStyles from '../../home.module.css';
 
@@ -31,6 +32,7 @@ interface Category {
 }
 
 export default function ShopPage() {
+  const { freeShippingThreshold } = getShippingConfig();
   const params = useParams();
   const categorySlug = params?.slug as string;
   const { toggleWishlist, isInWishlist } = useCart();
@@ -115,10 +117,10 @@ export default function ShopPage() {
       <div className={`${homeStyles.announcementBar} ${!headerVisible ? homeStyles.hidden : ''}`}>
         <div className={homeStyles.marquee}>
           <div className={homeStyles.marqueeContent}>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
           </div>

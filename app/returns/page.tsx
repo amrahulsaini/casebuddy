@@ -5,9 +5,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { RefreshCw, Package, CheckCircle, XCircle, ShoppingCart, User, Menu, Heart, Truck, Zap, Instagram, Facebook, Twitter, Mail, Phone, MapPin, MessageCircle } from 'lucide-react';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
+import { getShippingConfig } from '@/lib/shipping';
 import styles from './returns.module.css';
 
 export default function ReturnsPage() {
+  const { freeShippingThreshold, flatRate } = getShippingConfig();
   const [scrollY, setScrollY] = useState(0);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
@@ -37,10 +39,10 @@ export default function ReturnsPage() {
       <div className={`${styles.announcementBar} ${!headerVisible ? styles.hidden : ''}`}>
         <div className={styles.marquee}>
           <div className={styles.marqueeContent}>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
           </div>
@@ -216,7 +218,7 @@ export default function ReturnsPage() {
             We'll provide a prepaid return label or arrange free pickup.
           </p>
           <p className={styles.paragraph}>
-            <strong>For change of mind:</strong> Return shipping cost of ₹80 will be deducted from your refund amount.
+            <strong>For change of mind:</strong> Return shipping cost of ₹{flatRate} will be deducted from your refund amount.
           </p>
         </div>
 

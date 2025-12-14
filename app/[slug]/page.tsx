@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { ArrowRight, Gift, Star, Truck, ShieldCheck, Heart, ShoppingCart, User, Menu, Instagram, Facebook, Twitter, Mail, Phone, MapPin, Package, Zap } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
+import { getShippingConfig } from '@/lib/shipping';
 import styles from './dynamic-page.module.css';
 
 interface Category {
@@ -57,6 +58,7 @@ async function getPageData(slug: string): Promise<PageData | null> {
 }
 
 export default function DynamicPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { freeShippingThreshold } = getShippingConfig();
   const [pageData, setPageData] = useState<PageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFoundError, setNotFoundError] = useState(false);
@@ -119,10 +121,10 @@ export default function DynamicPage({ params }: { params: Promise<{ slug: string
       <div className={`${styles.announcementBar} ${!headerVisible ? styles.hidden : ''}`}>
         <div className={styles.marquee}>
           <div className={styles.marqueeContent}>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
           </div>

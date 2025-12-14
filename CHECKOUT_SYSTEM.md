@@ -19,9 +19,9 @@ Complete checkout system with email/mobile verification, address collection, and
 ### 3. Order Summary
 - Product details display
 - Real-time price calculation
-- Shipping cost logic:
-  - FREE shipping on orders ≥ ₹499
-  - ₹80 shipping on orders < ₹499
+- Shipping cost logic (configurable):
+  - FREE shipping on orders ≥ `NEXT_PUBLIC_SHIPPING_FREE_THRESHOLD` (default: ₹499)
+  - Flat shipping fee `NEXT_PUBLIC_SHIPPING_FLAT_RATE` on orders below threshold (default: ₹80)
 - Total amount calculation
 
 ### 4. Order Creation
@@ -41,6 +41,11 @@ EMAIL_PORT=587
 EMAIL_SECURE=false
 EMAIL_USER=info@casebuddy.co.in
 EMAIL_PASSWORD=info@123
+
+# Shipping Configuration
+# (NEXT_PUBLIC_* is required for UI banners/labels; server also supports these)
+NEXT_PUBLIC_SHIPPING_FREE_THRESHOLD=499
+NEXT_PUBLIC_SHIPPING_FLAT_RATE=80
 ```
 
 ## Database Schema

@@ -6,10 +6,12 @@ import Link from 'next/link';
 import { MapPin, Phone, Mail, Clock, Send, MessageSquare, ShoppingCart, User, Menu, Heart, Truck, Package, Zap, Instagram, Facebook, Twitter, MessageCircle } from 'lucide-react';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import SearchBar from '@/components/SearchBar';
+import { getShippingConfig } from '@/lib/shipping';
 import styles from './contact.module.css';
 import homeStyles from '../home.module.css';
 
 export default function ContactPage() {
+  const { freeShippingThreshold } = getShippingConfig();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -98,10 +100,10 @@ export default function ContactPage() {
       <div className={`${styles.announcementBar} ${!headerVisible ? styles.hidden : ''}`}>
         <div className={styles.marquee}>
           <div className={styles.marqueeContent}>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
           </div>
@@ -355,7 +357,7 @@ export default function ContactPage() {
           <div className={styles.faqCard}>
             <h3 className={styles.faqQuestion}>Is there a minimum order value?</h3>
             <p className={styles.faqAnswer}>
-              No minimum order value! However, orders above ₹499 qualify for free shipping across India.
+              No minimum order value! However, orders above ₹{freeShippingThreshold} qualify for free shipping across India.
             </p>
           </div>
 

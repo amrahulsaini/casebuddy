@@ -6,6 +6,7 @@ import { useEffect, useState, useRef } from 'react';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import HeroSlider from '@/components/HeroSlider';
 import SearchBar from '@/components/SearchBar';
+import { getShippingConfig } from '@/lib/shipping';
 import styles from './home.module.css';
 
 interface Category {
@@ -26,6 +27,7 @@ interface HomepageSection {
 }
 
 export default function HomePage() {
+  const { freeShippingThreshold } = getShippingConfig();
   const [sections, setSections] = useState<HomepageSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [scrollY, setScrollY] = useState(0);
@@ -119,10 +121,10 @@ export default function HomePage() {
       <div className={`${styles.announcementBar} ${!headerVisible ? styles.hidden : ''}`}>
         <div className={styles.marquee}>
           <div className={styles.marqueeContent}>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
-            <span><Truck size={16} /> Free Shipping Above ₹499</span>
+            <span><Truck size={16} /> Free Shipping Above ₹{freeShippingThreshold}</span>
             <span><Package size={16} /> 7 Days Easy Return</span>
             <span><Zap size={16} /> Delivery in 7-10 Days</span>
           </div>

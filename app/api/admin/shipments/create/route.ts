@@ -34,6 +34,57 @@ function safeJsonParse(value: string | null) {
   }
 }
 
+function getByPath(obj: any, path: string) {
+  return path.split('.').reduce((acc: any, key: string) => (acc == null ? undefined : acc[key]), obj);
+}
+
+function firstNonEmpty(...values: any[]) {
+  for (const v of values) {
+    if (v === undefined || v === null) continue;
+    if (typeof v === 'string' && v.trim() === '') continue;
+    return v;
+  }
+  return null;
+}
+
+function extractShiprocketIds(response: any) {
+  const dataNode = response?.data;
+  const data0 = Array.isArray(dataNode) ? dataNode[0] : dataNode;
+
+  const shiprocketOrderId = firstNonEmpty(
+    response?.order_id,
+    response?.orderId,
+    getByPath(response, 'data.order_id'),
+    getByPath(response, 'data.orderId'),
+    data0?.order_id,
+    data0?.orderId,
+    getByPath(response, 'data.data.order_id'),
+    getByPath(response, 'data.data.orderId')
+  );
+
+  const shiprocketShipmentId = firstNonEmpty(
+    response?.shipment_id,
+    response?.shipmentId,
+    getByPath(response, 'data.shipment_id'),
+    getByPath(response, 'data.shipmentId'),
+    data0?.shipment_id,
+    data0?.shipmentId,
+    getByPath(response, 'shipment.shipment_id'),
+    getByPath(response, 'shipment.id'),
+    getByPath(response, 'shipment_details.shipment_id'),
+    getByPath(response, 'shipment_details.id'),
+    getByPath(response, 'data.shipment.shipment_id'),
+    getByPath(response, 'data.shipment.id'),
+    getByPath(response, 'data.data.shipment_id'),
+    getByPath(response, 'data.data.shipmentId')
+  );
+
+  return {
+    shiprocketOrderId: shiprocketOrderId != null ? String(shiprocketOrderId) : null,
+    shiprocketShipmentId: shiprocketShipmentId != null ? String(shiprocketShipmentId) : null,
+  };
+}
+
 function normalizeMobile(mobile: string) {
   const digits = String(mobile || '').replace(/\D/g, '');
   // Keep last 10 digits if country code included
@@ -143,8 +194,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(payload),
     });
 
-    const shiprocketOrderId = response?.order_id ?? response?.orderId ?? null;
-    const shiprocketShipmentId = response?.shipment_id ?? response?.shipmentId ?? null;
+    const { shiprocketOrderId, shiprocketShipmentId } = extractShiprocketIds(response);
 
     await caseMainPool.execute(
       `INSERT INTO shipments (
@@ -159,8 +209,8 @@ export async function POST(request: NextRequest) {
       ) VALUES (?, 'shiprocket', ?, ?, ?, ?, ?, ?)`,
       [
         order.id,
-        shiprocketOrderId ? String(shiprocketOrderId) : null,
-        shiprocketShipmentId ? String(shiprocketShipmentId) : null,
+        shiprocketOrderId,
+        shiprocketShipmentId,
         'created',
         defaults.pickup_location,
         JSON.stringify(payload),

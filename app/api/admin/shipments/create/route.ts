@@ -2,6 +2,27 @@ import { NextRequest, NextResponse } from 'next/server';
 import caseMainPool from '@/lib/db-main';
 import { requireRole } from '@/lib/auth';
 import { getShipDefaults, shiprocketRequest } from '@/lib/shiprocket';
+import nodemailer from 'nodemailer';
+import {
+  buildEmailShell,
+  buildItemsHtml,
+  escapeHtml,
+  fetchPrimaryImagesByProductId,
+  parseItemsFromCustomizationJson,
+} from '@/lib/order-email-utils';
+
+const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST || 'localhost',
+  port: parseInt(process.env.EMAIL_PORT || '587'),
+  secure: process.env.EMAIL_SECURE === 'true',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+  tls: {
+    rejectUnauthorized: false,
+  },
+});
 
 type OrderRow = {
   id: number;
@@ -89,6 +110,89 @@ function normalizeMobile(mobile: string) {
   const digits = String(mobile || '').replace(/\D/g, '');
   // Keep last 10 digits if country code included
   return digits.length > 10 ? digits.slice(-10) : digits;
+}
+
+async function sendShipmentCreatedEmails(args: { order: OrderRow }) {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) return;
+
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'https://casebuddy.co.in').replace(/\/+$/, '');
+
+  const fallbackItem = {
+    productId: null,
+    productName: args.order.product_name,
+    phoneModel: args.order.phone_model,
+    designName: null,
+    quantity: Number(args.order.quantity) || 1,
+  };
+
+  const items = parseItemsFromCustomizationJson({
+    customizationData: args.order.customization_data,
+    fallback: fallbackItem,
+  });
+
+  const productIds = items
+    .map((it) => it.productId)
+    .filter((v): v is number => v != null && Number.isFinite(v));
+
+  const imageByProductId = await fetchPrimaryImagesByProductId({
+    pool: caseMainPool as any,
+    productIds,
+    baseUrl,
+  });
+
+  const itemsHtml = buildItemsHtml({ items, imageByProductId });
+
+  const commonBody = `
+    <p>Hi ${escapeHtml(args.order.customer_name)},</p>
+    <p>Your shipment has been created for order <strong>${escapeHtml(args.order.order_number)}</strong>.</p>
+    <div class="card">
+      <h3 style="margin:0 0 10px 0;">Items</h3>
+      ${itemsHtml}
+    </div>
+    <div class="card">
+      <h3 style="margin:0 0 10px 0;">Track Your Order</h3>
+      <p style="margin:0;">You can track your order anytime at <a href="https://casebuddy.co.in/orders" target="_blank" rel="noreferrer">https://casebuddy.co.in/orders</a></p>
+    </div>
+  `;
+
+  const customerHtml = buildEmailShell({
+    title: 'Shipment Created',
+    subtitle: `Order ${args.order.order_number}`,
+    bodyHtml: commonBody,
+    theme: 'info',
+  });
+
+  const adminBody = `
+    <p><strong>Shipment created</strong> for order <strong>${escapeHtml(args.order.order_number)}</strong></p>
+    <div class="card">
+      <p style="margin:0;">Customer: ${escapeHtml(args.order.customer_name)} (${escapeHtml(args.order.customer_email)})</p>
+    </div>
+    <div class="card">
+      <h3 style="margin:0 0 10px 0;">Items</h3>
+      ${itemsHtml}
+    </div>
+  `;
+
+  const adminHtml = buildEmailShell({
+    title: 'Shipment Created',
+    subtitle: `Order ${args.order.order_number}`,
+    bodyHtml: adminBody,
+    theme: 'info',
+  });
+
+  await transporter.sendMail({
+    from: `"CaseBuddy" <${process.env.EMAIL_USER}>`,
+    to: args.order.customer_email,
+    subject: `Shipment created - ${args.order.order_number}`,
+    html: customerHtml,
+  });
+
+  await transporter.sendMail({
+    from: `"CaseBuddy Orders" <${process.env.EMAIL_USER}>`,
+    to: process.env.ADMIN_EMAIL || 'info@casebuddy.co.in',
+    subject: `📦 Shipment created - ${args.order.order_number}`,
+    html: adminHtml,
+  });
 }
 
 export async function POST(request: NextRequest) {
@@ -293,6 +397,13 @@ export async function POST(request: NextRequest) {
     }
 
     const [rows]: any = await caseMainPool.execute('SELECT * FROM shipments WHERE order_id = ? LIMIT 1', [order.id]);
+
+    // Notify customer/admin immediately when shipment is created
+    try {
+      await sendShipmentCreatedEmails({ order });
+    } catch {
+      // ignore email errors
+    }
 
     return NextResponse.json({ success: true, shipment: rows?.[0] || null, shiprocket: response });
   } catch (error: any) {

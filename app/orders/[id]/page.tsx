@@ -40,12 +40,13 @@ type Shipment = {
   tracking_url: string | null;
   updated_at?: string;
   current_status?: string | null;
-  customer_status?: 'shipped' | 'cancelled' | null;
+  customer_status?: 'shipped' | 'delivered' | 'cancelled' | null;
   events?: Array<{ date: string | null; location: string | null; status: string | null; message: string | null }>;
 };
 
 function formatCustomerShipmentStatus(status: Shipment['customer_status']) {
   if (status === 'cancelled') return 'Cancelled';
+  if (status === 'delivered') return 'Delivered';
   if (status === 'shipped') return 'Shipped';
   return '—';
 }

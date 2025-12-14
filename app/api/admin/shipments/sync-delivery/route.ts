@@ -39,6 +39,22 @@ function normalizeText(value: any) {
   return String(value ?? '').trim();
 }
 
+function pickMeaningfulStatusFromTracking(response: any, fallback: any): string | null {
+  const statusText = firstNonEmpty(
+    response?.tracking_data?.shipment_track?.[0]?.current_status,
+    response?.current_status,
+    response?.tracking_data?.shipment_status,
+    fallback
+  );
+
+  if (statusText === undefined || statusText === null) return null;
+
+  // Prefer text like "Pickup Generated" over numeric codes like 3.
+  const asString = String(statusText).trim();
+  if (!asString) return null;
+  return asString;
+}
+
 function mapShiprocketToOrderStatus(rawStatus: string): 'shipped' | 'delivered' | 'cancelled' | null {
   const s = rawStatus.toLowerCase();
   if (!s) return null;
@@ -113,23 +129,27 @@ async function sendShipmentStatusEmail(params: {
   to: string;
   customerName: string;
   orderNumber: string;
-  status: 'shipped' | 'cancelled';
+  status: 'shipped' | 'delivered' | 'cancelled';
 }) {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) return;
 
   const subject =
     params.status === 'shipped'
       ? `Your order has been shipped - ${params.orderNumber}`
+      : params.status === 'delivered'
+        ? `Your order has been delivered - ${params.orderNumber}`
       : `Your order has been cancelled - ${params.orderNumber}`;
 
   const statusLine =
     params.status === 'shipped'
       ? 'Your order has been shipped.'
+      : params.status === 'delivered'
+        ? 'Your order has been delivered.'
       : 'Your order has been cancelled.';
 
   const html = `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
-      <h2>${params.status === 'shipped' ? 'Shipped' : 'Cancelled'}</h2>
+      <h2>${params.status === 'shipped' ? 'Shipped' : params.status === 'delivered' ? 'Delivered' : 'Cancelled'}</h2>
       <p>Hi ${escapeHtml(params.customerName)},</p>
       <p>${statusLine}</p>
       <p>Order: <strong>${escapeHtml(params.orderNumber)}</strong></p>
@@ -149,17 +169,19 @@ async function sendShipmentStatusEmail(params: {
 async function sendShipmentStatusAdminEmail(params: {
   orderNumber: string;
   customerEmail: string;
-  status: 'shipped' | 'cancelled';
+  status: 'shipped' | 'delivered' | 'cancelled';
 }) {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) return;
   const to = process.env.ADMIN_EMAIL || 'info@casebuddy.co.in';
   const subject =
     params.status === 'shipped'
       ? `📦 SHIPPED - ${params.orderNumber}`
+      : params.status === 'delivered'
+        ? `✅ DELIVERED - ${params.orderNumber}`
       : `🛑 CANCELLED - ${params.orderNumber}`;
   const html = `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
-      <h2>${params.status === 'shipped' ? 'Shipped' : 'Cancelled'}</h2>
+      <h2>${params.status === 'shipped' ? 'Shipped' : params.status === 'delivered' ? 'Delivered' : 'Cancelled'}</h2>
       <p>Order <strong>${escapeHtml(params.orderNumber)}</strong> is now <strong>${escapeHtml(params.status)}</strong>.</p>
       <p>Customer: ${escapeHtml(params.customerEmail)}</p>
     </div>
@@ -223,7 +245,13 @@ export async function POST(request: NextRequest) {
           { method: 'GET' }
         );
 
-        const trackingUrl = firstNonEmpty(response?.tracking_url, response?.trackingUrl, sh.tracking_url);
+        const trackingUrl = firstNonEmpty(
+          response?.tracking_url,
+          response?.trackingUrl,
+          response?.tracking_data?.track_url,
+          response?.tracking_data?.trackUrl,
+          sh.tracking_url
+        );
         const courierName = firstNonEmpty(
           response?.courier_name,
           response?.courierName,
@@ -231,13 +259,7 @@ export async function POST(request: NextRequest) {
           sh.shiprocket_courier_name
         );
 
-        const shipStatus = firstNonEmpty(
-          response?.tracking_data?.shipment_status,
-          response?.tracking_data?.shipment_track?.[0]?.current_status,
-          response?.current_status,
-          sh.status
-        );
-
+        const shipStatus = pickMeaningfulStatusFromTracking(response, sh.status);
         const mapped = shipStatus ? mapShiprocketToOrderStatus(String(shipStatus)) : null;
 
         await caseMainPool.execute(
@@ -266,7 +288,7 @@ export async function POST(request: NextRequest) {
           );
           orderUpdatedTo = mapped;
 
-          if (mapped === 'shipped' || mapped === 'cancelled') {
+          if (mapped === 'shipped' || mapped === 'delivered' || mapped === 'cancelled') {
             try {
               await sendShipmentStatusEmail({
                 to: sh.customer_email,

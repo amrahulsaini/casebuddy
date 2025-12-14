@@ -86,7 +86,11 @@ export default function OrderDetailPage() {
 
         // Try to fetch shipment info for tracking (if available)
         try {
-          const shipRes = await fetch(`/api/orders/${params.id}/shipment`);
+          const shipRes = await fetch(`/api/orders/${params.id}/shipment`, {
+            headers: {
+              'x-customer-email': (userEmail || '').trim().toLowerCase(),
+            },
+          });
           if (shipRes.ok) {
             const shipData = await shipRes.json();
             setShipment(shipData);

@@ -12,8 +12,16 @@ function getConfig(): ShiprocketConfig {
   const token = process.env.SHIPROCKET_TOKEN || '';
 
   // Allow manual token for debugging/temporary use.
-  // Note: Shiprocket tokens expire; prefer EMAIL+PASSWORD in production.
+  // IMPORTANT: this must be the JWT returned by /v1/external/auth/login.
+  // If you paste an API password or random code here, Shiprocket will return:
+  // 401 {"message":"Wrong number of segments"}
   if (token) {
+    const dotCount = (token.match(/\./g) || []).length;
+    if (dotCount < 2) {
+      throw new Error(
+        'Invalid SHIPROCKET_TOKEN: expected a JWT (format a.b.c). Remove SHIPROCKET_TOKEN and use SHIPROCKET_EMAIL+SHIPROCKET_PASSWORD (API user credentials) instead.'
+      );
+    }
     return { baseUrl, email, password, token };
   }
 

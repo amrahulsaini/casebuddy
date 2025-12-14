@@ -159,6 +159,22 @@
   gap: 20px;
 }
 
+.itemHeaderRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.itemImage {
+  width: 84px;
+  height: 84px;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  object-fit: cover;
+  background: #fff;
+  flex: 0 0 auto;
+}
+
 .itemDetails h3 {
   margin: 0 0 8px;
   font-size: 18px;

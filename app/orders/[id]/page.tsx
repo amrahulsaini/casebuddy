@@ -29,6 +29,19 @@ interface Order {
   shipping_pincode: string;
   created_at: string;
   updated_at: string;
+  items?: Array<{
+    productId: number | null;
+    productName: string;
+    phoneModel?: string | null;
+    designName?: string | null;
+    quantity: number;
+    imageUrl?: string | null;
+    customization?: {
+      customText?: string;
+      font?: string;
+      placement?: string;
+    };
+  }>;
 }
 
 type Shipment = {
@@ -49,6 +62,11 @@ function formatCustomerShipmentStatus(status: Shipment['customer_status']) {
   if (status === 'delivered') return 'Delivered';
   if (status === 'shipped') return 'Shipped';
   return '—';
+}
+
+function normalizePlacement(value: unknown) {
+  if (!value) return null;
+  return String(value).replace(/_/g, ' ');
 }
 
 export default function OrderDetailPage() {
@@ -177,10 +195,18 @@ export default function OrderDetailPage() {
     );
   }
 
-  let customData = null;
-  try {
-    customData = order.customization_data ? JSON.parse(order.customization_data) : null;
-  } catch (e) {}
+  const items = Array.isArray(order.items) && order.items.length > 0
+    ? order.items
+    : [
+        {
+          productId: null,
+          productName: order.product_name,
+          phoneModel: order.phone_model,
+          designName: null,
+          quantity: order.quantity,
+          imageUrl: null,
+        },
+      ];
 
   return (
     <div className={styles.container}>
@@ -220,25 +246,39 @@ export default function OrderDetailPage() {
               <Package size={20} />
               Order Items
             </h2>
-            <div className={styles.orderItem}>
-              <div className={styles.itemDetails}>
-                <h3>{order.product_name}</h3>
-                <p className={styles.itemMeta}>Phone Model: {order.phone_model}</p>
-                <p className={styles.itemMeta}>Quantity: {order.quantity}</p>
-              </div>
-              <div className={styles.itemPrice}>
-                ₹{order.unit_price} × {order.quantity}
-              </div>
-            </div>
+            {items.map((it, idx) => (
+              <div className={styles.orderItem} key={idx}>
+                <div className={styles.itemDetails}>
+                  <div className={styles.itemHeaderRow}>
+                    {it.imageUrl && (
+                      <img
+                        src={it.imageUrl}
+                        alt={it.productName}
+                        className={styles.itemImage}
+                        loading="lazy"
+                      />
+                    )}
+                    <div>
+                      <h3>{it.productName}</h3>
+                      {it.phoneModel && <p className={styles.itemMeta}>Phone Model: {it.phoneModel}</p>}
+                      {it.designName && <p className={styles.itemMeta}>Design: {it.designName}</p>}
+                      <p className={styles.itemMeta}>Quantity: {it.quantity}</p>
+                    </div>
+                  </div>
 
-            {customData && (
-              <div className={styles.customization}>
-                <strong>🎨 Customization</strong>
-                {customData.customText && <p>Text: "{customData.customText}"</p>}
-                {customData.font && <p>Font: {customData.font}</p>}
-                {customData.placement && <p>Placement: {customData.placement.replace(/_/g, ' ')}</p>}
+                  {it.customization && (it.customization.customText || it.customization.font || it.customization.placement) && (
+                    <div className={styles.customization}>
+                      <strong>🎨 Customization</strong>
+                      {it.customization.customText && <p>Text: "{it.customization.customText}"</p>}
+                      {it.customization.font && <p>Font: {it.customization.font}</p>}
+                      {it.customization.placement && (
+                        <p>Placement: {normalizePlacement(it.customization.placement)}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
+            ))}
 
             {order.notes && (
               <div className={styles.notes}>

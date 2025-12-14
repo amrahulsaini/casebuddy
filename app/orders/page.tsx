@@ -24,6 +24,25 @@ interface Order {
   customization_data: string | null;
   notes: string | null;
   created_at: string;
+  primary_image_url?: string | null;
+  items?: Array<{
+    productId: number | null;
+    productName: string;
+    phoneModel?: string | null;
+    designName?: string | null;
+    quantity: number;
+    imageUrl?: string | null;
+    customization?: {
+      customText?: string;
+      font?: string;
+      placement?: string;
+    };
+  }>;
+}
+
+function normalizePlacement(value: unknown) {
+  if (!value) return null;
+  return String(value).replace(/_/g, ' ');
 }
 
 export default function OrdersPage() {
@@ -415,10 +434,18 @@ export default function OrdersPage() {
       ) : (
         <div className={styles.ordersList}>
           {orders.map((order) => {
-            let customData = null;
-            try {
-              customData = order.customization_data ? JSON.parse(order.customization_data) : null;
-            } catch {}
+            const items = Array.isArray(order.items) && order.items.length > 0
+              ? order.items
+              : [
+                  {
+                    productId: null,
+                    productName: order.product_name,
+                    phoneModel: order.phone_model,
+                    designName: null,
+                    quantity: order.quantity,
+                    imageUrl: order.primary_image_url || null,
+                  },
+                ];
 
             return (
               <div key={order.id} className={styles.orderCard}>
@@ -446,16 +473,43 @@ export default function OrdersPage() {
 
                 <div className={styles.orderBody}>
                   <div className={styles.productInfo}>
-                    <h4>{order.product_name}</h4>
-                    <p>Phone Model: {order.phone_model}</p>
-                    <p>Quantity: {order.quantity}</p>
-                    
-                    {customData && (
+                    <div className={styles.productRow}>
+                      {order.primary_image_url && (
+                        // Using <img> to avoid next/image remote domain config issues
+                        <img
+                          src={order.primary_image_url}
+                          alt={items?.[0]?.productName || 'Product'}
+                          className={styles.productImage}
+                          loading="lazy"
+                        />
+                      )}
+                      <div style={{ flex: 1 }}>
+                        <h4>{items.length === 1 ? items[0].productName : `${items.length} items`}</h4>
+                        {items.length === 1 && items[0].phoneModel && <p>Phone Model: {items[0].phoneModel}</p>}
+                        {items.length === 1 && <p>Quantity: {items[0].quantity}</p>}
+                      </div>
+                    </div>
+
+                    {items.length > 1 && (
+                      <div className={styles.customization}>
+                        <strong>Items:</strong>
+                        {items.slice(0, 4).map((it, idx) => (
+                          <p key={idx}>
+                            {it.productName}{it.phoneModel ? ` (${it.phoneModel})` : ''} × {it.quantity}
+                          </p>
+                        ))}
+                        {items.length > 4 && <p>+ {items.length - 4} more…</p>}
+                      </div>
+                    )}
+
+                    {items.length === 1 && items[0].customization && (
                       <div className={styles.customization}>
                         <strong>Customization:</strong>
-                        {customData.customText && <p>Text: &quot;{customData.customText}&quot;</p>}
-                        {customData.font && <p>Font: {customData.font}</p>}
-                        {customData.placement && <p>Placement: {customData.placement.replace(/_/g, ' ')}</p>}
+                        {items[0].customization.customText && <p>Text: &quot;{items[0].customization.customText}&quot;</p>}
+                        {items[0].customization.font && <p>Font: {items[0].customization.font}</p>}
+                        {items[0].customization.placement && (
+                          <p>Placement: {normalizePlacement(items[0].customization.placement)}</p>
+                        )}
                       </div>
                     )}
                     

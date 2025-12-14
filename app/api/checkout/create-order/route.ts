@@ -325,8 +325,58 @@ export async function POST(request: NextRequest) {
       // Continue even if payment session creation fails
     }
 
-    // DON'T send emails here - only send after payment is confirmed
-    // Emails will be sent by the webhook when payment succeeds
+    // Payment pending email (so user has the payment link in inbox)
+    if (paymentUrl && process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+      try {
+        const itemsText = normalizedWithValidatedPrice
+          .map((it: any) => {
+            const name = it.productName || it.product_name || 'Item';
+            const model = it.phoneModel || it.phone_model || '';
+            return `- ${name}${model ? ` (${model})` : ''} x${it.quantity}`;
+          })
+          .join('\n');
+
+        const customerHtml = `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+            <h2>Payment Pending</h2>
+            <p>Hi ${sanitizedName},</p>
+            <p>Your order <strong>${orderNumber}</strong> is created and payment is pending.</p>
+            <p>Please complete payment using this link:</p>
+            <p><a href="${paymentUrl}" target="_blank" rel="noreferrer">Pay Now</a></p>
+            <h3>Items</h3>
+            <pre style="background:#f7f7f7;padding:12px;border-radius:8px;white-space:pre-wrap;">${itemsText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+            <p>After order is confirmed you can track your order at <a href="https://casebuddy.co.in/orders" target="_blank" rel="noreferrer">https://casebuddy.co.in/orders</a></p>
+            <p>Questions? Contact us at info@casebuddy.co.in</p>
+          </div>
+        `;
+
+        const adminHtml = `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+            <h2>Payment Pending</h2>
+            <p>Order <strong>${orderNumber}</strong> created, pending payment.</p>
+            <p>Customer: ${sanitizedName} (${email})</p>
+            <p>Payment link: <a href="${paymentUrl}" target="_blank" rel="noreferrer">${paymentUrl}</a></p>
+            <pre style="background:#f7f7f7;padding:12px;border-radius:8px;white-space:pre-wrap;">${itemsText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+          </div>
+        `;
+
+        await transporter.sendMail({
+          from: `"CaseBuddy" <${process.env.EMAIL_USER}>`,
+          to: email,
+          subject: `Payment Pending - Order #${orderNumber}`,
+          html: customerHtml,
+        });
+
+        await transporter.sendMail({
+          from: `"CaseBuddy Orders" <${process.env.EMAIL_USER}>`,
+          to: process.env.ADMIN_EMAIL || 'info@casebuddy.co.in',
+          subject: `⏳ PAYMENT PENDING - Order #${orderNumber} - ₹${calculatedTotal.toFixed(2)}`,
+          html: adminHtml,
+        });
+      } catch (emailError) {
+        console.error('Error sending payment pending emails:', emailError);
+      }
+    }
 
     return NextResponse.json({ 
       success: true, 

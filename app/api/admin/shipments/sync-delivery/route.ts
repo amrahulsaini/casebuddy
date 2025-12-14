@@ -2,6 +2,29 @@ import { NextRequest, NextResponse } from 'next/server';
 import caseMainPool from '@/lib/db-main';
 import { requireRole } from '@/lib/auth';
 import { shiprocketRequest } from '@/lib/shiprocket';
+import nodemailer from 'nodemailer';
+
+const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST || 'localhost',
+  port: parseInt(process.env.EMAIL_PORT || '587'),
+  secure: process.env.EMAIL_SECURE === 'true',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+  tls: {
+    rejectUnauthorized: false,
+  },
+});
+
+function escapeHtml(value: unknown) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 function firstNonEmpty(...values: any[]) {
   for (const v of values) {
@@ -81,7 +104,73 @@ type ShipmentRow = {
   tracking_url: string | null;
   status: string | null;
   order_status: string | null;
+  order_number: string;
+  customer_name: string;
+  customer_email: string;
 };
+
+async function sendShipmentStatusEmail(params: {
+  to: string;
+  customerName: string;
+  orderNumber: string;
+  status: 'shipped' | 'cancelled';
+}) {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) return;
+
+  const subject =
+    params.status === 'shipped'
+      ? `Your order has been shipped - ${params.orderNumber}`
+      : `Your order has been cancelled - ${params.orderNumber}`;
+
+  const statusLine =
+    params.status === 'shipped'
+      ? 'Your order has been shipped.'
+      : 'Your order has been cancelled.';
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+      <h2>${params.status === 'shipped' ? 'Shipped' : 'Cancelled'}</h2>
+      <p>Hi ${escapeHtml(params.customerName)},</p>
+      <p>${statusLine}</p>
+      <p>Order: <strong>${escapeHtml(params.orderNumber)}</strong></p>
+      <p>You can track your order anytime at <a href="https://casebuddy.co.in/orders" target="_blank" rel="noreferrer">https://casebuddy.co.in/orders</a></p>
+      <p>Questions? Contact us at info@casebuddy.co.in</p>
+    </div>
+  `;
+
+  await transporter.sendMail({
+    from: `"CaseBuddy" <${process.env.EMAIL_USER}>`,
+    to: params.to,
+    subject,
+    html,
+  });
+}
+
+async function sendShipmentStatusAdminEmail(params: {
+  orderNumber: string;
+  customerEmail: string;
+  status: 'shipped' | 'cancelled';
+}) {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) return;
+  const to = process.env.ADMIN_EMAIL || 'info@casebuddy.co.in';
+  const subject =
+    params.status === 'shipped'
+      ? `📦 SHIPPED - ${params.orderNumber}`
+      : `🛑 CANCELLED - ${params.orderNumber}`;
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+      <h2>${params.status === 'shipped' ? 'Shipped' : 'Cancelled'}</h2>
+      <p>Order <strong>${escapeHtml(params.orderNumber)}</strong> is now <strong>${escapeHtml(params.status)}</strong>.</p>
+      <p>Customer: ${escapeHtml(params.customerEmail)}</p>
+    </div>
+  `;
+  await transporter.sendMail({
+    from: `"CaseBuddy Orders" <${process.env.EMAIL_USER}>`,
+    to,
+    subject,
+    html,
+  });
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -109,7 +198,10 @@ export async function POST(request: NextRequest) {
         s.shiprocket_courier_name,
         s.tracking_url,
         s.status,
-        o.order_status
+        o.order_status,
+        o.order_number,
+        o.customer_name,
+        o.customer_email
        FROM shipments s
        JOIN orders o ON o.id = s.order_id
        WHERE ${where}
@@ -173,6 +265,24 @@ export async function POST(request: NextRequest) {
             [mapped, sh.order_id]
           );
           orderUpdatedTo = mapped;
+
+          if (mapped === 'shipped' || mapped === 'cancelled') {
+            try {
+              await sendShipmentStatusEmail({
+                to: sh.customer_email,
+                customerName: sh.customer_name,
+                orderNumber: sh.order_number,
+                status: mapped,
+              });
+              await sendShipmentStatusAdminEmail({
+                orderNumber: sh.order_number,
+                customerEmail: sh.customer_email,
+                status: mapped,
+              });
+            } catch {
+              // ignore email errors
+            }
+          }
         }
 
         results.push({

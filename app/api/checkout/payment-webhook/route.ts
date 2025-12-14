@@ -20,16 +20,24 @@ const transporter = nodemailer.createTransport({
 });
 
 type EmailItem = {
+  productId?: number | null;
   productName: string;
   phoneModel: string;
   designName?: string | null;
   quantity: number;
+  imageUrl?: string | null;
   customization?: {
     customText?: string;
     font?: string;
     placement?: string;
   };
 };
+
+function pickString(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
+}
 
 function escapeHtml(value: unknown) {
   return String(value ?? '')
@@ -42,6 +50,7 @@ function escapeHtml(value: unknown) {
 
 function parseEmailItemsFromOrderRow(orderDetails: any): EmailItem[] {
   const fallbackItem: EmailItem = {
+    productId: orderDetails.product_id != null ? Number(orderDetails.product_id) : null,
     productName: orderDetails.product_name,
     phoneModel: orderDetails.phone_model,
     designName: orderDetails.design_name || null,
@@ -55,6 +64,7 @@ function parseEmailItemsFromOrderRow(orderDetails: any): EmailItem[] {
     const parsed = JSON.parse(raw);
     if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
       return parsed.items.map((it: any) => ({
+        productId: it.productId != null ? Number(it.productId) : (it.product_id != null ? Number(it.product_id) : null),
         productName: it.productName || it.product_name || 'Item',
         phoneModel: it.phoneModel || it.phone_model || '',
         designName: it.designName || it.design_name || null,
@@ -65,6 +75,21 @@ function parseEmailItemsFromOrderRow(orderDetails: any): EmailItem[] {
           placement: it.customizationOptions.placement,
         } : undefined,
       }));
+    }
+
+    // Backward-compatible single-item customization payload
+    const customText = parsed?.customText;
+    const font = parsed?.font;
+    const placement = parsed?.placement;
+    if (customText || font || placement) {
+      return [{
+        ...fallbackItem,
+        customization: {
+          customText,
+          font,
+          placement,
+        },
+      }];
     }
   } catch {
     // ignore
@@ -123,12 +148,53 @@ export async function POST(request: NextRequest) {
         const orderDetails = orderRows[0];
 
         const emailItems = parseEmailItemsFromOrderRow(orderDetails);
+
+        const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'https://casebuddy.co.in').replace(/\/+$/, '');
+
+        const productIds = Array.from(
+          new Set(
+            emailItems
+              .map((it) => (it.productId != null ? Number(it.productId) : null))
+              .filter((v): v is number => v != null && Number.isFinite(v))
+          )
+        );
+
+        const imageByProductId = new Map<number, string>();
+        if (productIds.length > 0) {
+          try {
+            const placeholders = productIds.map(() => '?').join(',');
+            const [imgRows]: any = await caseMainPool.query(
+              `SELECT product_id, image_url, is_primary, sort_order, id
+               FROM product_images
+               WHERE product_id IN (${placeholders})
+               ORDER BY is_primary DESC, sort_order ASC, id ASC`,
+              productIds
+            );
+            for (const r of imgRows || []) {
+              const pid = Number(r.product_id);
+              const rawUrl = pickString(r.image_url);
+              const url = rawUrl
+                ? (rawUrl.startsWith('http://') || rawUrl.startsWith('https://') ? rawUrl : `${baseUrl}${rawUrl.startsWith('/') ? '' : '/'}${rawUrl}`)
+                : null;
+              if (!Number.isFinite(pid) || !url) continue;
+              if (!imageByProductId.has(pid)) imageByProductId.set(pid, url);
+            }
+          } catch {
+            // ignore image lookup failures
+          }
+        }
+
         const itemsHtml = emailItems
           .map((item) => {
             const customization = item.customization;
             const hasCustomization = !!(customization?.customText || customization?.font || customization?.placement);
+            const imgUrl = item.productId != null ? imageByProductId.get(Number(item.productId)) : null;
+            const imageHtml = imgUrl
+              ? `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(item.productName)}" style="width:80px;height:auto;border-radius:8px;border:1px solid #eee;display:block;margin:0 0 10px 0;" />`
+              : '';
             return `
               <div class="product-item">
+                ${imageHtml}
                 <strong>${escapeHtml(item.productName)}</strong><br>
                 ${item.phoneModel ? `${escapeHtml(item.phoneModel)}${item.designName ? ` • ${escapeHtml(item.designName)}` : ''}<br>` : ''}
                 Quantity: ${escapeHtml(item.quantity)}
@@ -202,7 +268,8 @@ export async function POST(request: NextRequest) {
                     Phone: ${orderDetails.customer_mobile}
                   </p>
                   
-                  <p>We'll send you a shipping confirmation email with tracking details once your order ships (7-10 business days).</p>
+                  <h3>Track Your Order</h3>
+                  <p>After order is confirmed you can track your order at <a href="https://casebuddy.co.in/orders" target="_blank" rel="noreferrer">https://casebuddy.co.in/orders</a></p>
                   
                   <p>If you have any questions, feel free to contact us at +918107624752 or reply to this email.</p>
                   
@@ -338,6 +405,58 @@ export async function POST(request: NextRequest) {
       );
       
       console.log(`Order ${orderId} marked as failed`);
+
+      // Send payment failed emails
+      try {
+        const [orderRows]: any = await caseMainPool.query('SELECT * FROM orders WHERE id = ?', [orderId]);
+        if (orderRows?.length) {
+          const orderDetails = orderRows[0];
+          const emailItems = parseEmailItemsFromOrderRow(orderDetails);
+          const itemsText = emailItems
+            .map((it) => `- ${it.productName}${it.phoneModel ? ` (${it.phoneModel})` : ''} x${it.quantity}`)
+            .join('\n');
+
+          const reason = pickString(order?.failure_reason) || pickString(order?.reason) || null;
+
+          const customerHtml = `
+            <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+              <h2>Payment Failed</h2>
+              <p>Hi ${escapeHtml(orderDetails.customer_name)},</p>
+              <p>Unfortunately, the payment for your order <strong>${escapeHtml(orderDetails.order_number)}</strong> did not go through.</p>
+              ${reason ? `<p>Reason: ${escapeHtml(reason)}</p>` : ''}
+              <h3>Items</h3>
+              <pre style="background:#f7f7f7;padding:12px;border-radius:8px;white-space:pre-wrap;">${escapeHtml(itemsText)}</pre>
+              <p>If you need help, contact us at info@casebuddy.co.in</p>
+            </div>
+          `;
+
+          const adminHtml = `
+            <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+              <h2>Payment Failed</h2>
+              <p>Order <strong>${escapeHtml(orderDetails.order_number)}</strong> payment failed.</p>
+              <p>Customer: ${escapeHtml(orderDetails.customer_name)} (${escapeHtml(orderDetails.customer_email)})</p>
+              ${reason ? `<p>Reason: ${escapeHtml(reason)}</p>` : ''}
+              <pre style="background:#f7f7f7;padding:12px;border-radius:8px;white-space:pre-wrap;">${escapeHtml(itemsText)}</pre>
+            </div>
+          `;
+
+          await transporter.sendMail({
+            from: `"CaseBuddy" <${process.env.EMAIL_USER}>`,
+            to: orderDetails.customer_email,
+            subject: `Payment Failed - Order #${orderDetails.order_number}`,
+            html: customerHtml,
+          });
+
+          await transporter.sendMail({
+            from: `"CaseBuddy Orders" <${process.env.EMAIL_USER}>`,
+            to: process.env.ADMIN_EMAIL || 'info@casebuddy.co.in',
+            subject: `❌ PAYMENT FAILED - Order #${orderDetails.order_number}`,
+            html: adminHtml,
+          });
+        }
+      } catch (emailError) {
+        console.error('Error sending payment failed emails:', emailError);
+      }
     }
 
     return NextResponse.json({ success: true });

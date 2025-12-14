@@ -287,7 +287,7 @@ export default function DynamicPage({ params }: { params: Promise<{ slug: string
               </li>
               <li>
                 <Mail size={20} />
-                <span>support@casebuddy.co.in</span>
+                <span>info@casebuddy.co.in</span>
               </li>
               <li>
                 <MapPin size={20} />

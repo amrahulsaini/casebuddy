@@ -14,6 +14,7 @@ interface Order extends RowDataPacket {
   shipping_city: string;
   shipping_state: string;
   shipping_pincode: string;
+  product_id?: number;
   product_name: string;
   phone_model: string;
   design_name: string | null;
@@ -38,10 +39,12 @@ interface OrderItem extends RowDataPacket {
 }
 
 type EmailItem = {
+  productId?: number | null;
   productName: string;
   phoneModel: string;
   designName?: string | null;
   quantity: number;
+  imageUrl?: string | null;
   customization?: {
     customText?: string;
     font?: string;
@@ -58,8 +61,15 @@ function escapeHtml(value: unknown) {
     .replace(/'/g, '&#39;');
 }
 
+function pickString(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
+}
+
 function parseEmailItemsFromOrder(order: Order): { items: EmailItem[]; singleCustomizationHtml: string } {
   const fallbackItem: EmailItem = {
+    productId: typeof order.product_id === 'number' ? order.product_id : null,
     productName: order.product_name,
     phoneModel: order.phone_model,
     designName: order.design_name,
@@ -74,6 +84,7 @@ function parseEmailItemsFromOrder(order: Order): { items: EmailItem[]; singleCus
     const parsed = JSON.parse(order.customization_data);
     if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
       const items: EmailItem[] = parsed.items.map((it: any) => ({
+        productId: it.productId != null ? Number(it.productId) : (it.product_id != null ? Number(it.product_id) : null),
         productName: it.productName || it.product_name || 'Item',
         phoneModel: it.phoneModel || it.phone_model || '',
         designName: it.designName || it.design_name || null,
@@ -212,6 +223,18 @@ export async function POST(request: Request) {
 
         // TRANSACTION ROLLBACK: Delete order if payment failed (not just pending)
         if (paymentData.order_status !== 'ACTIVE') {
+          try {
+            const [failedOrderRows] = await connection.execute<Order[]>(
+              'SELECT * FROM orders WHERE id = ?',
+              [orderId]
+            );
+            if (failedOrderRows.length > 0) {
+              await sendPaymentFailedEmails(failedOrderRows[0], String(paymentData.order_status));
+            }
+          } catch (emailError) {
+            console.error('Failed to send payment failed emails:', emailError);
+          }
+
           console.log('Payment failed, deleting order from database...');
           await connection.execute(
             'DELETE FROM orders WHERE id = ?',
@@ -265,12 +288,53 @@ async function sendOrderConfirmationEmails(order: Order) {
 
   const { items, singleCustomizationHtml } = parseEmailItemsFromOrder(order);
 
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'https://casebuddy.co.in').replace(/\/+$/, '');
+
+  const productIds = Array.from(
+    new Set(
+      items
+        .map((it) => (it.productId != null ? Number(it.productId) : null))
+        .filter((v): v is number => v != null && Number.isFinite(v))
+    )
+  );
+
+  const imageByProductId = new Map<number, string>();
+  if (productIds.length > 0) {
+    try {
+      const placeholders = productIds.map(() => '?').join(',');
+      const [rows]: any = await pool.query(
+        `SELECT product_id, image_url, is_primary, sort_order, id
+         FROM product_images
+         WHERE product_id IN (${placeholders})
+         ORDER BY is_primary DESC, sort_order ASC, id ASC`,
+        productIds
+      );
+
+      for (const r of rows || []) {
+        const pid = Number(r.product_id);
+        const rawUrl = pickString(r.image_url);
+        const url = rawUrl
+          ? (rawUrl.startsWith('http://') || rawUrl.startsWith('https://') ? rawUrl : `${baseUrl}${rawUrl.startsWith('/') ? '' : '/'}${rawUrl}`)
+          : null;
+        if (!Number.isFinite(pid) || !url) continue;
+        if (!imageByProductId.has(pid)) imageByProductId.set(pid, url);
+      }
+    } catch {
+      // ignore image lookup failures
+    }
+  }
+
   const itemsHtml = items
     .map((item) => {
       const customization = item.customization;
       const hasCustomization = !!(customization?.customText || customization?.font || customization?.placement);
+      const imgUrl = item.productId != null ? imageByProductId.get(Number(item.productId)) : null;
+      const imageHtml = imgUrl
+        ? `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(item.productName)}" style="width:80px;height:auto;border-radius:8px;border:1px solid #eee;display:block;margin:0 0 10px 0;" />`
+        : '';
       return `
         <div class="item">
+          ${imageHtml}
           <p><strong>${escapeHtml(item.productName)}</strong></p>
           ${item.phoneModel ? `<p>Phone Model: ${escapeHtml(item.phoneModel)}</p>` : ''}
           ${item.designName ? `<p>Design: ${escapeHtml(item.designName)}</p>` : ''}
@@ -334,9 +398,15 @@ async function sendOrderConfirmationEmails(order: Order) {
             <p>${order.shipping_city}, ${order.shipping_state} - ${order.shipping_pincode}</p>
             <p>Mobile: ${order.customer_mobile}</p>
           </div>
+
+          <div class="order-details">
+            <h3>Track Your Order</h3>
+            <p>You can track your order anytime at:</p>
+            <p><a href="https://casebuddy.co.in/orders" target="_blank" rel="noreferrer">https://casebuddy.co.in/orders</a></p>
+          </div>
         </div>
         <div class="footer">
-          <p>Questions? Contact us at support@casebuddy.co.in</p>
+          <p>Questions? Contact us at info@casebuddy.co.in</p>
           <p>&copy; ${new Date().getFullYear()} CaseBuddy. All rights reserved.</p>
         </div>
       </div>
@@ -419,5 +489,56 @@ async function sendOrderConfirmationEmails(order: Order) {
     to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
     subject: `New Order ${order.order_number} - ${order.customer_name}`,
     html: adminEmailHtml,
+  });
+}
+
+async function sendPaymentFailedEmails(order: Order, rawStatus: string) {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) return;
+
+  const transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST || 'casebuddy.co.in',
+    port: parseInt(process.env.EMAIL_PORT || '587'),
+    secure: process.env.EMAIL_SECURE === 'true',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD,
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
+
+  const status = rawStatus || 'FAILED';
+  const customerHtml = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+      <h2>Payment Failed</h2>
+      <p>Hi ${escapeHtml(order.customer_name)},</p>
+      <p>Unfortunately, the payment for your order <strong>${escapeHtml(order.order_number)}</strong> did not complete.</p>
+      <p>Status: ${escapeHtml(status)}</p>
+      <p>If you need help, contact us at info@casebuddy.co.in</p>
+    </div>
+  `;
+
+  const adminHtml = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+      <h2>Payment Failed</h2>
+      <p>Order <strong>${escapeHtml(order.order_number)}</strong> payment did not complete.</p>
+      <p>Status: ${escapeHtml(status)}</p>
+      <p>Customer: ${escapeHtml(order.customer_email)}</p>
+    </div>
+  `;
+
+  await transporter.sendMail({
+    from: `"CaseBuddy" <${process.env.EMAIL_USER}>`,
+    to: order.customer_email,
+    subject: `Payment Failed - Order ${order.order_number}`,
+    html: customerHtml,
+  });
+
+  await transporter.sendMail({
+    from: `"CaseBuddy Orders" <${process.env.EMAIL_USER}>`,
+    to: process.env.ADMIN_EMAIL || 'info@casebuddy.co.in',
+    subject: `❌ PAYMENT FAILED - ${order.order_number}`,
+    html: adminHtml,
   });
 }

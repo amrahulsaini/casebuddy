@@ -2,6 +2,29 @@ import { NextRequest, NextResponse } from 'next/server';
 import caseMainPool from '@/lib/db-main';
 import { requireRole } from '@/lib/auth';
 import { shiprocketRequest } from '@/lib/shiprocket';
+import nodemailer from 'nodemailer';
+
+const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST || 'localhost',
+  port: parseInt(process.env.EMAIL_PORT || '587'),
+  secure: process.env.EMAIL_SECURE === 'true',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+  tls: {
+    rejectUnauthorized: false,
+  },
+});
+
+function escapeHtml(value: unknown) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,6 +58,57 @@ export async function POST(request: NextRequest) {
        WHERE order_id = ?`,
       [JSON.stringify(response), orderId]
     );
+
+    const [orderRows]: any = await caseMainPool.execute(
+      'SELECT id, order_number, customer_email, customer_name, order_status FROM orders WHERE id = ? LIMIT 1',
+      [orderId]
+    );
+    const order = orderRows?.[0];
+
+    // Mark order cancelled (if not already terminal)
+    if (order && String(order.order_status || '').toLowerCase() !== 'cancelled') {
+      await caseMainPool.execute(
+        `UPDATE orders SET order_status = 'cancelled', updated_at = NOW() WHERE id = ?`,
+        [orderId]
+      );
+    }
+
+    // Email customer/admin about cancellation
+    if (order && process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+      try {
+        const customerHtml = `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+            <h2>Cancelled</h2>
+            <p>Hi ${escapeHtml(order.customer_name)},</p>
+            <p>Your order <strong>${escapeHtml(order.order_number)}</strong> has been cancelled.</p>
+            <p>If you have questions, contact us at info@casebuddy.co.in</p>
+          </div>
+        `;
+        const adminHtml = `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+            <h2>Cancelled</h2>
+            <p>Order <strong>${escapeHtml(order.order_number)}</strong> was cancelled via Shiprocket.</p>
+            <p>Customer: ${escapeHtml(order.customer_email)}</p>
+          </div>
+        `;
+
+        await transporter.sendMail({
+          from: `"CaseBuddy" <${process.env.EMAIL_USER}>`,
+          to: order.customer_email,
+          subject: `Your order has been cancelled - ${order.order_number}`,
+          html: customerHtml,
+        });
+
+        await transporter.sendMail({
+          from: `"CaseBuddy Orders" <${process.env.EMAIL_USER}>`,
+          to: process.env.ADMIN_EMAIL || 'info@casebuddy.co.in',
+          subject: `🛑 CANCELLED - ${order.order_number}`,
+          html: adminHtml,
+        });
+      } catch {
+        // ignore email errors
+      }
+    }
 
     const [updated]: any = await caseMainPool.execute('SELECT * FROM shipments WHERE order_id = ? LIMIT 1', [orderId]);
     return NextResponse.json({ success: true, shipment: updated?.[0] || null, shiprocket: response });

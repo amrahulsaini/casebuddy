@@ -105,11 +105,13 @@ export async function GET(
     const shipment = rows?.[0] || null;
     if (!shipment) return NextResponse.json(null);
 
-    // Auto-refresh tracking from Shiprocket if we have an AWB and the cached data is old.
-    // This makes customer view update automatically after "Ship Now" without requiring admin clicks.
+    // IMPORTANT: Customer view should reflect only what admin has synced.
+    // Auto-refresh is disabled by default; enable only if explicitly configured.
+    const allowCustomerAutoRefresh = String(process.env.SHIPROCKET_CUSTOMER_AUTO_REFRESH || '').trim() === '1';
+
     const awb = shipment.shiprocket_awb ? String(shipment.shiprocket_awb).trim() : '';
     const refreshMins = Number(process.env.SHIPROCKET_CUSTOMER_REFRESH_MINS || '10');
-    if (awb && shouldRefresh(shipment.updated_at, refreshMins)) {
+    if (allowCustomerAutoRefresh && awb && shouldRefresh(shipment.updated_at, refreshMins)) {
       try {
         const response = await shiprocketRequest<any>(
           `/v1/external/courier/track/awb/${encodeURIComponent(String(awb))}`,

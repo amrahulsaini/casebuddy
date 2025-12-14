@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Package, Search, Download, Filter, Eye, Edit, RefreshCw } from 'lucide-react';
+import { Package, Search, Download, Eye, RefreshCw } from 'lucide-react';
 import styles from './orders.module.css';
 
 interface Order {
@@ -15,7 +15,6 @@ interface Order {
   phone_model: string;
   quantity: number;
   total_amount: number;
-  order_status: string;
   payment_status: string;
   created_at: string;
 }
@@ -25,7 +24,6 @@ export default function AdminOrdersPage() {
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
   const [paymentFilter, setPaymentFilter] = useState('all');
   
   // Pagination state
@@ -40,7 +38,7 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     filterOrders();
-  }, [searchTerm, statusFilter, paymentFilter, orders]);
+  }, [searchTerm, paymentFilter, orders]);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -74,11 +72,6 @@ export default function AdminOrdersPage() {
       );
     }
 
-    // Status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(order => order.order_status === statusFilter);
-    }
-
     // Payment filter
     if (paymentFilter !== 'all') {
       filtered = filtered.filter(order => order.payment_status === paymentFilter);
@@ -87,24 +80,8 @@ export default function AdminOrdersPage() {
     setFilteredOrders(filtered);
   };
 
-  const updateOrderStatus = async (orderId: number, newStatus: string) => {
-    try {
-      const response = await fetch('/api/admin/orders/update-status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId, orderStatus: newStatus }),
-      });
-
-      if (response.ok) {
-        fetchOrders();
-      }
-    } catch (error) {
-      console.error('Error updating order status:', error);
-    }
-  };
-
   const exportToCSV = () => {
-    const headers = ['Order Number', 'Customer Name', 'Email', 'Mobile', 'Product', 'Phone Model', 'Quantity', 'Amount', 'Order Status', 'Payment Status', 'Date'];
+    const headers = ['Order Number', 'Customer Name', 'Email', 'Mobile', 'Product', 'Phone Model', 'Quantity', 'Amount', 'Payment Status', 'Date'];
     const rows = filteredOrders.map(order => [
       order.order_number,
       order.customer_name,
@@ -114,7 +91,6 @@ export default function AdminOrdersPage() {
       order.phone_model,
       order.quantity,
       order.total_amount,
-      order.order_status,
       order.payment_status,
       new Date(order.created_at).toLocaleDateString()
     ]);
@@ -152,8 +128,6 @@ export default function AdminOrdersPage() {
 
   const stats = {
     total: orders.length,
-    pending: orders.filter(o => o.order_status === 'pending').length,
-    processing: orders.filter(o => o.order_status === 'processing').length,
     completed: orders.filter(o => o.payment_status === 'completed').length,
     revenue: orders.filter(o => o.payment_status === 'completed').reduce((sum, o) => sum + o.total_amount, 0)
   };
@@ -192,8 +166,8 @@ export default function AdminOrdersPage() {
             <Package size={24} style={{ color: '#FF9800' }} />
           </div>
           <div className={styles.statContent}>
-            <div className={styles.statValue}>{stats.pending}</div>
-            <div className={styles.statLabel}>Pending</div>
+            <div className={styles.statValue}>{stats.completed}</div>
+            <div className={styles.statLabel}>Paid</div>
           </div>
         </div>
         <div className={styles.statCard}>
@@ -201,8 +175,8 @@ export default function AdminOrdersPage() {
             <Package size={24} style={{ color: '#03A9F4' }} />
           </div>
           <div className={styles.statContent}>
-            <div className={styles.statValue}>{stats.processing}</div>
-            <div className={styles.statLabel}>Processing</div>
+            <div className={styles.statValue}>{stats.total - stats.completed}</div>
+            <div className={styles.statLabel}>Unpaid</div>
           </div>
         </div>
         <div className={styles.statCard}>
@@ -229,21 +203,6 @@ export default function AdminOrdersPage() {
         </div>
         <div className={styles.filters}>
           <div className={styles.filterGroup}>
-            <Filter size={16} />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className={styles.filterSelect}
-            >
-              <option value="all">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="processing">Processing</option>
-              <option value="shipped">Shipped</option>
-              <option value="delivered">Delivered</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-          </div>
-          <div className={styles.filterGroup}>
             <select
               value={paymentFilter}
               onChange={(e) => setPaymentFilter(e.target.value)}
@@ -267,7 +226,7 @@ export default function AdminOrdersPage() {
         <div className={styles.empty}>
           <Package size={64} />
           <h2>No Orders Found</h2>
-          <p>{searchTerm || statusFilter !== 'all' || paymentFilter !== 'all' 
+          <p>{searchTerm || paymentFilter !== 'all' 
             ? 'Try adjusting your filters' 
             : 'No orders have been placed yet'}</p>
         </div>
@@ -280,7 +239,6 @@ export default function AdminOrdersPage() {
                 <th>Customer</th>
                 <th>Product</th>
                 <th>Amount</th>
-                <th>Order Status</th>
                 <th>Payment</th>
                 <th>Date</th>
                 <th>Actions</th>
@@ -307,20 +265,6 @@ export default function AdminOrdersPage() {
                   </td>
                   <td>
                     <div className={styles.amount}>₹{order.total_amount}</div>
-                  </td>
-                  <td>
-                    <select
-                      value={order.order_status}
-                      onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                      className={styles.statusSelect}
-                      style={{ borderColor: getStatusColor(order.order_status) }}
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="processing">Processing</option>
-                      <option value="shipped">Shipped</option>
-                      <option value="delivered">Delivered</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
                   </td>
                   <td>
                     <span

@@ -19,7 +19,7 @@ export default async function AdminDashboardPage() {
       ordersCount = (ordersResult as any[])[0].count;
       
       const [pendingResult] = await connection.execute(
-        "SELECT COUNT(*) as count FROM orders WHERE order_status = 'pending'"
+        "SELECT COUNT(*) as count FROM orders WHERE payment_status = 'pending'"
       );
       pendingCount = (pendingResult as any[])[0].count;
       
@@ -105,7 +105,7 @@ export default async function AdminDashboardPage() {
             <div className={styles.linkIcon}>🛒</div>
             <div>
               <div className={styles.linkTitle}>Orders</div>
-              <div className={styles.linkDesc}>{stats.pending} pending</div>
+              <div className={styles.linkDesc}>{stats.pending} unpaid</div>
             </div>
           </a>
         </div>
@@ -138,7 +138,7 @@ export default async function AdminDashboardPage() {
           <div className={styles.statCard}>
             <div className={styles.statIcon}>⏳</div>
             <div className={styles.statInfo}>
-              <p className={styles.statLabel}>Pending Orders</p>
+              <p className={styles.statLabel}>Unpaid Orders</p>
               <p className={styles.statValue}>{stats.pending}</p>
             </div>
           </div>
@@ -154,7 +154,7 @@ export default async function AdminDashboardPage() {
                     <th>Order #</th>
                     <th>Customer</th>
                     <th>Total</th>
-                    <th>Status</th>
+                    <th>Payment</th>
                     <th>Date</th>
                   </tr>
                 </thead>
@@ -165,8 +165,8 @@ export default async function AdminDashboardPage() {
                       <td>{order.customer_name}</td>
                       <td>₹{parseFloat(order.total_amount).toFixed(2)}</td>
                       <td>
-                        <span className={`${styles.badge} ${styles[order.order_status]}`}>
-                          {order.order_status}
+                        <span className={`${styles.badge} ${styles[order.payment_status]}`}>
+                          {order.payment_status}
                         </span>
                       </td>
                       <td>{new Date(order.created_at).toLocaleDateString()}</td>

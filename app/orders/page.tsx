@@ -19,7 +19,6 @@ interface Order {
   phone_model: string;
   quantity: number;
   total_amount: number;
-  order_status: string;
   payment_status: string;
   customization_data: string | null;
   notes: string | null;
@@ -439,13 +438,6 @@ export default function OrdersPage() {
                     >
                       {getStatusIcon(order.payment_status)}
                       {order.payment_status}
-                    </div>
-                    <div 
-                      className={styles.statusBadge}
-                      style={{ backgroundColor: getStatusColor(order.order_status) }}
-                    >
-                      {getStatusIcon(order.order_status)}
-                      {order.order_status}
                     </div>
                   </div>
                 </div>

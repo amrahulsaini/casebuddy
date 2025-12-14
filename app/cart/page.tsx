@@ -66,45 +66,10 @@ export default function CartPage() {
       console.log('Cart is empty, returning');
       return;
     }
-    
-    const firstItem = cart[0];
-    
-    // Calculate total from all items
-    const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
-    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const shipping = subtotal >= 499 ? 0 : 80;
-    const totalPrice = subtotal + shipping;
-    
-    const params = new URLSearchParams({
-      productId: firstItem.productId.toString(),
-      productName: firstItem.name,
-      phoneModel: firstItem.phoneModel,
-      price: totalPrice.toString(),
-      quantity: totalQuantity.toString(),
-      image: firstItem.image || '',
-    });
 
-    // Add customization if present
-    if (firstItem.customText) {
-      params.append('customText', firstItem.customText);
-      params.append('font', firstItem.font || 'Arial');
-      params.append('placement', firstItem.placement || 'center');
-    }
-
-    // Add notes if present
-    if (firstItem.additionalNotes) {
-      params.append('notes', firstItem.additionalNotes);
-    }
-    
-    // Add warning if multiple items
-    if (cart.length > 1) {
-      params.append('notes', `Multiple items: ${cart.map(item => `${item.name} (${item.quantity})`).join(', ')}`);
-    }
-
-    const checkoutUrl = `/checkout?${params.toString()}`;
+    // Navigate to checkout in cart mode (checkout page will read full cart from CartContext)
+    const checkoutUrl = `/checkout?fromCart=1`;
     console.log('Navigating to:', checkoutUrl);
-    
-    // Navigate to checkout
     window.location.href = checkoutUrl;
   };
 

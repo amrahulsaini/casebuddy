@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
       state,
       pincode,
       notes,
+      orderItems,
       orderItem,
       subtotal,
       shipping,
@@ -63,9 +64,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!orderItem || !orderItem.productId) {
+    const normalizedItems = Array.isArray(orderItems) && orderItems.length > 0
+      ? orderItems
+      : (orderItem ? [orderItem] : []);
+
+    if (!normalizedItems || normalizedItems.length === 0) {
       return NextResponse.json(
-        { error: 'Order item is required' },
+        { error: 'Order item(s) are required' },
+        { status: 400 }
+      );
+    }
+
+    if (normalizedItems.some((it: any) => !it || !it.productId)) {
+      return NextResponse.json(
+        { error: 'Each order item must have a productId' },
         { status: 400 }
       );
     }
@@ -86,24 +98,56 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // SERVER-SIDE PRICE VALIDATION: Get actual product price from database
+    // SERVER-SIDE PRICE VALIDATION: Get actual product prices from database
+    const productIds: number[] = Array.from(
+      new Set(normalizedItems.map((it: any) => parseInt(it.productId)))
+    ).filter((id) => Number.isFinite(id));
+
+    if (productIds.length === 0) {
+      return NextResponse.json(
+        { error: 'Invalid product id(s)' },
+        { status: 400 }
+      );
+    }
+
+    const placeholders = productIds.map(() => '?').join(',');
     const [productRows]: any = await caseMainPool.query(
-      'SELECT price FROM products WHERE id = ?',
-      [orderItem.productId]
+      `SELECT id, price FROM products WHERE id IN (${placeholders})`,
+      productIds
     );
 
-    if (!productRows || productRows.length === 0) {
+    const priceByProductId = new Map<number, number>();
+    for (const row of productRows || []) {
+      priceByProductId.set(parseInt(row.id), parseFloat(row.price));
+    }
+
+    // Ensure all products exist
+    const missing = productIds.filter((id) => !priceByProductId.has(id));
+    if (missing.length > 0) {
       return NextResponse.json(
-        { error: 'Product not found' },
+        { error: 'One or more products not found' },
         { status: 404 }
       );
     }
 
-    const actualPrice = parseFloat(productRows[0].price);
-    const quantity = parseInt(orderItem.quantity) || 1;
-    
     // Recalculate totals server-side (don't trust frontend)
-    const calculatedSubtotal = actualPrice * quantity;
+    const normalizedWithValidatedPrice = normalizedItems.map((it: any) => {
+      const productId = parseInt(it.productId);
+      const qty = Math.max(1, parseInt(it.quantity) || 1);
+      const unitPrice = priceByProductId.get(productId) || 0;
+      return {
+        ...it,
+        productId,
+        quantity: qty,
+        validatedUnitPrice: unitPrice,
+        lineSubtotal: unitPrice * qty,
+      };
+    });
+
+    const calculatedSubtotal = normalizedWithValidatedPrice.reduce(
+      (sum: number, it: any) => sum + it.lineSubtotal,
+      0
+    );
     const calculatedShipping = calculatedSubtotal < 499 ? 80 : 0;
     const calculatedTotal = calculatedSubtotal + calculatedShipping;
 
@@ -125,6 +169,13 @@ export async function POST(request: NextRequest) {
 
     // Create order in database
     const orderNumber = `CB${Date.now()}${Math.floor(Math.random() * 1000)}`;
+
+    const primaryItem = normalizedWithValidatedPrice[0];
+    const totalQuantity = normalizedWithValidatedPrice.reduce((sum: number, it: any) => sum + it.quantity, 0);
+    const effectiveUnitPrice = totalQuantity > 0 ? calculatedSubtotal / totalQuantity : primaryItem.validatedUnitPrice;
+    const storedProductName = normalizedWithValidatedPrice.length > 1
+      ? `Multiple Items (${normalizedWithValidatedPrice.length})`
+      : (primaryItem.productName || 'Custom Phone Case');
     
     const [result]: any = await caseMainPool.query(
       `INSERT INTO orders (
@@ -162,17 +213,19 @@ export async function POST(request: NextRequest) {
         sanitizedCity,
         sanitizedState,
         pincode,
-        orderItem.productId,
-        orderItem.productName,
-        orderItem.phoneModel,
-        orderItem.designName || null,
-        quantity,
-        actualPrice, // Use server-validated price
+        primaryItem.productId,
+        storedProductName,
+        primaryItem.phoneModel,
+        primaryItem.designName || null,
+        totalQuantity,
+        effectiveUnitPrice, // informational when multiple items
         calculatedSubtotal, // Use server-calculated subtotal
         calculatedShipping, // Use server-calculated shipping
         calculatedTotal, // Use server-calculated total
         sanitizedNotes,
-        orderItem.customizationOptions ? JSON.stringify(orderItem.customizationOptions) : null,
+        normalizedWithValidatedPrice.length > 1
+          ? JSON.stringify({ items: normalizedWithValidatedPrice.map(({ validatedUnitPrice, lineSubtotal, ...it }: any) => it) })
+          : (primaryItem.customizationOptions ? JSON.stringify(primaryItem.customizationOptions) : null),
         'pending', // order_status
         'pending'  // payment_status
       ]
@@ -200,7 +253,7 @@ export async function POST(request: NextRequest) {
         order_meta: {
           return_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/checkout/payment-callback?order_id=${orderId}`
         },
-        order_note: notes || `Order for ${orderItem.productName}`
+        order_note: notes || `Order for ${storedProductName}`
       };
 
       console.log('Creating Cashfree payment session:', {

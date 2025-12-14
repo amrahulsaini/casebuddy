@@ -8,6 +8,7 @@ import { User, Mail, Phone, MapPin, ShoppingBag, Lock, Check, Heart, ShoppingCar
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import SearchBar from '@/components/SearchBar';
 import Toast from '@/components/Toast';
+import { useCart } from '@/contexts/CartContext';
 import styles from './page.module.css';
 import homeStyles from '../home.module.css';
 
@@ -46,8 +47,9 @@ interface FormErrors {
 function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { cart } = useCart();
   const [loading, setLoading] = useState(true);
-  const [orderItem, setOrderItem] = useState<OrderItem | null>(null);
+  const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [scrollY, setScrollY] = useState(0);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
@@ -136,6 +138,44 @@ function CheckoutContent() {
 
   // Load order data from URL params
   useEffect(() => {
+    const fromCart = searchParams.get('fromCart') === '1';
+
+    if (fromCart) {
+      if (!cart || cart.length === 0) {
+        router.push('/cart');
+        return;
+      }
+
+      const mapped: OrderItem[] = cart.map((item) => ({
+        productId: item.productId,
+        productName: item.name,
+        phoneModel: item.phoneModel,
+        price: item.price,
+        quantity: item.quantity,
+        image: item.image,
+        customizationOptions: (item.customText || item.font || item.placement) ? {
+          customText: item.customText || undefined,
+          font: item.font || undefined,
+          placement: item.placement || undefined,
+        } : undefined,
+      }));
+
+      setOrderItems(mapped);
+
+      // Optional: prefill notes if cart items have notes
+      const cartNotes = cart
+        .map((item) => item.additionalNotes)
+        .filter(Boolean)
+        .join('\n')
+        .trim();
+      if (cartNotes) {
+        setFormData((prev) => ({ ...prev, notes: cartNotes }));
+      }
+
+      setLoading(false);
+      return;
+    }
+
     const productId = searchParams.get('productId');
     const phoneModel = searchParams.get('phoneModel');
     const designName = searchParams.get('designName');
@@ -153,20 +193,22 @@ function CheckoutContent() {
       return;
     }
 
-    setOrderItem({
-      productId: parseInt(productId),
-      productName: productName || 'Custom Phone Case',
-      phoneModel,
-      designName: designName || undefined,
-      price: parseFloat(price),
-      quantity: quantity ? parseInt(quantity) : 1,
-      image: decodeURIComponent(image),
-      customizationOptions: (customText || font || placement) ? {
-        customText: customText || undefined,
-        font: font || undefined,
-        placement: placement || undefined
-      } : undefined
-    });
+    setOrderItems([
+      {
+        productId: parseInt(productId),
+        productName: productName || 'Custom Phone Case',
+        phoneModel,
+        designName: designName || undefined,
+        price: parseFloat(price),
+        quantity: quantity ? parseInt(quantity) : 1,
+        image: decodeURIComponent(image),
+        customizationOptions: (customText || font || placement) ? {
+          customText: customText || undefined,
+          font: font || undefined,
+          placement: placement || undefined,
+        } : undefined,
+      },
+    ]);
 
     // Set notes from URL if provided
     if (urlNotes) {
@@ -174,7 +216,7 @@ function CheckoutContent() {
     }
 
     setLoading(false);
-  }, [searchParams, router]);
+  }, [searchParams, router, cart]);
 
   // Form validation
   const validateField = (name: string, value: string): string => {
@@ -302,9 +344,9 @@ function CheckoutContent() {
 
   // Calculate totals
   const calculateTotals = () => {
-    if (!orderItem) return { subtotal: 0, shipping: 0, total: 0 };
-    
-    const subtotal = orderItem.price * orderItem.quantity;
+    if (!orderItems || orderItems.length === 0) return { subtotal: 0, shipping: 0, total: 0 };
+
+    const subtotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const shipping = subtotal < 499 ? 80 : 0; // ₹80 shipping if order below ₹499
     const total = subtotal + shipping;
 
@@ -333,7 +375,7 @@ function CheckoutContent() {
 
 
 
-    if (!orderItem) {
+    if (!orderItems || orderItems.length === 0) {
       showToast('error', 'Order details not found');
       return;
     }
@@ -346,7 +388,7 @@ function CheckoutContent() {
       
       const orderData = {
         ...formData,
-        orderItem,
+        orderItems,
         subtotal,
         shipping,
         total,
@@ -413,11 +455,12 @@ function CheckoutContent() {
     );
   }
 
-  if (!orderItem) {
+  if (!orderItems || orderItems.length === 0) {
     return null;
   }
 
   const { subtotal, shipping, total } = calculateTotals();
+  const totalQuantity = orderItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <>
@@ -693,39 +736,41 @@ function CheckoutContent() {
         {/* Order Summary Sidebar */}
         <div className={styles.orderSummary}>
           <h3 className={styles.summaryTitle}>Order Summary</h3>
-          
-          <div className={styles.productCard}>
-            <img
-              src={orderItem.image}
-              alt={orderItem.productName}
-              className={styles.productImage}
-            />
-            <div className={styles.productInfo}>
-              <div className={styles.productName}>{orderItem.productName}</div>
-              <div className={styles.productVariant}>
-                {orderItem.phoneModel}
-                {orderItem.designName && ` • ${orderItem.designName}`}
-              </div>
-              {orderItem.customizationOptions?.customText && (
+
+          {orderItems.map((item, idx) => (
+            <div key={`${item.productId}-${idx}`} className={styles.productCard}>
+              <img
+                src={item.image}
+                alt={item.productName}
+                className={styles.productImage}
+              />
+              <div className={styles.productInfo}>
+                <div className={styles.productName}>{item.productName}</div>
                 <div className={styles.productVariant}>
-                  Custom Text: "{orderItem.customizationOptions.customText}"
-                  {orderItem.customizationOptions.font && ` (${orderItem.customizationOptions.font})`}
-                  {orderItem.customizationOptions.placement && (
-                    <div style={{ fontSize: '12px', marginTop: '4px' }}>
-                      Placement: {orderItem.customizationOptions.placement.replace(/_/g, ' ')}
-                    </div>
-                  )}
+                  {item.phoneModel}
+                  {item.designName && ` • ${item.designName}`}
                 </div>
-              )}
-              <div className={styles.productVariant}>
-                Quantity: {orderItem.quantity}
+                {item.customizationOptions?.customText && (
+                  <div className={styles.productVariant}>
+                    Custom Text: "{item.customizationOptions.customText}"
+                    {item.customizationOptions.font && ` (${item.customizationOptions.font})`}
+                    {item.customizationOptions.placement && (
+                      <div style={{ fontSize: '12px', marginTop: '4px' }}>
+                        Placement: {item.customizationOptions.placement.replace(/_/g, ' ')}
+                      </div>
+                    )}
+                  </div>
+                )}
+                <div className={styles.productVariant}>
+                  Quantity: {item.quantity}
+                </div>
+                <div className={styles.productPrice}>₹{item.price.toFixed(2)} each</div>
               </div>
-              <div className={styles.productPrice}>₹{orderItem.price.toFixed(2)} each</div>
             </div>
-          </div>
+          ))}
 
           <div className={styles.summaryRow}>
-            <span>Subtotal ({orderItem.quantity} {orderItem.quantity === 1 ? 'item' : 'items'})</span>
+            <span>Subtotal ({totalQuantity} {totalQuantity === 1 ? 'item' : 'items'})</span>
             <span>₹{subtotal.toFixed(2)}</span>
           </div>
           

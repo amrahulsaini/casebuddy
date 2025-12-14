@@ -37,7 +37,11 @@ type Shipment = {
   order_id: number;
   status: string | null;
   shiprocket_awb: string | null;
+  shiprocket_courier_name?: string | null;
   tracking_url: string | null;
+  updated_at?: string;
+  current_status?: string | null;
+  events?: Array<{ date: string | null; location: string | null; status: string | null; message: string | null }>;
 };
 
 export default function OrderDetailPage() {
@@ -272,18 +276,44 @@ export default function OrderDetailPage() {
               <div className={styles.infoList}>
                 <div className={styles.infoItem}>
                   <span className={styles.label}>Status:</span>
-                  <span className={styles.value}>{shipment.status || '—'}</span>
+                  <span className={styles.value}>{shipment.current_status || shipment.status || '—'}</span>
+                </div>
+                <div className={styles.infoItem}>
+                  <span className={styles.label}>Courier:</span>
+                  <span className={styles.valueSmall}>{shipment.shiprocket_courier_name || '—'}</span>
                 </div>
                 <div className={styles.infoItem}>
                   <span className={styles.label}>AWB:</span>
                   <span className={styles.valueSmall}>{shipment.shiprocket_awb || '—'}</span>
                 </div>
+                {shipment.updated_at && (
+                  <div className={styles.infoItem}>
+                    <span className={styles.label}>Last Update:</span>
+                    <span className={styles.valueSmall}>{new Date(shipment.updated_at).toLocaleString()}</span>
+                  </div>
+                )}
                 {shipment.tracking_url && (
                   <a href={shipment.tracking_url} target="_blank" rel="noreferrer" className={styles.backBtn}>
                     Open Tracking
                   </a>
                 )}
               </div>
+
+              {shipment.events && shipment.events.length > 0 && (
+                <div className={styles.timeline}>
+                  {shipment.events.map((ev, idx) => (
+                    <div className={styles.timelineItem} key={idx}>
+                      <div className={styles.timelineDot}></div>
+                      <div>
+                        <p className={styles.timelineLabel}>{ev.status || ev.message || 'Update'}</p>
+                        <p className={styles.timelineDate}>
+                          {[ev.location, ev.date].filter(Boolean).join(' • ')}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

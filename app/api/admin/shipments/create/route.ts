@@ -233,6 +233,14 @@ export async function POST(request: NextRequest) {
     const customData = safeJsonParse(order.customization_data);
     const itemsFromJson: any[] | null = Array.isArray(customData?.items) ? customData.items : null;
 
+    const skuCounts = new Map<string, number>();
+    const makeUniqueSku = (baseSku: string, index: number) => {
+      const cleaned = String(baseSku || '').trim() || `CASE-${order.id}-${index + 1}`;
+      const n = (skuCounts.get(cleaned) || 0) + 1;
+      skuCounts.set(cleaned, n);
+      return n === 1 ? cleaned : `${cleaned}-${n}`;
+    };
+
     const orderItems = (itemsFromJson?.length
       ? itemsFromJson
       : [
@@ -249,7 +257,8 @@ export async function POST(request: NextRequest) {
       const unitPrice = Number(it.unitPrice ?? it.price ?? order.unit_price);
       const name = String(it.productName || order.product_name || 'Product');
       const model = String(it.phoneModel || order.phone_model || '');
-      const sku = String(it.sku || (it.productId ? `CASE-${it.productId}` : `CASE-${order.id}-${index + 1}`));
+      const baseSku = String(it.sku || (it.productId ? `CASE-${it.productId}` : `CASE-${order.id}-${index + 1}`));
+      const sku = makeUniqueSku(baseSku, index);
 
       return {
         name: model ? `${name} (${model})` : name,

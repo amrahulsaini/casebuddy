@@ -143,6 +143,10 @@ export default function AdminOrderDetailPage() {
       }
       if (data?.shipment) setShipment(data.shipment);
       setShipSuccess('Done');
+
+      // Always re-fetch from server so any "auto-repair" logic
+      // (AWB/courier extracted from response_json) is reflected in the UI.
+      await fetchShipment();
     } catch (e) {
       setShipError('Shiprocket action failed');
     } finally {
@@ -194,6 +198,9 @@ export default function AdminOrderDetailPage() {
   }
 
   if (!order) return null;
+
+  const shipNowTriggered = !!shipment?.shiprocket_awb;
+  const canProceedInAdmin = shipNowTriggered;
 
   let customData = null;
   try {
@@ -320,6 +327,22 @@ export default function AdminOrderDetailPage() {
                     </button>
                   </div>
                 )}
+
+                {!!shipment.shiprocket_shipment_id && !shipNowTriggered && (
+                  <div className={styles.notes}>
+                    <strong>Waiting for Shiprocket “Ship Now”</strong>
+                    <p>
+                      Open Shiprocket dashboard and click <b>Ship Now</b>. After that, click Sync here to fetch AWB/courier.
+                    </p>
+                    <button
+                      onClick={() => shipAction('/api/admin/shipments/sync', { orderId: order.id })}
+                      disabled={shipLoading}
+                      className={styles.saveBtn}
+                    >
+                      {shipLoading ? 'Working...' : 'Sync From Shiprocket'}
+                    </button>
+                  </div>
+                )}
                 <div className={styles.infoRow}>
                   <span className={styles.label}>Status:</span>
                   <span className={styles.valueSmall}>{shipment.status || '—'}</span>
@@ -339,7 +362,7 @@ export default function AdminOrderDetailPage() {
 
                 <button
                   onClick={() => shipAction('/api/admin/shipments/assign-awb', { orderId: order.id })}
-                  disabled={shipLoading || !!shipment.shiprocket_awb}
+                  disabled={shipLoading || !canProceedInAdmin || !!shipment.shiprocket_awb}
                   className={styles.saveBtn}
                 >
                   {shipLoading ? 'Working...' : shipment.shiprocket_awb ? 'AWB Assigned' : 'Assign AWB'}
@@ -347,7 +370,7 @@ export default function AdminOrderDetailPage() {
 
                 <button
                   onClick={() => shipAction('/api/admin/shipments/generate-label', { orderId: order.id })}
-                  disabled={shipLoading || !shipment.shiprocket_shipment_id}
+                  disabled={shipLoading || !canProceedInAdmin || !shipment.shiprocket_shipment_id}
                   className={styles.saveBtn}
                 >
                   {shipLoading ? 'Working...' : 'Generate Label'}
@@ -361,7 +384,7 @@ export default function AdminOrderDetailPage() {
 
                 <button
                   onClick={() => shipAction('/api/admin/shipments/track', { orderId: order.id })}
-                  disabled={shipLoading || !shipment.shiprocket_awb}
+                  disabled={shipLoading || !canProceedInAdmin || !shipment.shiprocket_awb}
                   className={styles.saveBtn}
                 >
                   {shipLoading ? 'Working...' : 'Refresh Tracking'}

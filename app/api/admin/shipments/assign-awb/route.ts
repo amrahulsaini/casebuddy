@@ -3,6 +3,62 @@ import caseMainPool from '@/lib/db-main';
 import { requireRole } from '@/lib/auth';
 import { shiprocketRequest } from '@/lib/shiprocket';
 
+function getByPath(obj: any, path: string) {
+  return path.split('.').reduce((acc: any, key: string) => (acc == null ? undefined : acc[key]), obj);
+}
+
+function firstNonEmpty(...values: any[]) {
+  for (const v of values) {
+    if (v === undefined || v === null) continue;
+    if (typeof v === 'string' && v.trim() === '') continue;
+    return v;
+  }
+  return null;
+}
+
+function extractAwbAndCourier(response: any) {
+  const dataNode = response?.data;
+  const data0 = Array.isArray(dataNode) ? dataNode[0] : dataNode;
+
+  const awb = firstNonEmpty(
+    response?.awb_code,
+    response?.awb,
+    response?.awbCode,
+    getByPath(response, 'data.awb_code'),
+    getByPath(response, 'data.awb'),
+    getByPath(response, 'data.awbCode'),
+    data0?.awb_code,
+    data0?.awb,
+    data0?.awbCode,
+    getByPath(response, 'data.data.awb_code'),
+    getByPath(response, 'data.data.awb'),
+    getByPath(response, 'data.data.awbCode'),
+    getByPath(response, 'response.awb_code')
+  );
+
+  const courier = firstNonEmpty(
+    response?.courier_name,
+    response?.courierName,
+    response?.courier_company_name,
+    response?.courierCompanyName,
+    getByPath(response, 'data.courier_name'),
+    getByPath(response, 'data.courierName'),
+    getByPath(response, 'data.courier_company_name'),
+    getByPath(response, 'data.courierCompanyName'),
+    data0?.courier_name,
+    data0?.courierName,
+    data0?.courier_company_name,
+    data0?.courierCompanyName,
+    getByPath(response, 'data.data.courier_name'),
+    getByPath(response, 'data.data.courier_company_name')
+  );
+
+  return {
+    awb: awb != null ? String(awb) : null,
+    courier: courier != null ? String(courier) : null,
+  };
+}
+
 export async function POST(request: NextRequest) {
   try {
     await requireRole(['admin', 'manager']);
@@ -25,8 +81,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(payload),
     });
 
-    const awb = response?.awb_code ?? response?.awb ?? null;
-    const courier = response?.courier_name ?? response?.courierName ?? null;
+    const { awb, courier } = extractAwbAndCourier(response);
 
     await caseMainPool.execute(
       `UPDATE shipments
@@ -37,9 +92,9 @@ export async function POST(request: NextRequest) {
            response_json = ?
        WHERE order_id = ?`,
       [
-        awb ? String(awb) : null,
+        awb,
         courierId ? String(courierId) : null,
-        courier ? String(courier) : null,
+        courier,
         JSON.stringify(response),
         orderId,
       ]

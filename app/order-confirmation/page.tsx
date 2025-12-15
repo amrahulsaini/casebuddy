@@ -5,16 +5,25 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { CheckCircle, Package, Truck, Mail, Phone, MapPin, ArrowRight } from 'lucide-react';
+import { useCart } from '@/contexts/CartContext';
 import styles from './order-confirmation.module.css';
 
 function OrderConfirmationContent() {
   const searchParams = useSearchParams();
+  const { clearCart } = useCart();
   const [orderDetails, setOrderDetails] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const orderId = searchParams.get('orderId');
     if (orderId) {
+      // Clear cart after an order is placed (COD / non-payment flows)
+      try {
+        clearCart();
+        localStorage.removeItem('casebuddy_cart');
+      } catch {
+        // ignore
+      }
       fetchOrderDetails(orderId);
     }
   }, [searchParams]);

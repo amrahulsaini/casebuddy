@@ -4,11 +4,13 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, XCircle, Clock, Loader2 } from 'lucide-react';
+import { useCart } from '@/contexts/CartContext';
 import styles from './payment-callback.module.css';
 
 function PaymentCallbackContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { clearCart } = useCart();
   const [status, setStatus] = useState<'loading' | 'success' | 'failed' | 'pending'>('loading');
   const [message, setMessage] = useState('');
   const [errorDetails, setErrorDetails] = useState('');
@@ -54,6 +56,14 @@ function PaymentCallbackContent() {
         // Payment was successful
         setStatus('success');
         setMessage(data.message || 'Payment successful! Your order has been confirmed.');
+
+        // Clear cart after successful payment
+        try {
+          clearCart();
+          localStorage.removeItem('casebuddy_cart');
+        } catch {
+          // ignore
+        }
       } else {
         // Payment not completed (pending or failed)
         setStatus('failed');

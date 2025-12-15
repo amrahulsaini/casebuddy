@@ -2,29 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import styles from './billing.module.css';
-import { ArrowLeft, DollarSign, IndianRupee, Activity, Calendar } from 'lucide-react';
+import { ArrowLeft, IndianRupee, Activity, Calendar, Download } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-interface UsageLog {
+interface DownloadBillingLog {
   id: number;
-  model_name: string;
-  operation_type: string;
-  input_images: number;
-  output_images: number;
-  output_tokens: number;
-  cost_usd: number;
-  cost_inr: number;
-  is_billable: boolean;
+  generation_log_id: number;
+  amount_inr: number;
   phone_model: string;
-  feedback_status: string;
+  generated_image_url: string | null;
   created_at: string;
 }
 
 interface BillingSummary {
-  total_operations: number;
-  total_cost_usd: number;
+  total_downloads: number;
   total_cost_inr: number;
-  refunded_cost_inr?: number;
 }
 
 interface Pagination {
@@ -37,7 +29,7 @@ interface Pagination {
 export default function BillingPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [usageLogs, setUsageLogs] = useState<UsageLog[]>([]);
+  const [downloadLogs, setDownloadLogs] = useState<DownloadBillingLog[]>([]);
   const [summary, setSummary] = useState<BillingSummary | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [pagination, setPagination] = useState<Pagination>({ page: 1, pageSize: 100, total: 0, totalPages: 0 });
@@ -52,15 +44,13 @@ export default function BillingPage() {
       const data = await response.json();
       
       if (data.success) {
-        setUsageLogs(data.logs || []);
+        setDownloadLogs(data.logs || []);
         // Convert string numbers to actual numbers
         const rawSummary = data.summary || null;
         if (rawSummary) {
           setSummary({
-            total_operations: Number(rawSummary.total_operations) || 0,
-            total_cost_usd: Number(rawSummary.total_cost_usd) || 0,
+            total_downloads: Number(rawSummary.total_downloads) || 0,
             total_cost_inr: Number(rawSummary.total_cost_inr) || 0,
-            refunded_cost_inr: rawSummary.refunded_cost_inr !== undefined ? Number(rawSummary.refunded_cost_inr) || 0 : undefined,
           });
         }
 
@@ -74,7 +64,7 @@ export default function BillingPage() {
           });
         } else {
           // Backward compatible fallback
-          const total = Number(rawSummary?.total_operations) || 0;
+          const total = Number(rawSummary?.total_downloads) || 0;
           const totalPages = total > 0 ? Math.ceil(total / pagination.pageSize) : 0;
           setPagination({ page, pageSize: pagination.pageSize, total, totalPages });
         }
@@ -116,24 +106,6 @@ export default function BillingPage() {
     });
   };
 
-  const getOperationLabel = (operationType: string) => {
-    const labels: Record<string, string> = {
-      text_analysis: 'Text Analysis',
-      image_generation: 'Image Generation',
-      image_enhancement: '4K Enhancement',
-    };
-    return labels[operationType] || operationType;
-  };
-
-  const getModelLabel = (modelName: string) => {
-    const labels: Record<string, string> = {
-      'gemini-2.0-flash': 'Gemini 2.0 Flash',
-      'gemini-2.5-flash-image': 'Gemini 2.5 Flash Image',
-      'gemini-3-pro-image-preview': 'Gemini 3 Pro Image',
-    };
-    return labels[modelName] || modelName;
-  };
-
   if (loading) {
     return (
       <div className={styles.container}>
@@ -159,18 +131,8 @@ export default function BillingPage() {
               <Activity size={24} />
             </div>
             <div className={styles.cardContent}>
-              <div className={styles.cardLabel}>Total Operations</div>
-              <div className={styles.cardValue}>{summary.total_operations}</div>
-            </div>
-          </div>
-
-          <div className={styles.summaryCard}>
-            <div className={styles.cardIcon}>
-              <DollarSign size={24} />
-            </div>
-            <div className={styles.cardContent}>
-              <div className={styles.cardLabel}>Total Cost (USD)</div>
-              <div className={styles.cardValue}>${summary.total_cost_usd.toFixed(4)}</div>
+              <div className={styles.cardLabel}>Total Downloads</div>
+              <div className={styles.cardValue}>{summary.total_downloads}</div>
             </div>
           </div>
 
@@ -179,22 +141,10 @@ export default function BillingPage() {
               <IndianRupee size={24} />
             </div>
             <div className={styles.cardContent}>
-              <div className={styles.cardLabel}>Billable Cost (INR)</div>
+              <div className={styles.cardLabel}>Total Cost (INR)</div>
               <div className={styles.cardValue}>₹{summary.total_cost_inr.toFixed(2)}</div>
             </div>
           </div>
-
-          {summary.refunded_cost_inr !== undefined && summary.refunded_cost_inr > 0 && (
-            <div className={styles.summaryCard}>
-              <div className={styles.cardIcon} style={{ background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' }}>
-                <IndianRupee size={24} />
-              </div>
-              <div className={styles.cardContent}>
-                <div className={styles.cardLabel}>Refunded (INR)</div>
-                <div className={styles.cardValue}>₹{summary.refunded_cost_inr.toFixed(2)}</div>
-              </div>
-            </div>
-          )}
         </div>
       )}
 
@@ -232,48 +182,38 @@ export default function BillingPage() {
           </div>
         )}
 
-        {usageLogs.length === 0 ? (
+        {downloadLogs.length === 0 ? (
           <div className={styles.emptyState}>
-            <p>No API usage recorded yet.</p>
-            <p>Start generating case mockups to see your usage here!</p>
+            <p>No downloads recorded yet.</p>
+            <p>Billing is recorded when you download an image.</p>
           </div>
         ) : (
           <div className={styles.table}>
             <div className={styles.tableHeader}>
               <div className={styles.tableCell}>Date & Time</div>
               <div className={styles.tableCell}>Phone Model</div>
-              <div className={styles.tableCell}>Operation</div>
-              <div className={styles.tableCell}>Model</div>
-              <div className={styles.tableCell}>Status</div>
-              <div className={styles.tableCell}>Cost (INR)</div>
+              <div className={styles.tableCell}>Amount (INR)</div>
+              <div className={styles.tableCell}>File</div>
             </div>
 
-            {usageLogs.map((log) => (
+            {downloadLogs.map((log) => (
               <div key={log.id} className={styles.tableRow}>
                 <div className={styles.tableCell}>{formatDate(log.created_at)}</div>
                 <div className={styles.tableCell}>
                   <span className={styles.phoneModel}>{log.phone_model}</span>
                 </div>
                 <div className={styles.tableCell}>
-                  <span className={styles.operationType}>{getOperationLabel(log.operation_type)}</span>
+                  <span className={styles.costInr}>₹{Number(log.amount_inr).toFixed(2)}</span>
                 </div>
                 <div className={styles.tableCell}>
-                  <span className={styles.modelName}>{getModelLabel(log.model_name)}</span>
-                </div>
-                <div className={styles.tableCell}>
-                  <span className={`${styles.billingStatus} ${log.is_billable ? styles.billable : styles.refunded}`}>
-                    {log.is_billable ? '✓ Billable' : '✗ Refunded'}
-                  </span>
-                  {log.feedback_status && (
-                    <span className={styles.feedbackBadge}>
-                      {log.feedback_status === 'accurate' ? '👍' : log.feedback_status === 'inaccurate' ? '👎' : '⏳'}
-                    </span>
+                  {log.generated_image_url ? (
+                    <a href={log.generated_image_url} className={styles.fileLink} target="_blank" rel="noreferrer">
+                      <Download size={16} />
+                      View
+                    </a>
+                  ) : (
+                    <span className={styles.fileMissing}>—</span>
                   )}
-                </div>
-                <div className={styles.tableCell}>
-                  <span className={log.is_billable ? styles.costInr : styles.costRefunded}>
-                    ₹{Number(log.cost_inr).toFixed(2)}
-                  </span>
                 </div>
               </div>
             ))}

@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
 
     // Check if table exists first
     const [tableCheck] = await pool.execute(
-      `SHOW TABLES LIKE 'api_usage_logs'`
+      `SHOW TABLES LIKE 'download_billing_logs'`
     );
 
     if (!Array.isArray(tableCheck) || tableCheck.length === 0) {
@@ -31,52 +31,42 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({
         success: true,
         logs: [],
-        summary: { total_operations: 0, total_cost_usd: 0, total_cost_inr: 0 },
+        summary: { total_downloads: 0, total_cost_inr: 0 },
         pagination: { page, pageSize, total: 0, totalPages: 0 },
-        message: 'Billing tables not yet created. Please run the database migration.',
+        message: 'Billing tables not yet created. Please run database/add-download-billing.sql.',
       });
     }
 
-    // Fetch billing summary for the user (only billable items)
-    // Use api_usage_logs.user_id (indexed) for speed.
+    // Download-based billing summary
     const [summaryRows] = await pool.execute(
       `SELECT 
-        COUNT(*) as total_operations,
-        COALESCE(SUM(CASE WHEN is_billable = TRUE THEN cost_usd ELSE 0 END), 0) as total_cost_usd,
-        COALESCE(SUM(CASE WHEN is_billable = TRUE THEN cost_inr ELSE 0 END), 0) as total_cost_inr,
-        COALESCE(SUM(CASE WHEN is_billable = FALSE THEN cost_inr ELSE 0 END), 0) as refunded_cost_inr
-      FROM api_usage_logs
+        COUNT(*) as total_downloads,
+        COALESCE(SUM(amount_inr), 0) as total_cost_inr
+      FROM download_billing_logs
       WHERE user_id = ?`,
       [userId]
     );
 
     const summary = Array.isArray(summaryRows) && summaryRows.length > 0
       ? summaryRows[0]
-      : { total_operations: 0, total_cost_usd: 0, total_cost_inr: 0 };
+      : { total_downloads: 0, total_cost_inr: 0 };
 
-    const total = Number((summary as any).total_operations) || 0;
+    const total = Number((summary as any).total_downloads) || 0;
     const totalPages = total > 0 ? Math.ceil(total / pageSize) : 0;
 
-    // Fetch usage logs for the user - paginated
-    // Filter on aul.user_id (indexed) and left join generation_logs only for display fields.
+    // Download billing logs (one row per downloaded generation)
     const [logs] = await pool.execute(
-      `SELECT 
-        aul.id,
-        aul.model_name,
-        aul.operation_type,
-        aul.input_images,
-        aul.output_images,
-        aul.output_tokens,
-        aul.cost_usd,
-        aul.cost_inr,
-        aul.is_billable,
-        aul.created_at,
+      `SELECT
+        dbl.id,
+        dbl.generation_log_id,
+        dbl.amount_inr,
+        dbl.created_at,
         gl.phone_model,
-        gl.feedback_status
-      FROM api_usage_logs aul
-      LEFT JOIN generation_logs gl ON aul.generation_log_id = gl.id
-      WHERE aul.user_id = ?
-      ORDER BY aul.created_at DESC
+        gl.generated_image_url
+      FROM download_billing_logs dbl
+      LEFT JOIN generation_logs gl ON dbl.generation_log_id = gl.id
+      WHERE dbl.user_id = ?
+      ORDER BY dbl.created_at DESC
       LIMIT ? OFFSET ?`,
       [userId, pageSize, offset]
     );

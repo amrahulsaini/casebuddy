@@ -192,7 +192,7 @@
 
 .tableHeader {
   display: grid;
-  grid-template-columns: 200px 140px 140px 180px 150px 120px;
+  grid-template-columns: 220px 1fr 140px 120px;
   gap: 1rem;
   padding: 1rem;
   background: rgba(255, 107, 0, 0.15);
@@ -207,7 +207,7 @@
 
 .tableRow {
   display: grid;
-  grid-template-columns: 200px 140px 140px 180px 150px 120px;
+  grid-template-columns: 220px 1fr 140px 120px;
   gap: 1rem;
   padding: 1rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -225,24 +225,28 @@
   align-items: center;
 }
 
-.operationType {
-  background: rgba(255, 107, 0, 0.2);
-  color: #ff9500;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  white-space: nowrap;
-}
 
-.modelName {
+.fileLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  padding: 0.35rem 0.6rem;
+  border-radius: 10px;
+  font-weight: 700;
   font-size: 0.85rem;
 }
 
-.costUsd {
-  color: #4ade80;
-  font-weight: 600;
+.fileLink:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.fileMissing {
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .costInr {
@@ -262,36 +266,13 @@
   font-size: 0.9rem;
 }
 
-.billingStatus {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
 
-.billable {
-  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-  color: #065f46;
-}
-
-.refunded {
-  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-  color: #991b1b;
-}
-
-.feedbackBadge {
-  margin-left: 6px;
-  font-size: 0.9rem;
-}
 
 /* Responsive design */
 @media (max-width: 1200px) {
   .tableHeader,
   .tableRow {
-    grid-template-columns: 180px 120px 120px 150px 130px 100px;
+    grid-template-columns: 200px 1fr 120px 100px;
     gap: 0.75rem;
     font-size: 0.85rem;
   }

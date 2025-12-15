@@ -12,8 +12,6 @@ import {
   Loader2,
   X,
   LogOut,
-  CheckCircle,
-  XCircle,
   RotateCcw
 } from 'lucide-react';
 
@@ -34,9 +32,27 @@ export default function CaseToolPage() {
   const [uploadedFileName, setUploadedFileName] = useState<string>('');
   const [lastFormData, setLastFormData] = useState<FormData | null>(null);
   const [lastPrompt, setLastPrompt] = useState<string>('');
-  const [feedbackGiven, setFeedbackGiven] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const recordDownload = (logId: number) => {
+    try {
+      const payload = new Blob([JSON.stringify({ logId })], { type: 'application/json' });
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon('/casetool/api/billing/download', payload);
+        return;
+      }
+    } catch {
+      // ignore
+    }
+
+    fetch('/casetool/api/billing/download', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ logId }),
+      keepalive: true,
+    }).catch(() => undefined);
+  };
 
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
@@ -84,7 +100,6 @@ export default function CaseToolPage() {
     setStatus('Initializing...');
     setImages([]);
     setError('');
-    setFeedbackGiven(false);
 
     const formData = new FormData(e.currentTarget);
     setLastFormData(formData);
@@ -170,35 +185,13 @@ export default function CaseToolPage() {
     }
   };
 
-  const handleFeedback = async (approved: boolean) => {
-    if (images.length === 0 || !images[0].logId) return;
-
-    try {
-      await fetch('/casetool/api/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          generationLogId: images[0].logId,
-          feedbackType: approved ? 'approved' : 'rejected',
-          issueCategory: approved ? null : 'quality',
-          issueDescription: approved ? null : 'User rejected the mockup',
-        }),
-      });
-
-      setFeedbackGiven(true);
-    } catch (err) {
-      console.error('Feedback error:', err);
-    }
-  };
-
   const handleGenerateAnother = async () => {
-    if (!lastFormData || !feedbackGiven) return;
+    if (!lastFormData) return;
     
     setIsGenerating(true);
     setProgress(0);
     setStatus('');
     setError('');
-    setFeedbackGiven(false);
 
     const newFormData = new FormData();
     for (const [key, value] of lastFormData.entries()) {
@@ -418,48 +411,31 @@ export default function CaseToolPage() {
                         <img src={img.url} alt={img.title} />
                       </div>
 
-                      {!feedbackGiven && (
-                        <div className={styles.feedbackSection}>
-                          <p>Is this mockup correct?</p>
-                          <div className={styles.feedbackBtns}>
-                            <button 
-                              className={`${styles.feedbackBtn} ${styles.approve}`}
-                              onClick={() => handleFeedback(true)}
-                            >
-                              <CheckCircle size={20} />
-                              <span>Yes, Perfect!</span>
-                            </button>
-                            <button 
-                              className={`${styles.feedbackBtn} ${styles.reject}`}
-                              onClick={() => handleFeedback(false)}
-                            >
-                              <XCircle size={20} />
-                              <span>No, Try Again</span>
-                            </button>
-                          </div>
-                        </div>
-                      )}
-
-                      {feedbackGiven && (
-                        <div className={styles.actions}>
-                          <button 
-                            className={styles.actionBtn}
-                            onClick={handleGenerateAnother}
-                            disabled={isGenerating}
-                          >
-                            <Wand2 size={18} />
-                            <span>Generate Another</span>
-                          </button>
-                          <a href={img.url} download className={styles.actionBtn}>
-                            <Download size={18} />
-                            <span>Download</span>
-                          </a>
-                          <button className={styles.resetBtn} onClick={handleReset}>
-                            <RotateCcw size={18} />
-                            <span>Start Over</span>
-                          </button>
-                        </div>
-                      )}
+                      <div className={styles.actions}>
+                        <button 
+                          className={styles.actionBtn}
+                          onClick={handleGenerateAnother}
+                          disabled={isGenerating}
+                        >
+                          <Wand2 size={18} />
+                          <span>Generate Another</span>
+                        </button>
+                        <a
+                          href={img.url}
+                          download
+                          className={styles.actionBtn}
+                          onClick={() => {
+                            if (img.logId) recordDownload(img.logId);
+                          }}
+                        >
+                          <Download size={18} />
+                          <span>Download</span>
+                        </a>
+                        <button className={styles.resetBtn} onClick={handleReset}>
+                          <RotateCcw size={18} />
+                          <span>Start Over</span>
+                        </button>
+                      </div>
                     </>
                   )}
                 </div>

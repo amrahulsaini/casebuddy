@@ -16,15 +16,12 @@ import {
   Loader2,
   Camera,
   Zap,
-  Shield,
   Clock,
   X,
   Image as ImageIcon,
   Grid,
   LogOut,
   Maximize2,
-  ThumbsUp,
-  ThumbsDown
 } from 'lucide-react';
 
 interface GeneratedImage {
@@ -32,7 +29,6 @@ interface GeneratedImage {
   title: string;
   isProcessing?: boolean;
   logId?: number;
-  feedbackStatus?: 'pending' | 'accurate' | 'inaccurate';
 }
 
 export default function ToolPage() {
@@ -50,8 +46,6 @@ export default function ToolPage() {
   const [lastFormData, setLastFormData] = useState<FormData | null>(null);
   const [lastPrompt, setLastPrompt] = useState<string>('');
   const [selectedModel, setSelectedModel] = useState<'normal' | 'high'>('normal');
-  const [feedbackLoading, setFeedbackLoading] = useState<number | null>(null);
-  const [feedbackMessage, setFeedbackMessage] = useState<{ logId: number; message: string; type: 'success' | 'error' } | null>(null);
 
   // Drag and drop state
   const [isDragging, setIsDragging] = useState(false);
@@ -221,8 +215,7 @@ export default function ToolPage() {
             url: data.payload.url, 
             title: data.payload.title, 
             isProcessing: false,
-            logId: data.payload.logId,
-            feedbackStatus: 'pending'
+            logId: data.payload.logId
           }];
         });
         // Auto-scroll to results
@@ -388,56 +381,24 @@ export default function ToolPage() {
     setFullscreenImageUrl(null);
   };
 
-  const handleFeedback = async (logId: number | undefined, feedbackType: 'accurate' | 'inaccurate') => {
-    if (!logId) {
-      setFeedbackMessage({ logId: 0, message: 'Unable to submit feedback: Generation ID not found', type: 'error' });
-      return;
-    }
-
-    setFeedbackLoading(logId);
-    setFeedbackMessage(null);
-
+  const recordDownload = (logId: number) => {
     try {
-      const response = await fetch('/casetool/api/feedback', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          logId,
-          feedbackType,
-          comment: null,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to submit feedback');
+      const payload = new Blob([JSON.stringify({ logId })], { type: 'application/json' });
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon('/casetool/api/billing/download', payload);
+        return;
       }
-
-      // Update image feedback status
-      setImages((prev) => 
-        prev.map((img) => 
-          img.logId === logId ? { ...img, feedbackStatus: feedbackType } : img
-        )
-      );
-
-      setFeedbackMessage({ logId, message: data.message, type: 'success' });
-      
-      // Auto-hide success message after 5 seconds
-      setTimeout(() => {
-        setFeedbackMessage((prev) => prev?.logId === logId ? null : prev);
-      }, 5000);
-    } catch (error: any) {
-      setFeedbackMessage({ logId, message: error.message || 'Failed to submit feedback', type: 'error' });
-    } finally {
-      setFeedbackLoading(null);
+    } catch {
+      // ignore
     }
-  };
 
-  // Check if any images need feedback
-  const hasPendingFeedback = images.some(img => img.feedbackStatus === 'pending' && img.logId);
+    fetch('/casetool/api/billing/download', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ logId }),
+      keepalive: true,
+    }).catch(() => undefined);
+  };
 
   return (
     <div className={styles.container}>
@@ -709,7 +670,14 @@ export default function ToolPage() {
                       </div>
                       <div className={styles.mockupCardFooter}>
                         <div className={styles.mockupCardActions}>
-                          <a href={img.url} download className={styles.actionBtn}>
+                          <a
+                            href={img.url}
+                            download
+                            className={styles.actionBtn}
+                            onClick={() => {
+                              if (img.logId) recordDownload(img.logId);
+                            }}
+                          >
                             <Download size={16} />
                             Download
                           </a>
@@ -718,56 +686,6 @@ export default function ToolPage() {
                             Crop
                           </button>
                         </div>
-                        {img.logId && img.feedbackStatus === 'pending' && (
-                          <div className={styles.feedbackSection}>
-                            <span className={styles.feedbackLabel}>Rate this result:</span>
-                            <div className={styles.feedbackButtons}>
-                              <button
-                                onClick={() => handleFeedback(img.logId, 'accurate')}
-                                className={styles.feedbackBtnAccurate}
-                                disabled={feedbackLoading === img.logId}
-                                title="Accurate - Good quality"
-                              >
-                                {feedbackLoading === img.logId ? (
-                                  <Loader2 size={16} className={styles.buttonIconSpinning} />
-                                ) : (
-                                  <ThumbsUp size={16} />
-                                )}
-                                Accurate
-                              </button>
-                              <button
-                                onClick={() => handleFeedback(img.logId, 'inaccurate')}
-                                className={styles.feedbackBtnInaccurate}
-                                disabled={feedbackLoading === img.logId}
-                                title="Inaccurate - Will be refunded"
-                              >
-                                {feedbackLoading === img.logId ? (
-                                  <Loader2 size={16} className={styles.buttonIconSpinning} />
-                                ) : (
-                                  <ThumbsDown size={16} />
-                                )}
-                                Inaccurate
-                              </button>
-                            </div>
-                            {feedbackMessage && feedbackMessage.logId === img.logId && (
-                              <div className={feedbackMessage.type === 'success' ? styles.feedbackMessageSuccess : styles.feedbackMessageError}>
-                                {feedbackMessage.message}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                        {img.feedbackStatus === 'accurate' && (
-                          <div className={styles.feedbackStatusAccurate}>
-                            <ThumbsUp size={16} />
-                            Marked as accurate
-                          </div>
-                        )}
-                        {img.feedbackStatus === 'inaccurate' && (
-                          <div className={styles.feedbackStatusInaccurate}>
-                            <ThumbsDown size={16} />
-                            Marked as inaccurate - Refunded
-                          </div>
-                        )}
                       </div>
                     </>
                   )}
@@ -776,17 +694,10 @@ export default function ToolPage() {
             </div>
             
             <div className={styles.actionButtons}>
-              {hasPendingFeedback && !isGenerating && (
-                <div className={styles.feedbackWarning}>
-                  <Shield size={20} />
-                  <span>Please rate the generated image before creating another one</span>
-                </div>
-              )}
               <button
                 onClick={handleGenerateAnother}
-                disabled={isGenerating || hasPendingFeedback}
+                disabled={isGenerating}
                 className={styles.submitButton}
-                title={hasPendingFeedback ? 'Please submit feedback first' : ''}
               >
                 {isGenerating ? (
                   <>

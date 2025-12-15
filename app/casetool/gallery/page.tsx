@@ -28,7 +28,6 @@ interface GenerationLog {
   generated_image_url: string;
   generation_time: number;
   status: string;
-  feedback_status: string;
   created_at: string;
 }
 
@@ -124,6 +123,26 @@ export default function GalleryPage() {
   const handleFullscreen = (url: string) => {
     setFullscreenImageUrl(url);
     setFullscreenModalOpen(true);
+  };
+
+  const recordDownload = (logId: number) => {
+    try {
+      const payload = new Blob([JSON.stringify({ logId })], { type: 'application/json' });
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon('/casetool/api/billing/download', payload);
+        return;
+      }
+    } catch {
+      // ignore
+    }
+
+    // Fallback
+    fetch('/casetool/api/billing/download', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ logId }),
+      keepalive: true,
+    }).catch(() => undefined);
   };
 
   const closeFullscreenModal = () => {
@@ -254,6 +273,7 @@ export default function GalleryPage() {
                     download 
                     className={styles.downloadBtn}
                     title="Download"
+                    onClick={() => recordDownload(log.id)}
                   >
                     <Download size={16} />
                   </a>
@@ -298,11 +318,6 @@ export default function GalleryPage() {
                       📧 {log.user_email.length > 20 
                         ? log.user_email.substring(0, 20) + '...' 
                         : log.user_email}
-                    </div>
-                  )}
-                  {log.feedback_status && (
-                    <div className={`${styles.feedbackBadge} ${styles[`feedback${log.feedback_status}`]}`}>
-                      {log.feedback_status === 'accurate' ? '✓' : log.feedback_status === 'inaccurate' ? '✗' : '⏳'} {log.feedback_status}
                     </div>
                   )}
                 </div>

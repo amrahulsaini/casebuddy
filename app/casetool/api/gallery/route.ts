@@ -28,7 +28,6 @@ export async function GET(request: NextRequest) {
         gl.generated_image_url,
         gl.generation_time,
         gl.status,
-        gl.feedback_status,
         gl.created_at
       FROM generation_logs gl
       LEFT JOIN users u ON gl.user_id = u.id`;
@@ -44,7 +43,6 @@ export async function GET(request: NextRequest) {
         gl.generated_image_url,
         gl.generation_time,
         gl.status,
-        gl.feedback_status,
         gl.created_at
       FROM generation_logs gl
       LEFT JOIN users u ON gl.user_id = u.id`;

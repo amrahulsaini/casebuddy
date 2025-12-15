@@ -64,7 +64,15 @@ export default function OrderDetailPage() {
 
   useEffect(() => {
     const userEmail = localStorage.getItem('userEmail');
+    const verifiedAtRaw = localStorage.getItem('ordersEmailVerifiedAt');
+    const verifiedAt = verifiedAtRaw ? Number(verifiedAtRaw) : 0;
+    const isFresh = verifiedAt && Date.now() - verifiedAt < 24 * 60 * 60 * 1000;
     if (!userEmail) {
+      router.push('/orders');
+      return;
+    }
+
+    if (!isFresh) {
       router.push('/orders');
       return;
     }

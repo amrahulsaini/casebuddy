@@ -48,6 +48,10 @@ function normalizePlacement(value: unknown) {
 export default function OrdersPage() {
   const { freeShippingThreshold } = getShippingConfig();
   const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpVerifying, setOtpVerifying] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -60,7 +64,11 @@ export default function OrdersPage() {
   useEffect(() => {
     // Check if user is already logged in
     const savedEmail = localStorage.getItem('userEmail');
-    if (savedEmail) {
+    const verifiedAtRaw = localStorage.getItem('ordersEmailVerifiedAt');
+    const verifiedAt = verifiedAtRaw ? Number(verifiedAtRaw) : 0;
+    const isFresh = verifiedAt && Date.now() - verifiedAt < 24 * 60 * 60 * 1000;
+
+    if (savedEmail && isFresh) {
       const normalized = savedEmail.trim().toLowerCase();
       if (normalized && normalized !== savedEmail) {
         localStorage.setItem('userEmail', normalized);
@@ -68,6 +76,13 @@ export default function OrdersPage() {
       setEmail(normalized || savedEmail);
       setIsLoggedIn(true);
       fetchOrders(normalized || savedEmail);
+    } else if (savedEmail && !isFresh) {
+      // Keep email filled, but require OTP again.
+      const normalized = savedEmail.trim().toLowerCase();
+      setEmail(normalized || savedEmail);
+      setOtpSent(false);
+      setOtp('');
+      localStorage.removeItem('ordersEmailVerifiedAt');
     }
   }, []);
 
@@ -92,24 +107,83 @@ export default function OrdersPage() {
     };
   }, [lastScrollY]);
 
+  const validateEmail = (value: string) => {
+    const v = value.trim().toLowerCase();
+    if (!v) return { ok: false, email: '', error: 'Please enter your email address' };
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return { ok: false, email: v, error: 'Please enter a valid email address' };
+    return { ok: true, email: v, error: '' };
+  };
+
+  const requestEmailOtp = async (normalizedEmail: string) => {
+    setOtpSending(true);
+    setError('');
+    try {
+      const res = await fetch('/api/checkout/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'email', email: normalizedEmail }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data?.error || 'Failed to send OTP');
+        return;
+      }
+      setOtpSent(true);
+    } catch {
+      setError('Failed to send OTP');
+    } finally {
+      setOtpSending(false);
+    }
+  };
+
+  const verifyEmailOtp = async (normalizedEmail: string) => {
+    setOtpVerifying(true);
+    setError('');
+    try {
+      const res = await fetch('/api/checkout/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'email', email: normalizedEmail, otp: otp.trim() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data?.error || 'Invalid OTP');
+        return;
+      }
+
+      localStorage.setItem('userEmail', normalizedEmail);
+      localStorage.setItem('ordersEmailVerifiedAt', String(Date.now()));
+      setIsLoggedIn(true);
+      fetchOrders(normalizedEmail);
+    } catch {
+      setError('Failed to verify OTP');
+    } finally {
+      setOtpVerifying(false);
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
-    if (!email.trim()) {
-      setError('Please enter your email address');
+
+    const v = validateEmail(email);
+    if (!v.ok) {
+      setError(v.error);
       return;
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Please enter a valid email address');
+    if (!otpSent) {
+      setOtp('');
+      await requestEmailOtp(v.email);
       return;
     }
 
-    const normalized = email.trim().toLowerCase();
-    localStorage.setItem('userEmail', normalized);
-    setIsLoggedIn(true);
-    fetchOrders(normalized);
+    if (!otp.trim()) {
+      setError('Please enter the OTP sent to your email');
+      return;
+    }
+
+    await verifyEmailOtp(v.email);
   };
 
   const fetchOrders = async (userEmail: string) => {
@@ -131,8 +205,11 @@ export default function OrdersPage() {
 
   const handleLogout = () => {
     localStorage.removeItem('userEmail');
+    localStorage.removeItem('ordersEmailVerifiedAt');
     setIsLoggedIn(false);
     setEmail('');
+    setOtp('');
+    setOtpSent(false);
     setOrders([]);
   };
 
@@ -236,7 +313,7 @@ export default function OrdersPage() {
           <div className={styles.loginHeader}>
             <Package size={48} />
             <h1>Track Your Orders</h1>
-            <p>Enter your email to view your order history</p>
+            <p>Enter your email and verify OTP to view your orders</p>
           </div>
           
           <form onSubmit={handleLogin} className={styles.loginForm}>
@@ -252,14 +329,67 @@ export default function OrdersPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoFocus
+                disabled={otpSent}
               />
             </div>
+
+            {otpSent && (
+              <div className={styles.formGroup}>
+                <label className={styles.label}>
+                  <CheckCircle size={20} />
+                  Email OTP
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  className={styles.input}
+                  placeholder="Enter OTP"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  autoFocus
+                />
+              </div>
+            )}
             
             {error && <div className={styles.error}>{error}</div>}
             
-            <button type="submit" className={styles.loginBtn}>
-              View My Orders
+            <button type="submit" className={styles.loginBtn} disabled={otpSending || otpVerifying}>
+              {!otpSent ? (otpSending ? 'Sending OTP...' : 'Send OTP') : (otpVerifying ? 'Verifying...' : 'Verify & View Orders')}
             </button>
+
+            {otpSent && (
+              <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOtpSent(false);
+                    setOtp('');
+                    setError('');
+                  }}
+                  className={styles.loginBtn}
+                  style={{ background: '#fff', color: '#333', border: '1px solid #ddd' }}
+                  disabled={otpSending || otpVerifying}
+                >
+                  Change Email
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const v = validateEmail(email);
+                    if (!v.ok) {
+                      setError(v.error);
+                      return;
+                    }
+                    requestEmailOtp(v.email);
+                  }}
+                  className={styles.loginBtn}
+                  style={{ background: '#f5f5f5', color: '#333' }}
+                  disabled={otpSending || otpVerifying}
+                >
+                  {otpSending ? 'Resending...' : 'Resend OTP'}
+                </button>
+              </div>
+            )}
           </form>
           
           <div className={styles.loginFooter}>

@@ -44,7 +44,11 @@ export async function GET(request: NextRequest) {
     const whereClause = userId ? ` WHERE gl.user_id = ?` : '';
     if (userId) params.push(userId);
 
-    const suffix = ` ORDER BY gl.created_at DESC LIMIT 100`;
+    // If user is authenticated, return the full history (no hard cap).
+    // If not authenticated, keep a conservative limit to avoid dumping the full table.
+    const suffix = userId
+      ? ` ORDER BY gl.created_at DESC`
+      : ` ORDER BY gl.created_at DESC LIMIT 100`;
 
     let rows: any;
     try {

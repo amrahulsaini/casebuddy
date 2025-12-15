@@ -7,6 +7,13 @@ export async function GET(req: NextRequest) {
     const cookieStore = await cookies();
     const userId = cookieStore.get('casetool_user_id')?.value;
 
+    const url = new URL(req.url);
+    const pageParam = parseInt(url.searchParams.get('page') || '1', 10);
+    const pageSizeParam = parseInt(url.searchParams.get('pageSize') || '100', 10);
+    const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
+    const pageSize = Number.isFinite(pageSizeParam) ? Math.min(Math.max(pageSizeParam, 1), 200) : 100;
+    const offset = (page - 1) * pageSize;
+
     if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Not authenticated' },
@@ -25,32 +32,10 @@ export async function GET(req: NextRequest) {
         success: true,
         logs: [],
         summary: { total_operations: 0, total_cost_usd: 0, total_cost_inr: 0 },
+        pagination: { page, pageSize, total: 0, totalPages: 0 },
         message: 'Billing tables not yet created. Please run the database migration.',
       });
     }
-
-    // Fetch usage logs for the user (join through generation_logs)
-    const [logs] = await pool.execute(
-      `SELECT 
-        aul.id,
-        aul.model_name,
-        aul.operation_type,
-        aul.input_images,
-        aul.output_images,
-        aul.output_tokens,
-        aul.cost_usd,
-        aul.cost_inr,
-        aul.is_billable,
-        aul.created_at,
-        gl.phone_model,
-        gl.feedback_status
-      FROM api_usage_logs aul
-      JOIN generation_logs gl ON aul.generation_log_id = gl.id
-      WHERE gl.user_id = ?
-      ORDER BY aul.created_at DESC
-      LIMIT 100`,
-      [userId]
-    );
 
     // Fetch billing summary for the user (only billable items)
     const [summaryRows] = await pool.execute(
@@ -69,10 +54,37 @@ export async function GET(req: NextRequest) {
       ? summaryRows[0]
       : { total_operations: 0, total_cost_usd: 0, total_cost_inr: 0 };
 
+    const total = Number((summary as any).total_operations) || 0;
+    const totalPages = total > 0 ? Math.ceil(total / pageSize) : 0;
+
+    // Fetch usage logs for the user (join through generation_logs) - paginated
+    const [logs] = await pool.execute(
+      `SELECT 
+        aul.id,
+        aul.model_name,
+        aul.operation_type,
+        aul.input_images,
+        aul.output_images,
+        aul.output_tokens,
+        aul.cost_usd,
+        aul.cost_inr,
+        aul.is_billable,
+        aul.created_at,
+        gl.phone_model,
+        gl.feedback_status
+      FROM api_usage_logs aul
+      JOIN generation_logs gl ON aul.generation_log_id = gl.id
+      WHERE gl.user_id = ?
+      ORDER BY aul.created_at DESC
+      LIMIT ? OFFSET ?`,
+      [userId, pageSize, offset]
+    );
+
     return NextResponse.json({
       success: true,
       logs,
       summary,
+      pagination: { page, pageSize, total, totalPages },
     });
 
   } catch (error: any) {

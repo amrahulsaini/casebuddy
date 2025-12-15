@@ -27,20 +27,28 @@ interface BillingSummary {
   refunded_cost_inr?: number;
 }
 
+interface Pagination {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
+
 export default function BillingPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [usageLogs, setUsageLogs] = useState<UsageLog[]>([]);
   const [summary, setSummary] = useState<BillingSummary | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const [pagination, setPagination] = useState<Pagination>({ page: 1, pageSize: 100, total: 0, totalPages: 0 });
 
   useEffect(() => {
-    fetchBillingData();
+    fetchBillingData(1);
   }, []);
 
-  const fetchBillingData = async () => {
+  const fetchBillingData = async (page: number) => {
     try {
-      const response = await fetch('/casetool/api/billing');
+      const response = await fetch(`/casetool/api/billing?page=${page}&pageSize=${pagination.pageSize}`);
       const data = await response.json();
       
       if (data.success) {
@@ -52,8 +60,25 @@ export default function BillingPage() {
             total_operations: Number(rawSummary.total_operations) || 0,
             total_cost_usd: Number(rawSummary.total_cost_usd) || 0,
             total_cost_inr: Number(rawSummary.total_cost_inr) || 0,
+            refunded_cost_inr: rawSummary.refunded_cost_inr !== undefined ? Number(rawSummary.refunded_cost_inr) || 0 : undefined,
           });
         }
+
+        const rawPagination = data.pagination || null;
+        if (rawPagination) {
+          setPagination({
+            page: Number(rawPagination.page) || page,
+            pageSize: Number(rawPagination.pageSize) || pagination.pageSize,
+            total: Number(rawPagination.total) || 0,
+            totalPages: Number(rawPagination.totalPages) || 0,
+          });
+        } else {
+          // Backward compatible fallback
+          const total = Number(rawSummary?.total_operations) || 0;
+          const totalPages = total > 0 ? Math.ceil(total / pagination.pageSize) : 0;
+          setPagination({ page, pageSize: pagination.pageSize, total, totalPages });
+        }
+
         if (data.message) {
           setErrorMessage(data.message);
         }
@@ -66,6 +91,18 @@ export default function BillingPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const goToPrevPage = () => {
+    if (pagination.page <= 1) return;
+    setLoading(true);
+    fetchBillingData(pagination.page - 1);
+  };
+
+  const goToNextPage = () => {
+    if (pagination.totalPages > 0 && pagination.page >= pagination.totalPages) return;
+    setLoading(true);
+    fetchBillingData(pagination.page + 1);
   };
 
   const formatDate = (dateString: string) => {
@@ -167,6 +204,28 @@ export default function BillingPage() {
           Usage History
         </h2>
 
+        {pagination.totalPages > 1 && (
+          <div className={styles.paginationBar}>
+            <button
+              className={styles.pageButton}
+              onClick={goToPrevPage}
+              disabled={pagination.page <= 1}
+            >
+              Previous
+            </button>
+            <div className={styles.pageInfo}>
+              Page {pagination.page} of {pagination.totalPages}
+            </div>
+            <button
+              className={styles.pageButton}
+              onClick={goToNextPage}
+              disabled={pagination.totalPages > 0 && pagination.page >= pagination.totalPages}
+            >
+              Next
+            </button>
+          </div>
+        )}
+
         {errorMessage && (
           <div className={styles.errorMessage}>
             {errorMessage}
@@ -218,6 +277,28 @@ export default function BillingPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {pagination.totalPages > 1 && (
+          <div className={styles.paginationBarBottom}>
+            <button
+              className={styles.pageButton}
+              onClick={goToPrevPage}
+              disabled={pagination.page <= 1}
+            >
+              Previous
+            </button>
+            <div className={styles.pageInfo}>
+              Page {pagination.page} of {pagination.totalPages}
+            </div>
+            <button
+              className={styles.pageButton}
+              onClick={goToNextPage}
+              disabled={pagination.totalPages > 0 && pagination.page >= pagination.totalPages}
+            >
+              Next
+            </button>
           </div>
         )}
       </div>

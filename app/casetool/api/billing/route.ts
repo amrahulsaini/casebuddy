@@ -38,15 +38,15 @@ export async function GET(req: NextRequest) {
     }
 
     // Fetch billing summary for the user (only billable items)
+    // Use api_usage_logs.user_id (indexed) for speed.
     const [summaryRows] = await pool.execute(
       `SELECT 
         COUNT(*) as total_operations,
-        COALESCE(SUM(CASE WHEN aul.is_billable = TRUE THEN aul.cost_usd ELSE 0 END), 0) as total_cost_usd,
-        COALESCE(SUM(CASE WHEN aul.is_billable = TRUE THEN aul.cost_inr ELSE 0 END), 0) as total_cost_inr,
-        COALESCE(SUM(CASE WHEN aul.is_billable = FALSE THEN aul.cost_inr ELSE 0 END), 0) as refunded_cost_inr
-      FROM api_usage_logs aul
-      JOIN generation_logs gl ON aul.generation_log_id = gl.id
-      WHERE gl.user_id = ?`,
+        COALESCE(SUM(CASE WHEN is_billable = TRUE THEN cost_usd ELSE 0 END), 0) as total_cost_usd,
+        COALESCE(SUM(CASE WHEN is_billable = TRUE THEN cost_inr ELSE 0 END), 0) as total_cost_inr,
+        COALESCE(SUM(CASE WHEN is_billable = FALSE THEN cost_inr ELSE 0 END), 0) as refunded_cost_inr
+      FROM api_usage_logs
+      WHERE user_id = ?`,
       [userId]
     );
 
@@ -57,7 +57,8 @@ export async function GET(req: NextRequest) {
     const total = Number((summary as any).total_operations) || 0;
     const totalPages = total > 0 ? Math.ceil(total / pageSize) : 0;
 
-    // Fetch usage logs for the user (join through generation_logs) - paginated
+    // Fetch usage logs for the user - paginated
+    // Filter on aul.user_id (indexed) and left join generation_logs only for display fields.
     const [logs] = await pool.execute(
       `SELECT 
         aul.id,
@@ -73,8 +74,8 @@ export async function GET(req: NextRequest) {
         gl.phone_model,
         gl.feedback_status
       FROM api_usage_logs aul
-      JOIN generation_logs gl ON aul.generation_log_id = gl.id
-      WHERE gl.user_id = ?
+      LEFT JOIN generation_logs gl ON aul.generation_log_id = gl.id
+      WHERE aul.user_id = ?
       ORDER BY aul.created_at DESC
       LIMIT ? OFFSET ?`,
       [userId, pageSize, offset]

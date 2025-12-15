@@ -38,6 +38,11 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email, mobile, type } = body;
+    const purpose = typeof body?.purpose === 'string' ? body.purpose : '';
+    const normalizedPurpose = String(purpose)
+      .trim()
+      .toLowerCase()
+      .replace(/[\s-]+/g, '_');
 
     if (!type || (type !== 'email' && type !== 'mobile')) {
       return NextResponse.json(
@@ -101,10 +106,13 @@ export async function POST(request: NextRequest) {
       global.otpStore.set(`email:${email}`, { otp, expires });
 
       // Send email
+      const isOrdersLogin = normalizedPurpose === 'orders_login';
       await transporter.sendMail({
         from: `"CaseBuddy" <${process.env.EMAIL_USER}>`,
         to: email,
-        subject: 'Your OTP for Order Verification - CaseBuddy',
+        subject: isOrdersLogin
+          ? 'Your OTP to view your orders - CaseBuddy'
+          : 'Your OTP for Order Verification - CaseBuddy',
         html: `
           <!DOCTYPE html>
           <html>
@@ -122,11 +130,15 @@ export async function POST(request: NextRequest) {
           <body>
             <div class="container">
               <div class="header">
-                <h1>Email Verification</h1>
+                <h1>${isOrdersLogin ? 'Login Verification' : 'Email Verification'}</h1>
               </div>
               <div class="content">
                 <p>Hello,</p>
-                <p>Thank you for shopping with CaseBuddy! To complete your order, please verify your email address using the OTP below:</p>
+                <p>${
+                  isOrdersLogin
+                    ? 'Use the OTP below to securely view your order history on CaseBuddy:'
+                    : 'Thank you for shopping with CaseBuddy! To complete your order, please verify your email address using the OTP below:'
+                }</p>
                 
                 <div class="otp-box">
                   <div class="otp-code">${otp}</div>

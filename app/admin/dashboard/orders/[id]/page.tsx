@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Package, User, Phone, Mail, MapPin, CreditCard, Clock } from 'lucide-react';
+import { isNumericOnly, shiprocketStatusCodeToLabel } from '@/lib/shiprocket-status';
 import styles from './order-detail.module.css';
 
 type Shipment = {
@@ -190,12 +191,23 @@ export default function AdminOrderDetailPage() {
     if (!shipment) return 'Pending Dispatch';
     if (!shipment.shiprocket_shipment_id && !shipment.shiprocket_order_id) return 'Pending Dispatch';
     if (!shipment.shiprocket_awb) return 'Pending AWB (Ship Now)';
-    const combined = `${String(shipment.status || '')}`.toLowerCase();
+    const raw = String(shipment.status || '').trim();
+    const mapped = raw && isNumericOnly(raw) ? (shiprocketStatusCodeToLabel(raw) || raw) : raw;
+    const combined = `${mapped}`.toLowerCase();
     if (combined.includes('deliver')) return 'Delivered';
     if (combined.includes('cancel')) return 'Cancelled';
     if (combined.includes('rto')) return 'RTO';
     if (combined.includes('in transit') || combined.includes('shipped')) return 'In Transit';
-    return shipment.status || 'Shipped';
+    return mapped || 'Shipped';
+  })();
+
+  const prettyShipmentStatus = (() => {
+    const raw = String(shipment?.status || '').trim();
+    if (!raw) return '—';
+    if (isNumericOnly(raw)) {
+      return shiprocketStatusCodeToLabel(raw) || `Tracking in progress (code ${raw})`;
+    }
+    return raw;
   })();
 
   let customData = null;
@@ -384,7 +396,7 @@ export default function AdminOrderDetailPage() {
                 )}
                 <div className={styles.infoRow}>
                   <span className={styles.label}>Status:</span>
-                  <span className={styles.valueSmall}>{shipment.status || '—'}</span>
+                  <span className={styles.valueSmall}>{prettyShipmentStatus}</span>
                 </div>
                 <div className={styles.infoRow}>
                   <span className={styles.label}>Shipment ID:</span>

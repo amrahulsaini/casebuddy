@@ -18,6 +18,7 @@ interface Order {
   unit_price: number;
   shipping_cost: number;
   total_amount: number;
+  order_status?: string | null;
   payment_status: string;
   payment_id: string | null;
   customization_data: string | null;
@@ -162,6 +163,30 @@ export default function OrderDetailPage() {
     }
   };
 
+  const getPopularStatusLabel = (orderStatusRaw: unknown, paymentStatusRaw: unknown) => {
+    const raw = String(orderStatusRaw || '').trim();
+    const payment = String(paymentStatusRaw || '').trim();
+    const source = raw || payment;
+    const s = source.toLowerCase();
+
+    if (!s) return 'Pending';
+    if (s.includes('cancel')) return 'Cancelled';
+    if (s.includes('deliver') || s.includes('complete')) return 'Delivered';
+    if (s.includes('rto')) return 'RTO';
+    if (s.includes('return')) return 'Returned';
+    if (s.includes('ship') || s.includes('transit')) return 'Shipped';
+    if (s.includes('process') || s.includes('pack') || s.includes('print')) return 'Processing';
+    if (s.includes('pending')) return 'Pending';
+    if (s.includes('paid')) return 'Processing';
+    if (s.includes('fail')) return 'Failed';
+
+    return source
+      .split(/[_\s]+/g)
+      .filter(Boolean)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(' ');
+  };
+
   if (loading) {
     return (
       <div className={styles.container}>
@@ -187,6 +212,8 @@ export default function OrderDetailPage() {
       </div>
     );
   }
+
+  const popularStatus = getPopularStatusLabel(order.order_status, order.payment_status);
 
   const items = Array.isArray(order.items) && order.items.length > 0
     ? order.items
@@ -224,10 +251,10 @@ export default function OrderDetailPage() {
         <div className={styles.statusBadges}>
           <div 
             className={styles.statusBadge}
-            style={{ backgroundColor: getStatusColor(order.payment_status) }}
+            style={{ backgroundColor: getStatusColor(popularStatus) }}
           >
-            {getStatusIcon(order.payment_status)}
-            {order.payment_status}
+            {getStatusIcon(popularStatus)}
+            {popularStatus}
           </div>
         </div>
       </div>

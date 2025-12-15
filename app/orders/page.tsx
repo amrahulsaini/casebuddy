@@ -20,6 +20,7 @@ interface Order {
   phone_model: string;
   quantity: number;
   total_amount: number;
+  order_status?: string | null;
   payment_status: string;
   customization_data: string | null;
   notes: string | null;
@@ -121,7 +122,7 @@ export default function OrdersPage() {
       const res = await fetch('/api/checkout/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'email', email: normalizedEmail }),
+        body: JSON.stringify({ type: 'email', email: normalizedEmail, purpose: 'orders_login' }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -213,18 +214,46 @@ export default function OrdersPage() {
     setOrders([]);
   };
 
+  const getPopularStatusLabel = (orderStatusRaw: unknown, paymentStatusRaw: unknown) => {
+    const raw = String(orderStatusRaw || '').trim();
+    const payment = String(paymentStatusRaw || '').trim();
+    const source = raw || payment;
+    const s = source.toLowerCase();
+
+    if (!s) return 'Pending';
+    if (s.includes('cancel')) return 'Cancelled';
+    if (s.includes('deliver') || s.includes('complete')) return 'Delivered';
+    if (s.includes('rto')) return 'RTO';
+    if (s.includes('return')) return 'Returned';
+    if (s.includes('ship') || s.includes('transit')) return 'Shipped';
+    if (s.includes('process') || s.includes('pack') || s.includes('print')) return 'Processing';
+    if (s.includes('pending')) return 'Pending';
+    if (s.includes('paid')) return 'Processing';
+    if (s.includes('fail')) return 'Failed';
+
+    // Title-case fallback
+    return source
+      .split(/[_\s]+/g)
+      .filter(Boolean)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(' ');
+  };
+
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'completed':
       case 'delivered':
+      case 'completed':
         return '#4CAF50';
       case 'processing':
       case 'shipped':
+      case 'in transit':
         return '#2196F3';
       case 'pending':
         return '#FF9800';
       case 'cancelled':
       case 'failed':
+      case 'rto':
+      case 'returned':
         return '#f44336';
       default:
         return '#757575';
@@ -233,16 +262,19 @@ export default function OrdersPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'completed':
       case 'delivered':
+      case 'completed':
         return <CheckCircle size={20} />;
       case 'processing':
       case 'shipped':
+      case 'in transit':
         return <Truck size={20} />;
       case 'pending':
         return <Clock size={20} />;
       case 'cancelled':
       case 'failed':
+      case 'rto':
+      case 'returned':
         return <XCircle size={20} />;
       default:
         return <Package size={20} />;
@@ -564,6 +596,7 @@ export default function OrdersPage() {
       ) : (
         <div className={styles.ordersList}>
           {orders.map((order) => {
+            const popularStatus = getPopularStatusLabel(order.order_status, order.payment_status);
             const items = Array.isArray(order.items) && order.items.length > 0
               ? order.items
               : [
@@ -593,10 +626,10 @@ export default function OrdersPage() {
                   <div className={styles.orderStatus}>
                     <div 
                       className={styles.statusBadge}
-                      style={{ backgroundColor: getStatusColor(order.payment_status) }}
+                      style={{ backgroundColor: getStatusColor(popularStatus) }}
                     >
-                      {getStatusIcon(order.payment_status)}
-                      {order.payment_status}
+                      {getStatusIcon(popularStatus)}
+                      {popularStatus}
                     </div>
                   </div>
                 </div>

@@ -17,9 +17,20 @@ export async function GET(request: NextRequest) {
         p.compare_price,
         p.is_featured,
         pi.image_url,
-        pi.alt_text
+        pi.alt_text,
+        cat.category_slug,
+        cat.category_name
       FROM products p
       LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = TRUE
+      LEFT JOIN (
+        SELECT
+          pc.product_id,
+          MIN(c.slug) AS category_slug,
+          MIN(c.name) AS category_name
+        FROM product_categories pc
+        JOIN categories c ON pc.category_id = c.id
+        GROUP BY pc.product_id
+      ) cat ON cat.product_id = p.id
       WHERE p.is_active = TRUE
     `;
 
@@ -75,6 +86,8 @@ export async function GET(request: NextRequest) {
       price: parseFloat(p.price),
       compare_price: p.compare_price ? parseFloat(p.compare_price) : null,
       is_featured: Boolean(p.is_featured),
+      category_slug: p.category_slug != null ? String(p.category_slug) : null,
+      category_name: p.category_name != null ? String(p.category_name) : null,
     })) : [];
 
     return NextResponse.json({

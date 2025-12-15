@@ -69,8 +69,7 @@ export default function ToolPage() {
   useEffect(() => {
     try {
       const alreadyPaid = window.localStorage.getItem('casetool_due_paid') === '1';
-      const dismissedForSession = window.sessionStorage.getItem('casetool_due_dismissed') === '1';
-      setShowDueDisclaimer(!alreadyPaid && !dismissedForSession);
+      setShowDueDisclaimer(!alreadyPaid);
     } catch {
       setShowDueDisclaimer(true);
     }
@@ -115,20 +114,10 @@ export default function ToolPage() {
   };
 
   const handlePayLater = () => {
-    try {
-      window.sessionStorage.setItem('casetool_due_dismissed', '1');
-    } catch {
-      // ignore
-    }
     setShowDueDisclaimer(false);
   };
 
   const handlePayNow = () => {
-    try {
-      window.sessionStorage.setItem('casetool_due_dismissed', '1');
-    } catch {
-      // ignore
-    }
     window.location.href = 'https://rzp.io/rzp/MEVerRhj';
   };
 

@@ -11,6 +11,7 @@ import {
   Menu,
   Loader2,
   X,
+  XCircle,
   LogOut,
   RotateCcw
 } from 'lucide-react';

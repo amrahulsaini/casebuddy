@@ -400,35 +400,6 @@ export default function ToolPage() {
         navigator.sendBeacon('/casetool/api/billing/download', payload);
         return;
       }
-            {showDueDisclaimer && (
-              <div className={styles.dueDisclaimerOverlay} role="dialog" aria-modal="true">
-                <div className={styles.dueDisclaimerCard}>
-                  <div className={styles.dueDisclaimerHeader}>
-                    <div className={styles.dueDisclaimerIconWrap}>
-                      <Shield size={22} />
-                    </div>
-                    <div>
-                      <div className={styles.dueDisclaimerTitle}>Payment Disclaimer</div>
-                      <div className={styles.dueDisclaimerSubtitle}>Due amount: ₹3200</div>
-                    </div>
-                  </div>
-
-                  <p className={styles.dueDisclaimerText}>
-                    Please first complete your remaining due amount <strong>₹3200</strong> to use your tool without any inconvenience.
-                  </p>
-
-                  <div className={styles.dueDisclaimerActions}>
-                    <button type="button" className={styles.dueDisclaimerPrimary} onClick={handleAlreadyPaid}>
-                      I already paid
-                    </button>
-                    <button type="button" className={styles.dueDisclaimerSecondary} onClick={handlePayLater}>
-                      I will pay later
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
     } catch {
       // ignore
     }
@@ -443,6 +414,35 @@ export default function ToolPage() {
 
   return (
     <div className={styles.container}>
+      {showDueDisclaimer && (
+        <div className={styles.dueDisclaimerOverlay} role="dialog" aria-modal="true">
+          <div className={styles.dueDisclaimerCard}>
+            <div className={styles.dueDisclaimerHeader}>
+              <div className={styles.dueDisclaimerIconWrap}>
+                <Shield size={22} />
+              </div>
+              <div>
+                <div className={styles.dueDisclaimerTitle}>Payment Disclaimer</div>
+                <div className={styles.dueDisclaimerSubtitle}>Due amount: ₹3200</div>
+              </div>
+            </div>
+
+            <p className={styles.dueDisclaimerText}>
+              Please first complete your remaining due amount <strong>₹3200</strong> to use your tool without any inconvenience.
+            </p>
+
+            <div className={styles.dueDisclaimerActions}>
+              <button type="button" className={styles.dueDisclaimerPrimary} onClick={handleAlreadyPaid}>
+                I already paid
+              </button>
+              <button type="button" className={styles.dueDisclaimerSecondary} onClick={handlePayLater}>
+                I will pay later
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Sidebar */}
       <div className={`${styles.sidebarOverlay} ${sidebarOpen ? styles.sidebarOpen : ''}`}>
         <div className={styles.sidebarHeader}>

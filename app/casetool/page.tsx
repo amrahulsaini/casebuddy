@@ -64,7 +64,17 @@ export default function ToolPage() {
   const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null);
 
   // Due payment disclaimer
-  const [showDueDisclaimer, setShowDueDisclaimer] = useState(true);
+  const [showDueDisclaimer, setShowDueDisclaimer] = useState(false);
+
+  useEffect(() => {
+    try {
+      const alreadyPaid = window.localStorage.getItem('casetool_due_paid') === '1';
+      const dismissedForSession = window.sessionStorage.getItem('casetool_due_dismissed') === '1';
+      setShowDueDisclaimer(!alreadyPaid && !dismissedForSession);
+    } catch {
+      setShowDueDisclaimer(true);
+    }
+  }, []);
 
   // Initialize cropper when modal opens
   useEffect(() => {
@@ -96,10 +106,29 @@ export default function ToolPage() {
   }, [cropModalOpen, cropImageUrl]);
 
   const handleAlreadyPaid = () => {
+    try {
+      window.localStorage.setItem('casetool_due_paid', '1');
+    } catch {
+      // ignore
+    }
     setShowDueDisclaimer(false);
   };
 
   const handlePayLater = () => {
+    try {
+      window.sessionStorage.setItem('casetool_due_dismissed', '1');
+    } catch {
+      // ignore
+    }
+    setShowDueDisclaimer(false);
+  };
+
+  const handlePayNow = () => {
+    try {
+      window.sessionStorage.setItem('casetool_due_dismissed', '1');
+    } catch {
+      // ignore
+    }
     window.location.href = 'https://rzp.io/rzp/MEVerRhj';
   };
 
@@ -432,6 +461,9 @@ export default function ToolPage() {
             </p>
 
             <div className={styles.dueDisclaimerActions}>
+              <button type="button" className={styles.dueDisclaimerPayNow} onClick={handlePayNow}>
+                Pay now
+              </button>
               <button type="button" className={styles.dueDisclaimerPrimary} onClick={handleAlreadyPaid}>
                 I already paid
               </button>

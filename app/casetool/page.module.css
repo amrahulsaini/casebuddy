@@ -1511,6 +1511,7 @@
   display: flex;
   gap: 12px;
   margin-top: 18px;
+  flex-wrap: wrap;
 }
 
 .dueDisclaimerPrimary,
@@ -1522,6 +1523,25 @@
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   border: 2px solid transparent;
+  min-width: 160px;
+}
+
+.dueDisclaimerPayNow {
+  flex: 1;
+  border-radius: 999px;
+  padding: 14px 16px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid var(--primary-orange);
+  background: var(--primary-orange);
+  color: var(--pure-white);
+  min-width: 160px;
+}
+
+.dueDisclaimerPayNow:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 30px rgba(255, 107, 53, 0.30);
 }
 
 .dueDisclaimerPrimary {

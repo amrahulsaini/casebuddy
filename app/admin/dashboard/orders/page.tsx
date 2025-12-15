@@ -17,6 +17,9 @@ interface Order {
   total_amount: number;
   payment_status: string;
   created_at: string;
+  shipment_status?: string | null;
+  shipment_updated_at?: string | null;
+  shiprocket_awb?: string | null;
 }
 
 export default function AdminOrdersPage() {
@@ -81,7 +84,7 @@ export default function AdminOrdersPage() {
   };
 
   const exportToCSV = () => {
-    const headers = ['Order Number', 'Customer Name', 'Email', 'Mobile', 'Product', 'Phone Model', 'Quantity', 'Amount', 'Payment Status', 'Date'];
+    const headers = ['Order Number', 'Customer Name', 'Email', 'Mobile', 'Product', 'Phone Model', 'Quantity', 'Amount', 'Payment Status', 'Shipment Status', 'Shipment Updated', 'Date'];
     const rows = filteredOrders.map(order => [
       order.order_number,
       order.customer_name,
@@ -92,6 +95,8 @@ export default function AdminOrdersPage() {
       order.quantity,
       order.total_amount,
       order.payment_status,
+      order.shipment_status || '',
+      order.shipment_updated_at ? new Date(order.shipment_updated_at).toLocaleString() : '',
       new Date(order.created_at).toLocaleDateString()
     ]);
 
@@ -240,6 +245,7 @@ export default function AdminOrdersPage() {
                 <th>Product</th>
                 <th>Amount</th>
                 <th>Payment</th>
+                <th>Shipment</th>
                 <th>Date</th>
                 <th>Actions</th>
               </tr>
@@ -273,6 +279,16 @@ export default function AdminOrdersPage() {
                     >
                       {order.payment_status}
                     </span>
+                  </td>
+                  <td>
+                    <div className={styles.productInfo}>
+                      <div className={styles.productName}>
+                        {order.shipment_status ? order.shipment_status : '—'}
+                      </div>
+                      <div className={styles.productMeta}>
+                        {order.shipment_updated_at ? new Date(order.shipment_updated_at).toLocaleString() : '—'}
+                      </div>
+                    </div>
                   </td>
                   <td>
                     <div className={styles.date}>

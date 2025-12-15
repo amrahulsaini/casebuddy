@@ -3,6 +3,7 @@ import caseMainPool from '@/lib/db-main';
 import { requireRole } from '@/lib/auth';
 import { shiprocketRequest } from '@/lib/shiprocket';
 import { shiprocketStatusCodeToLabel, isNumericOnly } from '@/lib/shiprocket-status';
+import nodemailer from 'nodemailer';
 
 function escapeHtml(value: unknown) {
   return String(value ?? '')
@@ -11,6 +12,57 @@ function escapeHtml(value: unknown) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+async function sendDeliveredEmail(params: {
+  to: string;
+  customerName?: string | null;
+  orderNumber?: string | null;
+}) {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) return;
+
+  const transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST || 'casebuddy.co.in',
+    port: parseInt(process.env.EMAIL_PORT || '587'),
+    secure: process.env.EMAIL_SECURE === 'true',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD,
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
+
+  const name = params.customerName ? String(params.customerName) : '';
+  const orderNumber = params.orderNumber ? String(params.orderNumber) : '';
+
+  await transporter.sendMail({
+    from: `"CaseBuddy" <${process.env.EMAIL_USER}>`,
+    to: params.to,
+    subject: 'Your order has been delivered - CaseBuddy',
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8" />
+      </head>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: #4CAF50; color: #fff; padding: 18px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h2 style="margin: 0;">Delivered</h2>
+          </div>
+          <div style="background: #f9f9f9; padding: 18px; border-radius: 0 0 10px 10px;">
+            <p style="margin-top: 0;">Hi ${escapeHtml(name || 'there')},</p>
+            <p>Your order${orderNumber ? ` <strong>#${escapeHtml(orderNumber)}</strong>` : ''} has been delivered.</p>
+            <p>Thank you for shopping with CaseBuddy.</p>
+            <p style="margin-bottom: 0;">Team CaseBuddy</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  });
 }
 
 function firstNonEmpty(...values: any[]) {
@@ -218,7 +270,19 @@ export async function POST(request: NextRequest) {
           );
           orderUpdatedTo = mapped;
 
-          // Emails disabled (confirmation-only policy)
+          if (orderUpdatedTo === 'delivered') {
+            try {
+              if (sh.customer_email) {
+                await sendDeliveredEmail({
+                  to: String(sh.customer_email),
+                  customerName: sh.customer_name,
+                  orderNumber: sh.order_number,
+                });
+              }
+            } catch (emailError) {
+              console.error('Failed to send delivered email:', emailError);
+            }
+          }
         }
 
         results.push({

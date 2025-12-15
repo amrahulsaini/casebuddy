@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db-main';
+import { isNumericOnly, shiprocketStatusCodeToLabel } from '@/lib/shiprocket-status';
 
 export async function GET(request: Request) {
   try {
@@ -18,26 +19,42 @@ export async function GET(request: Request) {
     // Get paginated orders
     const [rows] = await pool.execute(
       `SELECT 
-        id,
-        order_number,
-        customer_email,
-        customer_mobile,
-        customer_name,
-        product_name,
-        phone_model,
-        quantity,
-        total_amount,
-        order_status,
-        payment_status,
-        created_at
-      FROM orders 
-      ORDER BY created_at DESC
+        o.id,
+        o.order_number,
+        o.customer_email,
+        o.customer_mobile,
+        o.customer_name,
+        o.product_name,
+        o.phone_model,
+        o.quantity,
+        o.total_amount,
+        o.order_status,
+        o.payment_status,
+        o.created_at,
+        s.status AS shipment_status,
+        s.updated_at AS shipment_updated_at,
+        s.shiprocket_awb AS shiprocket_awb
+      FROM orders o
+      LEFT JOIN shipments s ON s.order_id = o.id
+      ORDER BY o.created_at DESC
       LIMIT ? OFFSET ?`,
       [limit, offset]
     );
 
+    const normalizedRows = (rows as any[]).map((r) => {
+      const rawStatus = r?.shipment_status != null ? String(r.shipment_status).trim() : '';
+      let shipment_status = rawStatus || null;
+      if (shipment_status && isNumericOnly(shipment_status)) {
+        shipment_status = shiprocketStatusCodeToLabel(shipment_status) || `Tracking in progress (code ${shipment_status})`;
+      }
+      return {
+        ...r,
+        shipment_status,
+      };
+    });
+
     return NextResponse.json({
-      orders: rows,
+      orders: normalizedRows,
       pagination: {
         page,
         limit,

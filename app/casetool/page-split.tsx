@@ -247,7 +247,6 @@ export default function CaseToolPage() {
     setProgress(0);
     setStatus('');
     setError('');
-    setFeedbackGiven(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }

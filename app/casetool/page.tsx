@@ -18,6 +18,7 @@ import {
   Zap,
   Clock,
   X,
+  Shield,
   Image as ImageIcon,
   Grid,
   LogOut,

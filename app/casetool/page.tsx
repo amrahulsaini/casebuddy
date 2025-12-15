@@ -64,7 +64,7 @@ export default function ToolPage() {
   const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null);
 
   // Due payment disclaimer
-  const [showDueDisclaimer, setShowDueDisclaimer] = useState(false);
+  const [showDueDisclaimer, setShowDueDisclaimer] = useState(true);
 
   // Initialize cropper when modal opens
   useEffect(() => {
@@ -95,21 +95,7 @@ export default function ToolPage() {
     };
   }, [cropModalOpen, cropImageUrl]);
 
-  useEffect(() => {
-    try {
-      const alreadyPaid = window.localStorage.getItem('casetool_due_paid') === '1';
-      setShowDueDisclaimer(!alreadyPaid);
-    } catch {
-      setShowDueDisclaimer(true);
-    }
-  }, []);
-
   const handleAlreadyPaid = () => {
-    try {
-      window.localStorage.setItem('casetool_due_paid', '1');
-    } catch {
-      // ignore
-    }
     setShowDueDisclaimer(false);
   };
 

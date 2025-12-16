@@ -159,6 +159,10 @@ export async function POST(request: NextRequest) {
     const storedProductName = normalizedWithValidatedPrice.length > 1
       ? `Multiple Items (${normalizedWithValidatedPrice.length})`
       : (primaryItem.productName || 'Custom Phone Case');
+
+    // Use a unique temporary order number to satisfy UNIQUE/NOT NULL constraints
+    // until we can derive the final CB+5-digit order number from insertId.
+    const orderNumberTemp = `TEMP_${Date.now()}_${Math.floor(Math.random() * 1_000_000)}`;
     
     const [result]: any = await caseMainPool.query(
       `INSERT INTO orders (
@@ -187,7 +191,7 @@ export async function POST(request: NextRequest) {
         created_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
       [
-        'TEMP',
+        orderNumberTemp,
         email,
         mobile,
         sanitizedName,

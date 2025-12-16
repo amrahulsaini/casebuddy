@@ -16,7 +16,7 @@ interface Order {
   product_name: string;
   phone_model: string;
   quantity: number;
-  total_amount: number;
+  total_amount: number | string;
   payment_status: string;
   created_at: string;
   shipment_status?: string | null;
@@ -136,7 +136,9 @@ export default function AdminOrdersPage() {
   const stats = {
     total: orders.length,
     completed: orders.filter(o => o.payment_status === 'completed').length,
-    revenue: orders.filter(o => o.payment_status === 'completed').reduce((sum, o) => sum + o.total_amount, 0)
+    revenue: orders
+      .filter(o => o.payment_status === 'completed')
+      .reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
   };
 
   return (
@@ -282,7 +284,7 @@ export default function AdminOrdersPage() {
                     </div>
                   </td>
                   <td>
-                    <div className={styles.amount}>₹{order.total_amount}</div>
+                    <div className={styles.amount}>₹{Number(order.total_amount) || 0}</div>
                   </td>
                   <td>
                     <span

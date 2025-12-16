@@ -47,6 +47,19 @@ interface Order {
   shipping_pincode: string;
   created_at: string;
   updated_at: string;
+  items?: Array<{
+    productId: number | null;
+    productName: string;
+    phoneModel?: string | null;
+    designName?: string | null;
+    quantity: number;
+    imageUrl?: string | null;
+    customization?: {
+      customText?: string;
+      font?: string;
+      placement?: string;
+    };
+  }>;
 }
 
 export default function AdminOrderDetailPage() {
@@ -248,6 +261,24 @@ export default function AdminOrderDetailPage() {
       {successMessage && <div className={styles.success}>{successMessage}</div>}
       {error && <div className={styles.errorMsg}>{error}</div>}
 
+      {(() => {
+        // Normalize items for display (supports multi-item orders)
+        const items = Array.isArray(order.items) && order.items.length > 0
+          ? order.items
+          : [
+              {
+                productId: null,
+                productName: order.product_name,
+                phoneModel: order.phone_model,
+                designName: null,
+                quantity: order.quantity,
+                imageUrl: null,
+              },
+            ];
+
+        return (
+          <>
+
       <div className={styles.grid}>
         <div className={styles.mainContent}>
           <div className={styles.card}>
@@ -255,17 +286,36 @@ export default function AdminOrderDetailPage() {
               <Package size={20} />
               Order Items
             </h2>
-            <div className={styles.orderItem}>
-              <div className={styles.itemDetails}>
-                <h3>{order.product_name}</h3>
-                <p className={styles.itemMeta}>Phone Model: {order.phone_model}</p>
-                <p className={styles.itemMeta}>Quantity: {order.quantity}</p>
-                <p className={styles.itemMeta}>Price per unit: ₹{order.unit_price}</p>
+            {items.map((it, idx) => (
+              <div className={styles.orderItem} key={idx}>
+                <div className={styles.itemDetails}>
+                  <div className={styles.itemHeaderRow}>
+                    {it.imageUrl && (
+                      <img
+                        src={it.imageUrl}
+                        alt={it.productName}
+                        className={styles.itemImage}
+                        loading="lazy"
+                      />
+                    )}
+                    <div>
+                      <h3>{it.productName}</h3>
+                      {it.phoneModel && <p className={styles.itemMeta}>Phone Model: {it.phoneModel}</p>}
+                      {it.designName && <p className={styles.itemMeta}>Design: {it.designName}</p>}
+                      <p className={styles.itemMeta}>Quantity: {it.quantity}</p>
+                      {idx === 0 && (
+                        <p className={styles.itemMeta}>Price per unit: ₹{order.unit_price}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                {idx === 0 && (
+                  <div className={styles.itemPrice}>
+                    ₹{order.unit_price * order.quantity}
+                  </div>
+                )}
               </div>
-              <div className={styles.itemPrice}>
-                ₹{order.unit_price * order.quantity}
-              </div>
-            </div>
+            ))}
 
             {customData && (
               <div className={styles.customization}>
@@ -565,6 +615,9 @@ export default function AdminOrderDetailPage() {
           </div>
         </div>
       </div>
+          </>
+        );
+      })()}
     </div>
   );
 }

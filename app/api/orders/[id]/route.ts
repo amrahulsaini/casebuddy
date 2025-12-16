@@ -30,7 +30,7 @@ export async function GET(
     const items = parseItemsFromCustomizationJson({
       customizationData: order.customization_data ?? null,
       fallback: {
-        productId: null,
+        productId: order.product_id != null ? Number(order.product_id) : null,
         productName: order.product_name,
         phoneModel: order.phone_model,
         designName: null,

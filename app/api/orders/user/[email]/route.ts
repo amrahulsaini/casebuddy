@@ -11,6 +11,7 @@ type OrderRow = {
   customer_email: string;
   customer_mobile: string;
   customer_name: string;
+  product_id: number;
   product_name: string;
   phone_model: string;
   quantity: number;
@@ -37,6 +38,7 @@ export async function GET(
         customer_email,
         customer_mobile,
         customer_name,
+        product_id,
         product_name,
         phone_model,
         quantity,
@@ -63,7 +65,7 @@ export async function GET(
       const items = parseItemsFromCustomizationJson({
         customizationData: o.customization_data,
         fallback: {
-          productId: null,
+          productId: o.product_id != null ? Number(o.product_id) : null,
           productName: o.product_name,
           phoneModel: o.phone_model,
           designName: null,

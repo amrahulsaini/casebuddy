@@ -11,6 +11,8 @@ interface Order {
   customer_email: string;
   customer_mobile: string;
   customer_name: string;
+  product_id?: number;
+  primary_image_url?: string | null;
   product_name: string;
   phone_model: string;
   quantity: number;
@@ -250,6 +252,16 @@ export default function AdminOrdersPage() {
                 <th>Actions</th>
               </tr>
             </thead>
+                      {order.primary_image_url ? (
+                        <img
+                          src={order.primary_image_url}
+                          alt={order.product_name}
+                          className={styles.productThumb}
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className={styles.productThumbPlaceholder} />
+                      )}
             <tbody>
               {filteredOrders.map((order) => (
                 <tr key={order.id}>

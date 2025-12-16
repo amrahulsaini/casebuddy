@@ -153,9 +153,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create order in database
-    const orderNumber = `CB${Date.now()}${Math.floor(Math.random() * 1000)}`;
-
     const primaryItem = normalizedWithValidatedPrice[0];
     const totalQuantity = normalizedWithValidatedPrice.reduce((sum: number, it: any) => sum + it.quantity, 0);
     const effectiveUnitPrice = totalQuantity > 0 ? calculatedSubtotal / totalQuantity : primaryItem.validatedUnitPrice;
@@ -190,7 +187,7 @@ export async function POST(request: NextRequest) {
         created_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
       [
-        orderNumber,
+        'TEMP',
         email,
         mobile,
         sanitizedName,
@@ -218,6 +215,10 @@ export async function POST(request: NextRequest) {
     );
 
     const orderId = result.insertId;
+
+    // Generate readable order number: CB + 5 digits (from DB id)
+    const orderNumber = `CB${String(orderId).padStart(5, '0')}`;
+    await caseMainPool.query('UPDATE orders SET order_number = ? WHERE id = ?', [orderNumber, orderId]);
 
     // Create Cashfree payment session
     let paymentSessionId = null;

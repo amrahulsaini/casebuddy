@@ -218,6 +218,25 @@
   color: #666;
 }
 
+.productThumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid #eee;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.productThumbPlaceholder {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid #eee;
+  background: #f3f4f6;
+  flex-shrink: 0;
+}
+
 .tableContainer {
   background: white;
   border-radius: 12px;

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db-main';
 import { isNumericOnly, shiprocketStatusCodeToLabel } from '@/lib/shiprocket-status';
+import { fetchPrimaryImagesByProductId } from '@/lib/order-email-utils';
 
 export async function GET(request: Request) {
   try {
@@ -24,6 +25,7 @@ export async function GET(request: Request) {
         o.customer_email,
         o.customer_mobile,
         o.customer_name,
+        o.product_id,
         o.product_name,
         o.phone_model,
         o.quantity,
@@ -53,8 +55,28 @@ export async function GET(request: Request) {
       };
     });
 
+    const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'https://casebuddy.co.in').replace(/\/+$/, '');
+    const productIds = normalizedRows
+      .map((r) => Number(r?.product_id))
+      .filter((v) => Number.isFinite(v));
+
+    const imageByProductId = await fetchPrimaryImagesByProductId({
+      pool: pool as any,
+      productIds,
+      baseUrl,
+    });
+
+    const withImages = normalizedRows.map((r) => {
+      const pid = Number(r?.product_id);
+      const primary_image_url = Number.isFinite(pid) ? imageByProductId.get(pid) || null : null;
+      return {
+        ...r,
+        primary_image_url,
+      };
+    });
+
     return NextResponse.json({
-      orders: normalizedRows,
+      orders: withImages,
       pagination: {
         page,
         limit,

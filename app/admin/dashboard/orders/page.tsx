@@ -252,16 +252,6 @@ export default function AdminOrdersPage() {
                 <th>Actions</th>
               </tr>
             </thead>
-                      {order.primary_image_url ? (
-                        <img
-                          src={order.primary_image_url}
-                          alt={order.product_name}
-                          className={styles.productThumb}
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className={styles.productThumbPlaceholder} />
-                      )}
             <tbody>
               {filteredOrders.map((order) => (
                 <tr key={order.id}>
@@ -277,6 +267,16 @@ export default function AdminOrdersPage() {
                   </td>
                   <td>
                     <div className={styles.productInfo}>
+                      {order.primary_image_url ? (
+                        <img
+                          src={order.primary_image_url}
+                          alt={order.product_name}
+                          className={styles.productThumb}
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className={styles.productThumbPlaceholder} />
+                      )}
                       <div className={styles.productName}>{order.product_name}</div>
                       <div className={styles.productMeta}>{order.phone_model} × {order.quantity}</div>
                     </div>

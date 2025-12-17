@@ -1443,128 +1443,34 @@
   animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Due Payment Disclaimer */
-.dueDisclaimerOverlay {
+/* Payment Captured Notice (Top Right) */
+.paymentCapturedNotice {
   position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.75);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10000;
-  backdrop-filter: blur(18px) saturate(160%);
-  animation: fadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 24px;
-}
-
-.dueDisclaimerCard {
-  width: min(560px, 100%);
+  top: 18px;
+  right: 18px;
+  z-index: 9999;
+  width: min(360px, calc(100vw - 36px));
   background: var(--pure-white);
-  border-radius: 28px;
-  border: 2px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.45);
-  padding: 28px;
-  animation: scaleIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  border-radius: 16px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+  padding: 14px 16px;
+  backdrop-filter: blur(10px);
 }
 
-.dueDisclaimerHeader {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 14px;
-}
-
-.dueDisclaimerIconWrap {
-  width: 46px;
-  height: 46px;
-  border-radius: 14px;
-  background: rgba(255, 107, 53, 0.10);
-  border: 1px solid rgba(255, 107, 53, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--dark-orange);
-}
-
-.dueDisclaimerTitle {
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: -0.3px;
-  color: var(--off-black);
-}
-
-.dueDisclaimerSubtitle {
+.paymentCapturedTitle {
   font-size: 14px;
-  font-weight: 700;
-  color: var(--medium-gray);
-  margin-top: 2px;
-}
-
-.dueDisclaimerText {
-  margin: 0;
-  font-size: 15px;
-  line-height: 1.55;
-  color: rgba(0, 0, 0, 0.80);
-}
-
-.dueDisclaimerActions {
-  display: flex;
-  gap: 12px;
-  margin-top: 18px;
-  flex-wrap: wrap;
-}
-
-.dueDisclaimerPrimary,
-.dueDisclaimerSecondary {
-  flex: 1;
-  border-radius: 999px;
-  padding: 14px 16px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 2px solid transparent;
-  min-width: 160px;
-}
-
-.dueDisclaimerPayNow {
-  flex: 1;
-  border-radius: 999px;
-  padding: 14px 16px;
   font-weight: 900;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 2px solid var(--primary-orange);
-  background: var(--primary-orange);
-  color: var(--pure-white);
-  min-width: 160px;
-}
-
-.dueDisclaimerPayNow:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 30px rgba(255, 107, 53, 0.30);
-}
-
-.dueDisclaimerPrimary {
-  background: var(--pure-black);
-  color: var(--pure-white);
-  border-color: var(--pure-black);
-}
-
-.dueDisclaimerPrimary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-}
-
-.dueDisclaimerSecondary {
-  background: var(--pure-white);
+  letter-spacing: -0.2px;
   color: var(--off-black);
-  border-color: rgba(0, 0, 0, 0.14);
+  margin-bottom: 4px;
 }
 
-.dueDisclaimerSecondary:hover {
-  border-color: rgba(255, 107, 53, 0.55);
-  box-shadow: 0 10px 30px rgba(255, 107, 53, 0.18);
-  transform: translateY(-1px);
+.paymentCapturedText {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: rgba(0, 0, 0, 0.72);
 }
 
 .cropModalContent {

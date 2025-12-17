@@ -63,18 +63,6 @@ export default function ToolPage() {
   const [fullscreenModalOpen, setFullscreenModalOpen] = useState(false);
   const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null);
 
-  // Due payment disclaimer
-  const [showDueDisclaimer, setShowDueDisclaimer] = useState(false);
-
-  useEffect(() => {
-    try {
-      const alreadyPaid = window.localStorage.getItem('casetool_due_paid') === '1';
-      setShowDueDisclaimer(!alreadyPaid);
-    } catch {
-      setShowDueDisclaimer(true);
-    }
-  }, []);
-
   // Initialize cropper when modal opens
   useEffect(() => {
     if (cropModalOpen && cropImageUrl && cropImageRef.current) {
@@ -104,22 +92,6 @@ export default function ToolPage() {
     };
   }, [cropModalOpen, cropImageUrl]);
 
-  const handleAlreadyPaid = () => {
-    try {
-      window.localStorage.setItem('casetool_due_paid', '1');
-    } catch {
-      // ignore
-    }
-    setShowDueDisclaimer(false);
-  };
-
-  const handlePayLater = () => {
-    setShowDueDisclaimer(false);
-  };
-
-  const handlePayNow = () => {
-    window.location.href = 'https://rzp.io/rzp/MEVerRhj';
-  };
 
   // Drag and drop handlers
   const handleDragEnter = (e: React.DragEvent) => {
@@ -432,37 +404,10 @@ export default function ToolPage() {
 
   return (
     <div className={styles.container}>
-      {showDueDisclaimer && (
-        <div className={styles.dueDisclaimerOverlay} role="dialog" aria-modal="true">
-          <div className={styles.dueDisclaimerCard}>
-            <div className={styles.dueDisclaimerHeader}>
-              <div className={styles.dueDisclaimerIconWrap}>
-                <Shield size={22} />
-              </div>
-              <div>
-                <div className={styles.dueDisclaimerTitle}>Payment Disclaimer</div>
-                <div className={styles.dueDisclaimerSubtitle}>Due amount: ₹3200</div>
-              </div>
-            </div>
-
-            <p className={styles.dueDisclaimerText}>
-              Please first complete your remaining due amount <strong>₹3200</strong> to use your tool without any inconvenience.
-            </p>
-
-            <div className={styles.dueDisclaimerActions}>
-              <button type="button" className={styles.dueDisclaimerPayNow} onClick={handlePayNow}>
-                Pay now
-              </button>
-              <button type="button" className={styles.dueDisclaimerPrimary} onClick={handleAlreadyPaid}>
-                I already paid
-              </button>
-              <button type="button" className={styles.dueDisclaimerSecondary} onClick={handlePayLater}>
-                I will pay later
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <div className={styles.paymentCapturedNotice} role="status" aria-live="polite">
+        <div className={styles.paymentCapturedTitle}>Payment captured</div>
+        <div className={styles.paymentCapturedText}>Your payment of ₹3200 was captured. Please keep using the tool.</div>
+      </div>
 
       {/* Sidebar */}
       <div className={`${styles.sidebarOverlay} ${sidebarOpen ? styles.sidebarOpen : ''}`}>

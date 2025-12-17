@@ -404,11 +404,6 @@ export default function ToolPage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.paymentCapturedNotice} role="status" aria-live="polite">
-        <div className={styles.paymentCapturedTitle}>Payment captured</div>
-        <div className={styles.paymentCapturedText}>Your payment of ₹3200 was captured. Please keep using the tool.</div>
-      </div>
-
       {/* Sidebar */}
       <div className={`${styles.sidebarOverlay} ${sidebarOpen ? styles.sidebarOpen : ''}`}>
         <div className={styles.sidebarHeader}>

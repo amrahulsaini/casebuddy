@@ -116,6 +116,11 @@ export default function BillingPage() {
 
   return (
     <div className={styles.container}>
+      <div className={styles.paymentCapturedDialog} role="dialog" aria-label="Payment captured">
+        <div className={styles.paymentCapturedTitle}>Payment captured</div>
+        <div className={styles.paymentCapturedText}>Your payment of ₹3200 was captured. Please keep using the tool.</div>
+      </div>
+
       <div className={styles.header}>
         <button className={styles.backButton} onClick={() => router.push('/casetool')}>
           <ArrowLeft size={20} />

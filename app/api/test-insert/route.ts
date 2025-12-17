@@ -27,6 +27,10 @@ function extensionFromMime(mimeType: string | undefined) {
   return 'jpg';
 }
 
+function stripExtension(fileName: string) {
+  return fileName.replace(/\.[a-z0-9]{2,5}$/i, '');
+}
+
 type Aspect = '1:1' | '4:5' | '16:9';
 
 function buildInsertPhonePrompt(phoneModel: string) {
@@ -111,10 +115,12 @@ export async function POST(request: NextRequest) {
     );
 
     let genB64: string | null = null;
+    let genMimeType: string | undefined;
     const parts = imgRes.candidates[0]?.content?.parts || [];
     for (const p of parts) {
       if (p.inlineData?.data) {
         genB64 = p.inlineData.data;
+        genMimeType = p.inlineData.mimeType;
         break;
       }
     }
@@ -133,10 +139,9 @@ export async function POST(request: NextRequest) {
 
     const sessionId = uuidv4();
     const originalBaseName = sanitizeFileName(caseImage.name || 'upload');
-    const hasExt = /\.[a-z0-9]{2,5}$/i.test(originalBaseName);
-    const ext = hasExt ? '' : `.${extensionFromMime(caseImage.type)}`;
-
-    const fileName = `test_insert_${sessionId}_${Date.now()}_${originalBaseName}${ext}`;
+    const safeStem = stripExtension(originalBaseName) || 'upload';
+    const outExt = extensionFromMime(genMimeType);
+    const fileName = `test_insert_${sessionId}_${Date.now()}_${safeStem}.${outExt}`;
     const filePath = join(outputDir, fileName);
     await writeFile(filePath, Buffer.from(genB64, 'base64'));
 

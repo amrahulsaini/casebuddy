@@ -193,15 +193,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Build angle descriptions text
-        // NOTE: For collage generation, keep descriptions simple to avoid multi-scene "banner" compositions.
-        const collageAngleDescriptions = [
-          'Hero: one clean studio panel showing the phone inside the case, camera area clearly visible, accurate fit and cutouts.',
-          'Back-only 3/4 rear view: one phone inside the case, product photography lighting, no extra props.',
-          'Detail close-up: macro crop focusing on camera cutouts and lens alignment; single scene only.',
-          'Side detail: close-up of side buttons/cutouts and case thickness; single scene only.',
-          'Case alone technical: top-down or slight angle showing all cutouts; single scene only.',
-        ];
-        const angleListText = collageAngleDescriptions.map((d, idx) => `${idx + 1}) ${d}`).join(' ');
+        const angleListText = ANGLE_DESCRIPTIONS.map((desc, idx) => `${idx + 1}) ${desc}`).join(' ');
 
         const ts = Date.now();
         const outputDir = join(process.cwd(), 'public', 'output');
@@ -224,16 +216,13 @@ export async function POST(request: NextRequest) {
 
           const gridPrompt =
             finalPrompt +
-            ' Create ONE SINGLE 4K HIGH-RESOLUTION Amazon-style product COLLAGE image that contains EXACTLY five (5) separate panels inside ONE canvas. ' +
-            'LAYOUT MUST BE STRICT: five equal-sized rectangular panels arranged in a clean grid, separated by uniform white gutters/borders so every panel is clearly framed. ' +
-            'DO NOT merge panels. DO NOT place two views inside one panel. DO NOT split one view across multiple panels. ' +
-            'NO text, NO labels, NO icons, NO watermarks, NO zoom bubbles, NO banners. ' +
-            'QUALITY REQUIREMENTS: Crystal-clear sharpness, no blur or artifacts, perfect focus on all details especially camera lenses and textures, vibrant colors with smooth gradients, professional studio lighting with realistic shadows and reflections. ' +
-            'Each panel MUST correspond to exactly one of the following angle requirements: ' +
+            ' Create a SINGLE ultra-realistic, 4K HIGH-RESOLUTION (minimum 3840x2160 pixels) Amazon-style product render that contains five separate views of the case and phone inside one canvas, arranged in a clean grid or collage. ' +
+            'QUALITY REQUIREMENTS: Crystal-clear sharpness, no blur or artifacts, perfect focus on all details especially camera lenses and textures, 300 DPI print-ready quality, vibrant colors with smooth gradients, professional studio lighting with realistic shadows and reflections. ' +
+            'Each tile or panel inside this single image must correspond to the following camera angle descriptions: ' +
             angleListText +
-            ' All panels must preserve identical phone proportions and the exact case geometry from the reference image, including camera island shape and the precise number and layout of circular openings. ' +
+            ' All tiles must preserve identical phone proportions and the exact case geometry from the reference image, including camera island shape and the precise number and layout of circular openings. ' +
             'The phone body must always stay fully inside the case outline wherever the phone appears. ' +
-            'RENDERING QUALITY: perfect geometric accuracy, no distortion or warping.';
+            'RENDERING QUALITY: Use maximum detail level, ray-traced lighting, photorealistic materials (TPU softness, silicone texture, glass reflections), perfect geometric accuracy, no distortion or warping.';
 
           const imgPayload = {
             contents: [

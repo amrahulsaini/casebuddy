@@ -5,6 +5,7 @@ import styles from './page.module.css';
 
 type ModelChoice = 'normal' | 'high';
 type AspectChoice = '1:1' | '4:5' | '16:9';
+type OutputMode = 'single' | 'collage';
 
 interface ApiOk {
   status: 'ok';
@@ -28,6 +29,7 @@ export default function TestInsertPage() {
   const [error, setError] = useState<string | null>(null);
   const [modelChoice, setModelChoice] = useState<ModelChoice>('normal');
   const [aspect, setAspect] = useState<AspectChoice>('4:5');
+  const [mode, setMode] = useState<OutputMode>('single');
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -39,9 +41,10 @@ export default function TestInsertPage() {
     const formData = new FormData(e.currentTarget);
     formData.append('image_model', modelChoice);
     formData.append('aspect_ratio', aspect);
+    formData.append('mode', mode);
 
     try {
-      setStatus('Generating phone-in-case image…');
+      setStatus(mode === 'collage' ? 'Generating collage (5 panels)…' : 'Generating phone-in-case image…');
       const res = await fetch('/api/test-insert', {
         method: 'POST',
         body: formData,
@@ -100,6 +103,19 @@ export default function TestInsertPage() {
           </div>
 
           <div className={styles.row}>
+            <label className={styles.label}>
+              Output
+              <select
+                className={styles.select}
+                value={mode}
+                onChange={(e) => setMode(e.target.value as OutputMode)}
+                disabled={isLoading}
+              >
+                <option value="single">Single image (best accuracy)</option>
+                <option value="collage">Collage (5 panels, one image)</option>
+              </select>
+            </label>
+
             <label className={styles.label}>
               Aspect Ratio
               <select

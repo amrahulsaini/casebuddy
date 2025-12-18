@@ -32,6 +32,7 @@ function stripExtension(fileName: string) {
 }
 
 type Aspect = '1:1' | '4:5' | '16:9';
+type Mode = 'single' | 'collage';
 
 function buildInsertPhonePrompt(phoneModel: string) {
   return (
@@ -45,6 +46,31 @@ function buildInsertPhonePrompt(phoneModel: string) {
     `- Do not add extra holes/sensors/rings/logos.\n` +
     `- No text, no labels, no watermark.\n\n` +
     `OUTPUT: one clean studio product image (Amazon-style).`
+  );
+}
+
+function buildInsertPhoneCollagePrompt(phoneModel: string) {
+  const angles = [
+    'Panel 1 (Hero): phone inserted, back-facing 3/4 rear angle, centered, clean studio background. Focus on camera cutouts and perfect fit.',
+    'Panel 2 (Back straight-on): phone inserted, perfectly straight-on back view, full case visible, maximum geometric accuracy.',
+    'Panel 3 (Camera macro): close-up crop of camera island and surrounding case, show lenses perfectly centered in openings.',
+    'Panel 4 (Side buttons): close-up of side edge showing button cutouts and thickness, no distortion.',
+    'Panel 5 (Flat lay): case + phone inserted OR case alone flat lay (choose the most realistic), top-down technical clarity.',
+  ].map((d, i) => `${i + 1}) ${d}`).join(' ');
+
+  return (
+    `Using the provided reference image of a PRINTED PHONE CASE (straight-on packshot), generate ONE single Amazon-style product collage image with EXACTLY five panels arranged in a clean 5-tile grid.\n\n` +
+    `PHONE MODEL LABEL: "${phoneModel}" (treat as label only; do not use catalog specs if they conflict with the case cutouts).\n\n` +
+    `CRITICAL RULES (do not break):\n` +
+    `- Preserve the case silhouette, camera island position, and ALL cutouts exactly as in the reference image.\n` +
+    `- Preserve the printed design exactly (same colors, same placement, no redesign, no shifting).\n` +
+    `- When the phone is shown inserted: phone must fit 100% inside the case (no floating, no intersections).\n` +
+    `- Across all panels, depict the SAME exact phone+case geometry by reusing one identical 3D asset; only rotate or crop it.\n` +
+    `- Do NOT redraw or reinterpret the camera layout per panel.\n` +
+    `- No text, no labels, no zoom bubbles, no watermark.\n` +
+    `- No hands, no accessories, no extra devices.\n` +
+    `- No fisheye, no perspective warping, no stretched proportions.\n\n` +
+    `Panels must follow: ${angles}`
   );
 }
 
@@ -62,6 +88,7 @@ export async function POST(request: NextRequest) {
     const caseImage = formData.get('case_image') as File;
     const imageModelChoice = (formData.get('image_model') as string) || 'normal';
     const aspectRatio = ((formData.get('aspect_ratio') as string) || '4:5') as Aspect;
+    const mode = ((formData.get('mode') as string) || 'single') as Mode;
 
     if (!caseImage) {
       return NextResponse.json(
@@ -79,7 +106,10 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(arrayBuffer);
     const imgB64 = buffer.toString('base64');
 
-    const editPrompt = buildInsertPhonePrompt(phoneModel);
+    const editPrompt =
+      mode === 'collage'
+        ? buildInsertPhoneCollagePrompt(phoneModel)
+        : buildInsertPhonePrompt(phoneModel);
 
     const imgPayload: any = {
       contents: [
@@ -106,6 +136,7 @@ export async function POST(request: NextRequest) {
 
     // If the backend/model supports these fields, they help keep output clean.
     imgPayload.generationConfig.responseModalities = ['Image'];
+    // Collage looks best wide; if user picked 4:5 for collage, we keep it as-is.
     imgPayload.generationConfig.imageConfig = { aspectRatio };
 
     const imgRes = await callGemini(
@@ -141,7 +172,7 @@ export async function POST(request: NextRequest) {
     const originalBaseName = sanitizeFileName(caseImage.name || 'upload');
     const safeStem = stripExtension(originalBaseName) || 'upload';
     const outExt = extensionFromMime(genMimeType);
-    const fileName = `test_insert_${sessionId}_${Date.now()}_${safeStem}.${outExt}`;
+    const fileName = `test_insert_${mode}_${sessionId}_${Date.now()}_${safeStem}.${outExt}`;
     const filePath = join(outputDir, fileName);
     await writeFile(filePath, Buffer.from(genB64, 'base64'));
 

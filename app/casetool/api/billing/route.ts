@@ -59,6 +59,9 @@ export async function GET(req: NextRequest) {
       `SELECT
         dbl.id,
         dbl.generation_log_id,
+        dbl.slice_key,
+        dbl.downloaded_url,
+        dbl.downloaded_label,
         dbl.amount_inr,
         dbl.created_at,
         gl.phone_model,

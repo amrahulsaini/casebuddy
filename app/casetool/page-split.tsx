@@ -21,6 +21,7 @@ interface GeneratedImage {
   title: string;
   isProcessing?: boolean;
   logId?: number;
+  sliceKey?: string;
 }
 
 export default function CaseToolPage() {
@@ -36,9 +37,12 @@ export default function CaseToolPage() {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const recordDownload = (logId: number) => {
+  const recordDownload = (logId: number, sliceKey: string, downloadedUrl: string, downloadedLabel: string) => {
     try {
-      const payload = new Blob([JSON.stringify({ logId })], { type: 'application/json' });
+      const payload = new Blob(
+        [JSON.stringify({ logId, sliceKey, downloadedUrl, downloadedLabel })],
+        { type: 'application/json' }
+      );
       if (navigator.sendBeacon) {
         navigator.sendBeacon('/casetool/api/billing/download', payload);
         return;
@@ -50,7 +54,7 @@ export default function CaseToolPage() {
     fetch('/casetool/api/billing/download', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ logId }),
+      body: JSON.stringify({ logId, sliceKey, downloadedUrl, downloadedLabel }),
       keepalive: true,
     }).catch(() => undefined);
   };
@@ -163,7 +167,8 @@ export default function CaseToolPage() {
           url: data.payload.url, 
           title: data.payload.title, 
           isProcessing: false,
-          logId: data.payload.logId 
+          logId: data.payload.logId,
+          sliceKey: data.payload.sliceKey
         }]);
         break;
 
@@ -425,7 +430,14 @@ export default function CaseToolPage() {
                           download
                           className={styles.actionBtn}
                           onClick={() => {
-                            if (img.logId) recordDownload(img.logId);
+                            if (img.logId) {
+                              recordDownload(
+                                img.logId,
+                                img.sliceKey || 'full',
+                                img.url,
+                                img.title
+                              );
+                            }
                           }}
                         >
                           <Download size={18} />

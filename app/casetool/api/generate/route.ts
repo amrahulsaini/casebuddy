@@ -302,57 +302,41 @@ export async function POST(request: NextRequest) {
             currentProgress = 85;
             writer.send('status', 'Auto-splitting collage into individual images...', currentProgress);
 
-            // IMPORTANT: Do NOT change generation prompt; only make splitting smarter.
-            // Many failures happen when the bbox model returns one big box covering 2 panels.
-            const strictFivePanelBboxPrompt = `You will receive ONE composite product image that contains EXACTLY five (5) distinct panels (sub-images) on a single canvas.\n\nYour task:\n- Return EXACTLY 5 tight bounding boxes, one per panel.\n- Each box must contain ONLY ONE panel. Never include two panels in one box.\n- If a box would contain two panels, split it into two boxes instead.\n\nCoordinates:\n- Use normalized coordinates in [0,1].\n- x,y = top-left corner. width,height = size.\n- Boxes should not overlap and should cover the full panel area.\n\nReturn STRICT JSON only:\n{\n  \"regions\": [\n    { \"id\": 1, \"label\": \"angle_1\", \"x\": 0.0, \"y\": 0.0, \"width\": 0.0, \"height\": 0.0 },\n    { \"id\": 2, \"label\": \"angle_2\", \"x\": 0.0, \"y\": 0.0, \"width\": 0.0, \"height\": 0.0 },\n    { \"id\": 3, \"label\": \"angle_3\", \"x\": 0.0, \"y\": 0.0, \"width\": 0.0, \"height\": 0.0 },\n    { \"id\": 4, \"label\": \"angle_4\", \"x\": 0.0, \"y\": 0.0, \"width\": 0.0, \"height\": 0.0 },\n    { \"id\": 5, \"label\": \"angle_5\", \"x\": 0.0, \"y\": 0.0, \"width\": 0.0, \"height\": 0.0 }\n  ]\n}\n\nRules:\n- Output JSON only.\n- Always return exactly 5 regions.`;
-
-            async function getRegions(promptText: string): Promise<Region[]> {
-              const bboxPayload = {
-                contents: [
-                  {
-                    role: 'user',
-                    parts: [
-                      { text: promptText },
-                      {
-                        inlineData: {
-                          mimeType: 'image/png',
-                          data: genB64,
-                        },
+            const bboxPrompt = buildBoundingBoxPrompt();
+            const bboxPayload = {
+              contents: [
+                {
+                  role: 'user',
+                  parts: [
+                    { text: bboxPrompt },
+                    {
+                      inlineData: {
+                        mimeType: 'image/png',
+                        data: genB64,
                       },
-                    ],
-                  },
-                ],
-                generationConfig: {
-                  responseMimeType: 'application/json',
+                    },
+                  ],
                 },
-              };
+              ],
+              generationConfig: {
+                responseMimeType: 'application/json',
+              },
+            };
 
-              const bboxRes = await callGemini(
-                `https://generativelanguage.googleapis.com/v1beta/models/${TEXT_MODEL}:generateContent`,
-                bboxPayload,
-                GEMINI_API_KEY
-              );
+            const bboxRes = await callGemini(
+              `https://generativelanguage.googleapis.com/v1beta/models/${TEXT_MODEL}:generateContent`,
+              bboxPayload,
+              GEMINI_API_KEY
+            );
 
-              const bboxRaw = bboxRes.candidates[0]?.content?.parts[0]?.text || '{}';
-              const bboxParsed = JSON.parse(bboxRaw);
-              if (!bboxParsed.regions || !Array.isArray(bboxParsed.regions)) {
-                throw new Error('Invalid region JSON from AI');
-              }
-              return bboxParsed.regions as Region[];
+            const bboxRaw = bboxRes.candidates[0]?.content?.parts[0]?.text || '{}';
+            const bboxParsed = JSON.parse(bboxRaw);
+
+            if (!bboxParsed.regions || !Array.isArray(bboxParsed.regions)) {
+              throw new Error('Invalid region JSON from AI');
             }
 
-            let regions: Region[] = await getRegions(strictFivePanelBboxPrompt);
-
-            // One retry (still cheap) if model didn't follow the EXACT 5 requirement.
-            if (regions.length !== 5) {
-              const retryPrompt = strictFivePanelBboxPrompt +
-                '\n\nRETRY: Your previous output did not have exactly 5 regions. Return exactly 5 non-overlapping regions now.';
-              regions = await getRegions(retryPrompt);
-            }
-
-            if (regions.length < 1) {
-              throw new Error('No regions returned');
-            }
+            const regions: Region[] = bboxParsed.regions;
             const croppedResults = await cropAndUpscaleRegions(filePath, regions);
 
             if (!croppedResults.length) {

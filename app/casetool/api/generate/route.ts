@@ -12,12 +12,10 @@ import pool from '@/lib/db';
 import {
   callGemini,
   buildAnalysisPrompt,
-  buildBoundingBoxPrompt,
   ANGLE_DESCRIPTIONS,
 } from '@/lib/gemini';
 import { StreamWriter } from '@/lib/stream-helpers';
 import { logAPIUsage } from '@/lib/pricing';
-import { cropAndUpscaleRegions, Region } from '@/lib/image-processing';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const TEXT_MODEL = process.env.TEXT_MODEL || 'gemini-2.0-flash';
@@ -296,78 +294,11 @@ export async function POST(request: NextRequest) {
             );
           }
 
-          // Auto-split: detect panel bounding boxes and crop into separate images.
-          // Requirement: don't show the collage in UI; show individual images after backend split.
-          try {
-            currentProgress = 85;
-            writer.send('status', 'Auto-splitting collage into individual images...', currentProgress);
-
-            const bboxPrompt = buildBoundingBoxPrompt();
-            const bboxPayload = {
-              contents: [
-                {
-                  role: 'user',
-                  parts: [
-                    { text: bboxPrompt },
-                    {
-                      inlineData: {
-                        mimeType: 'image/png',
-                        data: genB64,
-                      },
-                    },
-                  ],
-                },
-              ],
-              generationConfig: {
-                responseMimeType: 'application/json',
-              },
-            };
-
-            const bboxRes = await callGemini(
-              `https://generativelanguage.googleapis.com/v1beta/models/${TEXT_MODEL}:generateContent`,
-              bboxPayload,
-              GEMINI_API_KEY
-            );
-
-            const bboxRaw = bboxRes.candidates[0]?.content?.parts[0]?.text || '{}';
-            const bboxParsed = JSON.parse(bboxRaw);
-
-            if (!bboxParsed.regions || !Array.isArray(bboxParsed.regions)) {
-              throw new Error('Invalid region JSON from AI');
-            }
-
-            const regions: Region[] = bboxParsed.regions;
-            const croppedResults = await cropAndUpscaleRegions(filePath, regions);
-
-            if (!croppedResults.length) {
-              throw new Error('No valid regions were produced by AI');
-            }
-
-            const sliceTs = Date.now();
-            let sliceIndex = 0;
-            for (const result of croppedResults) {
-              sliceIndex += 1;
-              const sliceFileName = `${sanitizedModel}_${sliceTs}_slice_${sliceIndex}.png`;
-              const slicePath = join(outputDir, sliceFileName);
-              await writeFile(slicePath, result.buffer);
-
-              writer.send('image_result', `Image ${sliceIndex} ready`, 92, {
-                url: `/output/${sliceFileName}`,
-                title: result.label,
-                logId: logId,
-                sliceKey: `slice_${sliceIndex}`,
-              });
-            }
-          } catch (splitErr: any) {
-            // If split fails, fall back to returning the collage so user still gets an output.
-            writer.send('status', 'Auto-split failed; returning full collage image...', 88);
-            writer.send('image_result', `Mockup image ready`, 90, {
-              url: imageUrl,
-              title: `${phoneModel} Case Mockup`,
-              logId: logId,
-              sliceKey: 'full',
-            });
-          }
+          writer.send('image_result', `Mockup image ready`, 90, {
+            url: imageUrl,
+            title: `${phoneModel} Case Mockup`,
+            logId: logId,
+          });
 
         writer.send('done', 'All tasks completed successfully!', 100);
         controller.close();

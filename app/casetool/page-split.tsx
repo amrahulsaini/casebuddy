@@ -93,6 +93,14 @@ export default function CaseToolPage() {
     }
   };
 
+  const cloneFormData = (src: FormData) => {
+    const next = new FormData();
+    for (const [key, value] of src.entries()) {
+      next.append(key, value);
+    }
+    return next;
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -102,10 +110,20 @@ export default function CaseToolPage() {
     setImages([]);
     setError('');
 
-    const formData = new FormData(e.currentTarget);
-    setLastFormData(formData);
+    const baseFormData = new FormData(e.currentTarget);
+    setLastFormData(baseFormData);
 
-    try {
+    const totalRuns = 3;
+    let promptToReuse = '';
+
+    const runOneGeneration = async (runIndex: number) => {
+      const formData = cloneFormData(baseFormData);
+      if (runIndex > 1 && promptToReuse) {
+        formData.set('reuse_prompt', promptToReuse);
+      }
+
+      setStatus(`(${runIndex}/${totalRuns}) Starting...`);
+
       const response = await fetch('/casetool/api/generate', {
         method: 'POST',
         body: formData,
@@ -129,14 +147,73 @@ export default function CaseToolPage() {
           if (!line.trim()) continue;
           try {
             const data = JSON.parse(line);
-            handleStreamData(data);
+
+            if (typeof data.progress === 'number') {
+              const scaled = Math.round((((runIndex - 1) * 100) + data.progress) / totalRuns);
+              setProgress(scaled);
+            }
+
+            if (data.msg) {
+              setStatus(`(${runIndex}/${totalRuns}) ${data.msg}`);
+            }
+
+            switch (data.type) {
+              case 'data_log':
+                if (data.payload && data.payload.prompt) {
+                  promptToReuse = data.payload.prompt;
+                  setLastPrompt(data.payload.prompt);
+                }
+                break;
+
+              case 'image_start':
+                setImages((prev) => [
+                  ...prev,
+                  { url: '', title: data.msg || `Generating (${runIndex}/${totalRuns})...`, isProcessing: true },
+                ]);
+                break;
+
+              case 'image_result':
+                setImages((prev) => {
+                  const withoutProcessing = prev.filter(img => !img.isProcessing);
+                  return [
+                    ...withoutProcessing,
+                    {
+                      url: data.payload.url,
+                      title: data.payload.title,
+                      isProcessing: false,
+                      logId: data.payload.logId,
+                    },
+                  ];
+                });
+                break;
+
+              case 'error':
+                setError(data.msg);
+                setImages((prev) => prev.filter(img => !img.isProcessing));
+                throw new Error(data.msg || 'Generation failed');
+
+              case 'done':
+                break;
+
+              default:
+                break;
+            }
           } catch (err) {
             console.error('Parse error', err, line);
           }
         }
       }
+    };
+
+    try {
+      for (let runIndex = 1; runIndex <= totalRuns; runIndex += 1) {
+        await runOneGeneration(runIndex);
+      }
+      setStatus('Generation Complete!');
+      setImages((prev) => prev.filter(img => !img.isProcessing));
+      setProgress(100);
     } catch (err: any) {
-      setError('Network Error: ' + err.message);
+      setError('Network Error: ' + (err?.message || String(err)));
     } finally {
       setIsGenerating(false);
     }

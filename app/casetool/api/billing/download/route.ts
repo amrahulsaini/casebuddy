@@ -56,17 +56,26 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Compute amount from recorded API usage for this generation (fallback to 0 if not available)
-    let amountINR = 0;
+    // Billing amount is a fixed price per downloaded generation.
+    // This avoids under-charging when prompt reuse skips the analysis step (previously showed ₹2.10).
+    const STANDARD_PRICE_INR = 4.10;
+    const ULTRA_HD_PRICE_INR = 9.39;
+
+    let amountINR = STANDARD_PRICE_INR;
     try {
-      const [usageRows]: any = await pool.execute(
-        'SELECT COALESCE(SUM(cost_inr), 0) as total_inr FROM api_usage_logs WHERE user_id = ? AND generation_log_id = ?',
+      const [rows]: any = await pool.execute(
+        `SELECT
+           MAX(CASE WHEN model_name = 'gemini-3-pro-image-preview' THEN 1 ELSE 0 END) AS has_ultra
+         FROM api_usage_logs
+         WHERE user_id = ? AND generation_log_id = ?`,
         [userId, logId]
       );
-      amountINR = Number(usageRows?.[0]?.total_inr) || 0;
+
+      const hasUltra = Number(rows?.[0]?.has_ultra) === 1;
+      amountINR = hasUltra ? ULTRA_HD_PRICE_INR : STANDARD_PRICE_INR;
     } catch {
-      // api_usage_logs might not exist in some deployments; keep amount as 0
-      amountINR = 0;
+      // api_usage_logs might not exist in some deployments; default to standard price
+      amountINR = STANDARD_PRICE_INR;
     }
 
     await pool.execute(

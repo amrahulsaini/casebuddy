@@ -57,6 +57,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
     stock_quantity: '0',
     is_featured: false,
     is_active: true,
+    design_addon_enabled: false,
   });
 
   useEffect(() => {
@@ -84,6 +85,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
         stock_quantity: data.stock_quantity.toString(),
         is_featured: data.is_featured,
         is_active: data.is_active,
+        design_addon_enabled: data.design_addon_enabled || false,
       });
       setSelectedCategories(data.categories.map((c: Category) => c.id));
     } catch (error) {
@@ -330,6 +332,17 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
               }
             />
             Active
+          </label>
+
+          <label className={styles.checkbox}>
+            <input
+              type="checkbox"
+              checked={formData.design_addon_enabled}
+              onChange={(e) =>
+                setFormData({ ...formData, design_addon_enabled: e.target.checked })
+              }
+            />
+            Enable Design Position Add-on (Right Design / Left Design)
           </label>
         </div>
 

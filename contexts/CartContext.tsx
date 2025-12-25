@@ -15,6 +15,7 @@ interface CartItem {
   customText?: string;
   font?: string;
   placement?: string;
+  designPosition?: string; // New: right_design or left_design
   additionalNotes?: string;
 }
 

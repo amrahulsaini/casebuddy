@@ -23,6 +23,7 @@ export async function GET(
         p.sku,
         p.stock_quantity,
         p.is_featured,
+        p.design_addon_enabled,
         p.created_at
       FROM products p
       WHERE p.slug = ? AND p.is_active = TRUE`,

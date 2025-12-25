@@ -93,6 +93,7 @@ function parseEmailItemsFromOrder(order: Order): { items: EmailItem[]; singleCus
           customText: it.customizationOptions.customText,
           font: it.customizationOptions.font,
           placement: it.customizationOptions.placement,
+          designPosition: it.customizationOptions.designPosition,
         } : undefined,
       }));
 
@@ -103,14 +104,16 @@ function parseEmailItemsFromOrder(order: Order): { items: EmailItem[]; singleCus
     const customText = parsed?.customText;
     const font = parsed?.font;
     const placement = parsed?.placement;
-    const hasAny = !!(customText || font || placement);
+    const designPosition = parsed?.designPosition;
+    const hasAny = !!(customText || font || placement || designPosition);
     const singleCustomizationHtml = hasAny
       ? `
         <div class="customization">
           <strong>🎨 Customization:</strong><br/>
           ${customText ? `Text: "${escapeHtml(customText)}"<br/>` : ''}
           ${font ? `Font: ${escapeHtml(font)}<br/>` : ''}
-          ${placement ? `Placement: ${escapeHtml(String(placement).replace(/_/g, ' '))}` : ''}
+          ${placement ? `Placement: ${escapeHtml(String(placement).replace(/_/g, ' '))}<br/>` : ''}
+          ${designPosition ? `Design Position: ${escapeHtml(designPosition === 'right_design' ? 'Right Design' : 'Left Design')}` : ''}
         </div>
       `
       : '';
@@ -317,7 +320,7 @@ async function sendOrderConfirmationEmails(order: Order) {
   const itemsHtml = items
     .map((item) => {
       const customization = item.customization;
-      const hasCustomization = !!(customization?.customText || customization?.font || customization?.placement);
+      const hasCustomization = !!(customization?.customText || customization?.font || customization?.placement || customization?.designPosition);
       const imgUrl = item.productId != null ? imageByProductId.get(Number(item.productId)) : null;
       const imageHtml = imgUrl
         ? `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(item.productName)}" style="width:80px;height:auto;border-radius:8px;border:1px solid #eee;display:block;margin:0 0 10px 0;" />`
@@ -333,7 +336,8 @@ async function sendOrderConfirmationEmails(order: Order) {
               <strong>🎨 Customization:</strong><br/>
               ${customization?.customText ? `Text: "${escapeHtml(customization.customText)}"<br/>` : ''}
               ${customization?.font ? `Font: ${escapeHtml(customization.font)}<br/>` : ''}
-              ${customization?.placement ? `Placement: ${escapeHtml(String(customization.placement).replace(/_/g, ' '))}` : ''}
+              ${customization?.placement ? `Placement: ${escapeHtml(String(customization.placement).replace(/_/g, ' '))}<br/>` : ''}
+              ${customization?.designPosition ? `Design Position: ${escapeHtml(customization.designPosition === 'right_design' ? 'Right Design' : 'Left Design')}` : ''}
             </div>
           ` : ''}
           <p>Quantity: ${escapeHtml(item.quantity)}</p>

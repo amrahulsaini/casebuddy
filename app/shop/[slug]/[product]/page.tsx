@@ -49,6 +49,7 @@ interface Product {
   sku: string;
   stock_quantity: number;
   is_featured: boolean;
+  design_addon_enabled?: boolean;
   images: ProductImage[];
   categories: Category[];
   customization: {
@@ -85,6 +86,7 @@ export default function ProductDetailPage() {
   const [customText, setCustomText] = useState('');
   const [selectedFont, setSelectedFont] = useState<string>('bold');
   const [selectedPlacement, setSelectedPlacement] = useState<string>('');
+  const [selectedDesignPosition, setSelectedDesignPosition] = useState<string>(''); // New: right_design or left_design
   const [additionalNotes, setAdditionalNotes] = useState('');
 
   useEffect(() => {
@@ -194,6 +196,7 @@ export default function ProductDetailPage() {
         customText: customText.trim() || undefined,
         font: customText.trim() ? selectedFont : undefined,
         placement: customText.trim() ? selectedPlacement : undefined,
+        designPosition: selectedDesignPosition || undefined, // New: design position
         additionalNotes: additionalNotes.trim() || undefined,
       });
     }
@@ -234,6 +237,7 @@ export default function ProductDetailPage() {
       ...(customText.trim() && { customText: customText.trim() }),
       ...(customText.trim() && selectedFont && { font: selectedFont }),
       ...(customText.trim() && selectedPlacement && { placement: selectedPlacement }),
+      ...(selectedDesignPosition && { designPosition: selectedDesignPosition }), // New: design position
       ...(additionalNotes.trim() && { notes: additionalNotes.trim() }),
     });
 
@@ -594,6 +598,32 @@ export default function ProductDetailPage() {
               </div>
             )}
 
+            {/* Design Position Add-on (only if enabled by admin) */}
+            {product.design_addon_enabled && (
+              <div className={styles.customizationGroup}>
+                <label className={styles.customizationLabel}>
+                  Design Position
+                  <span className={styles.optionalLabel}>(Add-on)</span>
+                </label>
+                <div className={styles.designPositionOptions}>
+                  <button
+                    type="button"
+                    className={`${styles.designPositionOption} ${selectedDesignPosition === 'right_design' ? styles.selected : ''}`}
+                    onClick={() => setSelectedDesignPosition('right_design')}
+                  >
+                    Right Design
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.designPositionOption} ${selectedDesignPosition === 'left_design' ? styles.selected : ''}`}
+                    onClick={() => setSelectedDesignPosition('left_design')}
+                  >
+                    Left Design
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Additional Notes */}
             <div className={styles.customizationGroup}>
               <label className={styles.customizationLabel}>
@@ -619,6 +649,7 @@ export default function ProductDetailPage() {
                   <li>Phone: {phoneBrands.find(b => b.id === selectedBrand)?.name} - {phoneModels.find(m => m.id === selectedModel)?.model_name}</li>
                   {customText && <li>Text: "{customText}" ({selectedFont || 'Bold'})</li>}
                   {customText && selectedPlacement && <li>Placement: {selectedPlacement.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</li>}
+                  {selectedDesignPosition && <li>Design Position: {selectedDesignPosition === 'right_design' ? 'Right Design' : 'Left Design'}</li>}
                   {additionalNotes && <li>Notes: {additionalNotes}</li>}
                 </ul>
               </div>

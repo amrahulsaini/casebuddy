@@ -183,6 +183,9 @@ export default function CartPage() {
                             <p><strong>Placement:</strong> {item.placement?.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}</p>
                           </>
                         )}
+                        {item.designPosition && (
+                          <p><strong>Design Position:</strong> {item.designPosition === 'right_design' ? 'Right Design' : 'Left Design'}</p>
+                        )}
                         {item.additionalNotes && (
                           <p><strong>Notes:</strong> {item.additionalNotes}</p>
                         )}

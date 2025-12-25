@@ -154,10 +154,11 @@ function CheckoutContent() {
         price: item.price,
         quantity: item.quantity,
         image: item.image,
-        customizationOptions: (item.customText || item.font || item.placement) ? {
+        customizationOptions: (item.customText || item.font || item.placement || item.designPosition) ? {
           customText: item.customText || undefined,
           font: item.font || undefined,
           placement: item.placement || undefined,
+          designPosition: item.designPosition || undefined,
         } : undefined,
       }));
 
@@ -187,6 +188,7 @@ function CheckoutContent() {
     const customText = searchParams.get('customText');
     const font = searchParams.get('font');
     const placement = searchParams.get('placement');
+    const designPosition = searchParams.get('designPosition');
     const urlNotes = searchParams.get('notes');
 
     if (!productId || !phoneModel || !price || !image) {
@@ -203,10 +205,11 @@ function CheckoutContent() {
         price: parseFloat(price),
         quantity: quantity ? parseInt(quantity) : 1,
         image: decodeURIComponent(image),
-        customizationOptions: (customText || font || placement) ? {
+        customizationOptions: (customText || font || placement || designPosition) ? {
           customText: customText || undefined,
           font: font || undefined,
           placement: placement || undefined,
+          designPosition: designPosition || undefined,
         } : undefined,
       },
     ]);
@@ -761,6 +764,11 @@ function CheckoutContent() {
                         Placement: {item.customizationOptions.placement.replace(/_/g, ' ')}
                       </div>
                     )}
+                  </div>
+                )}
+                {item.customizationOptions?.designPosition && (
+                  <div className={styles.productVariant}>
+                    Design Position: {item.customizationOptions.designPosition === 'right_design' ? 'Right Design' : 'Left Design'}
                   </div>
                 )}
                 <div className={styles.productVariant}>

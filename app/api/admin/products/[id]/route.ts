@@ -82,7 +82,7 @@ export async function PUT(
         `UPDATE products SET
          name = ?, slug = ?, description = ?, short_description = ?,
          price = ?, compare_price = ?, sku = ?, stock_quantity = ?,
-         is_featured = ?, is_active = ?
+         is_featured = ?, is_active = ?, design_addon_enabled = ?
          WHERE id = ?`,
         [
           data.name,
@@ -95,6 +95,7 @@ export async function PUT(
           data.stock_quantity || 0,
           data.is_featured || false,
           data.is_active ?? true,
+          data.design_addon_enabled || false,
           id,
         ]
       );

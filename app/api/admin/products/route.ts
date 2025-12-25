@@ -99,8 +99,8 @@ export async function POST(request: Request) {
       // Insert product
       const [result] = await connection.execute(
         `INSERT INTO products 
-         (name, slug, description, short_description, price, compare_price, sku, stock_quantity, is_featured, is_active)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         (name, slug, description, short_description, price, compare_price, sku, stock_quantity, is_featured, is_active, design_addon_enabled)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           data.name,
           data.slug,
@@ -112,6 +112,7 @@ export async function POST(request: Request) {
           data.stock_quantity || 0,
           data.is_featured || false,
           data.is_active ?? true,
+          data.design_addon_enabled || false,
         ]
       );
 

@@ -10,6 +10,7 @@ export type EmailOrderItem = {
     customText?: string;
     font?: string;
     placement?: string;
+    designPosition?: string; // New: right_design or left_design
   };
 };
 
@@ -55,6 +56,7 @@ export function parseItemsFromCustomizationJson(args: {
               customText: it.customizationOptions.customText,
               font: it.customizationOptions.font,
               placement: it.customizationOptions.placement,
+              designPosition: it.customizationOptions.designPosition,
             }
           : undefined,
       }));
@@ -64,7 +66,8 @@ export function parseItemsFromCustomizationJson(args: {
     const customText = parsed?.customText;
     const font = parsed?.font;
     const placement = parsed?.placement;
-    if (customText || font || placement) {
+    const designPosition = parsed?.designPosition;
+    if (customText || font || placement || designPosition) {
       return [
         {
           ...fallback,
@@ -72,6 +75,7 @@ export function parseItemsFromCustomizationJson(args: {
             customText,
             font,
             placement,
+            designPosition,
           },
         },
       ];

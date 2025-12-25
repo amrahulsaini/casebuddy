@@ -53,6 +53,7 @@ export default function ProductNewPage() {
     stock_quantity: '999',
     is_featured: false,
     is_active: true,
+    design_addon_enabled: false,
   });
 
   useEffect(() => {
@@ -413,6 +414,17 @@ export default function ProductNewPage() {
               }
             />
             Active
+          </label>
+
+          <label className={styles.checkbox}>
+            <input
+              type="checkbox"
+              checked={formData.design_addon_enabled}
+              onChange={(e) =>
+                setFormData({ ...formData, design_addon_enabled: e.target.checked })
+              }
+            />
+            Enable Design Position Add-on (Right Design / Left Design)
           </label>
         </div>
 

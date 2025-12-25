@@ -58,6 +58,7 @@ interface Order {
       customText?: string;
       font?: string;
       placement?: string;
+      designPosition?: string;
     };
   }>;
 }
@@ -238,8 +239,9 @@ export default function AdminOrderDetailPage() {
     const customText = typeof value.customText === 'string' ? value.customText : null;
     const font = typeof value.font === 'string' ? value.font : null;
     const placement = formatPlacement(value.placement);
-    if (!customText && !font && !placement) return null;
-    return { customText, font, placement };
+    const designPosition = typeof value.designPosition === 'string' ? value.designPosition : null;
+    if (!customText && !font && !placement && !designPosition) return null;
+    return { customText, font, placement, designPosition };
   };
 
   return (
@@ -336,6 +338,7 @@ export default function AdminOrderDetailPage() {
                         {fields?.customText && <p>Custom Text: "{fields.customText}"</p>}
                         {fields?.font && <p>Font Style: {fields.font}</p>}
                         {fields?.placement && <p>Text Placement: {fields.placement}</p>}
+                        {fields?.designPosition && <p>Design Position: {fields.designPosition === 'right_design' ? 'Right Design' : 'Left Design'}</p>}
                       </div>
                     );
                   })
@@ -348,6 +351,7 @@ export default function AdminOrderDetailPage() {
                         {fields.customText && <p>Custom Text: "{fields.customText}"</p>}
                         {fields.font && <p>Font Style: {fields.font}</p>}
                         {fields.placement && <p>Text Placement: {fields.placement}</p>}
+                        {fields.designPosition && <p>Design Position: {fields.designPosition === 'right_design' ? 'Right Design' : 'Left Design'}</p>}
                       </>
                     );
                   })()

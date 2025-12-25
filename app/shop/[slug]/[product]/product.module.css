@@ -145,46 +145,20 @@
 .productContainer {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0;
+  padding: 40px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0;
-  align-items: stretch;
-  height: calc(100vh - 120px);
-  overflow: hidden;
+  gap: 60px;
+  align-items: start;
 }
 
 /* Gallery */
 .gallery {
+  position: sticky;
+  top: 120px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 40px;
-  height: 100%;
-  overflow-y: auto;
-  background: #fafafa;
-  border-right: 1px solid #e0e0e0;
-  /* Smooth scrollbar */
-  scrollbar-width: thin;
-  scrollbar-color: #ff6b00 #f0f0f0;
-}
-
-.gallery::-webkit-scrollbar {
-  width: 8px;
-}
-
-.gallery::-webkit-scrollbar-track {
-  background: #f0f0f0;
-  border-radius: 10px;
-}
-
-.gallery::-webkit-scrollbar-thumb {
-  background: #ff6b00;
-  border-radius: 10px;
-}
-
-.gallery::-webkit-scrollbar-thumb:hover {
-  background: #ff9500;
 }
 
 .mainImageWrapper {
@@ -287,31 +261,6 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  padding: 40px;
-  height: 100%;
-  overflow-y: auto;
-  background: #ffffff;
-  /* Smooth scrollbar */
-  scrollbar-width: thin;
-  scrollbar-color: #ff6b00 #f0f0f0;
-}
-
-.productInfo::-webkit-scrollbar {
-  width: 8px;
-}
-
-.productInfo::-webkit-scrollbar-track {
-  background: #f0f0f0;
-  border-radius: 10px;
-}
-
-.productInfo::-webkit-scrollbar-thumb {
-  background: #ff6b00;
-  border-radius: 10px;
-}
-
-.productInfo::-webkit-scrollbar-thumb:hover {
-  background: #ff9500;
 }
 
 .productTitle {
@@ -974,20 +923,11 @@
 @media (max-width: 1024px) {
   .productContainer {
     grid-template-columns: 1fr;
-    height: auto;
-    overflow: visible;
+    gap: 40px;
   }
 
   .gallery {
-    height: auto;
-    max-height: 600px;
-    border-right: none;
-    border-bottom: 1px solid #e0e0e0;
-  }
-
-  .productInfo {
-    height: auto;
-    overflow-y: visible;
+    position: static;
   }
 }
 
@@ -1007,25 +947,12 @@
   }
 
   .productContainer {
-    padding: 0;
-    grid-template-columns: 1fr;
-    height: auto;
-    overflow: visible;
+    padding: 20px;
+    gap: 30px;
   }
 
   .gallery {
-    padding: 20px;
-    height: auto;
-    max-height: none;
-    overflow-y: visible;
-    border-right: none;
-    border-bottom: 1px solid #e0e0e0;
-  }
-
-  .productInfo {
-    padding: 20px;
-    height: auto;
-    overflow-y: visible;
+    position: static;
   }
 
   .productTitle {

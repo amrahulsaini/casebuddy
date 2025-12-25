@@ -49,6 +49,7 @@ type EmailItem = {
     customText?: string;
     font?: string;
     placement?: string;
+    designPosition?: string;
   };
 };
 

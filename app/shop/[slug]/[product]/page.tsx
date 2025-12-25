@@ -467,6 +467,31 @@ export default function ProductDetailPage() {
           <div className={styles.customizationSection}>
             <h3 className={styles.customizationTitle}>🎨 Customize Your Case</h3>
             
+            {/* Design Position Add-on (REQUIRED - shown at top before brand selection) */}
+            {product.design_addon_enabled && (
+              <div className={styles.customizationGroup}>
+                <label className={styles.customizationLabel}>
+                  Design Position *
+                </label>
+                <div className={styles.designPositionOptions}>
+                  <button
+                    type="button"
+                    className={`${styles.designPositionOption} ${selectedDesignPosition === 'right_design' ? styles.selected : ''}`}
+                    onClick={() => setSelectedDesignPosition('right_design')}
+                  >
+                    Right Design
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.designPositionOption} ${selectedDesignPosition === 'left_design' ? styles.selected : ''}`}
+                    onClick={() => setSelectedDesignPosition('left_design')}
+                  >
+                    Left Design
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Phone Brand Selection */}
             <div className={styles.customizationGroup}>
               <label className={styles.customizationLabel}>Select Phone Brand *</label>
@@ -504,31 +529,6 @@ export default function ProductDetailPage() {
                       </option>
                     ))}
                 </select>
-              </div>
-            )}
-
-            {/* Design Position Add-on (REQUIRED - shown right after phone model) */}
-            {product.design_addon_enabled && selectedBrand && selectedModel && (
-              <div className={styles.customizationGroup}>
-                <label className={styles.customizationLabel}>
-                  Design Position *
-                </label>
-                <div className={styles.designPositionOptions}>
-                  <button
-                    type="button"
-                    className={`${styles.designPositionOption} ${selectedDesignPosition === 'right_design' ? styles.selected : ''}`}
-                    onClick={() => setSelectedDesignPosition('right_design')}
-                  >
-                    Right Design
-                  </button>
-                  <button
-                    type="button"
-                    className={`${styles.designPositionOption} ${selectedDesignPosition === 'left_design' ? styles.selected : ''}`}
-                    onClick={() => setSelectedDesignPosition('left_design')}
-                  >
-                    Left Design
-                  </button>
-                </div>
               </div>
             )}
 

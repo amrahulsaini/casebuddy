@@ -468,7 +468,7 @@ export default function ProductDetailPage() {
             <h3 className={styles.customizationTitle}>🎨 Customize Your Case</h3>
             
             {/* Design Position Add-on (REQUIRED - shown at top before brand selection) */}
-            {product.design_addon_enabled && (
+            {!!product.design_addon_enabled && (
               <div className={styles.customizationGroup}>
                 <label className={styles.customizationLabel}>
                   Design Position *

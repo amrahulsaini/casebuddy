@@ -22,8 +22,11 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 40px;
+  margin-top: 20px;
   flex-wrap: wrap;
   gap: 20px;
+  position: relative;
+  z-index: 1;
 }
 
 .header h1 {

@@ -155,6 +155,12 @@ export default function ProductDetailPage() {
       return false;
     }
 
+    // Design position is required when addon is enabled
+    if (product?.design_addon_enabled && !selectedDesignPosition) {
+      setValidationError('Please select a design position (Right or Left)');
+      return false;
+    }
+
     // If custom text is entered, font and placement are required
     if (customText.trim()) {
       if (!selectedFont) {
@@ -501,6 +507,31 @@ export default function ProductDetailPage() {
               </div>
             )}
 
+            {/* Design Position Add-on (REQUIRED - shown right after phone model) */}
+            {product.design_addon_enabled && selectedBrand && selectedModel && (
+              <div className={styles.customizationGroup}>
+                <label className={styles.customizationLabel}>
+                  Design Position *
+                </label>
+                <div className={styles.designPositionOptions}>
+                  <button
+                    type="button"
+                    className={`${styles.designPositionOption} ${selectedDesignPosition === 'right_design' ? styles.selected : ''}`}
+                    onClick={() => setSelectedDesignPosition('right_design')}
+                  >
+                    Right Design
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.designPositionOption} ${selectedDesignPosition === 'left_design' ? styles.selected : ''}`}
+                    onClick={() => setSelectedDesignPosition('left_design')}
+                  >
+                    Left Design
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* WhatsApp Preorder Message */}
             <div className={styles.infoMessage}>
               <span className={styles.infoIcon}>💬</span>
@@ -593,32 +624,6 @@ export default function ProductDetailPage() {
                     onClick={() => setSelectedPlacement('name_with_heart_at_bottom')}
                   >
                     Name with a Heart at Bottom of the Case
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Design Position Add-on (only if enabled by admin) */}
-            {product.design_addon_enabled && (
-              <div className={styles.customizationGroup}>
-                <label className={styles.customizationLabel}>
-                  Design Position
-                  <span className={styles.optionalLabel}>(Add-on)</span>
-                </label>
-                <div className={styles.designPositionOptions}>
-                  <button
-                    type="button"
-                    className={`${styles.designPositionOption} ${selectedDesignPosition === 'right_design' ? styles.selected : ''}`}
-                    onClick={() => setSelectedDesignPosition('right_design')}
-                  >
-                    Right Design
-                  </button>
-                  <button
-                    type="button"
-                    className={`${styles.designPositionOption} ${selectedDesignPosition === 'left_design' ? styles.selected : ''}`}
-                    onClick={() => setSelectedDesignPosition('left_design')}
-                  >
-                    Left Design
                   </button>
                 </div>
               </div>

@@ -10,7 +10,7 @@
   box-sizing: border-box;
 }
 
-* {
+.page :global(*) {
   box-sizing: border-box;
 }
 

@@ -37,6 +37,7 @@ interface Order {
       customText?: string;
       font?: string;
       placement?: string;
+      designPosition?: string;
     };
   }>;
 }
@@ -668,6 +669,9 @@ export default function OrdersPage() {
                     {items.length === 1 && items[0].customization && (
                       <div className={styles.customization}>
                         <strong>Customization:</strong>
+                        {items[0].customization.designPosition && (
+                          <p>Design Position: {items[0].customization.designPosition === 'right_design' ? 'Right Design' : 'Left Design'}</p>
+                        )}
                         {items[0].customization.customText && <p>Text: &quot;{items[0].customization.customText}&quot;</p>}
                         {items[0].customization.font && <p>Font: {items[0].customization.font}</p>}
                         {items[0].customization.placement && (

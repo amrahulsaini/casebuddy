@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
-import { join } from 'path';
 import { existsSync } from 'fs';
+
+// Predefine the output directory path to avoid dynamic path resolution
+const OUTPUT_DIR = process.cwd() + '/public/output/';
 
 export async function GET(
   request: NextRequest,
@@ -15,7 +17,7 @@ export async function GET(
       return NextResponse.json({ error: 'Invalid filename' }, { status: 400 });
     }
 
-    const filePath = join(process.cwd(), 'public', 'output', filename);
+    const filePath = OUTPUT_DIR + filename;
 
     if (!existsSync(filePath)) {
       return NextResponse.json({ error: 'File not found' }, { status: 404 });

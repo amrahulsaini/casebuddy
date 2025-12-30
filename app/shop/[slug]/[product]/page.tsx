@@ -723,17 +723,6 @@ export default function ProductDetailPage() {
               <span className={styles.charCount}>{additionalNotes.length}/200</span>
             </div>
 
-            {/* Product Description */}
-            {product.description && (
-              <div className={styles.descriptionSection}>
-                <h2>Product Description</h2>
-                <div 
-                  className={styles.descriptionContent}
-                  dangerouslySetInnerHTML={{ __html: formatDescription(product.description) }}
-                />
-              </div>
-            )}
-
             {/* Customization Summary */}
             {selectedBrand && selectedModel && (
               <div className={styles.customizationSummary}>
@@ -812,6 +801,17 @@ export default function ProductDetailPage() {
             </div>
           </div>
         </div>
+
+        {/* Product Description */}
+        {product.description && (
+          <div className={styles.descriptionSection}>
+            <h2>Product Description</h2>
+            <div 
+              className={styles.descriptionContent}
+              dangerouslySetInnerHTML={{ __html: formatDescription(product.description) }}
+            />
+          </div>
+        )}
       </div>
 
       </main>

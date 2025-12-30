@@ -485,6 +485,17 @@ export default function ProductDetailPage() {
               ))}
             </div>
           )}
+
+          {/* Product Description */}
+          {product.description && (
+            <div className={styles.descriptionSection}>
+              <h2>Product Description</h2>
+              <div 
+                className={styles.descriptionContent}
+                dangerouslySetInnerHTML={{ __html: formatDescription(product.description) }}
+              />
+            </div>
+          )}
         </div>
 
         {/* Product Info */}
@@ -738,6 +749,17 @@ export default function ProductDetailPage() {
             )}
           </div>
 
+          {/* Product Description Mobile */}
+          {product.description && (
+            <div className={styles.descriptionSectionMobile}>
+              <h2>Product Description</h2>
+              <div 
+                className={styles.descriptionContent}
+                dangerouslySetInnerHTML={{ __html: formatDescription(product.description) }}
+              />
+            </div>
+          )}
+
           {/* Validation Error */}
           {validationError && (
             <div className={styles.errorMessage}>
@@ -777,17 +799,6 @@ export default function ProductDetailPage() {
             </button>
           </div>
         </div>
-
-        {/* Product Description */}
-        {product.description && (
-          <div className={styles.descriptionSection}>
-            <h2>Product Description</h2>
-            <div 
-              className={styles.descriptionContent}
-              dangerouslySetInnerHTML={{ __html: formatDescription(product.description) }}
-            />
-          </div>
-        )}
       </div>
 
       </main>

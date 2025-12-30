@@ -776,30 +776,6 @@ export default function ProductDetailPage() {
               <Heart size={20} fill={product && isInWishlist(product.id) ? '#ff6b00' : 'none'} />
             </button>
           </div>
-
-          <div className={styles.features}>
-            <div className={styles.feature}>
-              <Truck size={24} />
-              <div>
-                <h4>Free Delivery</h4>
-                <p>On orders above ₹{freeShippingThreshold}</p>
-              </div>
-            </div>
-            <div className={styles.feature}>
-              <Shield size={24} />
-              <div>
-                <h4>Secure Payment</h4>
-                <p>100% secure payment</p>
-              </div>
-            </div>
-            <div className={styles.feature}>
-              <Package size={24} />
-              <div>
-                <h4>Easy Returns</h4>
-                <p>7-day return policy</p>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Product Description */}

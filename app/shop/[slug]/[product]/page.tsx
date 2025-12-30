@@ -465,7 +465,7 @@ export default function ProductDetailPage() {
 
           {/* Customization Section - Always enabled for all products */}
           <div className={styles.customizationSection}>
-            <h3 className={styles.customizationTitle}>🎨 Customize Your Case</h3>
+            <h3 className={styles.customizationTitle}>🎨 Customize</h3>
             
             {/* Design Position Add-on (REQUIRED - shown at top before brand selection) */}
             {!!product.design_addon_enabled && (

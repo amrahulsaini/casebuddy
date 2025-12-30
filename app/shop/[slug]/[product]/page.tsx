@@ -77,7 +77,7 @@ function formatDescription(text: string): string {
     const line = lines[i];
     
     // Check if line is a heading (ends with colon or contains certain keywords)
-    const isHeading = line.endsWith(':') || 
+    const isHeading = line.endsWith(':') && !line.match(/^[•\-\*]\s/) && 
                      /^(key features|perfect gift|order processing|delivery|made to order|processing time|delivery time)/i.test(line);
     
     // Check if line starts with bullet point or dash
@@ -101,8 +101,10 @@ function formatDescription(text: string): string {
       const content = line.replace(/^[•\-\*]\s*/, '');
       // Check if content has a bold part (text before colon)
       if (content.includes(':')) {
-        const parts = content.split(':');
-        html += `<li><strong>${parts[0]}:</strong>${parts.slice(1).join(':')}</li>`;
+        const colonIndex = content.indexOf(':');
+        const beforeColon = content.substring(0, colonIndex);
+        const afterColon = content.substring(colonIndex + 1);
+        html += `<li><strong>${beforeColon}:</strong>${afterColon}</li>`;
       } else {
         html += `<li>${content}</li>`;
       }
@@ -112,8 +114,16 @@ function formatDescription(text: string): string {
         html += '</ul>';
         inList = false;
       }
-      // Regular paragraph
-      html += `<p>${line}</p>`;
+      // Check if regular paragraph has text before colon to make bold
+      if (line.includes(':') && !line.endsWith(':')) {
+        const colonIndex = line.indexOf(':');
+        const beforeColon = line.substring(0, colonIndex);
+        const afterColon = line.substring(colonIndex + 1);
+        html += `<p><strong>${beforeColon}:</strong>${afterColon}</p>`;
+      } else {
+        // Regular paragraph
+        html += `<p>${line}</p>`;
+      }
     }
   }
   
@@ -475,6 +485,17 @@ export default function ProductDetailPage() {
               ))}
             </div>
           )}
+
+          {/* Product Description under gallery */}
+          {product.description && (
+            <div className={styles.descriptionSection}>
+              <h2>Product Description</h2>
+              <div 
+                className={styles.descriptionContent}
+                dangerouslySetInnerHTML={{ __html: formatDescription(product.description) }}
+              />
+            </div>
+          )}
         </div>
 
         {/* Product Info */}
@@ -792,17 +813,6 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
-
-      {/* Product Description */}
-      {product.description && (
-        <div className={styles.descriptionSection}>
-          <h2>Product Description</h2>
-          <div 
-            className={styles.descriptionContent}
-            dangerouslySetInnerHTML={{ __html: formatDescription(product.description) }}
-          />
-        </div>
-      )}
 
       </main>
 

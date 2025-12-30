@@ -896,26 +896,26 @@
 
 /* Description Section */
 .descriptionSection {
-  max-width: 1400px;
-  margin: 60px auto;
-  padding: 0 40px;
+  max-width: 100%;
+  margin: 40px 0 0 0;
+  padding: 0;
 }
 
 .descriptionSection h2 {
-  font-size: 32px;
-  font-weight: 800;
+  font-size: 24px;
+  font-weight: 700;
   color: #000;
-  margin: 0 0 24px 0;
+  margin: 0 0 20px 0;
 }
 
 .descriptionContent {
-  font-size: 16px;
+  font-size: 15px;
   color: #666;
   line-height: 1.8;
 }
 
 .descriptionContent p {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .descriptionContent strong {
@@ -926,23 +926,23 @@
 .descriptionContent ul {
   list-style: none;
   padding-left: 0;
-  margin: 16px 0;
+  margin: 12px 0;
 }
 
 .descriptionContent li {
   position: relative;
-  padding-left: 24px;
-  margin-bottom: 12px;
+  padding-left: 20px;
+  margin-bottom: 10px;
   line-height: 1.6;
 }
 
 .descriptionContent li::before {
   content: "•";
   position: absolute;
-  left: 8px;
+  left: 4px;
   color: #ff6b00;
   font-weight: bold;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 /* Error */
@@ -1093,12 +1093,12 @@
   }
 
   .descriptionSection {
-    padding: 0 20px;
-    margin: 40px auto;
+    padding: 0;
+    margin: 30px 0 0 0;
   }
 
   .descriptionSection h2 {
-    font-size: 24px;
+    font-size: 20px;
   }
 
   .features {
@@ -1344,21 +1344,30 @@
   }
 
   .descriptionSection {
-    padding: 0 16px;
-    margin: 32px auto;
+    padding: 0;
+    margin: 24px 0 0 0;
   }
 
   .descriptionSection h2 {
-    font-size: 20px;
-    margin-bottom: 16px;
+    font-size: 18px;
+    margin-bottom: 14px;
   }
 
   .descriptionContent {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .descriptionContent p {
-    margin-bottom: 12px;
+    margin-bottom: 10px;
+  }
+
+  .descriptionContent li {
+    padding-left: 18px;
+    margin-bottom: 8px;
+  }
+
+  .descriptionContent li::before {
+    font-size: 16px;
   }
 
   .thumbnails {

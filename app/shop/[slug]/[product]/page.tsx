@@ -485,17 +485,6 @@ export default function ProductDetailPage() {
               ))}
             </div>
           )}
-
-          {/* Product Description */}
-          {product.description && (
-            <div className={styles.descriptionSection}>
-              <h2>Product Description</h2>
-              <div 
-                className={styles.descriptionContent}
-                dangerouslySetInnerHTML={{ __html: formatDescription(product.description) }}
-              />
-            </div>
-          )}
         </div>
 
         {/* Product Info */}
@@ -812,6 +801,17 @@ export default function ProductDetailPage() {
             </div>
           </div>
         </div>
+
+        {/* Product Description */}
+        {product.description && (
+          <div className={styles.descriptionSection}>
+            <h2>Product Description</h2>
+            <div 
+              className={styles.descriptionContent}
+              dangerouslySetInnerHTML={{ __html: formatDescription(product.description) }}
+            />
+          </div>
+        )}
       </div>
 
       </main>

@@ -167,6 +167,8 @@
   .productContainer {
     display: flex;
     flex-direction: column;
+    padding: 20px;
+    gap: 30px;
   }
 }
 
@@ -918,8 +920,9 @@
 /* Description Section */
 .descriptionSection {
   max-width: 100%;
-  margin: 40px 0 0 0;
+  margin: 0;
   padding: 0;
+  grid-column: 1;
 }
 
 @media (max-width: 768px) {
@@ -1045,11 +1048,6 @@
     font-size: 12px;
   }
 
-  .productContainer {
-    padding: 20px;
-    gap: 30px;
-  }
-
   .gallery {
     position: static;
     max-width: 100%;
@@ -1118,12 +1116,6 @@
   .fontOptions,
   .placementOptions {
     grid-template-columns: 1fr;
-  }
-
-  .descriptionSection {
-    padding: 0;
-    margin: 30px 0 0 0;
-    order: 3;
   }
 
   .descriptionSection h2 {

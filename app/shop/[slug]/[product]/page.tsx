@@ -58,6 +58,73 @@ interface Product {
   };
 }
 
+// Function to format plain text description into HTML
+function formatDescription(text: string): string {
+  if (!text) return '';
+  
+  // If already contains HTML tags, return as is
+  if (text.includes('<p>') || text.includes('<ul>') || text.includes('<li>')) {
+    return text;
+  }
+  
+  // Split into lines
+  let lines = text.split('\n').map(line => line.trim()).filter(line => line);
+  
+  let html = '';
+  let inList = false;
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    
+    // Check if line is a heading (ends with colon or contains certain keywords)
+    const isHeading = line.endsWith(':') || 
+                     /^(key features|perfect gift|order processing|delivery|made to order|processing time|delivery time)/i.test(line);
+    
+    // Check if line starts with bullet point or dash
+    const isBulletPoint = /^[•\-\*]\s/.test(line);
+    
+    if (isHeading) {
+      // Close list if open
+      if (inList) {
+        html += '</ul>';
+        inList = false;
+      }
+      // Add heading as strong tag in paragraph
+      html += `<p><strong>${line}</strong></p>`;
+    } else if (isBulletPoint) {
+      // Start list if not already started
+      if (!inList) {
+        html += '<ul>';
+        inList = true;
+      }
+      // Remove bullet character and add as list item
+      const content = line.replace(/^[•\-\*]\s*/, '');
+      // Check if content has a bold part (text before colon)
+      if (content.includes(':')) {
+        const parts = content.split(':');
+        html += `<li><strong>${parts[0]}:</strong>${parts.slice(1).join(':')}</li>`;
+      } else {
+        html += `<li>${content}</li>`;
+      }
+    } else {
+      // Close list if open
+      if (inList) {
+        html += '</ul>';
+        inList = false;
+      }
+      // Regular paragraph
+      html += `<p>${line}</p>`;
+    }
+  }
+  
+  // Close list if still open
+  if (inList) {
+    html += '</ul>';
+  }
+  
+  return html;
+}
+
 export default function ProductDetailPage() {
   const { freeShippingThreshold } = getShippingConfig();
   const params = useParams();
@@ -732,7 +799,7 @@ export default function ProductDetailPage() {
           <h2>Product Description</h2>
           <div 
             className={styles.descriptionContent}
-            dangerouslySetInnerHTML={{ __html: product.description }}
+            dangerouslySetInnerHTML={{ __html: formatDescription(product.description) }}
           />
         </div>
       )}

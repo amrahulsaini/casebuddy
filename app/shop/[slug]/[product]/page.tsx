@@ -155,6 +155,10 @@ export default function ProductDetailPage() {
   const [validationError, setValidationError] = useState<string>('');
   const [showSuccess, setShowSuccess] = useState(false);
   
+  // Accordion state for mobile
+  const [descriptionOpen, setDescriptionOpen] = useState(false);
+  const [shippingOpen, setShippingOpen] = useState(false);
+  
   // Customization state
   const [phoneBrands, setPhoneBrands] = useState<PhoneBrand[]>([]);
   const [phoneModels, setPhoneModels] = useState<PhoneModel[]>([]);
@@ -494,6 +498,11 @@ export default function ProductDetailPage() {
                 className={styles.descriptionContent}
                 dangerouslySetInnerHTML={{ __html: formatDescription(product.description) }}
               />
+              
+              <h2 style={{ marginTop: '32px' }}>Shipping Policy</h2>
+              <div className={styles.descriptionContent}>
+                <p>Ships within 24-48 business hours. Delivery in 3-5 business days.</p>
+              </div>
             </div>
           )}
         </div>
@@ -752,11 +761,33 @@ export default function ProductDetailPage() {
           {/* Product Description Mobile */}
           {product.description && (
             <div className={styles.descriptionSectionMobile}>
-              <h2>Product Description</h2>
-              <div 
-                className={styles.descriptionContent}
-                dangerouslySetInnerHTML={{ __html: formatDescription(product.description) }}
-              />
+              <button 
+                className={styles.accordionHeader}
+                onClick={() => setDescriptionOpen(!descriptionOpen)}
+              >
+                <h2>Product Description</h2>
+                <span className={styles.accordionIcon}>{descriptionOpen ? '−' : '+'}</span>
+              </button>
+              {descriptionOpen && (
+                <div 
+                  className={styles.descriptionContent}
+                  dangerouslySetInnerHTML={{ __html: formatDescription(product.description) }}
+                />
+              )}
+              
+              <button 
+                className={styles.accordionHeader}
+                onClick={() => setShippingOpen(!shippingOpen)}
+                style={{ marginTop: '16px' }}
+              >
+                <h2>Shipping Policy</h2>
+                <span className={styles.accordionIcon}>{shippingOpen ? '−' : '+'}</span>
+              </button>
+              {shippingOpen && (
+                <div className={styles.descriptionContent}>
+                  <p>Ships within 24-48 business hours. Delivery in 3-5 business days.</p>
+                </div>
+              )}
             </div>
           )}
 

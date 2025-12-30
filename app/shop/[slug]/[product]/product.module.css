@@ -928,6 +928,34 @@
   display: none;
 }
 
+.accordionHeader {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  margin-bottom: 16px;
+}
+
+.accordionHeader h2 {
+  font-size: 18px;
+  color: #000;
+  margin: 0;
+  font-weight: 700;
+}
+
+.accordionIcon {
+  font-size: 24px;
+  color: #ff6b35;
+  font-weight: 700;
+  line-height: 1;
+  transition: transform 0.3s ease;
+}
+
 @media (max-width: 768px) {
   .descriptionSection {
     display: none;

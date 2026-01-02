@@ -6,6 +6,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const categorySlug = searchParams.get('category');
     const featured = searchParams.get('featured');
+    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : undefined;
 
     let query = `
       SELECT 
@@ -76,6 +77,11 @@ export async function GET(request: NextRequest) {
     const total = Number(countResult[0]?.total || 0);
 
     query += ` ORDER BY p.created_at DESC`;
+    
+    if (limit) {
+      query += ` LIMIT ?`;
+      params.push(limit);
+    }
 
     const [products]: any = await pool.execute(query, params);
 

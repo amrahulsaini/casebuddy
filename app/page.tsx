@@ -19,7 +19,11 @@ interface Category {
 
 interface Product {
   id: number;
+  name: string;
+  slug: string;
   image_url: string;
+  price: number;
+  compare_price?: number | null;
 }
 
 interface HomepageSection {
@@ -60,11 +64,11 @@ export default function HomePage() {
           section.categories.forEach((category: Category) => {
             fetch(`/api/products?category=${category.slug}&limit=6`)
               .then(res => res.json())
-              .then(products => {
-                if (products && products.length > 0) {
+              .then(data => {
+                if (data.success && data.products && data.products.length > 0) {
                   setCategoryProducts(prev => ({
                     ...prev,
-                    [category.id]: products
+                    [category.id]: data.products
                   }));
                 }
               })
@@ -90,6 +94,9 @@ export default function HomePage() {
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      if (hoverIntervalRef.current) {
+        clearInterval(hoverIntervalRef.current);
+      }
     };
   }, [lastScrollY]);
 

@@ -1240,6 +1240,13 @@
   margin-bottom: 3rem;
 }
 
+@media (max-width: 1024px) {
+  .footerContent {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.5rem;
+  }
+}
+
 .footerSection {
   animation: fadeInUp 0.8s ease-out both;
 }
@@ -1356,6 +1363,12 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .footerBottom {
+    padding-top: 1.5rem;
+  }
 }
 
 .footerText {
@@ -1634,10 +1647,69 @@
     gap: 2.5rem;
   }
   
+  .footerSection {
+    text-align: left;
+  }
+  
+  .footerLogo {
+    display: flex;
+    justify-content: flex-start;
+  }
+  
+  .footerLogoWrapper {
+    padding: 0.7rem 1.2rem;
+  }
+  
+  .footerDesc {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  
+  .socialLinks {
+    justify-content: flex-start;
+  }
+  
+  .socialIcon {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .footerTitle {
+    font-size: 1.15rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  .footerLinks li {
+    margin-bottom: 0.9rem;
+  }
+  
+  .footerLinks a {
+    font-size: 0.95rem;
+  }
+  
+  .footerContact li {
+    font-size: 0.95rem;
+    margin-bottom: 1.1rem;
+  }
+  
+  .footerContact svg {
+    flex-shrink: 0;
+  }
+  
   .footerBottom {
     flex-direction: column;
     text-align: center;
-    gap: 1rem;
+    gap: 1.5rem;
+    padding-top: 1.75rem;
+  }
+  
+  .footerText {
+    font-size: 0.9rem;
+  }
+  
+  .paymentMethods {
+    flex-direction: column;
+    gap: 0.75rem;
   }
 }
 
@@ -1812,20 +1884,72 @@
   }
   
   .footer {
-    padding: 3rem 1rem 1.5rem;
+    padding: 2.5rem 1rem 1.5rem;
   }
   
   .footerContent {
-    gap: 2rem;
+    gap: 2.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .footerLogoWrapper {
+    padding: 0.6rem 1rem;
+  }
+  
+  .footerLogoWrapper img {
+    width: 130px !important;
+    height: auto !important;
+  }
+  
+  .footerDesc {
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  
+  .socialIcon {
+    width: 38px;
+    height: 38px;
+  }
+  
+  .socialIcon svg {
+    width: 20px;
+    height: 20px;
   }
   
   .footerTitle {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
+    margin-bottom: 1rem;
   }
   
-  .footerText,
+  .footerLinks a,
+  .footerContact li {
+    font-size: 0.875rem;
+  }
+  
+  .footerContact li {
+    gap: 0.7rem;
+    margin-bottom: 0.9rem;
+  }
+  
+  .footerContact svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .footerBottom {
+    padding-top: 1.5rem;
+  }
+  
+  .footerText {
+    font-size: 0.8rem;
+  }
+  
   .paymentMethods {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+  }
+  
+  .paymentIcons {
+    font-size: 0.8rem;
   }
   
   .heroSubtitle {
@@ -1904,5 +2028,36 @@
 
   .heroSubtitle {
     font-size: 0.9rem;
+  }
+  
+  .footerLogoWrapper img {
+    width: 120px !important;
+  }
+  
+  .footerDesc {
+    font-size: 0.85rem;
+  }
+  
+  .socialIcon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .footerTitle {
+    font-size: 1rem;
+  }
+  
+  .footerLinks a,
+  .footerContact li {
+    font-size: 0.85rem;
+  }
+  
+  .footerContact li {
+    gap: 0.6rem;
+  }
+  
+  .footerText,
+  .paymentMethods {
+    font-size: 0.75rem;
   }
 }

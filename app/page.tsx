@@ -17,6 +17,11 @@ interface Category {
   sort_order: number;
 }
 
+interface Product {
+  id: number;
+  image_url: string;
+}
+
 interface HomepageSection {
   id: number;
   section_key: string;
@@ -38,6 +43,10 @@ export default function HomePage() {
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
+  const [categoryProducts, setCategoryProducts] = useState<Record<number, Product[]>>({});
+  const [hoveredCategory, setHoveredCategory] = useState<number | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState<Record<number, number>>({});
+  const hoverIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     fetch('/api/page-sections')
@@ -45,6 +54,23 @@ export default function HomePage() {
       .then(data => {
         setSections(data);
         setLoading(false);
+        
+        // Fetch products for each category
+        data.forEach((section: HomepageSection) => {
+          section.categories.forEach((category: Category) => {
+            fetch(`/api/products?category=${category.slug}&limit=6`)
+              .then(res => res.json())
+              .then(products => {
+                if (products && products.length > 0) {
+                  setCategoryProducts(prev => ({
+                    ...prev,
+                    [category.id]: products
+                  }));
+                }
+              })
+              .catch(err => console.log('Error fetching products:', err));
+          });
+        });
       });
 
     const handleScroll = () => {
@@ -96,6 +122,35 @@ export default function HomePage() {
       e.preventDefault();
       e.stopPropagation();
     }
+  };
+
+  const handleCategoryHover = (categoryId: number, isHovering: boolean) => {
+    if (isHovering && categoryProducts[categoryId] && categoryProducts[categoryId].length > 1) {
+      setHoveredCategory(categoryId);
+      setCurrentImageIndex(prev => ({ ...prev, [categoryId]: 0 }));
+      
+      hoverIntervalRef.current = setInterval(() => {
+        setCurrentImageIndex(prev => {
+          const products = categoryProducts[categoryId];
+          const nextIndex = ((prev[categoryId] || 0) + 1) % products.length;
+          return { ...prev, [categoryId]: nextIndex };
+        });
+      }, 800);
+    } else {
+      setHoveredCategory(null);
+      if (hoverIntervalRef.current) {
+        clearInterval(hoverIntervalRef.current);
+        hoverIntervalRef.current = null;
+      }
+    }
+  };
+
+  const getCurrentImage = (category: Category) => {
+    const products = categoryProducts[category.id];
+    if (!products || products.length === 0) return category.image_url;
+    
+    const index = currentImageIndex[category.id] || 0;
+    return products[index]?.image_url || category.image_url;
   };
 
   const scroll = (direction: 'left' | 'right') => {
@@ -215,10 +270,13 @@ export default function HomePage() {
                       className={styles.horizontalCard}
                       draggable={false}
                       onClick={(e) => isDragging && e.preventDefault()}
+                      onMouseEnter={() => handleCategoryHover(category.id, true)}
+                      onMouseLeave={() => handleCategoryHover(category.id, false)}
                     >
                       <div className={styles.horizontalImageWrapper}>
                         <Image 
-                          src={category.image_url} 
+                          key={getCurrentImage(category)}
+                          src={getCurrentImage(category)} 
                           alt={category.name}
                           width={280}
                           height={380}
@@ -299,11 +357,14 @@ export default function HomePage() {
               href={`/shop/${category.slug}`}
               className={styles.verticalCard}
               data-index={index}
+              onMouseEnter={() => handleCategoryHover(category.id, true)}
+              onMouseLeave={() => handleCategoryHover(category.id, false)}
             >
               <div className={styles.categoryNameTop}>{category.name}</div>
               <div className={styles.verticalImageWrapper}>
                 <Image 
-                  src={category.image_url} 
+                  key={getCurrentImage(category)}
+                  src={getCurrentImage(category)} 
                   alt={category.name}
                   width={320}
                   height={420}

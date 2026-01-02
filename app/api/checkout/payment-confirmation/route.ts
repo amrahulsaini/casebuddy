@@ -260,6 +260,18 @@ export async function POST(request: Request) {
   }
 }
 
+async function logEmail(orderId: number, emailType: string, recipientEmail: string, subject: string, status: 'sent' | 'failed', errorMessage?: string) {
+  try {
+    await pool.execute(
+      `INSERT INTO email_logs (order_id, email_type, recipient_email, subject, status, error_message)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [orderId, emailType, recipientEmail, subject, status, errorMessage || null]
+    );
+  } catch (error) {
+    console.error('Failed to log email:', error);
+  }
+}
+
 async function sendOrderConfirmationEmails(order: Order) {
   // Check if email credentials are configured
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
@@ -471,18 +483,46 @@ async function sendOrderConfirmationEmails(order: Order) {
   `;
 
   // Send customer email
-  await transporter.sendMail({
-    from: `"CaseBuddy" <${process.env.EMAIL_USER}>`,
-    to: order.customer_email,
-    subject: `Order Confirmation - ${order.order_number}`,
-    html: customerEmailHtml,
-  });
+  try {
+    await transporter.sendMail({
+      from: `"CaseBuddy" <${process.env.EMAIL_USER}>`,
+      to: order.customer_email,
+      subject: `Order Confirmation - ${order.order_number}`,
+      html: customerEmailHtml,
+    });
+    await logEmail(order.id, 'order_confirmation', order.customer_email, `Order Confirmation - ${order.order_number}`, 'sent');
+  } catch (error) {
+    await logEmail(order.id, 'order_confirmation', order.customer_email, `Order Confirmation - ${order.order_number}`, 'failed', String(error));
+    throw error;
+  }
+
+  // Send copy to casebuddy25@gmail.com
+  try {
+    await transporter.sendMail({
+      from: `"CaseBuddy" <${process.env.EMAIL_USER}>`,
+      to: 'casebuddy25@gmail.com',
+      subject: `[COPY] Order Confirmation - ${order.order_number}`,
+      html: customerEmailHtml,
+    });
+    await logEmail(order.id, 'order_confirmation_copy', 'casebuddy25@gmail.com', `[COPY] Order Confirmation - ${order.order_number}`, 'sent');
+  } catch (error) {
+    await logEmail(order.id, 'order_confirmation_copy', 'casebuddy25@gmail.com', `[COPY] Order Confirmation - ${order.order_number}`, 'failed', String(error));
+    // Don't throw - copy email is not critical
+  }
 
   // Send admin email
-  await transporter.sendMail({
-    from: `"CaseBuddy Orders" <${process.env.EMAIL_USER}>`,
-    to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
-    subject: `New Order ${order.order_number} - ${order.customer_name}`,
-    html: adminEmailHtml,
-  });
+  try {
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
+    await transporter.sendMail({
+      from: `"CaseBuddy Orders" <${process.env.EMAIL_USER}>`,
+      to: adminEmail,
+      subject: `New Order ${order.order_number} - ${order.customer_name}`,
+      html: adminEmailHtml,
+    });
+    await logEmail(order.id, 'admin_notification', adminEmail, `New Order ${order.order_number} - ${order.customer_name}`, 'sent');
+  } catch (error) {
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
+    await logEmail(order.id, 'admin_notification', adminEmail, `New Order ${order.order_number} - ${order.customer_name}`, 'failed', String(error));
+    // Don't throw - admin email is not critical
+  }
 }

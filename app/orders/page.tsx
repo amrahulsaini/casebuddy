@@ -630,7 +630,7 @@ export default function OrdersPage() {
                       style={{ backgroundColor: getStatusColor(popularStatus) }}
                     >
                       {getStatusIcon(popularStatus)}
-                      {popularStatus}
+                      Order Status - {popularStatus}
                     </div>
                   </div>
                 </div>

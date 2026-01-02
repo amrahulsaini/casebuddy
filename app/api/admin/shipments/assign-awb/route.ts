@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import caseMainPool from '@/lib/db-main';
 import { requireRole } from '@/lib/auth';
 import { shiprocketRequest } from '@/lib/shiprocket';
+import { sendTrackingEmail } from '@/lib/tracking-email';
 
 function getByPath(obj: any, path: string) {
   return path.split('.').reduce((acc: any, key: string) => (acc == null ? undefined : acc[key]), obj);
@@ -134,11 +135,31 @@ export async function POST(request: NextRequest) {
 
       const [updated]: any = await caseMainPool.execute('SELECT * FROM shipments WHERE order_id = ? LIMIT 1', [orderId]);
 
-      // Email customer/admin only when AWB becomes available (avoid duplicates on retry)
-      try {
-        // Emails disabled (confirmation-only policy)
-      } catch {
-        // ignore email errors
+      // Send tracking email to customer when AWB is assigned
+      const newAwb = awb || (updated?.[0]?.shiprocket_awb ? String(updated[0].shiprocket_awb) : null);
+      const trackingUrl = updated?.[0]?.tracking_url ? String(updated[0].tracking_url) : undefined;
+      
+      if (newAwb && newAwb !== prevAwb) {
+        try {
+          const [orderRows]: any = await caseMainPool.execute(
+            'SELECT order_number, customer_name, customer_email FROM orders WHERE id = ? LIMIT 1',
+            [orderId]
+          );
+          if (orderRows.length > 0) {
+            const order = orderRows[0];
+            await sendTrackingEmail(
+              orderId,
+              order.order_number,
+              order.customer_email,
+              order.customer_name,
+              newAwb,
+              trackingUrl
+            );
+          }
+        } catch (emailError) {
+          console.error('Failed to send tracking email:', emailError);
+          // Don't fail the request if email fails
+        }
       }
 
       return NextResponse.json({ success: true, shipment: updated?.[0] || null, shiprocket: response });
@@ -161,11 +182,28 @@ export async function POST(request: NextRequest) {
 
         const [updated]: any = await caseMainPool.execute('SELECT * FROM shipments WHERE order_id = ? LIMIT 1', [orderId]);
 
-        // Email when AWB becomes available from an "already assigned" error case
-        try {
-          // Emails disabled (confirmation-only policy)
-        } catch {
-          // ignore email errors
+        // Send tracking email when AWB becomes available from error case
+        const trackingUrl = updated?.[0]?.tracking_url ? String(updated[0].tracking_url) : undefined;
+        if (currentAwb && currentAwb !== prevAwb) {
+          try {
+            const [orderRows]: any = await caseMainPool.execute(
+              'SELECT order_number, customer_name, customer_email FROM orders WHERE id = ? LIMIT 1',
+              [orderId]
+            );
+            if (orderRows.length > 0) {
+              const order = orderRows[0];
+              await sendTrackingEmail(
+                orderId,
+                order.order_number,
+                order.customer_email,
+                order.customer_name,
+                currentAwb,
+                trackingUrl
+              );
+            }
+          } catch (emailError) {
+            console.error('Failed to send tracking email:', emailError);
+          }
         }
 
         return NextResponse.json({

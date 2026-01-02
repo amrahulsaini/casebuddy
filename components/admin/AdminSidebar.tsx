@@ -22,6 +22,7 @@ export default function AdminSidebar({ user }: AdminSidebarProps) {
     { href: '/admin/dashboard/category-phones', label: 'Category Phones' },
     { href: '/admin/dashboard/phone-brands', label: 'Phone Brands' },
     { href: '/admin/dashboard/orders', label: 'Orders' },
+    { href: '/admin/dashboard/email-logs', label: 'Email Logs' },
     { href: '/admin/dashboard/users', label: 'Admin Users', adminOnly: true },
   ];
 

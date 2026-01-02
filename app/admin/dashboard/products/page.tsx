@@ -189,6 +189,37 @@ export default function ProductsPage() {
     }
   };
 
+  // Generate pagination page numbers with ellipsis
+  const generatePagination = () => {
+    const delta = 2; // Number of pages to show on each side of current page
+    const range: (number | string)[] = [];
+    const rangeWithDots: (number | string)[] = [];
+
+    for (
+      let i = Math.max(2, page - delta);
+      i <= Math.min(totalPages - 1, page + delta);
+      i++
+    ) {
+      range.push(i);
+    }
+
+    if (page - delta > 2) {
+      rangeWithDots.push(1, '...');
+    } else {
+      rangeWithDots.push(1);
+    }
+
+    rangeWithDots.push(...range);
+
+    if (page + delta < totalPages - 1) {
+      rangeWithDots.push('...', totalPages);
+    } else if (totalPages > 1) {
+      rangeWithDots.push(totalPages);
+    }
+
+    return rangeWithDots;
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -389,9 +420,30 @@ export default function ProductsPage() {
               >
                 Previous
               </button>
-              <span className={styles.pageInfo}>
-                Page {page} of {totalPages}
-              </span>
+              
+              <div className={styles.pageNumbers}>
+                {generatePagination().map((pageNum, idx) => {
+                  if (pageNum === '...') {
+                    return (
+                      <span key={`ellipsis-${idx}`} className={styles.ellipsis}>
+                        ...
+                      </span>
+                    );
+                  }
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setPage(pageNum as number)}
+                      className={`${styles.pageNumber} ${
+                        page === pageNum ? styles.activePageNumber : ''
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+
               <button
                 onClick={() => setPage(page + 1)}
                 disabled={page === totalPages}

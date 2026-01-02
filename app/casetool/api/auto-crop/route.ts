@@ -26,9 +26,10 @@ export async function POST(request: NextRequest) {
       throw new Error('No image URL supplied for auto-crop');
     }
 
-    // Convert URL to filesystem path
+    // Convert URL to filesystem path - use static paths to avoid Turbopack warnings
     const relPath = imageUrl.replace(/^\//, '');
-    const imagePath = join(process.cwd(), 'public', relPath);
+    const publicDir = 'public';
+    const imagePath = join(process.cwd(), publicDir, relPath);
 
     if (!existsSync(imagePath)) {
       throw new Error('Image file not found on server');
@@ -86,7 +87,9 @@ export async function POST(request: NextRequest) {
     // Crop and upscale regions using canvas
     const croppedResults = await cropAndUpscaleRegions(imagePath, regions);
 
-    const outputDir = join(process.cwd(), 'public', 'output');
+    const publicDir = 'public';
+    const outputSubDir = 'output';
+    const outputDir = join(process.cwd(), publicDir, outputSubDir);
     if (!existsSync(outputDir)) {
       await mkdir(outputDir, { recursive: true });
     }
@@ -102,7 +105,7 @@ export async function POST(request: NextRequest) {
       outUrls.push({
         id: result.id,
         label: result.label,
-        url: `/output/${fileName}`,
+        url: `/${outputSubDir}/${fileName}`,
       });
     }
 

@@ -220,11 +220,69 @@ export default function ProductsPage() {
     return rangeWithDots;
   };
 
+  // Render pagination component
+  const renderPagination = () => (
+    <div className={styles.paginationCompact}>
+      <button
+        onClick={() => setPage(page - 1)}
+        disabled={page === 1}
+        className={styles.paginationButton}
+      >
+        Previous
+      </button>
+      
+      <div className={styles.pageNumbers}>
+        {generatePagination().map((pageNum, idx) => {
+          if (pageNum === '...') {
+            return (
+              <span key={`ellipsis-${idx}`} className={styles.ellipsis}>
+                ...
+              </span>
+            );
+          }
+          return (
+            <button
+              key={pageNum}
+              onClick={() => setPage(pageNum as number)}
+              className={`${styles.pageNumber} ${
+                page === pageNum ? styles.activePageNumber : ''
+              }`}
+            >
+              {pageNum}
+            </button>
+          );
+        })}
+      </div>
+
+      <button
+        onClick={() => setPage(page + 1)}
+        disabled={page === totalPages}
+        className={styles.paginationButton}
+      >
+        Next
+      </button>
+      
+      <select
+        value={page}
+        onChange={(e) => setPage(Number(e.target.value))}
+        className={styles.pagePicker}
+        title="Jump to page"
+      >
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+          <option key={p} value={p}>
+            Page {p}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <h1>Products</h1>
         <div className={styles.headerActions}>
+          {totalPages > 1 && renderPagination()}
           {selectedProducts.size > 0 && (
             <button
               onClick={handleBulkDelete}

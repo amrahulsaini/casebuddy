@@ -166,9 +166,7 @@ export default function OrderDetailPage() {
 
   const getPopularStatusLabel = (orderStatusRaw: unknown, paymentStatusRaw: unknown) => {
     const raw = String(orderStatusRaw || '').trim();
-    const payment = String(paymentStatusRaw || '').trim();
-    const source = raw || payment;
-    const s = source.toLowerCase();
+    const s = raw.toLowerCase();
 
     if (!s) return 'Pending';
     if (s.includes('cancel')) return 'Cancelled';
@@ -178,10 +176,10 @@ export default function OrderDetailPage() {
     if (s.includes('ship') || s.includes('transit')) return 'Shipped';
     if (s.includes('process') || s.includes('pack') || s.includes('print')) return 'Processing';
     if (s.includes('pending')) return 'Pending';
-    if (s.includes('paid')) return 'Processing';
+    if (s.includes('pickup')) return 'Pickup Generated';
     if (s.includes('fail')) return 'Failed';
 
-    return source
+    return raw
       .split(/[_\s]+/g)
       .filter(Boolean)
       .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())

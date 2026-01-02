@@ -139,7 +139,10 @@ export async function POST(request: NextRequest) {
       const newAwb = awb || (updated?.[0]?.shiprocket_awb ? String(updated[0].shiprocket_awb) : null);
       const trackingUrl = updated?.[0]?.tracking_url ? String(updated[0].tracking_url) : undefined;
       
+      console.log(`[AWB ASSIGN] Checking if tracking email should be sent. newAwb: ${newAwb}, prevAwb: ${prevAwb}`);
+      
       if (newAwb && newAwb !== prevAwb) {
+        console.log(`[AWB ASSIGN] New AWB detected, fetching order details for tracking email...`);
         try {
           const [orderRows]: any = await caseMainPool.execute(
             'SELECT order_number, customer_name, customer_email FROM orders WHERE id = ? LIMIT 1',
@@ -147,6 +150,7 @@ export async function POST(request: NextRequest) {
           );
           if (orderRows.length > 0) {
             const order = orderRows[0];
+            console.log(`[AWB ASSIGN] Sending tracking email to ${order.customer_email} for order ${order.order_number}`);
             await sendTrackingEmail(
               orderId,
               order.order_number,
@@ -155,11 +159,15 @@ export async function POST(request: NextRequest) {
               newAwb,
               trackingUrl
             );
+          } else {
+            console.error(`[AWB ASSIGN] Order not found for orderId: ${orderId}`);
           }
         } catch (emailError) {
-          console.error('Failed to send tracking email:', emailError);
+          console.error('[AWB ASSIGN] Failed to send tracking email:', emailError);
           // Don't fail the request if email fails
         }
+      } else {
+        console.log(`[AWB ASSIGN] Skipping tracking email - AWB unchanged or missing`);
       }
 
       return NextResponse.json({ success: true, shipment: updated?.[0] || null, shiprocket: response });
@@ -184,7 +192,10 @@ export async function POST(request: NextRequest) {
 
         // Send tracking email when AWB becomes available from error case
         const trackingUrl = updated?.[0]?.tracking_url ? String(updated[0].tracking_url) : undefined;
+        console.log(`[AWB ASSIGN ERROR CASE] Checking if tracking email should be sent. currentAwb: ${currentAwb}, prevAwb: ${prevAwb}`);
+        
         if (currentAwb && currentAwb !== prevAwb) {
+          console.log(`[AWB ASSIGN ERROR CASE] New AWB detected in error response, fetching order details...`);
           try {
             const [orderRows]: any = await caseMainPool.execute(
               'SELECT order_number, customer_name, customer_email FROM orders WHERE id = ? LIMIT 1',
@@ -192,6 +203,7 @@ export async function POST(request: NextRequest) {
             );
             if (orderRows.length > 0) {
               const order = orderRows[0];
+              console.log(`[AWB ASSIGN ERROR CASE] Sending tracking email to ${order.customer_email} for order ${order.order_number}`);
               await sendTrackingEmail(
                 orderId,
                 order.order_number,
@@ -200,10 +212,14 @@ export async function POST(request: NextRequest) {
                 currentAwb,
                 trackingUrl
               );
+            } else {
+              console.error(`[AWB ASSIGN ERROR CASE] Order not found for orderId: ${orderId}`);
             }
           } catch (emailError) {
-            console.error('Failed to send tracking email:', emailError);
+            console.error('[AWB ASSIGN ERROR CASE] Failed to send tracking email:', emailError);
           }
+        } else {
+          console.log(`[AWB ASSIGN ERROR CASE] Skipping tracking email - AWB unchanged or missing`);
         }
 
         return NextResponse.json({

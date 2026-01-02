@@ -14,9 +14,12 @@ async function logEmail(orderId: number, emailType: string, recipientEmail: stri
 }
 
 export async function sendTrackingEmail(orderId: number, orderNumber: string, customerEmail: string, customerName: string, awb: string, trackingUrl?: string) {
+  console.log(`[TRACKING EMAIL] Attempting to send tracking email for order ${orderNumber}, AWB: ${awb}, to: ${customerEmail}`);
+  
   // Check if email credentials are configured
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-    console.warn('Email credentials not configured, skipping tracking email');
+    console.error('[TRACKING EMAIL] Email credentials not configured! EMAIL_USER:', process.env.EMAIL_USER ? 'SET' : 'NOT SET', 'EMAIL_PASSWORD:', process.env.EMAIL_PASSWORD ? 'SET' : 'NOT SET');
+    await logEmail(orderId, 'tracking_update', customerEmail, `Your Order ${orderNumber} is Shipped! - Tracking Info`, 'failed', 'Email credentials not configured');
     return;
   }
 
@@ -94,6 +97,7 @@ export async function sendTrackingEmail(orderId: number, orderNumber: string, cu
   `;
 
   try {
+    console.log(`[TRACKING EMAIL] Sending email to ${customerEmail} with subject: Your Order ${orderNumber} is Shipped!`);
     await transporter.sendMail({
       from: `"CaseBuddy" <${process.env.EMAIL_USER}>`,
       to: customerEmail,
@@ -101,9 +105,10 @@ export async function sendTrackingEmail(orderId: number, orderNumber: string, cu
       html: trackingHtml,
     });
     await logEmail(orderId, 'tracking_update', customerEmail, `Your Order ${orderNumber} is Shipped! - Tracking Info`, 'sent');
-    console.log(`Tracking email sent to ${customerEmail} for order ${orderNumber}`);
+    console.log(`[TRACKING EMAIL] ✅ SUCCESS - Tracking email sent to ${customerEmail} for order ${orderNumber}`);
   } catch (error) {
     await logEmail(orderId, 'tracking_update', customerEmail, `Your Order ${orderNumber} is Shipped! - Tracking Info`, 'failed', String(error));
-    console.error('Failed to send tracking email:', error);
+    console.error('[TRACKING EMAIL] ❌ FAILED - Error sending tracking email:', error);
+    throw error;
   }
 }

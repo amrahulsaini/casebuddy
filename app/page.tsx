@@ -132,6 +132,12 @@ export default function HomePage() {
   };
 
   const handleCategoryHover = (categoryId: number, isHovering: boolean) => {
+    // Always clear existing interval first
+    if (hoverIntervalRef.current) {
+      clearInterval(hoverIntervalRef.current);
+      hoverIntervalRef.current = null;
+    }
+    
     if (isHovering && categoryProducts[categoryId] && categoryProducts[categoryId].length > 1) {
       setHoveredCategory(categoryId);
       setCurrentImageIndex(prev => ({ ...prev, [categoryId]: 0 }));
@@ -139,16 +145,15 @@ export default function HomePage() {
       hoverIntervalRef.current = setInterval(() => {
         setCurrentImageIndex(prev => {
           const products = categoryProducts[categoryId];
+          if (!products || products.length === 0) return prev;
           const nextIndex = ((prev[categoryId] || 0) + 1) % products.length;
           return { ...prev, [categoryId]: nextIndex };
         });
-      }, 800);
+      }, 600); // Reduced from 800ms to 600ms for faster cycling
     } else {
       setHoveredCategory(null);
-      if (hoverIntervalRef.current) {
-        clearInterval(hoverIntervalRef.current);
-        hoverIntervalRef.current = null;
-      }
+      // Reset to original image when hover leaves
+      setCurrentImageIndex(prev => ({ ...prev, [categoryId]: 0 }));
     }
   };
 

@@ -13,6 +13,10 @@ import { cropAndUpscaleRegions, Region } from '@/lib/image-processing';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const TEXT_MODEL = process.env.TEXT_MODEL || 'gemini-2.0-flash';
 
+// Static directory constants to avoid Turbopack warnings
+const PUBLIC_DIR = 'public';
+const OUTPUT_SUBDIR = 'output';
+
 export async function POST(request: NextRequest) {
   try {
     if (!GEMINI_API_KEY) {
@@ -26,10 +30,10 @@ export async function POST(request: NextRequest) {
       throw new Error('No image URL supplied for auto-crop');
     }
 
-    // Convert URL to filesystem path - use static paths to avoid Turbopack warnings
+    // Convert URL to filesystem path
     const relPath = imageUrl.replace(/^\//, '');
-    const publicDir = 'public';
-    const imagePath = join(process.cwd(), publicDir, relPath);
+    const rootDir = process.cwd();
+    const imagePath = join(rootDir, PUBLIC_DIR, relPath);
 
     if (!existsSync(imagePath)) {
       throw new Error('Image file not found on server');
@@ -87,9 +91,8 @@ export async function POST(request: NextRequest) {
     // Crop and upscale regions using canvas
     const croppedResults = await cropAndUpscaleRegions(imagePath, regions);
 
-    const publicDir = 'public';
-    const outputSubDir = 'output';
-    const outputDir = join(process.cwd(), publicDir, outputSubDir);
+    const rootDir = process.cwd();
+    const outputDir = join(rootDir, PUBLIC_DIR, OUTPUT_SUBDIR);
     if (!existsSync(outputDir)) {
       await mkdir(outputDir, { recursive: true });
     }
@@ -105,7 +108,7 @@ export async function POST(request: NextRequest) {
       outUrls.push({
         id: result.id,
         label: result.label,
-        url: `/${outputSubDir}/${fileName}`,
+        url: `/${OUTPUT_SUBDIR}/${fileName}`,
       });
     }
 

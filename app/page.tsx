@@ -47,10 +47,6 @@ export default function HomePage() {
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
-  const [categoryProducts, setCategoryProducts] = useState<Record<number, Product[]>>({});
-  const [hoveredCategory, setHoveredCategory] = useState<number | null>(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState<Record<number, number>>({});
-  const hoverIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     fetch('/api/page-sections')
@@ -58,23 +54,6 @@ export default function HomePage() {
       .then(data => {
         setSections(data);
         setLoading(false);
-        
-        // Fetch products for each category
-        data.forEach((section: HomepageSection) => {
-          section.categories.forEach((category: Category) => {
-            fetch(`/api/products?category=${category.slug}&limit=6`)
-              .then(res => res.json())
-              .then(data => {
-                if (data.success && data.products && data.products.length > 0) {
-                  setCategoryProducts(prev => ({
-                    ...prev,
-                    [category.id]: data.products
-                  }));
-                }
-              })
-              .catch(err => console.log('Error fetching products:', err));
-          });
-        });
       });
 
     const handleScroll = () => {
@@ -94,9 +73,6 @@ export default function HomePage() {
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      if (hoverIntervalRef.current) {
-        clearInterval(hoverIntervalRef.current);
-      }
     };
   }, [lastScrollY]);
 
@@ -129,40 +105,6 @@ export default function HomePage() {
       e.preventDefault();
       e.stopPropagation();
     }
-  };
-
-  const handleCategoryHover = (categoryId: number, isHovering: boolean) => {
-    // Always clear existing interval first
-    if (hoverIntervalRef.current) {
-      clearInterval(hoverIntervalRef.current);
-      hoverIntervalRef.current = null;
-    }
-    
-    if (isHovering && categoryProducts[categoryId] && categoryProducts[categoryId].length > 1) {
-      setHoveredCategory(categoryId);
-      setCurrentImageIndex(prev => ({ ...prev, [categoryId]: 0 }));
-      
-      hoverIntervalRef.current = setInterval(() => {
-        setCurrentImageIndex(prev => {
-          const products = categoryProducts[categoryId];
-          if (!products || products.length === 0) return prev;
-          const nextIndex = ((prev[categoryId] || 0) + 1) % products.length;
-          return { ...prev, [categoryId]: nextIndex };
-        });
-      }, 600); // Reduced from 800ms to 600ms for faster cycling
-    } else {
-      setHoveredCategory(null);
-      // Reset to original image when hover leaves
-      setCurrentImageIndex(prev => ({ ...prev, [categoryId]: 0 }));
-    }
-  };
-
-  const getCurrentImage = (category: Category) => {
-    const products = categoryProducts[category.id];
-    if (!products || products.length === 0) return category.image_url;
-    
-    const index = currentImageIndex[category.id] || 0;
-    return products[index]?.image_url || category.image_url;
   };
 
   const scroll = (direction: 'left' | 'right') => {
@@ -282,13 +224,10 @@ export default function HomePage() {
                       className={styles.horizontalCard}
                       draggable={false}
                       onClick={(e) => isDragging && e.preventDefault()}
-                      onMouseEnter={() => handleCategoryHover(category.id, true)}
-                      onMouseLeave={() => handleCategoryHover(category.id, false)}
                     >
                       <div className={styles.horizontalImageWrapper}>
                         <Image 
-                          key={getCurrentImage(category)}
-                          src={getCurrentImage(category)} 
+                          src={category.image_url} 
                           alt={category.name}
                           width={280}
                           height={380}
@@ -369,14 +308,11 @@ export default function HomePage() {
               href={`/shop/${category.slug}`}
               className={styles.verticalCard}
               data-index={index}
-              onMouseEnter={() => handleCategoryHover(category.id, true)}
-              onMouseLeave={() => handleCategoryHover(category.id, false)}
             >
               <div className={styles.categoryNameTop}>{category.name}</div>
               <div className={styles.verticalImageWrapper}>
                 <Image 
-                  key={getCurrentImage(category)}
-                  src={getCurrentImage(category)} 
+                  src={category.image_url} 
                   alt={category.name}
                   width={320}
                   height={420}

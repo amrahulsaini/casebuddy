@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { join } from 'path';
+import { sep } from 'path';
 import { readFile, writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import { callGemini, buildBoundingBoxPrompt } from '@/lib/gemini';
@@ -13,12 +13,7 @@ import { cropAndUpscaleRegions, Region } from '@/lib/image-processing';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const TEXT_MODEL = process.env.TEXT_MODEL || 'gemini-2.0-flash';
 
-// Static directory constants to avoid Turbopack warnings
-const PUBLIC_DIR = 'public';
-const OUTPUT_SUBDIR = 'output';
-
 export async function POST(request: NextRequest) {
-  // Get root directory once at the start
   const rootDir = process.cwd();
   
   try {
@@ -33,9 +28,9 @@ export async function POST(request: NextRequest) {
       throw new Error('No image URL supplied for auto-crop');
     }
 
-    // Convert URL to filesystem path
+    // Convert URL to filesystem path using string concatenation
     const relPath = imageUrl.replace(/^\//, '');
-    const imagePath = join(rootDir, PUBLIC_DIR, relPath);
+    const imagePath = `${rootDir}${sep}public${sep}${relPath}`;
 
     if (!existsSync(imagePath)) {
       throw new Error('Image file not found on server');
@@ -93,7 +88,7 @@ export async function POST(request: NextRequest) {
     // Crop and upscale regions using canvas
     const croppedResults = await cropAndUpscaleRegions(imagePath, regions);
 
-    const outputDir = join(rootDir, PUBLIC_DIR, OUTPUT_SUBDIR);
+    const outputDir = `${rootDir}${sep}public${sep}output`;
     if (!existsSync(outputDir)) {
       await mkdir(outputDir, { recursive: true });
     }
@@ -103,13 +98,13 @@ export async function POST(request: NextRequest) {
 
     for (const result of croppedResults) {
       const fileName = `auto_slice_hd_${ts}_${result.id}.png`;
-      const outPath = join(outputDir, fileName);
+      const outPath = `${outputDir}${sep}${fileName}`;
       await writeFile(outPath, result.buffer);
 
       outUrls.push({
         id: result.id,
         label: result.label,
-        url: `/${OUTPUT_SUBDIR}/${fileName}`,
+        url: `/output/${fileName}`,
       });
     }
 

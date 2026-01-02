@@ -18,6 +18,9 @@ const PUBLIC_DIR = 'public';
 const OUTPUT_SUBDIR = 'output';
 
 export async function POST(request: NextRequest) {
+  // Get root directory once at the start
+  const rootDir = process.cwd();
+  
   try {
     if (!GEMINI_API_KEY) {
       throw new Error('API Key not configured');
@@ -32,7 +35,6 @@ export async function POST(request: NextRequest) {
 
     // Convert URL to filesystem path
     const relPath = imageUrl.replace(/^\//, '');
-    const rootDir = process.cwd();
     const imagePath = join(rootDir, PUBLIC_DIR, relPath);
 
     if (!existsSync(imagePath)) {
@@ -91,7 +93,6 @@ export async function POST(request: NextRequest) {
     // Crop and upscale regions using canvas
     const croppedResults = await cropAndUpscaleRegions(imagePath, regions);
 
-    const rootDir = process.cwd();
     const outputDir = join(rootDir, PUBLIC_DIR, OUTPUT_SUBDIR);
     if (!existsSync(outputDir)) {
       await mkdir(outputDir, { recursive: true });

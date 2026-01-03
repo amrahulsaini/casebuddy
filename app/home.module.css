@@ -571,6 +571,7 @@
   background: #faf8f5;
   opacity: 0;
   animation: sectionFadeIn 1s ease-out forwards;
+  scroll-margin-top: 150px; /* Offset for fixed header */
 }
 
 .sectionFullWidth:first-of-type {
@@ -601,6 +602,7 @@
   background: #f5f2ed;
   opacity: 0;
   animation: sectionFadeIn 1s ease-out 0.3s forwards;
+  scroll-margin-top: 150px; /* Offset for fixed header */
 }
 
 .sectionAltFullWidth .sectionHeader {

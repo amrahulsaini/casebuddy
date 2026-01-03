@@ -262,7 +262,8 @@ export default function HomePage() {
       {/* Dynamic Homepage Sections */}
       {sections.map((section, sectionIndex) => (
         <section 
-          key={section.id} 
+          key={section.id}
+          id={section.section_key}
           className={sectionIndex === 0 ? styles.sectionFullWidth : styles.sectionAltFullWidth}
         >
           <div className={styles.sectionHeader}>

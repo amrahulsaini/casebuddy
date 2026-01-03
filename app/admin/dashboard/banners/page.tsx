@@ -206,34 +206,7 @@ export default function HeroBannersPage() {
               {editingId === banner.id ? (
                 <div className={styles.editForm}>
                   <div className={styles.formGroup}>
-                    <label>Title</label>
-                    <input
-                      type="text"
-                      value={formData.title || ''}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      className={styles.input}
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label>Subtitle</label>
-                    <input
-                      type="text"
-                      value={formData.subtitle || ''}
-                      onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
-                      className={styles.input}
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label>Description</label>
-                    <textarea
-                      value={formData.description || ''}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      className={styles.textarea}
-                      rows={3}
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label>Background Image (optional - overrides gradient)</label>
+                    <label>Banner Image (1920x1080 recommended)</label>
                     <input
                       type="file"
                       accept="image/*"
@@ -288,108 +261,6 @@ export default function HeroBannersPage() {
                       style={{ marginTop: '8px' }}
                     />
                   </div>
-                  <div className={styles.formGroup}>
-                    <label>Gradient (choose preset or enter custom)</label>
-                    <div className={styles.gradientPicker}>
-                      {gradientPresets.map((grad, idx) => (
-                        <div
-                          key={idx}
-                          className={styles.gradientSwatch}
-                          style={{ background: grad }}
-                          onClick={() => setFormData({ ...formData, gradient: grad })}
-                          title={grad}
-                        />
-                      ))}
-                    </div>
-                    <input
-                      type="text"
-                      value={formData.gradient || ''}
-                      onChange={(e) => setFormData({ ...formData, gradient: e.target.value })}
-                      className={styles.input}
-                      placeholder="linear-gradient(...)"
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label>Text Color</label>
-                    <div className={styles.colorPickerWrapper}>
-                      <input
-                        type="color"
-                        value={formData.text_color || '#ffffff'}
-                        onChange={(e) => setFormData({ ...formData, text_color: e.target.value })}
-                        className={styles.colorInput}
-                      />
-                      <input
-                        type="text"
-                        value={formData.text_color || '#ffffff'}
-                        onChange={(e) => setFormData({ ...formData, text_color: e.target.value })}
-                        className={styles.input}
-                        placeholder="#ffffff"
-                      />
-                    </div>
-                    <div className={styles.colorPresets}>
-                      <button
-                        type="button"
-                        className={styles.colorPresetBtn}
-                        style={{ background: '#ffffff' }}
-                        onClick={() => setFormData({ ...formData, text_color: '#ffffff' })}
-                        title="White"
-                      />
-                      <button
-                        type="button"
-                        className={styles.colorPresetBtn}
-                        style={{ background: '#000000' }}
-                        onClick={() => setFormData({ ...formData, text_color: '#000000' })}
-                        title="Black"
-                      />
-                      <button
-                        type="button"
-                        className={styles.colorPresetBtn}
-                        style={{ background: '#ffd700' }}
-                        onClick={() => setFormData({ ...formData, text_color: '#ffd700' })}
-                        title="Gold"
-                      />
-                      <button
-                        type="button"
-                        className={styles.colorPresetBtn}
-                        style={{ background: '#ff69b4' }}
-                        onClick={() => setFormData({ ...formData, text_color: '#ff69b4' })}
-                        title="Hot Pink"
-                      />
-                      <button
-                        type="button"
-                        className={styles.colorPresetBtn}
-                        style={{ background: '#00bfff' }}
-                        onClick={() => setFormData({ ...formData, text_color: '#00bfff' })}
-                        title="Deep Sky Blue"
-                      />
-                      <button
-                        type="button"
-                        className={styles.colorPresetBtn}
-                        style={{ background: '#32cd32' }}
-                        onClick={() => setFormData({ ...formData, text_color: '#32cd32' })}
-                        title="Lime Green"
-                      />
-                    </div>
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label>Font Family</label>
-                    <select
-                      value={formData.font_family || 'Inter, sans-serif'}
-                      onChange={(e) => setFormData({ ...formData, font_family: e.target.value })}
-                      className={styles.select}
-                    >
-                      <option value="Inter, sans-serif">Inter (Default)</option>
-                      <option value="'Playfair Display', serif">Playfair Display (Elegant)</option>
-                      <option value="'Montserrat', sans-serif">Montserrat (Modern)</option>
-                      <option value="'Roboto', sans-serif">Roboto (Clean)</option>
-                      <option value="'Poppins', sans-serif">Poppins (Rounded)</option>
-                      <option value="'Oswald', sans-serif">Oswald (Bold)</option>
-                      <option value="'Raleway', sans-serif">Raleway (Sophisticated)</option>
-                      <option value="'Bebas Neue', sans-serif">Bebas Neue (Display)</option>
-                      <option value="'Dancing Script', cursive">Dancing Script (Handwritten)</option>
-                      <option value="'Pacifico', cursive">Pacifico (Playful)</option>
-                    </select>
-                  </div>
                   <div className={styles.formActions}>
                     <button onClick={handleSave} className={styles.saveBtn}>
                       <Save size={18} />
@@ -413,9 +284,8 @@ export default function HeroBannersPage() {
                   />
                   <div className={styles.bannerInfo}>
                     <div className={styles.bannerMeta}>
-                      <strong>{banner.title}</strong>
-                      <span>Redirects to: {banner.cta_link}</span>
-                      <span>Order: {banner.sort_order}</span>
+                      <strong>Banner #{banner.sort_order}</strong>
+                      <span>Redirects to: {banner.cta_link || 'Not set'}</span>
                       <span className={banner.is_active ? styles.active : styles.inactive}>
                         {banner.is_active ? 'Active' : 'Inactive'}
                       </span>

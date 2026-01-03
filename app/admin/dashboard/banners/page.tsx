@@ -21,6 +21,7 @@ interface Banner {
 
 export default function HeroBannersPage() {
   const [banners, setBanners] = useState<Banner[]>([]);
+  const [sections, setSections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState<Partial<Banner>>({});
@@ -28,6 +29,7 @@ export default function HeroBannersPage() {
 
   useEffect(() => {
     fetchBanners();
+    fetchSections();
   }, []);
 
   const fetchBanners = async () => {
@@ -39,6 +41,16 @@ export default function HeroBannersPage() {
       console.error('Error fetching banners:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSections = async () => {
+    try {
+      const response = await fetch('/api/admin/page-sections');
+      const data = await response.json();
+      setSections(data);
+    } catch (error) {
+      console.error('Error fetching sections:', error);
     }
   };
 
@@ -244,13 +256,36 @@ export default function HeroBannersPage() {
                     )}
                   </div>
                   <div className={styles.formGroup}>
-                    <label>Redirect Link (Where banner will redirect when clicked)</label>
+                    <label>Banner Redirect</label>
+                    <select
+                      value={formData.cta_link || ''}
+                      onChange={(e) => setFormData({ ...formData, cta_link: e.target.value })}
+                      className={styles.select}
+                    >
+                      <option value="">Select a section or enter custom link</option>
+                      <optgroup label="Pages">
+                        <option value="/">Home</option>
+                        <option value="/shop">Shop</option>
+                        <option value="/about">About</option>
+                        <option value="/contact">Contact</option>
+                        <option value="/gallery">Gallery</option>
+                        <option value="/faq">FAQ</option>
+                      </optgroup>
+                      <optgroup label="Sections">
+                        {sections.map((section) => (
+                          <option key={section.id} value={`/#${section.section_key}`}>
+                            {section.title}
+                          </option>
+                        ))}
+                      </optgroup>
+                    </select>
                     <input
                       type="text"
                       value={formData.cta_link || ''}
                       onChange={(e) => setFormData({ ...formData, cta_link: e.target.value })}
                       className={styles.input}
-                      placeholder="/shop or /about or any URL"
+                      placeholder="Or enter custom link/URL"
+                      style={{ marginTop: '8px' }}
                     />
                   </div>
                   <div className={styles.formGroup}>

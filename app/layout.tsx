@@ -2,12 +2,75 @@ import './globals.css';
 import { Sora } from 'next/font/google';
 import { CartProvider } from '@/contexts/CartContext';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import type { Metadata } from 'next';
 
 const sora = Sora({ subsets: ['latin'] });
 
-export const metadata = {
-  title: 'CaseBuddy - Premium Custom Phone Cases Online',
-  description: 'Shop premium custom phone cases with personalized designs. Protect your phone with style - custom printed cases, bumper cases, and more.',
+export const metadata: Metadata = {
+  metadataBase: new URL('https://casebuddy.co.in'),
+  title: {
+    default: 'CaseBuddy - Premium Custom Phone Cases Online India',
+    template: '%s | CaseBuddy',
+  },
+  description: 'Shop premium custom phone cases with personalized designs. Design your own case with our online editor. High-quality prints, durable protection, fast delivery across India.',
+  keywords: [
+    'custom phone cases',
+    'personalized phone covers',
+    'design your own phone case',
+    'printed phone cases India',
+    'custom mobile covers',
+    'phone case editor',
+    'bumper cases',
+    'designer phone cases',
+    'custom gifts India',
+    'CaseBuddy',
+  ],
+  authors: [{ name: 'CaseBuddy' }],
+  creator: 'CaseBuddy',
+  publisher: 'CaseBuddy',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_IN',
+    url: 'https://casebuddy.co.in',
+    siteName: 'CaseBuddy',
+    title: 'CaseBuddy - Premium Custom Phone Cases Online India',
+    description: 'Design your own custom phone case with our easy editor. Premium quality, vibrant prints, durable protection. Fast delivery across India.',
+    images: [
+      {
+        url: '/casebuddy-logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'CaseBuddy Logo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'CaseBuddy - Premium Custom Phone Cases',
+    description: 'Design your own custom phone case with our easy editor. Premium quality, fast delivery across India.',
+    images: ['/casebuddy-logo.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: 'your-google-verification-code', // Add from Google Search Console
+    // yandex: 'your-yandex-verification-code',
+    // bing: 'your-bing-verification-code',
+  },
 };
 
 export default function RootLayout({

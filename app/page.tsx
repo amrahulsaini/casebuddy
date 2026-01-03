@@ -8,6 +8,7 @@ import HeroSlider from '@/components/HeroSlider';
 import SearchBar from '@/components/SearchBar';
 import { getShippingConfig } from '@/lib/shipping';
 import styles from './home.module.css';
+import Script from 'next/script';
 
 interface Category {
   id: number;
@@ -126,6 +127,79 @@ export default function HomePage() {
 
   return (
     <div className={styles.container}>
+      {/* JSON-LD Structured Data for SEO */}
+      <Script id="organization-schema" type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "CaseBuddy",
+          "url": "https://casebuddy.co.in",
+          "logo": "https://casebuddy.co.in/casebuddy-logo.png",
+          "description": "Premium custom phone cases with personalized designs. Design your own case with our online editor.",
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+918107624752",
+            "contactType": "Customer Service",
+            "areaServed": "IN",
+            "availableLanguage": ["English", "Hindi"]
+          },
+          "sameAs": [
+            "https://www.instagram.com/casebuddy6",
+            "https://www.facebook.com/casebuddy6"
+          ]
+        })}
+      </Script>
+      
+      <Script id="website-schema" type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "CaseBuddy",
+          "url": "https://casebuddy.co.in",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://casebuddy.co.in/shop?search={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        })}
+      </Script>
+
+      <Script id="localBusiness-schema" type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "CaseBuddy",
+          "image": "https://casebuddy.co.in/casebuddy-logo.png",
+          "@id": "https://casebuddy.co.in",
+          "url": "https://casebuddy.co.in",
+          "telephone": "+918107624752",
+          "email": "info@casebuddy.co.in",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Rajgarh",
+            "addressLocality": "Rajgarh",
+            "addressRegion": "Rajasthan",
+            "postalCode": "331023",
+            "addressCountry": "IN"
+          },
+          "priceRange": "₹₹",
+          "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday"
+            ],
+            "opens": "09:00",
+            "closes": "21:00"
+          }
+        })}
+      </Script>
+
       {/* Announcement Banner */}
       <div className={`${styles.announcementBar} ${!headerVisible ? styles.hidden : ''}`}>
         <div className={styles.marquee}>

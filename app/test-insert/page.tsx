@@ -1,4 +1,4 @@
-'use client';
+as'use client';
 
 import { FormEvent, useState } from 'react';
 import styles from './page.module.css';

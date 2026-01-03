@@ -12,6 +12,8 @@ interface Banner {
   cta_text: string;
   cta_link: string;
   gradient: string;
+  text_color: string;
+  font_family: string;
   image_url?: string;
   sort_order: number;
   is_active: boolean;
@@ -137,6 +139,8 @@ export default function HeroBannersPage() {
       cta_text: 'Click Here',
       cta_link: '/shop',
       gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      text_color: '#ffffff',
+      font_family: 'Inter, sans-serif',
       image_url: '',
       sort_order: banners.length + 1,
       is_active: true
@@ -280,6 +284,87 @@ export default function HeroBannersPage() {
                       placeholder="linear-gradient(...)"
                     />
                   </div>
+                  <div className={styles.formGroup}>
+                    <label>Text Color</label>
+                    <div className={styles.colorPickerWrapper}>
+                      <input
+                        type="color"
+                        value={formData.text_color || '#ffffff'}
+                        onChange={(e) => setFormData({ ...formData, text_color: e.target.value })}
+                        className={styles.colorInput}
+                      />
+                      <input
+                        type="text"
+                        value={formData.text_color || '#ffffff'}
+                        onChange={(e) => setFormData({ ...formData, text_color: e.target.value })}
+                        className={styles.input}
+                        placeholder="#ffffff"
+                      />
+                    </div>
+                    <div className={styles.colorPresets}>
+                      <button
+                        type="button"
+                        className={styles.colorPresetBtn}
+                        style={{ background: '#ffffff' }}
+                        onClick={() => setFormData({ ...formData, text_color: '#ffffff' })}
+                        title="White"
+                      />
+                      <button
+                        type="button"
+                        className={styles.colorPresetBtn}
+                        style={{ background: '#000000' }}
+                        onClick={() => setFormData({ ...formData, text_color: '#000000' })}
+                        title="Black"
+                      />
+                      <button
+                        type="button"
+                        className={styles.colorPresetBtn}
+                        style={{ background: '#ffd700' }}
+                        onClick={() => setFormData({ ...formData, text_color: '#ffd700' })}
+                        title="Gold"
+                      />
+                      <button
+                        type="button"
+                        className={styles.colorPresetBtn}
+                        style={{ background: '#ff69b4' }}
+                        onClick={() => setFormData({ ...formData, text_color: '#ff69b4' })}
+                        title="Hot Pink"
+                      />
+                      <button
+                        type="button"
+                        className={styles.colorPresetBtn}
+                        style={{ background: '#00bfff' }}
+                        onClick={() => setFormData({ ...formData, text_color: '#00bfff' })}
+                        title="Deep Sky Blue"
+                      />
+                      <button
+                        type="button"
+                        className={styles.colorPresetBtn}
+                        style={{ background: '#32cd32' }}
+                        onClick={() => setFormData({ ...formData, text_color: '#32cd32' })}
+                        title="Lime Green"
+                      />
+                    </div>
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Font Family</label>
+                    <select
+                      value={formData.font_family || 'Inter, sans-serif'}
+                      onChange={(e) => setFormData({ ...formData, font_family: e.target.value })}
+                      className={styles.select}
+                    >
+                      <option value="Inter, sans-serif">Inter (Default)</option>
+                      <option value="'Playfair Display', serif">Playfair Display (Elegant)</option>
+                      <option value="'Montserrat', sans-serif">Montserrat (Modern)</option>
+                      <option value="'Roboto', sans-serif">Roboto (Clean)</option>
+                      <option value="'Poppins', sans-serif">Poppins (Rounded)</option>
+                      <option value="'Oswald', sans-serif">Oswald (Bold)</option>
+                      <option value="'Raleway', sans-serif">Raleway (Sophisticated)</option>
+                      <option value="'Bebas Neue', sans-serif">Bebas Neue (Display)</option>
+                      <option value="'Dancing Script', cursive">Dancing Script (Handwritten)</option>
+                      <option value="'Pacifico', cursive">Pacifico (Playful)</option>
+                    </select>
+                  </div>
                   <div className={styles.formActions}>
                     <button onClick={handleSave} className={styles.saveBtn}>
                       <Save size={18} />
@@ -298,7 +383,9 @@ export default function HeroBannersPage() {
                     style={{ 
                       background: banner.image_url 
                         ? `url(${banner.image_url}) center/cover no-repeat` 
-                        : banner.gradient 
+                        : banner.gradient,
+                      color: banner.text_color || '#ffffff',
+                      fontFamily: banner.font_family || 'Inter, sans-serif'
                     }}
                   >
                     <h3>{banner.title}</h3>

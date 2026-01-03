@@ -19,12 +19,12 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { title, subtitle, description, cta_text, cta_link, gradient, image_url, sort_order } = body;
+    const { title, subtitle, description, cta_text, cta_link, gradient, text_color, font_family, image_url, sort_order } = body;
 
     const [result]: any = await pool.execute(
-      `INSERT INTO hero_banners (title, subtitle, description, cta_text, cta_link, gradient, image_url, sort_order) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [title, subtitle, description, cta_text, cta_link, gradient, image_url || null, sort_order || 0]
+      `INSERT INTO hero_banners (title, subtitle, description, cta_text, cta_link, gradient, text_color, font_family, image_url, sort_order) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [title, subtitle, description, cta_text, cta_link, gradient, text_color || '#ffffff', font_family || 'Inter, sans-serif', image_url || null, sort_order || 0]
     );
 
     return NextResponse.json({ 
@@ -43,14 +43,14 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { id, title, subtitle, description, cta_text, cta_link, gradient, image_url, sort_order, is_active } = body;
+    const { id, title, subtitle, description, cta_text, cta_link, gradient, text_color, font_family, image_url, sort_order, is_active } = body;
 
     await pool.execute(
       `UPDATE hero_banners 
        SET title = ?, subtitle = ?, description = ?, cta_text = ?, cta_link = ?, 
-           gradient = ?, image_url = ?, sort_order = ?, is_active = ?
+           gradient = ?, text_color = ?, font_family = ?, image_url = ?, sort_order = ?, is_active = ?
        WHERE id = ?`,
-      [title, subtitle, description, cta_text, cta_link, gradient, image_url || null, sort_order, is_active, id]
+      [title, subtitle, description, cta_text, cta_link, gradient, text_color || '#ffffff', font_family || 'Inter, sans-serif', image_url || null, sort_order, is_active, id]
     );
 
     return NextResponse.json({ success: true });

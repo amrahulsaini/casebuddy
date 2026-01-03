@@ -13,6 +13,8 @@ interface Slide {
   cta_text: string;
   cta_link: string;
   gradient: string;
+  text_color: string;
+  font_family: string;
   image_url?: string;
   sort_order: number;
 }
@@ -79,7 +81,7 @@ export default function HeroSlider() {
                     : slide.gradient 
                 }}
               >
-                <div className={styles.slideContent}>
+                <div className={styles.slideContent} style={{ color: slide.text_color || '#ffffff', fontFamily: slide.font_family || 'Inter, sans-serif' }}>
                   <h1 className={styles.title}>{slide.title}</h1>
                   <h2 className={styles.subtitle}>{slide.subtitle}</h2>
                   <p className={styles.description}>{slide.description}</p>

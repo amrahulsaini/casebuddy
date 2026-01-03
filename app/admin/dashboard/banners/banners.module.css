@@ -297,6 +297,65 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
+.colorPickerWrapper {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.colorInput {
+  width: 60px;
+  height: 44px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.colorInput:hover {
+  border-color: #ff6b00;
+}
+
+.colorPresets {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.colorPresetBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 3px solid #ddd;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.colorPresetBtn:hover {
+  transform: scale(1.1);
+  border-color: #ff6b00;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.select:focus {
+  outline: none;
+  border-color: #ff6b00;
+  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+}
+
 .formActions {
   display: flex;
   gap: 12px;

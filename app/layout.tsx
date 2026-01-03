@@ -92,6 +92,9 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" href="/casebuddy-logo.png" type="image/png" />
         <link rel="apple-touch-icon" href="/casebuddy-logo.png" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Playfair+Display:wght@600;700;800&family=Montserrat:wght@400;600;700;800&family=Roboto:wght@400;500;700&family=Poppins:wght@400;600;700;800&family=Oswald:wght@600;700&family=Raleway:wght@400;600;700&family=Bebas+Neue&family=Dancing+Script:wght@600;700&family=Pacifico&display=swap" rel="stylesheet" />
       </head>
       <body className={sora.className}>
         <CartProvider>

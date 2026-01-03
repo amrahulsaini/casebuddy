@@ -33,6 +33,14 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/casebuddy-logo.png', sizes: '512x512', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/casebuddy-logo.png',
+  },
   openGraph: {
     type: 'website',
     locale: 'en_IN',
@@ -80,6 +88,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/casebuddy-logo.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/casebuddy-logo.png" />
+      </head>
       <body className={sora.className}>
         <CartProvider>
           {children}

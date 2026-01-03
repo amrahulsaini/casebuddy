@@ -72,24 +72,16 @@ export default function HeroSlider() {
         <>
           <div className={styles.slidesWrapper}>
             {slides.map((slide, index) => (
-              <div
+              <Link
                 key={slide.id}
+                href={slide.cta_link}
                 className={`${styles.slide} ${index === currentSlide ? styles.active : ''}`}
                 style={{ 
                   background: slide.image_url 
                     ? `url(${slide.image_url}) center/cover no-repeat` 
                     : slide.gradient 
                 }}
-              >
-                <div className={styles.slideContent} style={{ color: slide.text_color || '#ffffff', fontFamily: slide.font_family || 'Inter, sans-serif' }}>
-                  <h1 className={styles.title}>{slide.title}</h1>
-                  <h2 className={styles.subtitle}>{slide.subtitle}</h2>
-                  <p className={styles.description}>{slide.description}</p>
-                  <Link href={slide.cta_link} className={styles.ctaButton}>
-                    {slide.cta_text}
-                  </Link>
-                </div>
-              </div>
+              />
             ))}
           </div>
 

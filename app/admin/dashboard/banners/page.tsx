@@ -243,25 +243,15 @@ export default function HeroBannersPage() {
                       </div>
                     )}
                   </div>
-                  <div className={styles.formRow}>
-                    <div className={styles.formGroup}>
-                      <label>Button Text</label>
-                      <input
-                        type="text"
-                        value={formData.cta_text || ''}
-                        onChange={(e) => setFormData({ ...formData, cta_text: e.target.value })}
-                        className={styles.input}
-                      />
-                    </div>
-                    <div className={styles.formGroup}>
-                      <label>Button Link</label>
-                      <input
-                        type="text"
-                        value={formData.cta_link || ''}
-                        onChange={(e) => setFormData({ ...formData, cta_link: e.target.value })}
-                        className={styles.input}
-                      />
-                    </div>
+                  <div className={styles.formGroup}>
+                    <label>Redirect Link (Where banner will redirect when clicked)</label>
+                    <input
+                      type="text"
+                      value={formData.cta_link || ''}
+                      onChange={(e) => setFormData({ ...formData, cta_link: e.target.value })}
+                      className={styles.input}
+                      placeholder="/shop or /about or any URL"
+                    />
                   </div>
                   <div className={styles.formGroup}>
                     <label>Gradient (choose preset or enter custom)</label>
@@ -383,17 +373,13 @@ export default function HeroBannersPage() {
                     style={{ 
                       background: banner.image_url 
                         ? `url(${banner.image_url}) center/cover no-repeat` 
-                        : banner.gradient,
-                      color: banner.text_color || '#ffffff',
-                      fontFamily: banner.font_family || 'Inter, sans-serif'
+                        : banner.gradient
                     }}
-                  >
-                    <h3>{banner.title}</h3>
-                    <p>{banner.subtitle}</p>
-                  </div>
+                  />
                   <div className={styles.bannerInfo}>
                     <div className={styles.bannerMeta}>
                       <strong>{banner.title}</strong>
+                      <span>Redirects to: {banner.cta_link}</span>
                       <span>Order: {banner.sort_order}</span>
                       <span className={banner.is_active ? styles.active : styles.inactive}>
                         {banner.is_active ? 'Active' : 'Inactive'}

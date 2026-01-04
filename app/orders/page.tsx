@@ -242,45 +242,29 @@ export default function OrdersPage() {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'delivered':
-      case 'completed':
-        return '#4CAF50';
-      case 'processing':
-      case 'shipped':
-      case 'in transit':
-        return '#2196F3';
-      case 'pending':
-        return '#FF9800';
-      case 'cancelled':
-      case 'failed':
-      case 'rto':
-      case 'returned':
-        return '#f44336';
-      default:
-        return '#757575';
-    }
+    const s = status.toLowerCase();
+    
+    if (s.includes('deliver')) return '#4CAF50';
+    if (s.includes('complet')) return '#4CAF50';
+    if (s.includes('transit') || s.includes('ship')) return '#2196F3';
+    if (s.includes('process') || s.includes('pack') || s.includes('pick')) return '#2196F3';
+    if (s.includes('pending')) return '#FF9800';
+    if (s.includes('cancel')) return '#f44336';
+    if (s.includes('fail')) return '#f44336';
+    if (s.includes('rto') || s.includes('return')) return '#f44336';
+    
+    return '#757575';
   };
 
   const getStatusIcon = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'delivered':
-      case 'completed':
-        return <CheckCircle size={20} />;
-      case 'processing':
-      case 'shipped':
-      case 'in transit':
-        return <Truck size={20} />;
-      case 'pending':
-        return <Clock size={20} />;
-      case 'cancelled':
-      case 'failed':
-      case 'rto':
-      case 'returned':
-        return <XCircle size={20} />;
-      default:
-        return <Package size={20} />;
-    }
+    const s = status.toLowerCase();
+    
+    if (s.includes('deliver') || s.includes('complet')) return <CheckCircle size={20} />;
+    if (s.includes('transit') || s.includes('ship') || s.includes('process') || s.includes('pack') || s.includes('pick')) return <Truck size={20} />;
+    if (s.includes('pending')) return <Clock size={20} />;
+    if (s.includes('cancel') || s.includes('fail') || s.includes('rto') || s.includes('return')) return <XCircle size={20} />;
+    
+    return <Package size={20} />;
   };
 
   if (!isLoggedIn) {

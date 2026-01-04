@@ -375,6 +375,89 @@ export default function OrderDetailPage() {
             </div>
           </div>
 
+          {/* Shipment Tracking Activity - Full Width */}
+          {trackingData && trackingData.scans && trackingData.scans.length > 0 && (
+            <div className={styles.card}>
+              <h2 className={styles.cardTitle}>
+                <Truck size={20} />
+                Shipment Tracking
+              </h2>
+              
+              {trackingData.etd && (
+                <div className={styles.etdBanner}>
+                  Expected Delivery: <strong>{new Date(trackingData.etd).toLocaleDateString('en-US', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                  })}</strong>
+                </div>
+              )}
+
+              <div className={styles.trackingList}>
+                {trackingData.scans.map((scan, index) => {
+                  const scanDate = new Date(scan.timestamp);
+                  const dateStr = scanDate.toLocaleDateString('en-US', {
+                    day: 'numeric',
+                    month: 'short'
+                  });
+                  const timeStr = scanDate.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                  });
+                  
+                  return (
+                    <div key={index} className={styles.trackingItem}>
+                      <div className={styles.trackingRadio}>
+                        <div className={index === 0 ? styles.radioActive : styles.radioInactive}></div>
+                      </div>
+                      <div className={styles.trackingDetails}>
+                        <div className={styles.trackingHeader}>
+                          <span className={styles.trackingDateBadge}>{dateStr}</span>
+                          <span className={styles.trackingTimeBadge}>
+                            <Clock size={14} /> {timeStr}
+                          </span>
+                        </div>
+                        <div className={styles.trackingActivityText}>
+                          <strong>Activity:</strong> {scan.activity}
+                        </div>
+                        {scan.location && (
+                          <div className={styles.trackingLocationText}>
+                            <MapPin size={14} />
+                            <strong>Location:</strong> {scan.location}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {trackingData.tracking_url && (
+                <div className={styles.trackingFooter}>
+                  <a 
+                    href={trackingData.tracking_url} 
+                    target="_blank" 
+                    rel="noreferrer" 
+                    className={styles.trackingFullLink}
+                  >
+                    View Full Tracking Details →
+                  </a>
+                </div>
+              )}
+            </div>
+          )}
+
+          {loadingTracking && (
+            <div className={styles.card}>
+              <h2 className={styles.cardTitle}>
+                <Truck size={20} />
+                Shipment Tracking
+              </h2>
+              <p className={styles.loadingText}>Loading tracking...</p>
+            </div>
+          )}
+
           <div className={styles.card}>
             <h2 className={styles.cardTitle}>
               <MapPin size={20} />
@@ -390,106 +473,6 @@ export default function OrderDetailPage() {
         </div>
 
         <div className={styles.sidebar}>
-          {/* Tracking Activity Timeline */}
-          {trackingData && trackingData.scans && trackingData.scans.length > 0 && (
-            <div className={styles.card}>
-              <h2 className={styles.cardTitle}>
-                <Truck size={20} />
-                Shipment Tracking
-              </h2>
-              
-              {trackingData.etd && (
-                <div className={styles.etdInfo}>
-                  <div className={styles.etdLabel}>Expected Delivery</div>
-                  <div className={styles.etdDate}>
-                    {new Date(trackingData.etd).toLocaleDateString('en-US', {
-                      day: '2-digit',
-                      month: 'short',
-                      year: 'numeric'
-                    })}
-                  </div>
-                </div>
-              )}
-
-              <div className={styles.trackingScrollable}>
-                <div className={styles.trackingTimeline}>
-                  {trackingData.scans.map((scan, index) => {
-                    const scanDate = new Date(scan.timestamp);
-                    const dateStr = scanDate.toLocaleDateString('en-US', {
-                      day: '2-digit',
-                      month: 'short'
-                    });
-                    const timeStr = scanDate.toLocaleTimeString('en-US', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      hour12: true
-                    });
-                    
-                    return (
-                      <div key={index} className={styles.trackingEvent}>
-                        <div className={styles.trackingDot}></div>
-                        <div className={styles.trackingContent}>
-                          <div className={styles.trackingDate}>
-                            {dateStr}
-                          </div>
-                          <div className={styles.trackingTime}>
-                            <Clock size={14} />
-                            {timeStr}
-                          </div>
-                          <div className={styles.trackingActivity}>
-                            <strong>Activity:</strong> {scan.activity}
-                          </div>
-                          {scan.location && (
-                            <div className={styles.trackingLocation}>
-                              <MapPin size={14} />
-                              <strong>Location:</strong> {scan.location}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-              
-              {trackingData.tracking_url && (
-                <a 
-                  href={trackingData.tracking_url} 
-                  target="_blank" 
-                  rel="noreferrer" 
-                  className={styles.trackingLink}
-                >
-                  View Full Details →
-                </a>
-              )}
-            </div>
-          )}
-
-          {loadingTracking && (
-            <div className={styles.card}>
-              <h2 className={styles.cardTitle}>
-                <Truck size={20} />
-                Shipment Tracking
-              </h2>
-              <p className={styles.loadingText}>Loading tracking...</p>
-            </div>
-          )}
-
-          {shipment && (shipment.tracking_url || shipment.shiprocket_awb) && (
-            <div className={styles.card}>
-              <h2 className={styles.cardTitle}>
-                <Truck size={20} />
-                Tracking Info
-              </h2>
-              <div className={styles.infoList}>
-                <div className={styles.infoItem}>
-                  <span className={styles.label}>AWB:</span>
-                  <span className={styles.valueSmall}>{shipment.shiprocket_awb || '—'}</span>
-                </div>
-              </div>
-            </div>
-          )}
-          
           <div className={styles.card}>
             <h2 className={styles.cardTitle}>
               <User size={20} />

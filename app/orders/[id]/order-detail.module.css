@@ -379,7 +379,154 @@
   }
 }
 
-/* Tracking Timeline Styles */
+/* Tracking Timeline Styles - Shiprocket Style */
+.trackingList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.trackingItem {
+  display: flex;
+  gap: 16px;
+  padding: 20px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.trackingItem:last-child {
+  border-bottom: none;
+}
+
+.trackingRadio {
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+.radioActive {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #667eea;
+  background: white;
+  position: relative;
+}
+
+.radioActive::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #667eea;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.radioInactive {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #d1d5db;
+  background: white;
+}
+
+.trackingDetails {
+  flex: 1;
+}
+
+.trackingHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.trackingDateBadge {
+  font-weight: 700;
+  font-size: 15px;
+  color: #667eea;
+}
+
+.trackingTimeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #6b7280;
+  padding: 4px 10px;
+  background: #f3f4f6;
+  border-radius: 12px;
+}
+
+.trackingActivityText {
+  font-size: 15px;
+  color: #111827;
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+
+.trackingActivityText strong {
+  color: #667eea;
+  font-weight: 600;
+}
+
+.trackingLocationText {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.trackingLocationText svg {
+  flex-shrink: 0;
+  color: #9ca3af;
+}
+
+.trackingLocationText strong {
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.etdBanner {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  text-align: center;
+  font-size: 15px;
+}
+
+.etdBanner strong {
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.trackingFooter {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+.trackingFullLink {
+  display: inline-block;
+  color: #667eea;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 10px 24px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.trackingFullLink:hover {
+  background: #667eea;
+  color: white;
+}
+
 .trackingLink {
   display: block;
   color: #667eea;

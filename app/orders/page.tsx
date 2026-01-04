@@ -58,6 +58,7 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'failed'>('paid');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -216,6 +217,20 @@ export default function OrdersPage() {
     setOtpSent(false);
     setOrders([]);
   };
+
+  const filteredOrders = orders.filter(order => {
+    if (paymentFilter === 'all') return true;
+    if (paymentFilter === 'paid') {
+      return order.payment_status?.toLowerCase() === 'paid' || 
+             order.payment_status?.toLowerCase() === 'success' || 
+             order.payment_status?.toLowerCase() === 'completed';
+    }
+    if (paymentFilter === 'failed') {
+      return order.payment_status?.toLowerCase() === 'failed' || 
+             order.payment_status?.toLowerCase() === 'pending';
+    }
+    return true;
+  });
 
   const getPopularStatusLabel = (orderStatusRaw: unknown, paymentStatusRaw: unknown) => {
     const raw = String(orderStatusRaw || '').trim();
@@ -384,23 +399,72 @@ export default function OrdersPage() {
           </button>
         </div>
 
+        <div className={styles.filterBar}>
+          <label className={styles.filterLabel}>Show:</label>
+          <div className={styles.filterButtons}>
+            <button 
+              className={`${styles.filterBtn} ${paymentFilter === 'paid' ? styles.filterBtnActive : ''}`}
+              onClick={() => setPaymentFilter('paid')}
+            >
+              Paid Orders {orders.filter(o => 
+                o.payment_status?.toLowerCase() === 'paid' || 
+                o.payment_status?.toLowerCase() === 'success' || 
+                o.payment_status?.toLowerCase() === 'completed'
+              ).length > 0 && `(${orders.filter(o => 
+                o.payment_status?.toLowerCase() === 'paid' || 
+                o.payment_status?.toLowerCase() === 'success' || 
+                o.payment_status?.toLowerCase() === 'completed'
+              ).length})`}
+            </button>
+            <button 
+              className={`${styles.filterBtn} ${paymentFilter === 'failed' ? styles.filterBtnActive : ''}`}
+              onClick={() => setPaymentFilter('failed')}
+            >
+              Failed Orders {orders.filter(o => 
+                o.payment_status?.toLowerCase() === 'failed' || 
+                o.payment_status?.toLowerCase() === 'pending'
+              ).length > 0 && `(${orders.filter(o => 
+                o.payment_status?.toLowerCase() === 'failed' || 
+                o.payment_status?.toLowerCase() === 'pending'
+              ).length})`}
+            </button>
+            <button 
+              className={`${styles.filterBtn} ${paymentFilter === 'all' ? styles.filterBtnActive : ''}`}
+              onClick={() => setPaymentFilter('all')}
+            >
+              All Orders ({orders.length})
+            </button>
+          </div>
+        </div>
+
       {loading ? (
         <div className={styles.loading}>
           <div className={styles.spinner}></div>
           <p>Loading your orders...</p>
         </div>
-      ) : orders.length === 0 ? (
-        <div className={styles.empty}>
+      ) : filteredOrders.length === 0 ? (
+        <div className={styles.noOrders}>
           <Package size={64} />
-          <h2>No Orders Found</h2>
-          <p>You haven&apos;t placed any orders yet.</p>
-          <Link href="/shop" className={styles.shopBtn}>
-            Start Shopping
-          </Link>
+          <h2>No {paymentFilter === 'paid' ? 'Paid' : paymentFilter === 'failed' ? 'Failed' : ''} Orders Found</h2>
+          <p>
+            {paymentFilter === 'paid' && 'You have no successful orders yet.'}
+            {paymentFilter === 'failed' && 'You have no failed payment orders.'}
+            {paymentFilter === 'all' && 'You haven\'t placed any orders yet.'}
+          </p>
+          {paymentFilter !== 'all' && orders.length > 0 && (
+            <button onClick={() => setPaymentFilter('all')} className={styles.shopBtn}>
+              View All Orders
+            </button>
+          )}
+          {orders.length === 0 && (
+            <Link href="/shop" className={styles.shopBtn}>
+              Start Shopping
+            </Link>
+          )}
         </div>
       ) : (
         <div className={styles.ordersList}>
-          {orders.map((order) => {
+          {filteredOrders.map((order) => {
             const displayStatus = order.shipment_status || order.order_status || 'Pending';
             console.log('Order:', order.order_number, 'shipment_status:', order.shipment_status, 'order_status:', order.order_status, 'displayStatus:', displayStatus);
             const items = Array.isArray(order.items) && order.items.length > 0

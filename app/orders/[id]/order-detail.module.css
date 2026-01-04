@@ -710,7 +710,42 @@
   padding: 20px;
   font-style: italic;
 }
+.trackingPending {
+  text-align: center;
+  padding: 40px 20px;
+}
 
+.pendingIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.trackingPending h3 {
+  font-size: 20px;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.trackingPending p {
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.trackingPending p strong {
+  color: #667eea;
+  font-weight: 700;
+}
+
+.pendingMessage {
+  max-width: 500px;
+  margin: 16px auto 24px;
+  line-height: 1.6;
+  color: #666;
+  background: #f9fafb;
+  padding: 16px;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+}
 @media (max-width: 768px) {
   .trackingTimeline {
     padding-left: 24px;

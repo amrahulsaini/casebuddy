@@ -458,6 +458,35 @@ export default function OrderDetailPage() {
             </div>
           )}
 
+          {/* Show message when AWB assigned but no tracking yet */}
+          {!loadingTracking && shipment?.shiprocket_awb && (!trackingData || trackingData.scans.length === 0) && (
+            <div className={styles.card}>
+              <h2 className={styles.cardTitle}>
+                <Truck size={20} />
+                Shipment Tracking
+              </h2>
+              <div className={styles.trackingPending}>
+                <div className={styles.pendingIcon}>📦</div>
+                <h3>AWB Assigned</h3>
+                <p>Tracking Number: <strong>{shipment.shiprocket_awb}</strong></p>
+                <p className={styles.pendingMessage}>
+                  Tracking information will be available once the courier picks up your package. 
+                  This usually happens within 24-48 hours of AWB assignment.
+                </p>
+                {shipment.tracking_url && (
+                  <a 
+                    href={shipment.tracking_url} 
+                    target="_blank" 
+                    rel="noreferrer" 
+                    className={styles.trackingFullLink}
+                  >
+                    Check on Shiprocket →
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className={styles.card}>
             <h2 className={styles.cardTitle}>
               <MapPin size={20} />

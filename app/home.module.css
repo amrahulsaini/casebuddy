@@ -1255,29 +1255,30 @@
   max-width: 1400px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: 2fr 1fr 1fr 1fr;
   gap: 3rem;
   margin-bottom: 3rem;
 }
 
 @media (max-width: 1024px) {
   .footerContent {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr 1fr;
     gap: 2.5rem;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   .footer {
     padding: 3rem 1.5rem 1.5rem;
   }
   
   .footerContent {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 2.5rem;
+    text-align: left;
   }
   
-  .footerSection {
+  .footerSection:first-child {
     text-align: center;
   }
   
@@ -1285,22 +1286,18 @@
     padding: 0.6rem 1.2rem;
   }
   
-  .socialLinks {
-    justify-content: center;
-  }
-  
-  .footerLinks,
-  .footerContact {
+  .footerDesc {
     text-align: center;
   }
   
-  .footerContact li {
+  .socialLinks {
     justify-content: center;
   }
   
   .footerBottom {
     flex-direction: column;
     text-align: center;
+    gap: 1rem;
   }
   
   .paymentMethods {

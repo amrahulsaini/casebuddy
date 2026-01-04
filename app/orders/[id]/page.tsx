@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Package, User, Phone, Mail, MapPin, CreditCard, Clock, CheckCircle, XCircle, Truck } from 'lucide-react';
+import MainHeader from '@/components/MainHeader';
+import MainFooter from '@/components/MainFooter';
 import styles from './order-detail.module.css';
 
 interface Order {
@@ -83,6 +85,10 @@ export default function OrderDetailPage() {
   const [shipment, setShipment] = useState<Shipment | null>(null);
   const [trackingData, setTrackingData] = useState<TrackingData | null>(null);
   const [loadingTracking, setLoadingTracking] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const userEmail = localStorage.getItem('userEmail');
@@ -106,6 +112,27 @@ export default function OrderDetailPage() {
 
     fetchOrderDetails();
   }, [params.id]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setHeaderVisible(false);
+      } else {
+        setHeaderVisible(true);
+      }
+      
+      setScrollY(currentScrollY);
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [lastScrollY]);
 
   const fetchOrderDetails = async () => {
     try {
@@ -207,10 +234,12 @@ export default function OrderDetailPage() {
   if (loading) {
     return (
       <div className={styles.container}>
+        <MainHeader scrollY={scrollY} headerVisible={headerVisible} mobileMenuOpen={mobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} />
         <div className={styles.loading}>
           <div className={styles.spinner}></div>
           <p>Loading order details...</p>
         </div>
+        <MainFooter />
       </div>
     );
   }
@@ -218,6 +247,7 @@ export default function OrderDetailPage() {
   if (error || !order) {
     return (
       <div className={styles.container}>
+        <MainHeader scrollY={scrollY} headerVisible={headerVisible} mobileMenuOpen={mobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} />
         <div className={styles.error}>
           <XCircle size={64} />
           <h2>{error || 'Order not found'}</h2>
@@ -226,6 +256,7 @@ export default function OrderDetailPage() {
             Back to Orders
           </Link>
         </div>
+        <MainFooter />
       </div>
     );
   }
@@ -247,6 +278,7 @@ export default function OrderDetailPage() {
 
   return (
     <div className={styles.container}>
+      <MainHeader scrollY={scrollY} headerVisible={headerVisible} mobileMenuOpen={mobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} />
       <Link href="/orders" className={styles.backLink}>
         <ArrowLeft size={20} />
         Back to Orders
@@ -542,6 +574,7 @@ export default function OrderDetailPage() {
           </div>
         </div>
       </div>
+      <MainFooter />
     </div>
   );
 }

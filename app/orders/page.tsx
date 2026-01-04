@@ -197,6 +197,7 @@ export default function OrdersPage() {
       const response = await fetch(`/api/orders/user/${encodeURIComponent(userEmail)}`);
       if (response.ok) {
         const data = await response.json();
+        console.log('Orders fetched:', data);
         setOrders(data);
       } else {
         setError('Failed to fetch orders');
@@ -583,6 +584,7 @@ export default function OrdersPage() {
         <div className={styles.ordersList}>
           {orders.map((order) => {
             const displayStatus = order.shipment_status || order.order_status || 'Pending';
+            console.log('Order:', order.order_number, 'shipment_status:', order.shipment_status, 'order_status:', order.order_status, 'displayStatus:', displayStatus);
             const items = Array.isArray(order.items) && order.items.length > 0
               ? order.items
               : [

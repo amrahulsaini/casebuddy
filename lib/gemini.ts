@@ -42,11 +42,14 @@ export function buildAnalysisPrompt(phoneModel: string): string {
   return `You are an expert product photographer and e-commerce prompt engineer.
 
 You will receive:
-- A single reference photo of a PHONE CASE.
+- A single reference photo of a PHONE CASE (just the case, empty or with a phone inside).
 - A text label for the target phone model: "${phoneModel}".
+
+YOUR PRIMARY TASK: Generate a prompt that will create product photos showing the EXACT "${phoneModel}" phone inserted into the EXACT case from the reference image. Do not change the phone model or the case design.
 
 CRITICAL GEOMETRY RULES:
 1) The REFERENCE CASE IMAGE is the ONLY source of truth for:
+   - Case material, color, and transparency (transparent/clear vs opaque/solid)
    - overall phone aspect ratio (height vs width)
    - camera island shape and size
    - number of circular openings
@@ -65,6 +68,10 @@ CRITICAL GEOMETRY RULES:
    - No part of the phone can be outside the case edges.
    - The phone must not float outside or intersect incorrectly with the case.
    - The case outline is treated like a strict clipping mask for the phone.
+6) PHONE MODEL MUST BE EXACT:
+   - Use EXACTLY "${phoneModel}" as the phone being inserted
+   - Do NOT substitute with similar models or generic phones
+   - The generated images must show the specific "${phoneModel}" device inside this specific case
 
 Your output must be STRICT JSON with exactly these three fields:
 
@@ -77,12 +84,14 @@ Your output must be STRICT JSON with exactly these three fields:
 DETAILS:
 
 1) "phone_model_description":
-   - Describe how the PHONE should look once inserted into THIS case:
+   - Describe how the "${phoneModel}" PHONE should look once inserted into THIS case:
+     • Mention it is specifically the "${phoneModel}" model
      • flat or slightly curved edges
      • camera island position and shape (top-left, rectangular / square, etc.)
      • number and arrangement of circular modules matching the cutouts.
-   - Treat "${phoneModel}" only as a label; do not use catalog specs or promo names.
+   - Treat "${phoneModel}" as the EXACT phone model that must be used - not a generic placeholder.
    - Do NOT mention any brand features like "Active Halo", etc.
+   - Do NOT change or substitute the phone model name.
 
 2) "case_description":
    - Describe ONLY the case from the uploaded image:
@@ -97,7 +106,9 @@ DETAILS:
 
 3) "final_generation_prompt":
    - A single long, detailed prompt to generate ultra-realistic Amazon-style product renders where:
-     • The ${phoneModel} phone is fully inserted into this exact case (when the shot includes the phone).
+     • MANDATORY: The prompt MUST start with: "Ultra realistic Amazon-style product photos of the ${phoneModel} phone fully inserted into the exact case from the reference image."
+     • CRITICAL: Explicitly state this is the "${phoneModel}" model - do not use generic terms like "smartphone" or "mobile phone"
+     • The "${phoneModel}" phone is fully inserted into this exact case (when the shot includes the phone).
      • CRITICAL: If the case is transparent/clear, the prompt MUST explicitly state "transparent case" or "clear case" and mention that the phone's body, color, and internal design should be visible through the case material. The phone model "${phoneModel}" must be clearly identifiable through the transparent material.
      • If the case is opaque/solid (black, colored, etc.), explicitly mention the exact color and material (e.g., "matte black TPU case", "dark silicone case").
      • The phone height/width ratio and camera island position are consistent in every image.

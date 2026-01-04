@@ -213,13 +213,16 @@ export async function POST(request: NextRequest) {
         writer.send('status', `Generating mockup image...`, currentProgress);
 
           const gridPrompt =
+            `CRITICAL INSTRUCTION: Generate product images of the EXACT ${phoneModel} phone model inserted into the EXACT case from the reference image. Do not substitute phone models or change case design. ` +
             finalPrompt +
-            ` Create a SINGLE ultra-realistic, 4K HIGH-RESOLUTION (minimum 3840x2160 pixels) Amazon-style product render that contains five separate views of the ${phoneModel} phone with the case inside one canvas, arranged in a clean grid or collage. ` +
+            ` Create a SINGLE ultra-realistic, 4K HIGH-RESOLUTION (minimum 3840x2160 pixels) Amazon-style product render that contains five separate views of the ${phoneModel} phone inside the case from the reference image, arranged in a clean grid or collage. ` +
             'QUALITY REQUIREMENTS: Crystal-clear sharpness, no blur or artifacts, perfect focus on all details especially camera lenses and textures, 300 DPI print-ready quality, vibrant colors with smooth gradients, professional studio lighting with realistic shadows and reflections. ' +
-            'TRANSPARENCY HANDLING: If the case is transparent/clear, ensure the phone body, color, components, and branding are FULLY VISIBLE through the transparent material. DO NOT make the case opaque or black if it is supposed to be transparent. For opaque cases, maintain the exact material color and finish. ' +
+            `MANDATORY PHONE MODEL: Every shot must show the ${phoneModel} phone - do not use generic phones or substitute models. The ${phoneModel} must be recognizable and accurate to the actual device specifications. ` +
+            'TRANSPARENCY HANDLING: If the case is transparent/clear, ensure the phone body, color, components, and branding are FULLY VISIBLE through the transparent material. DO NOT make the case opaque or black if it is supposed to be transparent. For opaque cases, maintain the exact material color and finish from the reference image. ' +
+            `CASE ACCURACY: The case must match the reference image EXACTLY - same color, material, transparency, and cutout positions. Do not modify or reinterpret the case design. ` +
             'Each tile or panel inside this single image must correspond to the following camera angle descriptions: ' +
             angleListText +
-            ` All tiles must preserve identical phone proportions and the exact case geometry from the reference image, including camera island shape and the precise number and layout of circular openings. The ${phoneModel} phone body must always stay fully inside the case outline wherever the phone appears. ` +
+            ` All tiles must preserve identical phone proportions and the exact case geometry from the reference image, including camera island shape and the precise number and layout of circular openings. The ${phoneModel} phone body must always stay fully inside the case outline wherever the phone appears. The phone must fit the case perfectly as if it was designed specifically for the ${phoneModel}. ` +
             'RENDERING QUALITY: Use maximum detail level, ray-traced lighting, photorealistic materials (TPU softness, silicone texture, glass reflections, transparent clarity), perfect geometric accuracy, no distortion or warping.';
 
           const imgPayload = {

@@ -44,26 +44,22 @@ export async function GET(
       return NextResponse.json({ scans: [] });
     }
 
-    console.log('[TRACKING API] Full response:', JSON.stringify(trackingData, null, 2));
-
-    // Extract scans from tracking data - try multiple possible paths
-    let scans = trackingData?.tracking_data?.shipment_track?.[0]?.qc_response?.scan || 
-                trackingData?.tracking_data?.shipment_track?.[0]?.scans ||
-                trackingData?.tracking_data?.shipment_track_activities ||
-                trackingData?.scans ||
-                [];
-
-    console.log('[TRACKING API] Extracted scans:', scans);
+    // Extract scans from tracking data
+    let scans = trackingData?.tracking_data?.shipment_track_activities || [];
 
     // Format scans for frontend
-    const formattedScans = scans.map((scan: any) => ({
-      status: scan.status || scan['Sr Status'] || scan.activity || '',
-      location: scan.location || scan['Sr Status Description'] || scan.scan_location || '',
-      date: scan.date || scan.Date || scan.scan_date || '',
-      time: scan.time || scan.Time || scan.scan_time || '',
-      timestamp: scan.timestamp || scan.date_time || '',
-      instructions: scan.instructions || scan.Instructions || scan.remarks || '',
-    }));
+    const formattedScans = scans.map((scan: any) => {
+      const dateTime = scan.date || '';
+      const [datePart, timePart] = dateTime.split(' ');
+      
+      return {
+        activity: scan.activity || '',
+        location: scan.location || '',
+        date: datePart || '',
+        time: timePart || '',
+        timestamp: dateTime,
+      };
+    });
 
     return NextResponse.json({
       scans: formattedScans,

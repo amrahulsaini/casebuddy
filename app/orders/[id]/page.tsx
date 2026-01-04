@@ -55,12 +55,11 @@ type Shipment = {
 };
 
 type TrackingScan = {
-  status: string;
+  activity: string;
   location: string;
   date: string;
   time: string;
   timestamp: string;
-  instructions: string;
 };
 
 type TrackingData = {
@@ -370,36 +369,54 @@ export default function OrderDetailPage() {
 
               {trackingData.etd && (
                 <div className={styles.etdInfo}>
-                  <strong>Expected Delivery:</strong> {trackingData.etd}
+                  <div className={styles.etdLabel}>Expected Delivery</div>
+                  <div className={styles.etdDate}>
+                    {new Date(trackingData.etd).toLocaleDateString('en-US', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric'
+                    })}
+                  </div>
                 </div>
               )}
 
               <div className={styles.trackingTimeline}>
-                {trackingData.scans.map((scan, index) => (
-                  <div key={index} className={styles.trackingEvent}>
-                    <div className={styles.trackingDot}></div>
-                    <div className={styles.trackingContent}>
-                      <div className={styles.trackingStatus}>
-                        {scan.status}
-                      </div>
-                      {scan.location && (
-                        <div className={styles.trackingLocation}>
-                          <MapPin size={14} />
-                          {scan.location}
+                {trackingData.scans.map((scan, index) => {
+                  const scanDate = new Date(scan.timestamp);
+                  const dateStr = scanDate.toLocaleDateString('en-US', {
+                    day: '2-digit',
+                    month: 'short'
+                  });
+                  const timeStr = scanDate.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                  });
+                  
+                  return (
+                    <div key={index} className={styles.trackingEvent}>
+                      <div className={styles.trackingDot}></div>
+                      <div className={styles.trackingContent}>
+                        <div className={styles.trackingDate}>
+                          {dateStr}
                         </div>
-                      )}
-                      <div className={styles.trackingTime}>
-                        <Clock size={14} />
-                        {scan.date} {scan.time}
-                      </div>
-                      {scan.instructions && (
-                        <div className={styles.trackingInstructions}>
-                          {scan.instructions}
+                        <div className={styles.trackingTime}>
+                          <Clock size={14} />
+                          {timeStr}
                         </div>
-                      )}
+                        <div className={styles.trackingActivity}>
+                          <strong>Activity:</strong> {scan.activity}
+                        </div>
+                        {scan.location && (
+                          <div className={styles.trackingLocation}>
+                            <MapPin size={14} />
+                            <strong>Location:</strong> {scan.location}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

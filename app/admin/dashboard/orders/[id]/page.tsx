@@ -598,43 +598,45 @@ export default function AdminOrderDetailPage() {
                 </div>
               )}
 
-              <div className={styles.trackingTimeline}>
-                {trackingData.scans.map((scan, index) => {
-                  const scanDate = new Date(scan.timestamp);
-                  const dateStr = scanDate.toLocaleDateString('en-US', {
-                    day: '2-digit',
-                    month: 'short'
-                  });
-                  const timeStr = scanDate.toLocaleTimeString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                  });
-                  
-                  return (
-                    <div key={index} className={styles.trackingEvent}>
-                      <div className={styles.trackingDot}></div>
-                      <div className={styles.trackingContent}>
-                        <div className={styles.trackingDate}>
-                          {dateStr}
-                        </div>
-                        <div className={styles.trackingTime}>
-                          <Clock size={14} />
-                          {timeStr}
-                        </div>
-                        <div className={styles.trackingActivity}>
-                          <strong>Activity:</strong> {scan.activity}
-                        </div>
-                        {scan.location && (
-                          <div className={styles.trackingLocation}>
-                            <MapPin size={14} />
-                            <strong>Location:</strong> {scan.location}
+              <div className={styles.trackingScrollable}>
+                <div className={styles.trackingTimeline}>
+                  {trackingData.scans.map((scan, index) => {
+                    const scanDate = new Date(scan.timestamp);
+                    const dateStr = scanDate.toLocaleDateString('en-US', {
+                      day: '2-digit',
+                      month: 'short'
+                    });
+                    const timeStr = scanDate.toLocaleTimeString('en-US', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: true
+                    });
+                    
+                    return (
+                      <div key={index} className={styles.trackingEvent}>
+                        <div className={styles.trackingDot}></div>
+                        <div className={styles.trackingContent}>
+                          <div className={styles.trackingDate}>
+                            {dateStr}
                           </div>
-                        )}
+                          <div className={styles.trackingTime}>
+                            <Clock size={14} />
+                            {timeStr}
+                          </div>
+                          <div className={styles.trackingActivity}>
+                            <strong>Activity:</strong> {scan.activity}
+                          </div>
+                          {scan.location && (
+                            <div className={styles.trackingLocation}>
+                              <MapPin size={14} />
+                              <strong>Location:</strong> {scan.location}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </div>
           )}
@@ -645,9 +647,10 @@ export default function AdminOrderDetailPage() {
                 <Truck size={20} />
                 Shipment Tracking Activity
               </h2>
-              <p className={styles.loadingText}>Loading tracking details...</p>
+              <p className={styles.loadingText}>Loading tracking...</p>
             </div>
           )}
+          
           <div className={styles.card}>
             <h2 className={styles.cardTitle}>
               <User size={20} />

@@ -1267,6 +1267,48 @@
   }
 }
 
+@media (max-width: 768px) {
+  .footer {
+    padding: 3rem 1.5rem 1.5rem;
+  }
+  
+  .footerContent {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .footerSection {
+    text-align: center;
+  }
+  
+  .footerLogoWrapper {
+    padding: 0.6rem 1.2rem;
+  }
+  
+  .socialLinks {
+    justify-content: center;
+  }
+  
+  .footerLinks,
+  .footerContact {
+    text-align: center;
+  }
+  
+  .footerContact li {
+    justify-content: center;
+  }
+  
+  .footerBottom {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .paymentMethods {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
 .footerSection {
   animation: fadeInUp 0.8s ease-out both;
 }

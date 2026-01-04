@@ -405,6 +405,32 @@
 }
 
 /* Tracking Timeline Styles */
+.trackingScrollable {
+  max-height: 500px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
+  margin-top: 16px;
+}
+
+.trackingScrollable::-webkit-scrollbar {
+  width: 6px;
+}
+
+.trackingScrollable::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.trackingScrollable::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 10px;
+}
+
+.trackingScrollable::-webkit-scrollbar-thumb:hover {
+  background: #5568d3;
+}
+
 .etdInfo {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 20px 24px;

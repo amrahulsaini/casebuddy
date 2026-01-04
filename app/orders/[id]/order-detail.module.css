@@ -381,17 +381,47 @@
 
 /* Tracking Timeline Styles */
 .trackingLink {
-  display: inline-block;
+  display: block;
   color: #667eea;
   font-weight: 600;
   text-decoration: none;
-  margin-bottom: 16px;
+  text-align: center;
+  margin-top: 16px;
+  padding: 10px;
+  background: #f5f7ff;
+  border-radius: 8px;
   transition: all 0.2s;
 }
 
 .trackingLink:hover {
-  color: #5568d3;
-  text-decoration: underline;
+  background: #667eea;
+  color: white;
+}
+
+.trackingScrollable {
+  max-height: 500px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
+  margin-top: 16px;
+}
+
+.trackingScrollable::-webkit-scrollbar {
+  width: 6px;
+}
+
+.trackingScrollable::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.trackingScrollable::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 10px;
+}
+
+.trackingScrollable::-webkit-scrollbar-thumb:hover {
+  background: #5568d3;
 }
 
 .etdInfo {

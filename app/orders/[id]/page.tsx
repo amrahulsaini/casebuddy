@@ -54,6 +54,22 @@ type Shipment = {
   tracking_url: string | null;
 };
 
+type TrackingScan = {
+  status: string;
+  location: string;
+  date: string;
+  time: string;
+  timestamp: string;
+  instructions: string;
+};
+
+type TrackingData = {
+  scans: TrackingScan[];
+  tracking_url: string | null;
+  etd: string | null;
+  current_status: string | null;
+};
+
 function normalizePlacement(value: unknown) {
   if (!value) return null;
   return String(value).replace(/_/g, ' ');
@@ -66,6 +82,8 @@ export default function OrderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [shipment, setShipment] = useState<Shipment | null>(null);
+  const [trackingData, setTrackingData] = useState<TrackingData | null>(null);
+  const [loadingTracking, setLoadingTracking] = useState(false);
 
   useEffect(() => {
     const userEmail = localStorage.getItem('userEmail');
@@ -107,6 +125,9 @@ export default function OrderDetailPage() {
         
         setOrder(data);
 
+        // Fetch tracking activity log
+        fetchTrackingDetails();
+
         // Try to fetch shipment info for tracking (if available)
         try {
           const shipRes = await fetch(`/api/orders/${params.id}/shipment`, {
@@ -128,6 +149,28 @@ export default function OrderDetailPage() {
       setError('Failed to load order details');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchTrackingDetails = async () => {
+    if (!params.id) return;
+    setLoadingTracking(true);
+    try {
+      const userEmail = localStorage.getItem('customerEmail');
+      const res = await fetch(`/api/orders/${params.id}/tracking`, {
+        headers: {
+          'x-customer-email': (userEmail || '').trim().toLowerCase(),
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setTrackingData(data);
+      }
+    } catch (error) {
+      console.error('Error fetching tracking:', error);
+    } finally {
+      setLoadingTracking(false);
     }
   };
 
@@ -300,6 +343,71 @@ export default function OrderDetailPage() {
               </div>
             </div>
           </div>
+
+          {/* Tracking Activity Log */}
+          {trackingData && trackingData.scans && trackingData.scans.length > 0 && (
+            <div className={styles.card}>
+              <h2 className={styles.cardTitle}>
+                <Truck size={20} />
+                Shipment Tracking Activity
+              </h2>
+              
+              {trackingData.tracking_url && (
+                <a 
+                  href={trackingData.tracking_url} 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className={styles.trackingLink}
+                >
+                  View Full Tracking Details
+                </a>
+              )}
+
+              {trackingData.etd && (
+                <div className={styles.etdInfo}>
+                  <strong>Expected Delivery:</strong> {trackingData.etd}
+                </div>
+              )}
+
+              <div className={styles.trackingTimeline}>
+                {trackingData.scans.map((scan, index) => (
+                  <div key={index} className={styles.trackingEvent}>
+                    <div className={styles.trackingDot}></div>
+                    <div className={styles.trackingContent}>
+                      <div className={styles.trackingStatus}>
+                        {scan.status}
+                      </div>
+                      {scan.location && (
+                        <div className={styles.trackingLocation}>
+                          <MapPin size={14} />
+                          {scan.location}
+                        </div>
+                      )}
+                      <div className={styles.trackingTime}>
+                        <Clock size={14} />
+                        {scan.date} {scan.time}
+                      </div>
+                      {scan.instructions && (
+                        <div className={styles.trackingInstructions}>
+                          {scan.instructions}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {loadingTracking && (
+            <div className={styles.card}>
+              <h2 className={styles.cardTitle}>
+                <Truck size={20} />
+                Shipment Tracking Activity
+              </h2>
+              <p className={styles.loadingText}>Loading tracking details...</p>
+            </div>
+          )}
 
           <div className={styles.card}>
             <h2 className={styles.cardTitle}>

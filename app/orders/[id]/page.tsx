@@ -380,33 +380,39 @@ export default function OrderDetailPage() {
             </div>
           </div>
 
+          {/* AWB Info Banner - Always show when AWB is assigned */}
+          {shipment?.shiprocket_awb && (
+            <div className={styles.card}>
+              <h2 className={styles.cardTitle}>
+                <Truck size={20} />
+                Shipment Information
+              </h2>
+              <div className={styles.awbInfoBanner}>
+                <div className={styles.awbInfo}>
+                  <span className={styles.awbLabel}>Tracking Number (AWB):</span>
+                  <span className={styles.awbNumber}>{shipment.shiprocket_awb}</span>
+                </div>
+                {shipment.tracking_url && (
+                  <a 
+                    href={shipment.tracking_url} 
+                    target="_blank" 
+                    rel="noreferrer" 
+                    className={styles.trackingUrlBtn}
+                  >
+                    Open Tracking
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Shipment Tracking Activity - Full Width */}
           {trackingData && trackingData.scans && trackingData.scans.length > 0 && (
             <div className={styles.card}>
               <h2 className={styles.cardTitle}>
                 <Truck size={20} />
-                Shipment Tracking
+                Tracking Activity
               </h2>
-              
-              {/* AWB Info Banner */}
-              {shipment?.shiprocket_awb && (
-                <div className={styles.awbInfoBanner}>
-                  <div className={styles.awbInfo}>
-                    <span className={styles.awbLabel}>Tracking Number (AWB):</span>
-                    <span className={styles.awbNumber}>{shipment.shiprocket_awb}</span>
-                  </div>
-                  {trackingData.tracking_url && (
-                    <a 
-                      href={trackingData.tracking_url} 
-                      target="_blank" 
-                      rel="noreferrer" 
-                      className={styles.trackingUrlBtn}
-                    >
-                      Open Tracking
-                    </a>
-                  )}
-                </div>
-              )}
               
               {trackingData.etd && (
                 <div className={styles.etdBanner}>
@@ -473,13 +479,13 @@ export default function OrderDetailPage() {
             </div>
           )}
 
-          {loadingTracking && (
+          {loadingTracking && shipment?.shiprocket_awb && (
             <div className={styles.card}>
               <h2 className={styles.cardTitle}>
                 <Truck size={20} />
-                Shipment Tracking
+                Tracking Activity
               </h2>
-              <p className={styles.loadingText}>Loading tracking...</p>
+              <p className={styles.loadingText}>Loading tracking activity...</p>
             </div>
           )}
 
@@ -488,26 +494,15 @@ export default function OrderDetailPage() {
             <div className={styles.card}>
               <h2 className={styles.cardTitle}>
                 <Truck size={20} />
-                Shipment Tracking
+                Tracking Activity
               </h2>
               <div className={styles.trackingPending}>
                 <div className={styles.pendingIcon}>📦</div>
-                <h3>AWB Assigned</h3>
-                <p>Tracking Number: <strong>{shipment.shiprocket_awb}</strong></p>
+                <h3>Tracking Pending</h3>
                 <p className={styles.pendingMessage}>
-                  Tracking information will be available once the courier picks up your package. 
+                  Tracking activity will be available once the courier picks up your package. 
                   This usually happens within 24-48 hours of AWB assignment.
                 </p>
-                {shipment.tracking_url && (
-                  <a 
-                    href={shipment.tracking_url} 
-                    target="_blank" 
-                    rel="noreferrer" 
-                    className={styles.trackingFullLink}
-                  >
-                    Check on Shiprocket →
-                  </a>
-                )}
               </div>
             </div>
           )}

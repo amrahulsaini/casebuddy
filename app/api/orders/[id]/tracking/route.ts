@@ -52,42 +52,40 @@ export async function GET(
     let etd = null;
     let currentStatus = null;
     
-    // Check if response is an array (direct shipment data)
-    if (Array.isArray(trackingData) && trackingData.length > 0) {
+    // Check for nested tracking_data structure first
+    if (trackingData?.tracking_data) {
+      const td = trackingData.tracking_data;
+      
+      // shipment_track_activities contains the actual tracking scans
+      // shipment_track is just metadata, NOT activities
+      if (td.shipment_track_activities && Array.isArray(td.shipment_track_activities)) {
+        scans = td.shipment_track_activities;
+      }
+      
+      trackUrl = td.track_url || null;
+      etd = td.etd || null;
+      
+      // Get current status from shipment_track metadata
+      if (td.shipment_track && Array.isArray(td.shipment_track) && td.shipment_track.length > 0) {
+        currentStatus = td.shipment_track[0].current_status || null;
+      }
+    } else if (Array.isArray(trackingData) && trackingData.length > 0) {
+      // Handle direct array response
       const shipmentData = trackingData[0];
       
-      // Try to find scans/activities in various fields
-      if (shipmentData.shipment_track_activities) {
+      if (shipmentData.shipment_track_activities && Array.isArray(shipmentData.shipment_track_activities)) {
         scans = shipmentData.shipment_track_activities;
-      } else if (shipmentData.scans) {
-        scans = shipmentData.scans;
-      } else if (shipmentData.qc_response?.shipment_track_activities) {
-        scans = shipmentData.qc_response.shipment_track_activities;
       }
       
       trackUrl = shipmentData.track_url || shipmentData.tracking_url || null;
       etd = shipmentData.edd || shipmentData.etd || null;
       currentStatus = shipmentData.current_status || null;
-    } else {
-      // Try nested structure
-      if (trackingData?.tracking_data?.shipment_track_activities) {
-        scans = trackingData.tracking_data.shipment_track_activities;
-      } else if (trackingData?.shipment_track_activities) {
-        scans = trackingData.shipment_track_activities;
-      } else if (trackingData?.tracking_data?.shipment_track) {
-        scans = trackingData.tracking_data.shipment_track;
-      } else if (trackingData?.shipment_track) {
-        scans = trackingData.shipment_track;
-      }
-      
-      trackUrl = trackingData?.tracking_data?.track_url || trackingData?.tracking_url || trackingData?.track_url || null;
-      etd = trackingData?.tracking_data?.etd || trackingData?.etd || trackingData?.edd || null;
-      currentStatus = trackingData?.tracking_data?.shipment_track?.[0]?.current_status || trackingData?.current_status || null;
     }
     
     console.log('Extracted scans:', scans);
     console.log('Track URL:', trackUrl);
     console.log('ETD:', etd);
+    console.log('Current Status:', currentStatus);
 
     // Format scans for frontend
     const formattedScans = Array.isArray(scans) ? scans.map((scan: any) => {

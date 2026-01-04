@@ -495,6 +495,79 @@
   font-weight: 600;
 }
 
+.awbInfoBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #667eea;
+}
+
+.awbInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.awbLabel {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.awbNumber {
+  font-size: 16px;
+  color: #111827;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  background: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+}
+
+.trackingUrlBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: #667eea;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.trackingUrlBtn:hover {
+  background: #5568d3;
+}
+
+@media (max-width: 640px) {
+  .awbInfoBanner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .awbInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .trackingUrlBtn {
+    text-align: center;
+    justify-content: center;
+  }
+}
+
 .etdBanner {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;

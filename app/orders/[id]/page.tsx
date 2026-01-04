@@ -388,6 +388,26 @@ export default function OrderDetailPage() {
                 Shipment Tracking
               </h2>
               
+              {/* AWB Info Banner */}
+              {shipment?.shiprocket_awb && (
+                <div className={styles.awbInfoBanner}>
+                  <div className={styles.awbInfo}>
+                    <span className={styles.awbLabel}>Tracking Number (AWB):</span>
+                    <span className={styles.awbNumber}>{shipment.shiprocket_awb}</span>
+                  </div>
+                  {trackingData.tracking_url && (
+                    <a 
+                      href={trackingData.tracking_url} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className={styles.trackingUrlBtn}
+                    >
+                      Open Tracking
+                    </a>
+                  )}
+                </div>
+              )}
+              
               {trackingData.etd && (
                 <div className={styles.etdBanner}>
                   Expected Delivery: <strong>{new Date(trackingData.etd).toLocaleDateString('en-US', {

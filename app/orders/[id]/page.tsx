@@ -228,31 +228,35 @@ export default function OrderDetailPage() {
 
   if (loading) {
     return (
-      <div className={styles.container}>
+      <>
         <MainHeader scrollY={scrollY} headerVisible={headerVisible} mobileMenuOpen={mobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} />
-        <div className={styles.loading}>
-          <div className={styles.spinner}></div>
-          <p>Loading order details...</p>
+        <div className={styles.container}>
+          <div className={styles.loading}>
+            <div className={styles.spinner}></div>
+            <p>Loading order details...</p>
+          </div>
         </div>
         <MainFooter />
-      </div>
+      </>
     );
   }
 
   if (error || !order) {
     return (
-      <div className={styles.container}>
+      <>
         <MainHeader scrollY={scrollY} headerVisible={headerVisible} mobileMenuOpen={mobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} />
-        <div className={styles.error}>
-          <XCircle size={64} />
-          <h2>{error || 'Order not found'}</h2>
-          <Link href="/orders" className={styles.backBtn}>
-            <ArrowLeft size={16} />
-            Back to Orders
-          </Link>
+        <div className={styles.container}>
+          <div className={styles.error}>
+            <XCircle size={64} />
+            <h2>{error || 'Order not found'}</h2>
+            <Link href="/orders" className={styles.backBtn}>
+              <ArrowLeft size={16} />
+              Back to Orders
+            </Link>
+          </div>
         </div>
         <MainFooter />
-      </div>
+      </>
     );
   }
 
@@ -272,12 +276,13 @@ export default function OrderDetailPage() {
       ];
 
   return (
-    <div className={styles.container}>
+    <>
       <MainHeader scrollY={scrollY} headerVisible={headerVisible} mobileMenuOpen={mobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} />
-      <Link href="/orders" className={styles.backLink}>
-        <ArrowLeft size={20} />
-        Back to Orders
-      </Link>
+      <div className={styles.container}>
+        <Link href="/orders" className={styles.backLink}>
+          <ArrowLeft size={20} />
+          Back to Orders
+        </Link>
 
       <div className={styles.header}>
         <div>
@@ -578,7 +583,8 @@ export default function OrderDetailPage() {
           </div>
         </div>
       </div>
+      </div>
       <MainFooter />
-    </div>
+    </>
   );
 }

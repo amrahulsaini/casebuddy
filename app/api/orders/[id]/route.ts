@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import caseMainPool from '@/lib/db-main';
+import { isNumericOnly, shiprocketStatusCodeToLabel } from '@/lib/shiprocket-status';
 import {
   fetchPrimaryImagesByProductId,
   parseItemsFromCustomizationJson,
@@ -13,7 +14,14 @@ export async function GET(
     const { id: orderId } = await params;
 
     const [rows]: any = await caseMainPool.execute(
-      `SELECT * FROM orders WHERE id = ?`,
+      `SELECT 
+        o.*,
+        s.status AS shipment_status,
+        s.updated_at AS shipment_updated_at,
+        s.shiprocket_awb AS shiprocket_awb
+      FROM orders o
+      LEFT JOIN shipments s ON s.order_id = o.id
+      WHERE o.id = ?`,
       [orderId]
     );
 
@@ -25,6 +33,14 @@ export async function GET(
     }
 
     const order = rows[0];
+    
+    // Normalize shipment status
+    const rawStatus = order?.shipment_status != null ? String(order.shipment_status).trim() : '';
+    let shipment_status = rawStatus || null;
+    if (shipment_status && isNumericOnly(shipment_status)) {
+      shipment_status = shiprocketStatusCodeToLabel(shipment_status) || `Tracking in progress (code ${shipment_status})`;
+    }
+    order.shipment_status = shipment_status;
 
     const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'https://casebuddy.co.in').replace(/\/+$/, '');
     const items = parseItemsFromCustomizationJson({

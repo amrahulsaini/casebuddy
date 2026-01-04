@@ -30,6 +30,9 @@ interface Order {
   shipping_pincode: string;
   created_at: string;
   updated_at: string;
+  shipment_status?: string | null;
+  shipment_updated_at?: string | null;
+  shiprocket_awb?: string | null;
   items?: Array<{
     productId: number | null;
     productName: string;
@@ -129,61 +132,29 @@ export default function OrderDetailPage() {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'completed':
-      case 'delivered':
-        return '#4CAF50';
-      case 'processing':
-      case 'shipped':
-        return '#2196F3';
-      case 'pending':
-        return '#FF9800';
-      case 'cancelled':
-      case 'failed':
-        return '#f44336';
-      default:
-        return '#757575';
-    }
+    const s = status.toLowerCase();
+    
+    if (s.includes('deliver')) return '#4CAF50';
+    if (s.includes('complet')) return '#4CAF50';
+    if (s.includes('transit') || s.includes('ship')) return '#2196F3';
+    if (s.includes('process') || s.includes('pack') || s.includes('pick')) return '#2196F3';
+    if (s.includes('pending')) return '#FF9800';
+    if (s.includes('cancel')) return '#f44336';
+    if (s.includes('fail')) return '#f44336';
+    if (s.includes('rto') || s.includes('return')) return '#f44336';
+    
+    return '#757575';
   };
 
   const getStatusIcon = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'completed':
-      case 'delivered':
-        return <CheckCircle size={24} />;
-      case 'processing':
-      case 'shipped':
-        return <Truck size={24} />;
-      case 'pending':
-        return <Clock size={24} />;
-      case 'cancelled':
-      case 'failed':
-        return <XCircle size={24} />;
-      default:
-        return <Package size={24} />;
-    }
-  };
-
-  const getPopularStatusLabel = (orderStatusRaw: unknown, paymentStatusRaw: unknown) => {
-    const raw = String(orderStatusRaw || '').trim();
-    const s = raw.toLowerCase();
-
-    if (!s) return 'Pending';
-    if (s.includes('cancel')) return 'Cancelled';
-    if (s.includes('deliver') || s.includes('complete')) return 'Delivered';
-    if (s.includes('rto')) return 'RTO';
-    if (s.includes('return')) return 'Returned';
-    if (s.includes('ship') || s.includes('transit')) return 'Shipped';
-    if (s.includes('process') || s.includes('pack') || s.includes('print')) return 'Processing';
-    if (s.includes('pending')) return 'Pending';
-    if (s.includes('pickup')) return 'Pickup Generated';
-    if (s.includes('fail')) return 'Failed';
-
-    return raw
-      .split(/[_\s]+/g)
-      .filter(Boolean)
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-      .join(' ');
+    const s = status.toLowerCase();
+    
+    if (s.includes('deliver') || s.includes('complet')) return <CheckCircle size={24} />;
+    if (s.includes('transit') || s.includes('ship') || s.includes('process') || s.includes('pack') || s.includes('pick')) return <Truck size={24} />;
+    if (s.includes('pending')) return <Clock size={24} />;
+    if (s.includes('cancel') || s.includes('fail') || s.includes('rto') || s.includes('return')) return <XCircle size={24} />;
+    
+    return <Package size={24} />;
   };
 
   if (loading) {
@@ -212,7 +183,7 @@ export default function OrderDetailPage() {
     );
   }
 
-  const popularStatus = getPopularStatusLabel(order.order_status, order.payment_status);
+  const displayStatus = order.shipment_status || order.order_status || 'Pending';
 
   const items = Array.isArray(order.items) && order.items.length > 0
     ? order.items
@@ -250,11 +221,16 @@ export default function OrderDetailPage() {
         <div className={styles.statusBadges}>
           <div 
             className={styles.statusBadge}
-            style={{ backgroundColor: getStatusColor(popularStatus) }}
+            style={{ backgroundColor: getStatusColor(displayStatus) }}
           >
-            {getStatusIcon(popularStatus)}
-            Order Status - {popularStatus}
+            {getStatusIcon(displayStatus)}
+            {displayStatus}
           </div>
+          {order.shipment_updated_at && (
+            <div className={styles.statusDate}>
+              Updated: {new Date(order.shipment_updated_at).toLocaleString()}
+            </div>
+          )}
         </div>
       </div>
 

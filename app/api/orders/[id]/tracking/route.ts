@@ -39,13 +39,28 @@ export async function GET(
       trackingData = await shiprocketRequest(`/v1/external/courier/track/awb/${encodeURIComponent(String(awb))}`, {
         method: 'GET',
       });
+      
+      console.log('Shiprocket tracking response:', JSON.stringify(trackingData, null, 2));
     } catch (error) {
       console.error('Shiprocket tracking API error:', error);
       return NextResponse.json({ scans: [] });
     }
 
-    // Extract scans from tracking data
-    const scans = trackingData?.tracking_data?.shipment_track_activities || [];
+    // Extract scans from tracking data - try multiple possible paths
+    let scans = [];
+    
+    // Try different possible response structures
+    if (trackingData?.tracking_data?.shipment_track_activities) {
+      scans = trackingData.tracking_data.shipment_track_activities;
+    } else if (trackingData?.shipment_track_activities) {
+      scans = trackingData.shipment_track_activities;
+    } else if (trackingData?.tracking_data?.shipment_track) {
+      scans = trackingData.tracking_data.shipment_track;
+    } else if (trackingData?.shipment_track) {
+      scans = trackingData.shipment_track;
+    }
+    
+    console.log('Extracted scans:', scans);
 
     // Format scans for frontend
     const formattedScans = scans.map((scan: any) => {

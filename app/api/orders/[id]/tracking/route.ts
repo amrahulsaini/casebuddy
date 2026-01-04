@@ -45,7 +45,7 @@ export async function GET(
     }
 
     // Extract scans from tracking data
-    let scans = trackingData?.tracking_data?.shipment_track_activities || [];
+    const scans = trackingData?.tracking_data?.shipment_track_activities || [];
 
     // Format scans for frontend
     const formattedScans = scans.map((scan: any) => {

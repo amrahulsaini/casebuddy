@@ -183,20 +183,15 @@ export default function OrderDetailPage() {
     setLoadingTracking(true);
     try {
       const userEmail = localStorage.getItem('customerEmail');
-      console.log('[TRACKING] Fetching tracking for order:', params.id);
       const res = await fetch(`/api/orders/${params.id}/tracking`, {
         headers: {
           'x-customer-email': (userEmail || '').trim().toLowerCase(),
         },
       });
 
-      console.log('[TRACKING] Response status:', res.status);
       if (res.ok) {
         const data = await res.json();
-        console.log('[TRACKING] Tracking data:', data);
         setTrackingData(data);
-      } else {
-        console.error('[TRACKING] API error:', res.status, await res.text());
       }
     } catch (error) {
       console.error('Error fetching tracking:', error);

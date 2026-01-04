@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Package, User, Phone, Mail, MapPin, CreditCard, Clock } from 'lucide-react';
+import { ArrowLeft, Package, User, Phone, Mail, MapPin, CreditCard, Clock, Truck } from 'lucide-react';
 import { isNumericOnly, shiprocketStatusCodeToLabel } from '@/lib/shiprocket-status';
 import styles from './order-detail.module.css';
 
@@ -21,6 +21,21 @@ type Shipment = {
   label_url: string | null;
   created_at: string;
   updated_at: string;
+};
+
+type TrackingScan = {
+  activity: string;
+  location: string;
+  date: string;
+  time: string;
+  timestamp: string;
+};
+
+type TrackingData = {
+  scans: TrackingScan[];
+  tracking_url: string | null;
+  etd: string | null;
+  current_status: string | null;
 };
 
 interface Order {
@@ -75,6 +90,9 @@ export default function AdminOrderDetailPage() {
   const [shipLoading, setShipLoading] = useState(false);
   const [shipError, setShipError] = useState('');
   const [shipSuccess, setShipSuccess] = useState('');
+  
+  const [trackingData, setTrackingData] = useState<TrackingData | null>(null);
+  const [trackingLoading, setTrackingLoading] = useState(false);
 
   useEffect(() => {
     fetchOrderDetails();
@@ -92,8 +110,28 @@ export default function AdminOrderDetailPage() {
       if (!res.ok) return;
       const data = await res.json();
       setShipment(data);
+      
+      // Fetch tracking data if AWB is available
+      if (data?.shiprocket_awb) {
+        fetchTrackingData();
+      }
     } catch (e) {
       // ignore
+    }
+  };
+
+  const fetchTrackingData = async () => {
+    try {
+      setTrackingLoading(true);
+      const res = await fetch(`/api/orders/${params.id}/tracking`);
+      if (res.ok) {
+        const data = await res.json();
+        setTrackingData(data);
+      }
+    } catch (error) {
+      console.error('Error fetching tracking:', error);
+    } finally {
+      setTrackingLoading(false);
     }
   };
 
@@ -539,7 +577,77 @@ export default function AdminOrderDetailPage() {
               </div>
             </div>
           </div>
+          {/* Tracking Activity Timeline */}
+          {trackingData && trackingData.scans && trackingData.scans.length > 0 && (
+            <div className={styles.card}>
+              <h2 className={styles.cardTitle}>
+                <Truck size={20} />
+                Shipment Tracking Activity
+              </h2>
+              
+              {trackingData.etd && (
+                <div className={styles.etdInfo}>
+                  <div className={styles.etdLabel}>Expected Delivery</div>
+                  <div className={styles.etdDate}>
+                    {new Date(trackingData.etd).toLocaleDateString('en-US', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric'
+                    })}
+                  </div>
+                </div>
+              )}
 
+              <div className={styles.trackingTimeline}>
+                {trackingData.scans.map((scan, index) => {
+                  const scanDate = new Date(scan.timestamp);
+                  const dateStr = scanDate.toLocaleDateString('en-US', {
+                    day: '2-digit',
+                    month: 'short'
+                  });
+                  const timeStr = scanDate.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                  });
+                  
+                  return (
+                    <div key={index} className={styles.trackingEvent}>
+                      <div className={styles.trackingDot}></div>
+                      <div className={styles.trackingContent}>
+                        <div className={styles.trackingDate}>
+                          {dateStr}
+                        </div>
+                        <div className={styles.trackingTime}>
+                          <Clock size={14} />
+                          {timeStr}
+                        </div>
+                        <div className={styles.trackingActivity}>
+                          <strong>Activity:</strong> {scan.activity}
+                        </div>
+                        {scan.location && (
+                          <div className={styles.trackingLocation}>
+                            <MapPin size={14} />
+                            <strong>Location:</strong> {scan.location}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {trackingLoading && (
+            <div className={styles.card}>
+              <h2 className={styles.cardTitle}>
+                <Truck size={20} />
+                Shipment Tracking Activity
+              </h2>
+              <p className={styles.loadingText}>Loading tracking details...</p>
+            </div>
+          )}
           <div className={styles.card}>
             <h2 className={styles.cardTitle}>
               <User size={20} />

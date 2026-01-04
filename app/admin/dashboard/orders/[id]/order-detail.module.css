@@ -404,6 +404,141 @@
   font-size: 12px;
 }
 
+/* Tracking Timeline Styles */
+.etdInfo {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px 24px;
+  border-radius: 12px;
+  margin-bottom: 32px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  text-align: center;
+}
+
+.etdLabel {
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.9;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.etdDate {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.trackingTimeline {
+  position: relative;
+  padding-left: 30px;
+}
+
+.trackingTimeline::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: linear-gradient(to bottom, #667eea 0%, #e0e0e0 100%);
+}
+
+.trackingEvent {
+  position: relative;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.trackingEvent:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.trackingDot {
+  position: absolute;
+  left: -26px;
+  top: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #667eea;
+  border: 3px solid white;
+  box-shadow: 0 0 0 2px #667eea;
+}
+
+.trackingEvent:first-child .trackingDot {
+  background: #4CAF50;
+  box-shadow: 0 0 0 2px #4CAF50;
+}
+
+.trackingContent {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.trackingDate {
+  font-weight: 700;
+  font-size: 15px;
+  color: #667eea;
+}
+
+.trackingTime {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #666;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.trackingTime svg {
+  flex-shrink: 0;
+}
+
+.trackingActivity {
+  font-size: 15px;
+  color: #333;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+.trackingActivity strong {
+  color: #667eea;
+  font-weight: 600;
+}
+
+.trackingLocation {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  color: #666;
+  font-size: 14px;
+  margin-top: 2px;
+}
+
+.trackingLocation svg {
+  flex-shrink: 0;
+  color: #999;
+  margin-top: 2px;
+}
+
+.trackingLocation strong {
+  color: #999;
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.loadingText {
+  text-align: center;
+  color: #999;
+  padding: 20px;
+  font-style: italic;
+}
+
 @media (max-width: 1024px) {
   .grid {
     grid-template-columns: 1fr;

@@ -27,21 +27,18 @@ export async function GET(
       return NextResponse.json({ scans: [] });
     }
 
-    // Fetch tracking details from Shiprocket
+    // Fetch tracking details from Shiprocket using AWB (required)
+    if (!awb) {
+      return NextResponse.json({ scans: [] });
+    }
+
     let trackingData: any;
     
     try {
-      if (shipmentId) {
-        // Use shipment ID to track
-        trackingData = await shiprocketRequest(`/v1/courier/track/shipment/${shipmentId}`, {
-          method: 'GET',
-        });
-      } else if (awb) {
-        // Use AWB to track
-        trackingData = await shiprocketRequest(`/v1/courier/track/awb/${awb}`, {
-          method: 'GET',
-        });
-      }
+      // Use external API endpoint which doesn't require special permissions
+      trackingData = await shiprocketRequest(`/v1/external/courier/track/awb/${encodeURIComponent(String(awb))}`, {
+        method: 'GET',
+      });
     } catch (error) {
       console.error('Shiprocket tracking API error:', error);
       return NextResponse.json({ scans: [] });

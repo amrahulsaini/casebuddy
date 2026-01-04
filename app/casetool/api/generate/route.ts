@@ -214,13 +214,13 @@ export async function POST(request: NextRequest) {
 
           const gridPrompt =
             finalPrompt +
-            ' Create a SINGLE ultra-realistic, 4K HIGH-RESOLUTION (minimum 3840x2160 pixels) Amazon-style product render that contains five separate views of the case and phone inside one canvas, arranged in a clean grid or collage. ' +
+            ` Create a SINGLE ultra-realistic, 4K HIGH-RESOLUTION (minimum 3840x2160 pixels) Amazon-style product render that contains five separate views of the ${phoneModel} phone with the case inside one canvas, arranged in a clean grid or collage. ` +
             'QUALITY REQUIREMENTS: Crystal-clear sharpness, no blur or artifacts, perfect focus on all details especially camera lenses and textures, 300 DPI print-ready quality, vibrant colors with smooth gradients, professional studio lighting with realistic shadows and reflections. ' +
+            'TRANSPARENCY HANDLING: If the case is transparent/clear, ensure the phone body, color, components, and branding are FULLY VISIBLE through the transparent material. DO NOT make the case opaque or black if it is supposed to be transparent. For opaque cases, maintain the exact material color and finish. ' +
             'Each tile or panel inside this single image must correspond to the following camera angle descriptions: ' +
             angleListText +
-            ' All tiles must preserve identical phone proportions and the exact case geometry from the reference image, including camera island shape and the precise number and layout of circular openings. ' +
-            'The phone body must always stay fully inside the case outline wherever the phone appears. ' +
-            'RENDERING QUALITY: Use maximum detail level, ray-traced lighting, photorealistic materials (TPU softness, silicone texture, glass reflections), perfect geometric accuracy, no distortion or warping.';
+            ` All tiles must preserve identical phone proportions and the exact case geometry from the reference image, including camera island shape and the precise number and layout of circular openings. The ${phoneModel} phone body must always stay fully inside the case outline wherever the phone appears. ` +
+            'RENDERING QUALITY: Use maximum detail level, ray-traced lighting, photorealistic materials (TPU softness, silicone texture, glass reflections, transparent clarity), perfect geometric accuracy, no distortion or warping.';
 
           const imgPayload = {
             contents: [

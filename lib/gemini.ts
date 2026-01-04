@@ -86,7 +86,9 @@ DETAILS:
 
 2) "case_description":
    - Describe ONLY the case from the uploaded image:
-     • material and finish (e.g., matte black soft-touch TPU, flexible silicone)
+     • TRANSPARENCY: First, determine if the case is transparent/clear or opaque/solid. If it's transparent, EXPLICITLY state "transparent case" or "clear case" in the description.
+     • material and finish (e.g., matte black soft-touch TPU, flexible silicone, transparent TPU, clear case with visible phone inside)
+     • For transparent cases: mention that the phone's internal components, design, and color should be visible through the case
      • inner soft lining if visible
      • camera block shape and cutouts
      • side buttons, cutouts for ports and speakers
@@ -96,6 +98,8 @@ DETAILS:
 3) "final_generation_prompt":
    - A single long, detailed prompt to generate ultra-realistic Amazon-style product renders where:
      • The ${phoneModel} phone is fully inserted into this exact case (when the shot includes the phone).
+     • CRITICAL: If the case is transparent/clear, the prompt MUST explicitly state "transparent case" or "clear case" and mention that the phone's body, color, and internal design should be visible through the case material. The phone model "${phoneModel}" must be clearly identifiable through the transparent material.
+     • If the case is opaque/solid (black, colored, etc.), explicitly mention the exact color and material (e.g., "matte black TPU case", "dark silicone case").
      • The phone height/width ratio and camera island position are consistent in every image.
      • The camera island keeps the same shape and size as the reference.
      • The exact number, spacing and layout of circular openings is preserved.
@@ -104,7 +108,9 @@ DETAILS:
    - Global visual style:
      • realistic, sharp, high-resolution
      • bright, clean, Amazon-style backgrounds (mostly light grey or white, simple studio pedestals or soft 3D shapes)
-     • strong but soft studio lighting with clear reflections on camera glass and subtle shadows under the phone.
+     • strong but soft studio lighting with clear reflections on camera glass and subtle shadows under the phone
+     • For transparent cases: lighting must show the clarity and transparency of the material, with the ${phoneModel} phone's original design, color, and branding clearly visible through the case
+     • For opaque cases: focus on the case material texture, color, and finish.
    - Mention that we will generate five e-commerce angles:
      1) combined front-and-back hero shot in one frame (front screen + rear case), main listing style
      2) clean back-only 3/4 studio angle showing camera area clearly
@@ -148,9 +154,9 @@ Rules:
 }
 
 export const ANGLE_DESCRIPTIONS = [
-  'Main Amazon-style hero: two phones in one frame, one showing the front display, the other showing the rear case with camera area, standing on a light pedestal. Bright white / light grey studio background, subtle gradient, crisp shadows.',
-  'Back-only 3/4 rear view from slightly above, phone standing on a podium, camera cutouts clearly visible and matching the case geometry, clean soft-box lighting, minimal abstract blocks in the background.',
-  'Case and phone composition similar to a "Shock-absorbing TPU + Soft Lining" banner: the case is open or slightly peeled from the phone so that the inner soft lining is visible, with a circular zoom-in bubble showing the lining texture and a short headline text like "Shock-absorbing TPU + Soft Lining" at the top. Amazon-style light background, realistic reflections, all camera and case openings still perfectly aligned.',
-  'Case alone, no phone inside, bent in a smooth S-curve in mid air to demonstrate flexibility and hybrid design. Light, airy background with soft bokeh circles. Labels like "Soft TPU edge" or "Hybrid Design" are allowed but keep them minimal.',
-  'Case alone laid flat or slightly tilted on a light surface, top-down or slight angle, all camera and button cutouts visible, simple white or light grey background, ideal for technical detail image on an Amazon listing.',
+  'Main Amazon-style hero: two phones in one frame, one showing the front display, the other showing the rear case with camera area, standing on a light pedestal. Bright white / light grey studio background, subtle gradient, crisp shadows. If transparent case: phone design and color must be clearly visible through the case material.',
+  'Back-only 3/4 rear view from slightly above, phone standing on a podium, camera cutouts clearly visible and matching the case geometry, clean soft-box lighting, minimal abstract blocks in the background. If transparent case: phone body and branding visible through the clear material.',
+  'Case and phone composition similar to a "Shock-absorbing TPU + Soft Lining" banner: the case is open or slightly peeled from the phone so that the inner soft lining is visible, with a circular zoom-in bubble showing the lining texture and a short headline text like "Shock-absorbing TPU + Soft Lining" at the top. Amazon-style light background, realistic reflections, all camera and case openings still perfectly aligned. If transparent case: show the transparency and clarity of the material.',
+  'Case alone, no phone inside, bent in a smooth S-curve in mid air to demonstrate flexibility and hybrid design. Light, airy background with soft bokeh circles. Labels like "Soft TPU edge" or "Hybrid Design" are allowed but keep them minimal. Maintain exact case transparency/opacity as per the reference image.',
+  'Case alone laid flat or slightly tilted on a light surface, top-down or slight angle, all camera and button cutouts visible, simple white or light grey background, ideal for technical detail image on an Amazon listing. Show true case transparency/opacity - if clear, show light passing through; if opaque, show solid material.',
 ];

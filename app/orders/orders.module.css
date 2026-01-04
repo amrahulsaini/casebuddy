@@ -284,6 +284,12 @@
   text-transform: capitalize;
 }
 
+.statusDate {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+
 .orderBody {
   display: flex;
   justify-content: space-between;

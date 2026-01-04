@@ -26,6 +26,9 @@ interface Order {
   notes: string | null;
   created_at: string;
   primary_image_url?: string | null;
+  shipment_status?: string | null;
+  shipment_updated_at?: string | null;
+  shiprocket_awb?: string | null;
   items?: Array<{
     productId: number | null;
     productName: string;
@@ -595,7 +598,7 @@ export default function OrdersPage() {
       ) : (
         <div className={styles.ordersList}>
           {orders.map((order) => {
-            const popularStatus = getPopularStatusLabel(order.order_status, order.payment_status);
+            const displayStatus = order.shipment_status || order.order_status || 'Pending';
             const items = Array.isArray(order.items) && order.items.length > 0
               ? order.items
               : [
@@ -625,11 +628,16 @@ export default function OrdersPage() {
                   <div className={styles.orderStatus}>
                     <div 
                       className={styles.statusBadge}
-                      style={{ backgroundColor: getStatusColor(popularStatus) }}
+                      style={{ backgroundColor: getStatusColor(displayStatus) }}
                     >
-                      {getStatusIcon(popularStatus)}
-                      Order Status - {popularStatus}
+                      {getStatusIcon(displayStatus)}
+                      {displayStatus}
                     </div>
+                    {order.shipment_updated_at && (
+                      <div className={styles.statusDate}>
+                        Updated: {new Date(order.shipment_updated_at).toLocaleString()}
+                      </div>
+                    )}
                   </div>
                 </div>
 

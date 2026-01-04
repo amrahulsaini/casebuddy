@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db-main';
+import { isNumericOnly, shiprocketStatusCodeToLabel } from '@/lib/shiprocket-status';
 import {
   fetchPrimaryImagesByProductId,
   parseItemsFromCustomizationJson,
@@ -21,6 +22,9 @@ type OrderRow = {
   customization_data: string | null;
   notes: string | null;
   created_at: string;
+  shipment_status?: string | null;
+  shipment_updated_at?: string | null;
+  shiprocket_awb?: string | null;
 };
 
 export async function GET(
@@ -33,28 +37,42 @@ export async function GET(
 
     const [rows]: any = await pool.execute(
       `SELECT 
-        id,
-        order_number,
-        customer_email,
-        customer_mobile,
-        customer_name,
-        product_id,
-        product_name,
-        phone_model,
-        quantity,
-        total_amount,
-        order_status,
-        payment_status,
-        customization_data,
-        notes,
-        created_at
-      FROM orders 
-      WHERE LOWER(customer_email) = ? 
-      ORDER BY created_at DESC`,
+        o.id,
+        o.order_number,
+        o.customer_email,
+        o.customer_mobile,
+        o.customer_name,
+        o.product_id,
+        o.product_name,
+        o.phone_model,
+        o.quantity,
+        o.total_amount,
+        o.order_status,
+        o.payment_status,
+        o.customization_data,
+        o.notes,
+        o.created_at,
+        s.status AS shipment_status,
+        s.updated_at AS shipment_updated_at,
+        s.shiprocket_awb AS shiprocket_awb
+      FROM orders o
+      LEFT JOIN shipments s ON s.order_id = o.id
+      WHERE LOWER(o.customer_email) = ? 
+      ORDER BY o.created_at DESC`,
       [email]
     );
 
-    const orders: OrderRow[] = rows || [];
+    const orders: OrderRow[] = (rows || []).map((r: any) => {
+      const rawStatus = r?.shipment_status != null ? String(r.shipment_status).trim() : '';
+      let shipment_status = rawStatus || null;
+      if (shipment_status && isNumericOnly(shipment_status)) {
+        shipment_status = shiprocketStatusCodeToLabel(shipment_status) || `Tracking in progress (code ${shipment_status})`;
+      }
+      return {
+        ...r,
+        shipment_status,
+      };
+    });
 
     const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'https://casebuddy.co.in').replace(/\/+$/, '');
 

@@ -489,8 +489,8 @@ export default function OrderDetailPage() {
             </div>
           )}
 
-          {/* Show message when AWB assigned but API returns no tracking */}
-          {!loadingTracking && shipment?.shiprocket_awb && !trackingData && (
+          {/* Show message when AWB assigned but no tracking scans yet */}
+          {!loadingTracking && shipment?.shiprocket_awb && (!trackingData || !trackingData.scans || trackingData.scans.length === 0) && (
             <div className={styles.card}>
               <h2 className={styles.cardTitle}>
                 <Truck size={20} />

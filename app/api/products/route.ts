@@ -7,6 +7,7 @@ export async function GET(request: NextRequest) {
     const categorySlug = searchParams.get('category');
     const featured = searchParams.get('featured');
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : undefined;
+    const offset = searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : undefined;
 
     let query = `
       SELECT 
@@ -81,6 +82,11 @@ export async function GET(request: NextRequest) {
     if (limit) {
       query += ` LIMIT ?`;
       params.push(limit);
+    }
+
+    if (offset) {
+      query += ` OFFSET ?`;
+      params.push(offset);
     }
 
     const [products]: any = await pool.execute(query, params);

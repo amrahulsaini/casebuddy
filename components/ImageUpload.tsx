@@ -59,6 +59,12 @@ export default function ImageUpload({
 
     try {
       for (const file of files) {
+        // Validate file size (10MB max)
+        if (file.size > 10 * 1024 * 1024) {
+          alert(`File "${file.name}" is too large. Maximum size is 10MB. File size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+          continue;
+        }
+
         const formData = new FormData();
         formData.append('file', file);
         formData.append('type', 'product');

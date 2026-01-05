@@ -3,7 +3,7 @@ import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
 
 export async function POST(request: NextRequest) {
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     if (file.size > MAX_FILE_SIZE) {
       console.error('File too large:', file.size);
       return NextResponse.json(
-        { error: `File too large. Maximum size is 5MB. File size: ${(file.size / 1024 / 1024).toFixed(2)}MB` },
+        { error: `File too large. Maximum size is 10MB. File size: ${(file.size / 1024 / 1024).toFixed(2)}MB` },
         { status: 400 }
       );
     }

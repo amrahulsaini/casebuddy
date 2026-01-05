@@ -50,6 +50,11 @@ export default function CategoryPhonesPage() {
   const fetchCategories = async () => {
     try {
       const response = await fetch('/api/admin/categories');
+      if (response.status === 401) {
+        alert('Your session has expired. Please login again.');
+        window.location.href = '/admin/login';
+        return;
+      }
       const data = await response.json();
       setCategories(data);
     } catch (error) {
@@ -62,6 +67,11 @@ export default function CategoryPhonesPage() {
   const fetchAllPhoneBrands = async () => {
     try {
       const response = await fetch('/api/admin/phone-brands');
+      if (response.status === 401) {
+        alert('Your session has expired. Please login again.');
+        window.location.href = '/admin/login';
+        return;
+      }
       const data = await response.json();
       if (data.success) {
         setAllPhoneBrands(data.brands);
@@ -87,6 +97,11 @@ export default function CategoryPhonesPage() {
     try {
       // Fetch category brands
       const brandsResponse = await fetch(`/api/admin/categories/${categoryId}/phone-brands`);
+      if (brandsResponse.status === 401) {
+        alert('Your session has expired. Please login again.');
+        window.location.href = '/admin/login';
+        return;
+      }
       const brandsData = await brandsResponse.json();
       if (brandsData.success && brandsData.brands) {
         setSelectedBrands(brandsData.brands.map((b: any) => b.id));
@@ -96,6 +111,11 @@ export default function CategoryPhonesPage() {
 
       // Fetch category models
       const modelsResponse = await fetch(`/api/admin/categories/${categoryId}/phone-models`);
+      if (modelsResponse.status === 401) {
+        alert('Your session has expired. Please login again.');
+        window.location.href = '/admin/login';
+        return;
+      }
       const modelsData = await modelsResponse.json();
       if (modelsData.success && modelsData.models) {
         setSelectedModels(modelsData.models.map((m: any) => m.id));
@@ -121,6 +141,13 @@ export default function CategoryPhonesPage() {
         body: JSON.stringify({ brand_ids: selectedBrands }),
       });
 
+      // Check for session expiration
+      if (brandsResponse.status === 401) {
+        alert('Your session has expired. Please login again.');
+        window.location.href = '/admin/login';
+        return;
+      }
+
       // Save models
       const modelsResponse = await fetch(`/api/admin/categories/${selectedCategory}/phone-models`, {
         method: 'PUT',
@@ -128,10 +155,20 @@ export default function CategoryPhonesPage() {
         body: JSON.stringify({ model_ids: selectedModels }),
       });
 
+      // Check for session expiration
+      if (modelsResponse.status === 401) {
+        alert('Your session has expired. Please login again.');
+        window.location.href = '/admin/login';
+        return;
+      }
+
       if (brandsResponse.ok && modelsResponse.ok) {
         alert('Phone brands and models updated successfully!');
       } else {
-        alert('Error updating phone brands/models');
+        const brandsError = await brandsResponse.json().catch(() => ({}));
+        const modelsError = await modelsResponse.json().catch(() => ({}));
+        const errorMsg = brandsError.error || modelsError.error || 'Error updating phone brands/models';
+        alert(errorMsg);
       }
     } catch (error) {
       console.error('Error saving:', error);

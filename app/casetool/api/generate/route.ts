@@ -65,11 +65,33 @@ function buildCaseTypePrompt(
       break;
 
     case 'doyers':
-      // TODO: Custom prompt for Doyers printed cases will be provided later
+      // DOYERS STYLE: Black protective frame/bumper with transparent center panel
       specificInstructions =
-        'PRINTED DESIGN CASE: This case features a printed design/pattern on its surface. Preserve the EXACT design, colors, patterns, and artwork from the reference image with PERFECT accuracy. Do not modify, shift, or reinterpret the printed design. ' +
-        'DESIGN FIDELITY: The printed graphics must remain crisp, vibrant, and perfectly aligned across all angles. Show how the design wraps around the case edges naturally. Maintain color accuracy and detail sharpness of all printed elements. ' +
-        'MATERIAL RENDERING: Render the case material (likely glossy or matte finish) with the printed design sitting on top, showing appropriate texture and finish quality. ';
+        'DOYERS CASE STRUCTURE - CRITICAL: This is a BLACK OUTLINE/FRAME case with a TRANSPARENT CENTER PANEL. The case has TWO distinct parts that must be rendered correctly:\n' +
+        '\n1. BLACK PROTECTIVE FRAME/BUMPER:\n' +
+        '   - The outer frame, edges, and borders are SOLID BLACK (deep, rich black - not gray)\n' +
+        `   - Black frame wraps around all edges providing protection and grip\n` +
+        '   - Raised black bezels around screen and camera for protection\n' +
+        '   - Black frame should have matte or slightly textured TPU/silicone finish\n' +
+        '   - Show clear definition between the black frame and transparent center\n' +
+        '   - Black sections include: top edge, bottom edge, left side, right side, and protective lips\n' +
+        '\n2. TRANSPARENT CENTER PANEL:\n' +
+        `   - The CENTER BACK PANEL is COMPLETELY TRANSPARENT/CLEAR\n` +
+        `   - Through this transparent center, the ${phoneModel} phone body, color, design, and branding MUST be FULLY VISIBLE\n` +
+        `   - Show the actual phone color and finish through the clear center panel\n` +
+        '   - Render realistic transparency with subtle light refractions and reflections\n' +
+        '   - The transparent section allows the phone\'s beauty to show while the black frame provides protection\n' +
+        '   - DO NOT make the center opaque - it must remain crystal clear\n' +
+        '\n3. CONTRAST & DEFINITION:\n' +
+        '   - Sharp, clear boundary between black frame and transparent center\n' +
+        '   - The black outline should create a striking contrast with the visible phone inside\n' +
+        '   - Show how the black frame enhances and protects without hiding the phone design\n' +
+        '   - Camera cutouts in the black frame should be precise and well-defined\n' +
+        '\n4. MATERIAL ACCURACY:\n' +
+        '   - Black frame: premium TPU/silicone with subtle texture\n' +
+        '   - Transparent center: crystal clear polycarbonate or TPU with glass-like clarity\n' +
+        '   - Show realistic material interactions with studio lighting\n' +
+        '\nRENDER REQUIREMENTS: Maintain the EXACT black frame shape and transparent center area from the reference image. The case should showcase both protection (black frame) and aesthetics (visible phone through transparent center). ';
       break;
 
     case 'black':

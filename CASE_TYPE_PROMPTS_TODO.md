@@ -2,9 +2,19 @@
 
 ## Overview
 The case type selector has been implemented with three options:
-1. **Transparent** - Clear TPU cases
-2. **Doyers** - Printed design cases
-3. **Black** - Black bumper cases
+1. **Transparent** - Fully clear TPU cases
+2. **Doyers** - Black outline/frame with transparent center panel (protective frame + clear back)
+3. **Black** - Solid black bumper cases
+
+## Doyers Case Type - DEFINED ✅
+
+**What is a "Doyers" case?**
+A Doyers case has a **BLACK PROTECTIVE FRAME/OUTLINE** with a **TRANSPARENT CENTER PANEL**:
+- Black edges/bumper wrap around for protection
+- Clear/transparent back panel shows the phone's design
+- Best of both worlds: protection (black frame) + aesthetics (visible phone)
+
+See reference image for visual example.
 
 ## Current Status ✅
 - ✅ UI implemented in casetool page with selector buttons

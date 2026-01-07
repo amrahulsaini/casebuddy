@@ -650,6 +650,21 @@ export default function ProductDetailPage() {
                 maxLength={30}
               />
               <span className={styles.charCount}>{customText.length}/30</span>
+              
+              {/* Live Font Preview */}
+              {customText && (
+                <div className={styles.fontPreviewContainer}>
+                  <p className={styles.previewLabel}>Preview your text in different styles:</p>
+                  <div className={styles.fontPreviewItem}>
+                    <span className={styles.fontPreviewName}>Rounded Sans-Serif (Bold):</span>
+                    <span className={styles.fontPreviewBold}>{customText}</span>
+                  </div>
+                  <div className={styles.fontPreviewItem}>
+                    <span className={styles.fontPreviewName}>Cursive (Calligraphic):</span>
+                    <span className={styles.fontPreviewCursive}>{customText}</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Font Style */}

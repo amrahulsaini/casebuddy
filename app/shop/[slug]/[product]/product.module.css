@@ -742,6 +742,69 @@
   font-weight: 500;
 }
 
+/* Font Preview Styles */
+.fontPreviewContainer {
+  margin-top: 20px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-radius: 12px;
+  border: 2px solid #e0e0e0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.previewLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.fontPreviewItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: white;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.fontPreviewItem:last-child {
+  margin-bottom: 0;
+}
+
+.fontPreviewName {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.fontPreviewBold {
+  font-size: 28px;
+  font-weight: 800;
+  color: #1a1a1a;
+  font-family: 'Sora', 'Rounded Mplus 1c', 'Arial Rounded MT Bold', 'Helvetica Rounded', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: 0.5px;
+  word-wrap: break-word;
+  line-height: 1.3;
+}
+
+.fontPreviewCursive {
+  font-size: 32px;
+  font-weight: 400;
+  font-style: italic;
+  color: #1a1a1a;
+  font-family: 'Brush Script MT', 'Lucida Calligraphy', 'Lucida Handwriting', 'Apple Chancery', cursive;
+  letter-spacing: 1px;
+  word-wrap: break-word;
+  line-height: 1.4;
+}
+
 .fontOptions {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1342,6 +1405,33 @@
 
   .charCount {
     font-size: 12px;
+  }
+
+  .fontPreviewContainer {
+    padding: 16px;
+    margin-top: 16px;
+  }
+
+  .previewLabel {
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+
+  .fontPreviewItem {
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+
+  .fontPreviewName {
+    font-size: 11px;
+  }
+
+  .fontPreviewBold {
+    font-size: 22px;
+  }
+
+  .fontPreviewCursive {
+    font-size: 26px;
   }
 
   .fontOption {

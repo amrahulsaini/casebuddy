@@ -50,7 +50,7 @@ function buildCaseTypePrompt(
   const baseInstructions = 
     `CRITICAL INSTRUCTION: Generate product images of the EXACT ${phoneModel} phone model inserted into the EXACT case from the reference image. Do not substitute phone models or change case design. ` +
     finalPrompt +
-    ` Create a SINGLE ultra-realistic, 4K HIGH-RESOLUTION (minimum 3840x2160 pixels) Amazon-style product render that contains five separate views of the ${phoneModel} phone inside the case from the reference image, arranged in a clean grid or collage. ` +
+    ` Create a SINGLE ultra-realistic, 4K HIGH-RESOLUTION (minimum 3840x2160 pixels) Amazon-style product render that contains four separate views of the ${phoneModel} phone inside the case from the reference image, arranged in a clean 2x2 grid or collage. ` +
     'QUALITY REQUIREMENTS: Crystal-clear sharpness, no blur or artifacts, perfect focus on all details especially camera lenses and textures, 300 DPI print-ready quality, vibrant colors with smooth gradients, professional studio lighting with realistic shadows and reflections. ' +
     `MANDATORY PHONE MODEL: Every shot must show the ${phoneModel} phone - do not use generic phones or substitute models. The ${phoneModel} must be recognizable and accurate to the actual device specifications. `;
 

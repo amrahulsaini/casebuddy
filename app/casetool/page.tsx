@@ -47,6 +47,7 @@ export default function ToolPage() {
   const [lastFormData, setLastFormData] = useState<FormData | null>(null);
   const [lastPrompt, setLastPrompt] = useState<string>('');
   const [selectedModel, setSelectedModel] = useState<'normal' | 'high'>('normal');
+  const [caseType, setCaseType] = useState<'transparent' | 'doyers' | 'black'>('transparent');
 
   // Drag and drop state
   const [isDragging, setIsDragging] = useState(false);
@@ -159,6 +160,7 @@ export default function ToolPage() {
 
     const baseFormData = new FormData(e.currentTarget);
     baseFormData.set('image_model', selectedModel);
+    baseFormData.set('case_type', caseType);
     setLastFormData(baseFormData);
 
     const totalRuns = 3;
@@ -608,6 +610,41 @@ export default function ToolPage() {
                 required
                 className={styles.input}
               />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>
+                Case Type
+              </label>
+              <div className={styles.caseTypeSelector}>
+                <button
+                  type="button"
+                  className={`${styles.caseTypeOption} ${caseType === 'transparent' ? styles.caseTypeActive : ''}`}
+                  onClick={() => setCaseType('transparent')}
+                >
+                  <div className={styles.caseTypeIcon}>🔍</div>
+                  <span className={styles.caseTypeTitle}>Transparent</span>
+                  <span className={styles.caseTypeDesc}>Clear TPU cases</span>
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.caseTypeOption} ${caseType === 'doyers' ? styles.caseTypeActive : ''}`}
+                  onClick={() => setCaseType('doyers')}
+                >
+                  <div className={styles.caseTypeIcon}>🎨</div>
+                  <span className={styles.caseTypeTitle}>Doyers</span>
+                  <span className={styles.caseTypeDesc}>Printed design cases</span>
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.caseTypeOption} ${caseType === 'black' ? styles.caseTypeActive : ''}`}
+                  onClick={() => setCaseType('black')}
+                >
+                  <div className={styles.caseTypeIcon}>⚫</div>
+                  <span className={styles.caseTypeTitle}>Black</span>
+                  <span className={styles.caseTypeDesc}>Black bumper cases</span>
+                </button>
+              </div>
             </div>
 
             <div className={styles.formGroup}>

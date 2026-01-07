@@ -39,6 +39,61 @@ function extensionFromMime(mimeType: string | undefined) {
   return 'jpg';
 }
 
+// Case-type-specific prompt builder
+function buildCaseTypePrompt(
+  caseType: string,
+  phoneModel: string,
+  finalPrompt: string,
+  angleListText: string
+): string {
+  // Base instructions that apply to all case types
+  const baseInstructions = 
+    `CRITICAL INSTRUCTION: Generate product images of the EXACT ${phoneModel} phone model inserted into the EXACT case from the reference image. Do not substitute phone models or change case design. ` +
+    finalPrompt +
+    ` Create a SINGLE ultra-realistic, 4K HIGH-RESOLUTION (minimum 3840x2160 pixels) Amazon-style product render that contains five separate views of the ${phoneModel} phone inside the case from the reference image, arranged in a clean grid or collage. ` +
+    'QUALITY REQUIREMENTS: Crystal-clear sharpness, no blur or artifacts, perfect focus on all details especially camera lenses and textures, 300 DPI print-ready quality, vibrant colors with smooth gradients, professional studio lighting with realistic shadows and reflections. ' +
+    `MANDATORY PHONE MODEL: Every shot must show the ${phoneModel} phone - do not use generic phones or substitute models. The ${phoneModel} must be recognizable and accurate to the actual device specifications. `;
+
+  let specificInstructions = '';
+
+  switch (caseType) {
+    case 'transparent':
+      // TODO: Custom prompt for transparent cases will be provided later
+      specificInstructions =
+        'TRANSPARENCY HANDLING: This is a TRANSPARENT/CLEAR case. The phone body, color, components, internal design, and branding MUST be FULLY VISIBLE through the transparent material. Show the phone\'s actual color and design through the clear case. The case material should have realistic transparency with subtle reflections and light refractions typical of clear TPU/silicone. DO NOT make the case opaque or black. ' +
+        `CASE ACCURACY: The transparent case must match the reference image EXACTLY - same transparency level, material finish (glossy/matte), and cutout positions. Showcase how the ${phoneModel}'s design is enhanced and protected by the clear case. `;
+      break;
+
+    case 'doyers':
+      // TODO: Custom prompt for Doyers printed cases will be provided later
+      specificInstructions =
+        'PRINTED DESIGN CASE: This case features a printed design/pattern on its surface. Preserve the EXACT design, colors, patterns, and artwork from the reference image with PERFECT accuracy. Do not modify, shift, or reinterpret the printed design. ' +
+        'DESIGN FIDELITY: The printed graphics must remain crisp, vibrant, and perfectly aligned across all angles. Show how the design wraps around the case edges naturally. Maintain color accuracy and detail sharpness of all printed elements. ' +
+        'MATERIAL RENDERING: Render the case material (likely glossy or matte finish) with the printed design sitting on top, showing appropriate texture and finish quality. ';
+      break;
+
+    case 'black':
+      // TODO: Custom prompt for black bumper cases will be provided later
+      specificInstructions =
+        'BLACK BUMPER CASE: This is a solid BLACK protective bumper case. The case should be rendered with deep, rich black color - not gray or faded. ' +
+        'MATERIAL QUALITY: Show premium black material finish (matte or glossy TPU/silicone) with subtle texture details. Capture realistic light interactions - black cases absorb light but should show form definition through subtle highlights and shadows. ' +
+        'PROTECTION FOCUS: Emphasize the protective bumper design, raised edges for screen protection, reinforced corners, and precise button cutouts. The black color should contrast beautifully with the phone\'s design visible through camera cutouts. ';
+      break;
+
+    default:
+      specificInstructions =
+        'CASE ACCURACY: The case must match the reference image EXACTLY - same color, material, transparency, and cutout positions. Do not modify or reinterpret the case design. ';
+  }
+
+  const commonEnding =
+    'Each tile or panel inside this single image must correspond to the following camera angle descriptions: ' +
+    angleListText +
+    ` All tiles must preserve identical phone proportions and the exact case geometry from the reference image, including camera island shape and the precise number and layout of circular openings. The ${phoneModel} phone body must always stay fully inside the case outline wherever the phone appears. The phone must fit the case perfectly as if it was designed specifically for the ${phoneModel}. ` +
+    'RENDERING QUALITY: Use maximum detail level, ray-traced lighting, photorealistic materials (TPU softness, silicone texture, glass reflections, transparent clarity for clear cases, matte/glossy finish for opaque cases), perfect geometric accuracy, no distortion or warping.';
+
+  return baseInstructions + specificInstructions + commonEnding;
+}
+
 export async function POST(request: NextRequest) {
   const stream = new ReadableStream({
     async start(controller) {
@@ -61,6 +116,7 @@ export async function POST(request: NextRequest) {
         const caseImage = formData.get('case_image') as File;
         const reusePrompt = formData.get('reuse_prompt') as string | null;
         const imageModel = (formData.get('image_model') as string) || 'normal';
+        const caseType = (formData.get('case_type') as string) || 'transparent';
         
         // Select model based on user choice
         const selectedImageModel = imageModel === 'high' ? IMAGE_ENHANCE_MODEL : IMAGE_MODEL;
@@ -212,18 +268,8 @@ export async function POST(request: NextRequest) {
         currentProgress = 70;
         writer.send('status', `Generating mockup image...`, currentProgress);
 
-          const gridPrompt =
-            `CRITICAL INSTRUCTION: Generate product images of the EXACT ${phoneModel} phone model inserted into the EXACT case from the reference image. Do not substitute phone models or change case design. ` +
-            finalPrompt +
-            ` Create a SINGLE ultra-realistic, 4K HIGH-RESOLUTION (minimum 3840x2160 pixels) Amazon-style product render that contains five separate views of the ${phoneModel} phone inside the case from the reference image, arranged in a clean grid or collage. ` +
-            'QUALITY REQUIREMENTS: Crystal-clear sharpness, no blur or artifacts, perfect focus on all details especially camera lenses and textures, 300 DPI print-ready quality, vibrant colors with smooth gradients, professional studio lighting with realistic shadows and reflections. ' +
-            `MANDATORY PHONE MODEL: Every shot must show the ${phoneModel} phone - do not use generic phones or substitute models. The ${phoneModel} must be recognizable and accurate to the actual device specifications. ` +
-            'TRANSPARENCY HANDLING: If the case is transparent/clear, ensure the phone body, color, components, and branding are FULLY VISIBLE through the transparent material. DO NOT make the case opaque or black if it is supposed to be transparent. For opaque cases, maintain the exact material color and finish from the reference image. ' +
-            `CASE ACCURACY: The case must match the reference image EXACTLY - same color, material, transparency, and cutout positions. Do not modify or reinterpret the case design. ` +
-            'Each tile or panel inside this single image must correspond to the following camera angle descriptions: ' +
-            angleListText +
-            ` All tiles must preserve identical phone proportions and the exact case geometry from the reference image, including camera island shape and the precise number and layout of circular openings. The ${phoneModel} phone body must always stay fully inside the case outline wherever the phone appears. The phone must fit the case perfectly as if it was designed specifically for the ${phoneModel}. ` +
-            'RENDERING QUALITY: Use maximum detail level, ray-traced lighting, photorealistic materials (TPU softness, silicone texture, glass reflections, transparent clarity), perfect geometric accuracy, no distortion or warping.';
+          // Build prompt based on case type
+          const gridPrompt = buildCaseTypePrompt(caseType, phoneModel, finalPrompt, angleListText);
 
           const imgPayload = {
             contents: [

@@ -351,6 +351,91 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
+/* Case Type Selector */
+.caseTypeSelector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.caseTypeOption {
+  background: var(--off-white);
+  border: 2px solid transparent;
+  border-radius: 14px;
+  padding: 16px 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.caseTypeOption:hover {
+  border-color: rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.caseTypeActive {
+  background: var(--pure-black);
+  border-color: var(--pure-black);
+  color: white;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.caseTypeActive:hover {
+  background: var(--pure-black);
+  border-color: var(--pure-black);
+  transform: translateY(-2px);
+}
+
+.caseTypeIcon {
+  font-size: 32px;
+  margin-bottom: 4px;
+}
+
+.caseTypeTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--off-black);
+}
+
+.caseTypeActive .caseTypeTitle {
+  color: white;
+}
+
+.caseTypeDesc {
+  font-size: 11px;
+  color: var(--medium-gray);
+  font-weight: 500;
+}
+
+.caseTypeActive .caseTypeDesc {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+@media (max-width: 768px) {
+  .caseTypeSelector {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .caseTypeOption {
+    flex-direction: row;
+    justify-content: flex-start;
+    text-align: left;
+    padding: 14px 16px;
+  }
+
+  .caseTypeIcon {
+    font-size: 28px;
+    margin-bottom: 0;
+  }
+}
+
 .label {
   color: var(--off-black);
   font-size: 13px;

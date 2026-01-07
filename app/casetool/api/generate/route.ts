@@ -48,11 +48,11 @@ function buildCaseTypePrompt(
 ): string {
   // Base instructions that apply to all case types
   const baseInstructions = 
-    `CRITICAL INSTRUCTION: Generate product images of the EXACT ${phoneModel} phone model inserted into the EXACT case from the reference image. Do not substitute phone models or change case design. ` +
+    `CRITICAL INSTRUCTION: Generate product images of the EXACT ${phoneModel} phone model with the EXACT case from the reference image. Do not substitute phone models or change case design. ` +
     finalPrompt +
-    ` Create a SINGLE ultra-realistic, 4K HIGH-RESOLUTION (minimum 3840x2160 pixels) Amazon-style product render that contains four separate views of the ${phoneModel} phone inside the case from the reference image, arranged in a clean 2x2 grid or collage. ` +
+    ` Create a SINGLE ultra-realistic, 4K HIGH-RESOLUTION (minimum 3840x2160 pixels) Amazon-style product collage containing FOUR DISTINCT PANELS arranged in a clean 2x2 grid. Each panel shows a different view/composition as specified in the angle descriptions below. ` +
     'QUALITY REQUIREMENTS: Crystal-clear sharpness, no blur or artifacts, perfect focus on all details especially camera lenses and textures, 300 DPI print-ready quality, vibrant colors with smooth gradients, professional studio lighting with realistic shadows and reflections. ' +
-    `MANDATORY PHONE MODEL: Every shot must show the ${phoneModel} phone - do not use generic phones or substitute models. The ${phoneModel} must be recognizable and accurate to the actual device specifications. `;
+    `MANDATORY PHONE MODEL: Every panel must feature the ${phoneModel} phone - do not use generic phones or substitute models. The ${phoneModel} must be recognizable and accurate to the actual device specifications. `;
 
   let specificInstructions = '';
 
@@ -108,9 +108,10 @@ function buildCaseTypePrompt(
   }
 
   const commonEnding =
-    'Each tile or panel inside this single image must correspond to the following camera angle descriptions: ' +
+    '\n\nCRITICAL - PANEL COMPOSITION INSTRUCTIONS: The four panels MUST follow these EXACT specifications:\n' +
     angleListText +
-    ` All tiles must preserve identical phone proportions and the exact case geometry from the reference image, including camera island shape and the precise number and layout of circular openings. The ${phoneModel} phone body must always stay fully inside the case outline wherever the phone appears. The phone must fit the case perfectly as if it was designed specifically for the ${phoneModel}. ` +
+    '\n\nIMPORTANT: Each panel has its own unique composition - some may show single phones, others may show multiple phones, and some may include text annotations. Follow each panel description PRECISELY. ' +
+    `Maintain the ${phoneModel} phone accuracy across all panels. Preserve exact case geometry from reference image including camera island shape and cutout positions. The ${phoneModel} phone body must always fit perfectly inside the case outline. ` +
     'RENDERING QUALITY: Use maximum detail level, ray-traced lighting, photorealistic materials (TPU softness, silicone texture, glass reflections, transparent clarity for clear cases, matte/glossy finish for opaque cases), perfect geometric accuracy, no distortion or warping.';
 
   return baseInstructions + specificInstructions + commonEnding;

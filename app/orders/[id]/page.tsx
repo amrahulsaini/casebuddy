@@ -414,15 +414,46 @@ export default function OrderDetailPage() {
                 Tracking Activity
               </h2>
               
-              {trackingData.etd && (
-                <div className={styles.etdBanner}>
-                  Expected Delivery: <strong>{new Date(trackingData.etd).toLocaleDateString('en-US', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric'
-                  })}</strong>
-                </div>
-              )}
+              {(() => {
+                // Check if order is delivered
+                const isDelivered = trackingData.current_status?.toLowerCase().includes('deliver') || 
+                                   order?.shipment_status?.toLowerCase().includes('deliver') ||
+                                   order?.order_status?.toLowerCase().includes('deliver');
+                
+                // Find the most recent scan (first in the list)
+                const latestScan = trackingData.scans[0];
+                const isLatestScanDelivered = latestScan?.activity?.toLowerCase().includes('deliver');
+                
+                if (isDelivered || isLatestScanDelivered) {
+                  // Show delivery confirmation
+                  const deliveryDate = new Date(latestScan.timestamp);
+                  return (
+                    <div className={styles.etdBanner} style={{ backgroundColor: '#4CAF50', color: 'white' }}>
+                      Order delivered on <strong>{deliveryDate.toLocaleDateString('en-US', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                      })} at {deliveryDate.toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                      })}</strong>
+                    </div>
+                  );
+                } else if (trackingData.etd) {
+                  // Show expected delivery date
+                  return (
+                    <div className={styles.etdBanner}>
+                      Expected Delivery: <strong>{new Date(trackingData.etd).toLocaleDateString('en-US', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                      })}</strong>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
 
               <div className={styles.trackingList}>
                 {trackingData.scans.map((scan, index) => {

@@ -48,6 +48,7 @@ export default function ToolPage() {
   const [lastPrompt, setLastPrompt] = useState<string>('');
   const [selectedModel, setSelectedModel] = useState<'normal' | 'high'>('normal');
   const [caseType, setCaseType] = useState<'transparent' | 'doyers' | 'black'>('transparent');
+  const [useImageBased, setUseImageBased] = useState(false);
 
   // Drag and drop state
   const [isDragging, setIsDragging] = useState(false);
@@ -175,7 +176,9 @@ export default function ToolPage() {
 
       setStatus(`(${runIndex}/${totalRuns}) Starting...`);
 
-      const response = await fetch('/casetool/api/generate', {
+      const apiEndpoint = useImageBased ? '/casetool/api/generate-image-based' : '/casetool/api/generate';
+
+      const response = await fetch(apiEndpoint, {
         method: 'POST',
         body: formData,
       });
@@ -714,6 +717,26 @@ export default function ToolPage() {
                     cursor: 'pointer'
                   }}
                 />
+              </div>
+            </div>
+
+            <div className={styles.caseTypeSelector}>
+              <label className={styles.caseTypeLabel}>Generation Mode:</label>
+              <div className={styles.caseTypeOptions}>
+                <button
+                  type="button"
+                  className={`${styles.caseTypeOption} ${!useImageBased ? styles.caseTypeOptionActive : ''}`}
+                  onClick={() => setUseImageBased(false)}
+                >
+                  Standard (Text Prompts)
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.caseTypeOption} ${useImageBased ? styles.caseTypeOptionActive : ''}`}
+                  onClick={() => setUseImageBased(true)}
+                >
+                  Image-Based (Experimental)
+                </button>
               </div>
             </div>
 

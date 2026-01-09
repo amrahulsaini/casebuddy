@@ -455,44 +455,46 @@ export default function OrderDetailPage() {
                 return null;
               })()}
 
-              <div className={styles.trackingList}>
-                {trackingData.scans.map((scan, index) => {
-                  const scanDate = new Date(scan.timestamp);
-                  const dateStr = scanDate.toLocaleDateString('en-US', {
-                    day: 'numeric',
-                    month: 'short'
-                  });
-                  const timeStr = scanDate.toLocaleTimeString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                  });
-                  
-                  return (
-                    <div key={index} className={styles.trackingItem}>
-                      <div className={styles.trackingRadio}>
-                        <div className={index === 0 ? styles.radioActive : styles.radioInactive}></div>
-                      </div>
-                      <div className={styles.trackingDetails}>
-                        <div className={styles.trackingHeader}>
-                          <span className={styles.trackingDateBadge}>{dateStr}</span>
-                          <span className={styles.trackingTimeBadge}>
-                            <Clock size={14} /> {timeStr}
-                          </span>
+              <div className={styles.trackingListContainer}>
+                <div className={styles.trackingList}>
+                  {trackingData.scans.map((scan, index) => {
+                    const scanDate = new Date(scan.timestamp);
+                    const dateStr = scanDate.toLocaleDateString('en-US', {
+                      day: 'numeric',
+                      month: 'short'
+                    });
+                    const timeStr = scanDate.toLocaleTimeString('en-US', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: true
+                    });
+                    
+                    return (
+                      <div key={index} className={styles.trackingItem}>
+                        <div className={styles.trackingRadio}>
+                          <div className={index === 0 ? styles.radioActive : styles.radioInactive}></div>
                         </div>
-                        <div className={styles.trackingActivityText}>
-                          <strong>Activity:</strong> {scan.activity}
-                        </div>
-                        {scan.location && (
-                          <div className={styles.trackingLocationText}>
-                            <MapPin size={14} />
-                            <strong>Location:</strong> {scan.location}
+                        <div className={styles.trackingDetails}>
+                          <div className={styles.trackingHeader}>
+                            <span className={styles.trackingDateBadge}>{dateStr}</span>
+                            <span className={styles.trackingTimeBadge}>
+                              <Clock size={14} /> {timeStr}
+                            </span>
                           </div>
-                        )}
+                          <div className={styles.trackingActivityText}>
+                            <strong>Activity:</strong> {scan.activity}
+                          </div>
+                          {scan.location && (
+                            <div className={styles.trackingLocationText}>
+                              <MapPin size={14} />
+                              <strong>Location:</strong> {scan.location}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
               
               {trackingData.tracking_url && (

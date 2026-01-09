@@ -413,6 +413,26 @@
   background: #fff;
 }
 
+.productImageLink {
+  display: block;
+  transition: opacity 0.2s;
+}
+
+.productImageLink:hover {
+  opacity: 0.8;
+}
+
+.productNameLink {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.2s;
+}
+
+.productNameLink:hover h4 {
+  color: #667eea;
+  text-decoration: underline;
+}
+
 .productInfo h4 {
   margin: 0 0 12px;
   font-size: 18px;

@@ -54,9 +54,18 @@ export async function GET(
         o.created_at,
         s.status AS shipment_status,
         s.updated_at AS shipment_updated_at,
-        s.shiprocket_awb AS shiprocket_awb
+        s.shiprocket_awb AS shiprocket_awb,
+        p.slug AS product_slug,
+        (
+          SELECT c.slug 
+          FROM categories c
+          INNER JOIN product_categories pc ON pc.category_id = c.id
+          WHERE pc.product_id = o.product_id
+          LIMIT 1
+        ) AS category_slug
       FROM orders o
       LEFT JOIN shipments s ON s.order_id = o.id
+      LEFT JOIN products p ON p.id = o.product_id
       WHERE LOWER(o.customer_email) = ? 
       ORDER BY o.created_at DESC`,
       [email]

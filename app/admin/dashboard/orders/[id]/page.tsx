@@ -48,6 +48,8 @@ interface Order {
   phone_model: string;
   quantity: number;
   unit_price: number;
+  product_slug?: string | null;
+  category_slug?: string | null;
   shipping_cost: number;
   total_amount: number;
   order_status: string;
@@ -330,16 +332,31 @@ export default function AdminOrderDetailPage() {
               <div className={styles.orderItem} key={idx}>
                 <div className={styles.itemDetails}>
                   <div className={styles.itemHeaderRow}>
-                    {it.imageUrl && (
+                    {order.product_slug && order.category_slug && it.imageUrl ? (
+                      <Link href={`/shop/${order.category_slug}/${order.product_slug}`} target="_blank">
+                        <img
+                          src={it.imageUrl}
+                          alt={it.productName}
+                          className={styles.itemImage}
+                          loading="lazy"
+                        />
+                      </Link>
+                    ) : it.imageUrl ? (
                       <img
                         src={it.imageUrl}
                         alt={it.productName}
                         className={styles.itemImage}
                         loading="lazy"
                       />
-                    )}
+                    ) : null}
                     <div>
-                      <h3>{it.productName}</h3>
+                      {order.product_slug && order.category_slug ? (
+                        <Link href={`/shop/${order.category_slug}/${order.product_slug}`} target="_blank" className={styles.productLink}>
+                          <h3>{it.productName}</h3>
+                        </Link>
+                      ) : (
+                        <h3>{it.productName}</h3>
+                      )}
                       {it.phoneModel && <p className={styles.itemMeta}>Phone Model: {it.phoneModel}</p>}
                       {it.designName && <p className={styles.itemMeta}>Design: {it.designName}</p>}
                       <p className={styles.itemMeta}>Quantity: {it.quantity}</p>

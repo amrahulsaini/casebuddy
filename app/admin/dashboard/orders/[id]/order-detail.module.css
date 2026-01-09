@@ -160,6 +160,23 @@
   object-fit: cover;
   background: #fff;
   flex: 0 0 auto;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.itemImage:hover {
+  opacity: 0.8;
+}
+
+.productLink {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.2s;
+}
+
+.productLink:hover h3 {
+  color: #667eea;
+  text-decoration: underline;
 }
 
 .itemDetails h3 {

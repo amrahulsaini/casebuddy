@@ -28,6 +28,8 @@ interface Order {
   shipment_status?: string | null;
   shipment_updated_at?: string | null;
   shiprocket_awb?: string | null;
+  product_slug?: string | null;
+  category_slug?: string | null;
   items?: Array<{
     productId: number | null;
     productName: string;
@@ -512,17 +514,31 @@ export default function OrdersPage() {
                 <div className={styles.orderBody}>
                   <div className={styles.productInfo}>
                     <div className={styles.productRow}>
-                      {order.primary_image_url && (
-                        // Using <img> to avoid next/image remote domain config issues
+                      {order.product_slug && order.category_slug && order.primary_image_url ? (
+                        <Link href={`/shop/${order.category_slug}/${order.product_slug}`} className={styles.productImageLink}>
+                          <img
+                            src={order.primary_image_url}
+                            alt={items?.[0]?.productName || 'Product'}
+                            className={styles.productImage}
+                            loading="lazy"
+                          />
+                        </Link>
+                      ) : order.primary_image_url ? (
                         <img
                           src={order.primary_image_url}
                           alt={items?.[0]?.productName || 'Product'}
                           className={styles.productImage}
                           loading="lazy"
                         />
-                      )}
+                      ) : null}
                       <div style={{ flex: 1 }}>
-                        <h4>{items.length === 1 ? items[0].productName : `${items.length} items`}</h4>
+                        {order.product_slug && order.category_slug ? (
+                          <Link href={`/shop/${order.category_slug}/${order.product_slug}`} className={styles.productNameLink}>
+                            <h4>{items.length === 1 ? items[0].productName : `${items.length} items`}</h4>
+                          </Link>
+                        ) : (
+                          <h4>{items.length === 1 ? items[0].productName : `${items.length} items`}</h4>
+                        )}
                         {items.length === 1 && items[0].phoneModel && <p>Phone Model: {items[0].phoneModel}</p>}
                         {items.length === 1 && <p>Quantity: {items[0].quantity}</p>}
                       </div>

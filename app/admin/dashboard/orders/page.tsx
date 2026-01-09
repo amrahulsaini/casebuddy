@@ -22,6 +22,8 @@ interface Order {
   shipment_status?: string | null;
   shipment_updated_at?: string | null;
   shiprocket_awb?: string | null;
+  product_slug?: string | null;
+  category_slug?: string | null;
 }
 
 export default function AdminOrdersPage() {
@@ -293,18 +295,41 @@ export default function AdminOrdersPage() {
                   </td>
                   <td>
                     <div className={styles.productInfo}>
-                      {order.primary_image_url ? (
-                        <img
-                          src={order.primary_image_url}
-                          alt={order.product_name}
-                          className={styles.productThumb}
-                          loading="lazy"
-                        />
+                      {order.product_slug && order.category_slug ? (
+                        <Link href={`/shop/${order.category_slug}/${order.product_slug}`} target="_blank" className={styles.productLink}>
+                          {order.primary_image_url ? (
+                            <img
+                              src={order.primary_image_url}
+                              alt={order.product_name}
+                              className={styles.productThumb}
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className={styles.productThumbPlaceholder} />
+                          )}
+                          <div>
+                            <div className={styles.productName}>{order.product_name}</div>
+                            <div className={styles.productMeta}>{order.phone_model} × {order.quantity}</div>
+                          </div>
+                        </Link>
                       ) : (
-                        <div className={styles.productThumbPlaceholder} />
+                        <>
+                          {order.primary_image_url ? (
+                            <img
+                              src={order.primary_image_url}
+                              alt={order.product_name}
+                              className={styles.productThumb}
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className={styles.productThumbPlaceholder} />
+                          )}
+                          <div>
+                            <div className={styles.productName}>{order.product_name}</div>
+                            <div className={styles.productMeta}>{order.phone_model} × {order.quantity}</div>
+                          </div>
+                        </>
                       )}
-                      <div className={styles.productName}>{order.product_name}</div>
-                      <div className={styles.productMeta}>{order.phone_model} × {order.quantity}</div>
                     </div>
                   </td>
                   <td>

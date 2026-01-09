@@ -307,10 +307,29 @@
   gap: 4px;
 }
 
+.productLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.2s;
+}
+
+.productLink:hover {
+  opacity: 0.8;
+}
+
+.productLink:hover .productName {
+  text-decoration: underline;
+  color: #667eea;
+}
+
 .productName {
   font-weight: 500;
   color: #333;
   font-size: 14px;
+  transition: color 0.2s;
 }
 
 .productMeta {

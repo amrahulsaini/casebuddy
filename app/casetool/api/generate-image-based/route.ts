@@ -25,11 +25,18 @@ export async function POST(request: NextRequest) {
     const referenceImage = formData.get('reference_image') as File;
     const phoneModel = formData.get('phone_model') as string;
     const caseType = formData.get('case_type') as string || 'doyers';
-    const imageModel = formData.get('image_model') as string || IMAGE_MODEL;
+    const imageModelSelection = formData.get('image_model') as string || 'normal';
+
+    // Map selection to actual model
+    const selectedImageModel = imageModelSelection === 'high' 
+      ? 'gemini-3-pro-image-preview' 
+      : 'gemini-2.5-flash-image';
 
     if (!referenceImage || !phoneModel) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
+
+    console.log(`Image-Based Generation: ${phoneModel}, Model: ${selectedImageModel}`);
 
     // Convert reference image to base64
     const imageBytes = await referenceImage.arrayBuffer();
@@ -76,7 +83,7 @@ export async function POST(request: NextRequest) {
       };
 
       const imgRes = await callGemini(
-        `https://generativelanguage.googleapis.com/v1beta/models/${imageModel}:generateContent`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${selectedImageModel}:generateContent`,
         payload,
         GEMINI_API_KEY
       );

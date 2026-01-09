@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Package, Search, Download, Eye, RefreshCw } from 'lucide-react';
+import { Package, Search, Download, Eye, RefreshCw, Trash2 } from 'lucide-react';
 import styles from './orders.module.css';
 
 interface Order {
@@ -30,6 +30,8 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [paymentFilter, setPaymentFilter] = useState('all');
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -83,6 +85,28 @@ export default function AdminOrdersPage() {
     }
 
     setFilteredOrders(filtered);
+  };
+
+  const deleteOrder = async (orderId: number) => {
+    setDeleting(true);
+    try {
+      const response = await fetch(`/api/admin/orders/${orderId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // Refresh orders list
+        await fetchOrders();
+        setDeleteConfirmId(null);
+      } else {
+        alert('Failed to delete order');
+      }
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      alert('Failed to delete order');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const exportToCSV = () => {
@@ -310,10 +334,19 @@ export default function AdminOrdersPage() {
                     </div>
                   </td>
                   <td>
-                    <Link href={`/admin/dashboard/orders/${order.id}`} className={styles.actionBtn}>
-                      <Eye size={16} />
-                      View
-                    </Link>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <Link href={`/admin/dashboard/orders/${order.id}`} className={styles.actionBtn}>
+                        <Eye size={16} />
+                        View
+                      </Link>
+                      <button
+                        onClick={() => setDeleteConfirmId(order.id)}
+                        className={styles.deleteBtn}
+                        title="Delete order"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -390,6 +423,32 @@ export default function AdminOrdersPage() {
       <div className={styles.footer}>
         <p>Total: {totalOrders} orders</p>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmId !== null && (
+        <div className={styles.modalOverlay} onClick={() => !deleting && setDeleteConfirmId(null)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <h2>Confirm Delete</h2>
+            <p>Are you sure you want to delete this order? This action cannot be undone.</p>
+            <div className={styles.modalActions}>
+              <button
+                onClick={() => setDeleteConfirmId(null)}
+                className={styles.cancelBtn}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => deleteOrder(deleteConfirmId)}
+                className={styles.confirmDeleteBtn}
+                disabled={deleting}
+              >
+                {deleting ? 'Deleting...' : 'Delete Order'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

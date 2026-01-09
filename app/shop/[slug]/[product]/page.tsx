@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, ShoppingCart, Heart, Star, Truck, Shield, Package, ChevronLeft, ChevronRight, Plus, Minus, User, Menu, Zap, Instagram, Facebook, Mail, Phone, MapPin, MessageCircle } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Heart, Star, Truck, Shield, Package, ChevronLeft, ChevronRight, Plus, Minus, User, Menu, Zap, Instagram, Facebook, Mail, Phone, MapPin, MessageCircle, ZoomIn, X } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import SearchBar from '@/components/SearchBar';
@@ -154,6 +154,9 @@ export default function ProductDetailPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [validationError, setValidationError] = useState<string>('');
   const [showSuccess, setShowSuccess] = useState(false);
+  const [isZoomOpen, setIsZoomOpen] = useState(false);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
   
   // Accordion state for mobile
   const [descriptionOpen, setDescriptionOpen] = useState(false);
@@ -344,6 +347,58 @@ export default function ProductDetailPage() {
     }
   };
 
+  // Touch gesture handlers for swipe
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe) {
+      nextImage();
+    } else if (isRightSwipe) {
+      prevImage();
+    }
+  };
+
+  const handleZoomIn = () => {
+    setIsZoomOpen(true);
+  };
+
+  const handleZoomOut = () => {
+    setIsZoomOpen(false);
+  };
+
+  // Handle keyboard navigation in zoom mode
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isZoomOpen) return;
+      
+      if (e.key === 'Escape') {
+        handleZoomOut();
+      } else if (e.key === 'ArrowLeft') {
+        prevImage();
+      } else if (e.key === 'ArrowRight') {
+        nextImage();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isZoomOpen]);
+
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
@@ -444,7 +499,12 @@ export default function ProductDetailPage() {
       <div className={styles.productContainer}>
         {/* Image Gallery */}
         <div className={styles.gallery}>
-          <div className={styles.mainImageWrapper}>
+          <div 
+            className={styles.mainImageWrapper}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+          >
             {selectedImage && (
               <Image 
                 src={selectedImage.image_url}
@@ -458,6 +518,9 @@ export default function ProductDetailPage() {
             {discount > 0 && (
               <div className={styles.discountBadge}>{discount}% OFF</div>
             )}
+            <button className={styles.zoomButton} onClick={handleZoomIn} title="View fullscreen">
+              <ZoomIn size={20} />
+            </button>
             {product.images.length > 1 && (
               <>
                 <button className={styles.galleryNav + ' ' + styles.prev} onClick={prevImage}>
@@ -846,6 +909,43 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Zoom Modal */}
+      {isZoomOpen && (
+        <div className={styles.zoomModal} onClick={handleZoomOut}>
+          <button className={styles.zoomCloseBtn} onClick={handleZoomOut}>
+            <X size={32} />
+          </button>
+          <div 
+            className={styles.zoomContent}
+            onClick={(e) => e.stopPropagation()}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+          >
+            {selectedImage && (
+              <img
+                src={selectedImage.image_url}
+                alt={selectedImage.alt_text || product.name}
+                className={styles.zoomImage}
+              />
+            )}
+            {product.images.length > 1 && (
+              <>
+                <button className={styles.zoomNav + ' ' + styles.prev} onClick={(e) => { e.stopPropagation(); prevImage(); }}>
+                  <ChevronLeft size={40} />
+                </button>
+                <button className={styles.zoomNav + ' ' + styles.next} onClick={(e) => { e.stopPropagation(); nextImage(); }}>
+                  <ChevronRight size={40} />
+                </button>
+              </>
+            )}
+            <div className={styles.zoomIndicator}>
+              {selectedImageIndex + 1} / {product.images.length}
+            </div>
+          </div>
+        </div>
+      )}
 
       </main>
 

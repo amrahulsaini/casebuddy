@@ -47,25 +47,12 @@ function buildCaseTypePrompt(
   angleListText: string
 ): string {
   
-  const mainPrompt = `
-⚠️ CRITICAL CAMERA REQUIREMENT - READ FIRST ⚠️
-${finalPrompt}
+  const mainPrompt = `${finalPrompt}
 
-THIS IS MANDATORY - NO EXCEPTIONS:
-The prompt above specifies EXACT camera count and arrangement. You MUST follow it EXACTLY.
+Reference image: EXACT case design to use (match colors/patterns exactly)
 
-Example: If it says "EXACTLY 2 cameras" → render 2 circular camera lenses, NOT 3, NOT 4, NOT 5.
-Example: If it says "vertical arrangement" → stack cameras vertically in a line.
-Example: If it says "torch: yes" → add ONE flash light circle.
-
-REFERENCE IMAGE: Shows the actual case design. Use this EXACT case (same colors, patterns, cutouts).
-
-TASK: Create 4-panel grid showing ${phoneModel} in this case.
-
-PANELS:
-${angleListText}
-
-BEFORE YOU GENERATE: Count the cameras in your head. Double-check it matches the specs above.`;
+Create 4-panel grid (2x2):
+${angleListText}`;
 
   return mainPrompt;
 }

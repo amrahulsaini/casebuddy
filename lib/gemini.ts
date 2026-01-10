@@ -74,15 +74,11 @@ Return JSON:
   },
   "phone_model_description": "${phoneModel} has 2 vertical cameras at top-left with torch",
   "case_description": "Describe the EXACT case from uploaded image - colors, patterns, material, cutouts",
-  "final_generation_prompt": "🚨 CAMERA SPECIFICATION FOR ${phoneModel} 🚨\n\nCOUNT: EXACTLY 2 cameras (TWO circular camera lenses ONLY)\nTORCH: 1 flash light circle\nTOTAL CIRCLES: 3 circles (2 cameras + 1 torch)\nARRANGEMENT: Vertical line (stacked top to bottom)\nPOSITION: Top-left corner of phone back\n\nDO NOT RENDER 3 or 4 cameras. ONLY 2 cameras.\nDO NOT add extra circles. ONLY 3 total circles.\n\nShow ${phoneModel} in the exact case from reference image."
+  "final_generation_prompt": "⚠️ ${phoneModel} CAMERA COUNT ⚠️\n2 CAMERAS ONLY (not 3, not 4, ONLY TWO)\n1 TORCH\nTOTAL: 3 circles\nVertical line, top-left\n\n⚠️ RENDER EXACTLY 2 CAMERA CIRCLES + 1 TORCH CIRCLE = 3 TOTAL ⚠️\n\nCase: Use exact design from reference image.\n4K product photos, professional lighting."
 }
 
-CRITICAL INSTRUCTION FOR final_generation_prompt:
-- START with "🚨 CAMERA SPECIFICATION"
-- List COUNT with the word "EXACTLY"
-- Say "TWO circular camera lenses ONLY" if count is 2
-- List TOTAL CIRCLES including torch (e.g., "3 circles (2 cameras + 1 torch)")
-- Repeat "DO NOT RENDER 3 or 4 cameras" if count is 2
+Make final_generation_prompt SHORT and START with camera count using emojis and caps.`;
+}
 - Be extremely explicit and use numbers written as words AND digits`;
 }
 

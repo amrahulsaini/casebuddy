@@ -72,12 +72,18 @@ Return JSON:
     "camera_module_position": "top-left",
     "lens_sizes": "main + ultrawide + macro"
   },
-  "phone_model_description": "${phoneModel} has 3 vertical cameras at top-left with torch",
+  "phone_model_description": "${phoneModel} has 2 vertical cameras at top-left with torch",
   "case_description": "Describe the EXACT case from uploaded image - colors, patterns, material, cutouts",
-  "final_generation_prompt": "CAMERA SPECS FOR ${phoneModel}: EXACTLY 2 rear cameras + 1 torch light arranged vertically at top-left corner. MANDATORY: You MUST render EXACTLY 2 cameras (not 3, not 4, ONLY 2) plus 1 torch light in vertical line. DO NOT add extra cameras. DO NOT change arrangement. Phone inserted into the exact case from reference image."
+  "final_generation_prompt": "🚨 CAMERA SPECIFICATION FOR ${phoneModel} 🚨\n\nCOUNT: EXACTLY 2 cameras (TWO circular camera lenses ONLY)\nTORCH: 1 flash light circle\nTOTAL CIRCLES: 3 circles (2 cameras + 1 torch)\nARRANGEMENT: Vertical line (stacked top to bottom)\nPOSITION: Top-left corner of phone back\n\nDO NOT RENDER 3 or 4 cameras. ONLY 2 cameras.\nDO NOT add extra circles. ONLY 3 total circles.\n\nShow ${phoneModel} in the exact case from reference image."
 }
 
-CRITICAL: In final_generation_prompt, START with camera specs and say "EXACTLY X cameras" where X is the actual count. Be very explicit and repetitive about the camera count.`;
+CRITICAL INSTRUCTION FOR final_generation_prompt:
+- START with "🚨 CAMERA SPECIFICATION"
+- List COUNT with the word "EXACTLY"
+- Say "TWO circular camera lenses ONLY" if count is 2
+- List TOTAL CIRCLES including torch (e.g., "3 circles (2 cameras + 1 torch)")
+- Repeat "DO NOT RENDER 3 or 4 cameras" if count is 2
+- Be extremely explicit and use numbers written as words AND digits`;
 }
 
 export function buildBoundingBoxPrompt(): string {

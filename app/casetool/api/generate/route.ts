@@ -48,31 +48,24 @@ function buildCaseTypePrompt(
 ): string {
   
   const mainPrompt = `
-STRICT CAMERA CONFIGURATION REQUIREMENT:
+⚠️ CRITICAL CAMERA REQUIREMENT - READ FIRST ⚠️
 ${finalPrompt}
 
-YOU MUST USE THE EXACT CAMERA SPECIFICATIONS STATED ABOVE. DO NOT MAKE UP RANDOM CAMERAS.
+THIS IS MANDATORY - NO EXCEPTIONS:
+The prompt above specifies EXACT camera count and arrangement. You MUST follow it EXACTLY.
 
-REFERENCE CASE IMAGE:
-The uploaded image shows the ACTUAL case being sold. Use its EXACT design (colors, patterns, structure).
+Example: If it says "EXACTLY 2 cameras" → render 2 circular camera lenses, NOT 3, NOT 4, NOT 5.
+Example: If it says "vertical arrangement" → stack cameras vertically in a line.
+Example: If it says "torch: yes" → add ONE flash light circle.
 
-TASK:
-Show ${phoneModel} phone inserted into this EXACT case in 4 different product photo panels.
+REFERENCE IMAGE: Shows the actual case design. Use this EXACT case (same colors, patterns, cutouts).
 
-MANDATORY CAMERA RENDERING RULES (FOLLOW EXACTLY):
-- Count: Use ONLY the exact number of cameras specified above for ${phoneModel}
-- Position: Place cameras ONLY where specified (top-left, center, etc.)
-- Arrangement: Follow ONLY the arrangement stated (vertical, grid, etc.)
-- Torch: Include torch light ONLY if stated as "has_torch_light: true"
-- DO NOT add extra cameras
-- DO NOT change camera positions
-- DO NOT invent camera layouts
-- REPLICATE THE EXACT CONFIGURATION from the camera specs above
+TASK: Create 4-panel grid showing ${phoneModel} in this case.
 
-4 PANELS TO CREATE:
+PANELS:
 ${angleListText}
 
-QUALITY: 4K Amazon product photography. Case design must match reference image exactly.`;
+BEFORE YOU GENERATE: Count the cameras in your head. Double-check it matches the specs above.`;
 
   return mainPrompt;
 }

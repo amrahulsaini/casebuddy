@@ -47,32 +47,36 @@ function buildCaseTypePrompt(
   angleListText: string
 ): string {
   
-  let caseInstructions = '';
-  
-  switch (caseType) {
-    case 'transparent':
-      caseInstructions = `CASE TYPE: Fully transparent/clear case. The ${phoneModel} phone's body, color, and design must be visible through the clear material.`;
-      break;
-    case 'doyers':
-      caseInstructions = `CASE TYPE: Black frame with transparent center (Doyers style). Black edges wrap around, but center is clear showing the ${phoneModel} phone's body and color.`;
-      break;
-    case 'black':
-      caseInstructions = `CASE TYPE: Solid black protective case. Deep black color covering the phone.`;
-      break;
-    default:
-      caseInstructions = `CASE TYPE: Match the reference case exactly.`;
-  }
-
-  return `Create a 4-panel product photo grid (2x2 layout) for ${phoneModel} in the case from the reference image.
-
+  // For doyers cases specifically
+  const doyersInstructions = `
+PHONE MODEL: ${phoneModel}
 ${finalPrompt}
 
-${caseInstructions}
+CASE STRUCTURE - DOYERS STYLE:
+- BLACK FRAME/BUMPER wrapping all edges (solid black borders)
+- TRANSPARENT CENTER PANEL showing phone body, color, and branding through clear material
+- Camera cutout in the black frame (cameras visible through cutout)
+- Phone fits perfectly inside - black frame around edges, phone visible through center
 
-PANELS (follow EXACTLY):
+CRITICAL: When inserting ${phoneModel} into this case:
+1. The phone's cameras MUST align with the camera cutout in the black frame
+2. The phone body is visible through the TRANSPARENT CENTER (color, branding, design visible)
+3. Black frame wraps around edges - you see black borders
+4. Center is crystal clear - you see the actual phone through it
+
+CREATE 4-PANEL GRID (2x2):
 ${angleListText}
 
-QUALITY: 4K resolution, Amazon-style product photography, professional studio lighting, clean backgrounds, sharp focus on cameras.`;
+RENDERING RULES:
+- Use EXACT camera count and arrangement for ${phoneModel} as specified above
+- Phone MUST be visible through transparent center (show phone color/design)
+- Black frame MUST be visible wrapping edges
+- Cameras fit in frame cutout precisely
+- 4K quality, professional product photography
+- Clean white or dark backgrounds as specified per panel
+`;
+
+  return doyersInstructions;
 }
 
 export async function POST(request: NextRequest) {

@@ -39,40 +39,43 @@ export async function callGemini(
 }
 
 export function buildAnalysisPrompt(phoneModel: string): string {
-  return `You are analyzing a phone case image for "${phoneModel}".
+  return `You are analyzing for product photography.
 
-TASK: Research the ${phoneModel} phone and describe what you find.
+STEP 1: Research "${phoneModel}" specifications
+Look up the REAL specifications of "${phoneModel}" phone:
+- Exact camera count on back (2, 3, 4, 5?)
+- Torch/flash present? (yes/no)
+- Camera arrangement (vertical, grid, L-shape, circular?)
+- Camera island shape (rectangular, square, circular, pill?)
+- Position on back (top-left, top-center?)
 
-STEP 1: Look up "${phoneModel}" specs:
-- How many cameras on the back?
-- Is there a flash/torch?
-- What arrangement (vertical, grid, L-shape)?
-- Where is the camera module (top-left, center, etc.)?
+STEP 2: Analyze the case image
+Look at the uploaded case:
+- Material type (transparent center with black frame = doyers style)
+- Camera cutout area visible
+- How phone will fit inside
 
-STEP 2: Look at the case image:
-- What material? (clear/transparent, black frame with clear center, solid black, etc.)
-- What can you see?
+STEP 3: Describe how phone fits in case
+Explain how the ${phoneModel}'s cameras will align with the case cutout when phone is inserted.
 
-Return ONLY this JSON (no markdown, no extra text):
+Return ONLY this JSON:
 
 {
   "phone_model_camera_specs": {
     "model_name": "${phoneModel}",
     "rear_camera_count": 3,
     "has_torch_light": true,
-    "camera_arrangement": "vertical triple camera",
+    "camera_arrangement": "vertical",
     "camera_island_shape": "rectangular",
-    "camera_module_position": "top-left corner",
-    "lens_sizes": "50MP main, 8MP ultrawide, 2MP macro"
+    "camera_module_position": "top-left",
+    "lens_sizes": "main + ultrawide + macro"
   },
-  "phone_model_description": "The ${phoneModel} has 3 rear cameras arranged vertically...",
-  "case_description": "Transparent case with black frame (doyers style)...",
-  "final_generation_prompt": "Create product photos of ${phoneModel} with exactly 3 cameras arranged vertically in the case shown..."
+  "phone_model_description": "The ${phoneModel} has 3 cameras in vertical arrangement at top-left with torch below",
+  "case_description": "Black frame doyers case with clear transparent center panel. Camera cutout in black frame at top-left",
+  "final_generation_prompt": "Product photos of ${phoneModel}. This phone has 3 rear cameras arranged vertically with torch below. Black frame case with transparent center showing phone body and color through clear panel. Cameras fit precisely in frame cutout."
 }
 
-IMPORTANT: The final_generation_prompt should start with: "Create a 4-panel product grid for ${phoneModel}. This phone has [X] cameras arranged [pattern] with [torch if present]. The case is [describe case type]."
-
-Keep it simple and accurate.`;
+Be accurate. Research the model properly.`;
 }
 
 export function buildBoundingBoxPrompt(): string {
@@ -105,9 +108,12 @@ Rules:
 }
 
 export const ANGLE_DESCRIPTIONS = [
-  'PANEL 1 - AMAZON HERO SHOT (FIXED ANGLE): TWO smartphones positioned side-by-side with SLIGHT OVERLAP on CLEAN WHITE BACKGROUND. MANDATORY ANGLE: Both phones MUST be shown at EXACTLY 3/4 ANGLED VIEW (approximately 15-20 degree tilt from straight-on) - this is NON-NEGOTIABLE and must be EXACTLY like the reference product image style. DO NOT show flat front view, DO NOT show top-down view, DO NOT show side profile - ONLY 3/4 angled view showing depth and dimension. LEFT PHONE: Shows BACK VIEW with case at this EXACT 3/4 angle - For DOYERS cases: BLACK FRAME/BUMPER clearly wrapping all edges with sharp definition, TRANSPARENT CENTER PANEL showing actual phone color/body and branding (like "vivo" logo visible through clear center). CRITICAL CAMERA ACCURACY: The camera module cutout in the BLACK FRAME must EXACTLY match the specified phone model\'s precise camera configuration - analyze the phone model name provided (e.g., "Vivo V60 5G", "Galaxy A35 5G") and render the EXACT number of camera lenses, their EXACT positions (vertical/horizontal/diagonal arrangement), EXACT sizes (main/ultra-wide/macro/depth), and EXACT spacing as that specific phone model has in reality. DO NOT use generic camera layouts. Research and replicate the actual camera island shape and lens configuration of the named phone model. The camera cutout must be a precise match to that model\'s specifications. RIGHT PHONE: Shows FRONT DISPLAY/SCREEN at MATCHING IDENTICAL 3/4 angle with screen facing viewer, displaying phone model compatibility text clearly readable. CRITICAL: Both phones MUST maintain this EXACT SAME 3/4 TILT ANGLE (15-20 degrees) - they should look like professional product photography with consistent perspective. Phones slightly overlapping at edges, CENTERED in frame, standing upright. Professional Amazon-style e-commerce studio lighting with soft shadows beneath phones. Clean white background with subtle gradient. This is the main Amazon product hero image showing complete 360° view - case design on left, screen functionality on right. For DOYERS cases: Show strong contrast between matte black protective frame edges and crystal-clear transparent center where phone body is visible. The black frame should have sharp, clean boundaries. TRANSPARENT cases: Show full phone visibility through clear material. BLACK cases: Show solid black protective coverage. Material accuracy and phone-specific camera precision are MANDATORY. Clean, minimal, professional product photography. REMEMBER: This angle NEVER changes - ALWAYS 3/4 tilted view showing dimension and depth, exactly like the reference style.',
-  'PANEL 2 - DUAL PHONE COMPARISON: TWO phones side-by-side on DARK/BLACK BACKGROUND with dramatic studio lighting. LEFT PHONE: Shows ONLY THE CASE without phone inside - pure BLACK FRAME/BUMPER with crystal clear/transparent center appearing EMPTY like glass, showing the case protection element by itself without any phone visible through it. The transparent center should look like clear glass/crystal with no phone backing visible. Camera cutout in the black frame visible but empty. RIGHT PHONE: Shows case WITH ACTUAL PHONE INSIDE - BLACK FRAME wrapping edges but TRANSPARENT CENTER clearly reveals the actual phone color/body (like cream, gold, black, blue etc.), phone branding and design fully visible through clear material. CRITICAL CAMERA ACCURACY: Camera modules visible with cutouts EXACTLY matching the specified phone model\'s precise camera configuration - analyze the phone model name and render the EXACT number of lenses, EXACT positions (vertical/horizontal/diagonal arrangement), EXACT sizes, and EXACT spacing as that specific model has. DO NOT use generic layouts. Both phones show BACK VIEW at MATCHING 3/4 ANGLE (approximately 25-30 degrees) - PERFECTLY ALIGNED at identical angles and heights. Both positioned upright standing on reflective dark surface at same level. Gradient lighting from behind creates depth and premium feel. Professional product comparison demonstrating: left = case transparency/clarity alone, right = how real phone looks through case. Realistic shadows and reflections. Symmetrical elegant spacing with both phones at identical tilt angles.',
-  'PANEL 3 - HYBRID DESIGN 3D RENDER: JUST ONE SINGLE phone case (the EXACT uploaded case design reference) displayed in DRAMATIC CURVED/BENT/TWISTED POSITION floating in 3D space on CLEAN LIGHT BACKGROUND (white to light grey gradient). ONE CASE ONLY - not two phones, not multiple cases - JUST THE SINGLE CASE SHELL. For DOYERS cases: Show the BLACK FRAME/BUMPER and TRANSPARENT CENTER clearly - the actual case structure with black protective edges and clear center panel. The EMPTY CASE is SIGNIFICANTLY CURVED and BENT like a wave or S-curve showcasing FLEXIBILITY and three-dimensional form. NO PHONE INSIDE, NO CAMERA CUTOUTS VISIBLE - just the pure case structure itself twisted/bending through space demonstrating the flexible hybrid construction. The case appears to float and bend showing the material flexibility of soft edges and rigid back panel. Large clean text "Hybrid Design" positioned separately at TOP of image (NOT on the case itself) in modern bold font. Simple annotation labels positioned SEPARATELY with minimal dotted lines or tick marks: "Soft TPU edge" pointing to black frame area, "Tough PC backplane" pointing to transparent center area. NO decorative elements, NO circular spheres, NO bubbles, NO camera details - just clean minimal design focusing on the single twisted/curved empty case shell demonstrating flexibility. Soft shadows beneath the curved case. The case should appear dramatically bent/curved in S-curve or wave position showing material flexibility. Professional 3D product render style. Clean, simple, minimalist background. EMPHASIS: ONLY ONE SINGLE EMPTY CASE SHELL in twisted form - exactly as provided in reference, no modifications.',
-  'PANEL 4 - LIFESTYLE HAND SHOT: Professional lifestyle photography showing a natural hand holding the phone from the BACK VIEW at slight angle (approximately 20-25 degrees) on DARK/BLACK GRADIENT BACKGROUND. Hand positioned on right side naturally gripping the phone, fingers visible on sides and bottom edge. Phone ALIGNED at consistent angle showing depth and dimension. For DOYERS cases: BLACK FRAME/BUMPER clearly visible wrapping around edges with sharp definition. TRANSPARENT CENTER prominently displaying the actual phone color, design, and branding through crystal-clear material - emphasizing how the case lets you "Flaunt The Original Look". CRITICAL CAMERA ACCURACY: Camera module sharply in focus with cutouts in the black frame precisely matching the specified phone model\'s EXACT camera configuration - analyze the phone model name and render the EXACT number of camera lenses, their EXACT positions (vertical/horizontal/diagonal arrangement), EXACT sizes (main/ultra-wide/macro/depth sensors), and EXACT spacing as that specific phone model has in reality. DO NOT use generic camera layouts. The camera cutout must be a precise match to that model\'s specifications. Studio lighting creates subtle highlights on the transparent center and dramatic shadows on dark background. Natural, realistic hand with proper skin tones and lighting. Title text "Flaunt The Original Look" positioned in top-left area. The shot should emphasize how the Doyers case protects while showcasing the phone\'s original beauty and design through the transparent center. Professional, aspirational lifestyle photography suitable for premium product marketing.',
+  'PANEL 1 (White Background): Two phones side-by-side at 3/4 angle. LEFT: Back view showing case - black frame edges with transparent center (phone body/color visible through center). Cameras in frame cutout match exact phone model specs. RIGHT: Front screen view showing model name. Both phones same angle, slight overlap, professional Amazon style.',
+  
+  'PANEL 2 (Dark Background): Two phones. LEFT: Empty case only (black frame + clear center with NO phone inside). RIGHT: Phone in case (black frame edges + phone visible through transparent center with exact camera configuration). Both at 3/4 angle, reflective surface.',
+  
+  'PANEL 3 (Light Background): ONE empty case twisted/curved in S-shape showing flexibility. Black frame edges + transparent center visible. NO phone inside. Text "Hybrid Design" at top with material labels. Clean minimal 3D render.',
+  
+  'PANEL 4 (Dark Background): Hand holding phone from back at angle. Black frame edges wrap around. Phone body/color/branding visible through transparent center. Cameras match exact model specs in frame cutout. Text "Flaunt The Original Look" at top. Lifestyle shot.',
 ];
 

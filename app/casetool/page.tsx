@@ -32,6 +32,16 @@ interface GeneratedImage {
   logId?: number;
 }
 
+interface CameraSpecs {
+  model_name: string;
+  rear_camera_count: number;
+  has_torch_light: boolean;
+  camera_arrangement: string;
+  camera_island_shape: string;
+  camera_module_position: string;
+  lens_sizes: string;
+}
+
 export default function ToolPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -48,6 +58,7 @@ export default function ToolPage() {
   const [lastPrompt, setLastPrompt] = useState<string>('');
   const [selectedModel, setSelectedModel] = useState<'normal' | 'high'>('normal');
   const [caseType, setCaseType] = useState<'transparent' | 'doyers' | 'black'>('transparent');
+  const [cameraSpecs, setCameraSpecs] = useState<CameraSpecs | null>(null);
 
   // Drag and drop state
   const [isDragging, setIsDragging] = useState(false);
@@ -214,6 +225,9 @@ export default function ToolPage() {
                   promptToReuse = data.payload.prompt;
                   setLastPrompt(data.payload.prompt);
                 }
+                if (data.payload && data.payload.camera_specs) {
+                  setCameraSpecs(data.payload.camera_specs);
+                }
                 break;
 
               case 'image_start':
@@ -356,6 +370,7 @@ export default function ToolPage() {
     setUploadedFileName('');
     setLastFormData(null);
     setLastPrompt('');
+    setCameraSpecs(null);
     setProgress(0);
     setStatus('');
     setError('');
@@ -753,6 +768,52 @@ export default function ToolPage() {
           {showError && (
             <div className={styles.errorBox}>
               {error}
+            </div>
+          )}
+
+          {/* Camera Specs Display */}
+          {cameraSpecs && (
+            <div className={styles.cameraSpecsCard}>
+              <div className={styles.cameraSpecsHeader}>
+                <div className={styles.cameraSpecsIcon}>📸</div>
+                <h3 className={styles.cameraSpecsTitle}>Researched Camera Specifications</h3>
+              </div>
+              <div className={styles.cameraSpecsGrid}>
+                <div className={styles.specItem}>
+                  <div className={styles.specLabel}>Phone Model</div>
+                  <div className={styles.specValue}>{cameraSpecs.model_name}</div>
+                </div>
+                <div className={styles.specItem}>
+                  <div className={styles.specLabel}>Camera Count</div>
+                  <div className={styles.specValue}>
+                    <span className={styles.specBadge}>{cameraSpecs.rear_camera_count} Cameras</span>
+                  </div>
+                </div>
+                <div className={styles.specItem}>
+                  <div className={styles.specLabel}>Torch Light</div>
+                  <div className={styles.specValue}>
+                    <span className={`${styles.specBadge} ${cameraSpecs.has_torch_light ? styles.specBadgeSuccess : styles.specBadgeGray}`}>
+                      {cameraSpecs.has_torch_light ? '🔦 Yes' : 'No'}
+                    </span>
+                  </div>
+                </div>
+                <div className={styles.specItem}>
+                  <div className={styles.specLabel}>Arrangement</div>
+                  <div className={styles.specValue}>{cameraSpecs.camera_arrangement}</div>
+                </div>
+                <div className={styles.specItem}>
+                  <div className={styles.specLabel}>Island Shape</div>
+                  <div className={styles.specValue}>{cameraSpecs.camera_island_shape}</div>
+                </div>
+                <div className={styles.specItem}>
+                  <div className={styles.specLabel}>Position</div>
+                  <div className={styles.specValue}>{cameraSpecs.camera_module_position}</div>
+                </div>
+                <div className={`${styles.specItem} ${styles.specItemFull}`}>
+                  <div className={styles.specLabel}>Lens Configuration</div>
+                  <div className={styles.specValue}>{cameraSpecs.lens_sizes}</div>
+                </div>
+              </div>
             </div>
           )}
         </div>

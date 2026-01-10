@@ -39,99 +39,87 @@ export async function callGemini(
 }
 
 export function buildAnalysisPrompt(phoneModel: string): string {
-  return `You are an expert product photographer and e-commerce prompt engineer.
+  return `You are an expert product photographer and smartphone hardware specialist.
 
-You will receive:
-- A single reference photo of a PHONE CASE (just the case, empty or with a phone inside).
-- A text label for the target phone model: "${phoneModel}".
+STEP 1 - MANDATORY PHONE MODEL RESEARCH:
+Before analyzing the case image, you MUST research the EXACT hardware specifications of "${phoneModel}".
 
-YOUR PRIMARY TASK: Generate a prompt that will create product photos showing the EXACT "${phoneModel}" phone inserted into the EXACT case from the reference image. Do not change the phone model or the case design.
+USE YOUR KNOWLEDGE BASE to answer these questions about "${phoneModel}":
+1. How many rear cameras does "${phoneModel}" have? (Example: 2, 3, 4, or 5 cameras)
+2. What is the exact arrangement of these cameras? (Example: "vertical line", "square 2x2 grid", "L-shaped", "triangular cluster")
+3. Does "${phoneModel}" have a torch/flash light on the back? (Yes/No, and where is it positioned?)
+4. What is the camera island shape on "${phoneModel}"? (Example: "rectangular", "square", "circular", "pill-shaped", "individual circles")
+5. Where is the camera module located on the back? (Example: "top-left corner", "top-center", "center-left")
+6. What are the camera sensor sizes? (Example: "large main + medium ultra-wide + small macro")
 
-CRITICAL PHONE MODEL RESEARCH:
-1) FIRST: Research and determine the EXACT camera specifications for "${phoneModel}":
-   - How many camera lenses does this specific phone model have? (e.g., 3 cameras, 4 cameras)
-   - What is the exact arrangement? (vertical line, square grid, L-shape, circular cluster)
-   - What are the lens types and sizes? (main camera, ultra-wide, macro, depth sensor)
-   - Where is the camera module positioned on the phone back? (top-left, top-center, etc.)
-   - What is the camera island shape for this model? (rectangular, square, circular, pill-shaped)
-   - Use your knowledge base to get the ACTUAL specifications of "${phoneModel}"
+CRITICAL: You MUST use your actual knowledge about "${phoneModel}" hardware. Do NOT make up information. Do NOT rely only on what you see in the case image.
 
-2) The REFERENCE CASE IMAGE shows you:
-   - Case material, color, and transparency (transparent/clear vs opaque/solid)
-   - Overall case structure and design
-   - Camera cutout area in the case
-   
-3) YOUR TASK: Describe how the "${phoneModel}"'s REAL camera configuration (from step 1) should fit into the case's camera cutout area (from step 2):
-   - The camera count and positions must match the ACTUAL "${phoneModel}" specifications
-   - The case cutout should accommodate the real camera layout of this phone model
-   - If the case cutout doesn't perfectly match, prioritize the phone's ACTUAL camera specs
+STEP 2 - CASE IMAGE ANALYSIS:
+Now analyze the uploaded case image for:
+- Case material and color (transparent/black frame/solid)
+- Case structure and finish
+- Camera cutout area size and shape
 
-4) Never invent fake features:
-   - Don't add halo lights, extra LED rings, or decorative elements unless they exist on the real "${phoneModel}"
-   - Stick to the actual hardware specifications of "${phoneModel}"
-
-5) ABSOLUTE ALIGNMENT RULE:
-   - In every image where the phone is inside the case, the phone body must fit 100% inside the inner silhouette of the case.
-   - No part of the phone can be outside the case edges.
-   - The phone must not float outside or intersect incorrectly with the case.
-   - The case outline is treated like a strict clipping mask for the phone.
-6) PHONE MODEL MUST BE EXACT:
-   - Use EXACTLY "${phoneModel}" as the phone being inserted
-   - Do NOT substitute with similar models or generic phones
-   - The generated images must show the specific "${phoneModel}" device inside this specific case
-
-Your output must be STRICT JSON with exactly these three fields:
+STEP 3 - OUTPUT REQUIREMENTS:
+Your output must be STRICT JSON with exactly these fields:
 
 {
+  "phone_model_camera_specs": {
+    "model_name": "${phoneModel}",
+    "rear_camera_count": 0,
+    "has_torch_light": false,
+    "camera_arrangement": "",
+    "camera_island_shape": "",
+    "camera_module_position": "",
+    "lens_sizes": ""
+  },
   "phone_model_description": "...",
   "case_description": "...",
   "final_generation_prompt": "..."
 }
 
-DETAILS:
+FIELD DETAILS:
 
-1) "phone_model_description":
-   - FIRST: Research the ACTUAL "${phoneModel}" specifications from your knowledge base
-   - Describe the REAL camera configuration of "${phoneModel}":
-     • EXACT number of camera lenses this model has (e.g., "3-camera system", "4-camera setup")
-     • EXACT arrangement pattern (e.g., "vertical triple camera", "square quad camera", "L-shaped layout")
-     • EXACT lens types (e.g., "50MP main + 8MP ultra-wide + 2MP macro")
-     • EXACT camera island shape for this model (rectangular, square, circular, pill)
-     • EXACT position on phone back (top-left corner, top-center, etc.)
-   - Then describe how this REAL phone hardware fits into the case:
-     • Mention it is specifically the "${phoneModel}" model
-     • The phone's actual camera configuration as researched above
-     • How the real cameras align with the case's cutout area
-   - IMPORTANT: Use the ACTUAL specifications of "${phoneModel}", not what you see in the case
-   - The case must accommodate the phone's real hardware, not vice versa
+1) "phone_model_camera_specs" (MANDATORY - MUST BE FILLED):
+   - "model_name": Exactly "${phoneModel}"
+   - "rear_camera_count": INTEGER number (2, 3, 4, etc.) - the EXACT count for ${phoneModel}
+   - "has_torch_light": true or false - does ${phoneModel} have a torch/flash on the back?
+   - "camera_arrangement": String describing layout (e.g., "vertical triple camera", "2x2 square grid")
+   - "camera_island_shape": Shape of the camera module (e.g., "rectangular", "circular", "pill")
+   - "camera_module_position": Location on back (e.g., "top-left corner")
+   - "lens_sizes": Description of sensor sizes (e.g., "large main, medium ultrawide, small macro")
 
-2) "case_description":
-   - Describe ONLY the case from the uploaded image:
-     • TRANSPARENCY: First, determine if the case is transparent/clear or opaque/solid. If it's transparent, EXPLICITLY state "transparent case" or "clear case" in the description.
-     • material and finish (e.g., matte black soft-touch TPU, flexible silicone, transparent TPU, clear case with visible phone inside)
-     • For transparent cases: mention that the phone's internal components, design, and color should be visible through the case
-     • inner soft lining if visible
-     • camera block shape and cutouts
-     • side buttons, cutouts for ports and speakers
-     • thickness and raised lips.
-   - Everything must come from what you SEE.
+2) "phone_model_description":
+   - Start with: "The ${phoneModel} features [X] rear cameras"
+   - Describe the RESEARCHED camera configuration from your knowledge base
+   - Explain how these cameras are arranged
+   - Mention torch light if present
+   - Include camera island shape and position
 
-3) "final_generation_prompt":
-   - A single long, detailed prompt to generate ultra-realistic Amazon-style product renders where:
-     • MANDATORY: The prompt MUST start with: "Ultra realistic Amazon-style product photos of the ${phoneModel} phone fully inserted into the exact case from the reference image."
-     • CRITICAL: Explicitly state this is the "${phoneModel}" model with its ACTUAL camera configuration (the exact number of lenses and their arrangement as you researched)
-     • CAMERA SPECIFICATIONS: The prompt MUST include the EXACT camera specs of "${phoneModel}":
-       - "The ${phoneModel} features [X] cameras in a [arrangement pattern] with [lens descriptions]"
-       - "The camera island is [shape] positioned at [location] on the phone back"
-       - "Camera cutouts in the case must precisely match this ${phoneModel}'s actual camera layout"
-     • The "${phoneModel}" phone is fully inserted into this exact case (when the shot includes the phone).
-     • CRITICAL: If the case is transparent/clear, the prompt MUST explicitly state "transparent case" or "clear case" and mention that the phone's body, color, and internal design should be visible through the case material. The phone model "${phoneModel}" must be clearly identifiable through the transparent material.
-     • If the case is opaque/solid (black, colored, etc.), explicitly mention the exact color and material (e.g., "matte black TPU case", "dark silicone case").
-     • The camera configuration must match the ACTUAL "${phoneModel}" specifications researched above
-     • Lenses must be rendered according to the real "${phoneModel}" hardware specs
-     • The phone body is always fully inside the case outline; no part of the phone leaves the case boundaries.
-   - Global visual style:
-     • realistic, sharp, high-resolution
+3) "case_description":
+   - Describe the case from the uploaded image:
+     • Material (transparent/black frame/solid)
+     • Structure (doyers style with black frame and clear center, or fully transparent, or solid)
+     • Camera cutout area
+
+4) "final_generation_prompt":
+   - MUST start with: "Ultra realistic Amazon-style product photos of the ${phoneModel} phone"
+   - IMMEDIATELY follow with: "The ${phoneModel} has exactly [X] rear cameras arranged in [arrangement pattern] with [lens descriptions]. The camera island is [shape] located at [position]. [Include torch light if present]."
+   - Then describe the case structure
+   - Then continue with composition and quality requirements
+   - CRITICAL: The prompt must explicitly state the exact camera count and arrangement researched in step 1
+   - Example start: "Ultra realistic Amazon-style product photos of the Vivo V60 5G phone. The Vivo V60 5G has exactly 3 rear cameras arranged in a vertical line with a large 50MP main camera, 8MP ultra-wide, and 2MP macro sensor. The camera island is rectangular located at the top-left corner. A torch light is positioned below the cameras. The phone is inserted into a black frame doyers case with transparent center..."
+
+REMEMBER: You MUST research the actual "${phoneModel}" specifications using your knowledge base. The camera count, arrangement, and torch light presence must be ACCURATE to the real device.
+
+ALIGNMENT RULES:
+- Phone body must fit 100% inside the case
+- No part of phone can be outside case edges
+- Camera module must align with case cutout
+- Use EXACTLY "${phoneModel}" - no substitutions
+
+Output ONLY the JSON. No markdown, no explanations.`;
+}
      • bright, clean, Amazon-style backgrounds (mostly light grey or white, simple studio pedestals or soft 3D shapes)
      • strong but soft studio lighting with clear reflections on camera glass and subtle shadows under the phone
      • For transparent cases: lighting must show the clarity and transparency of the material, with the ${phoneModel} phone's original design, color, and branding clearly visible through the case

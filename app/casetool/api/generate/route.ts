@@ -243,11 +243,26 @@ export async function POST(request: NextRequest) {
           const rawText = res.candidates[0]?.content?.parts[0]?.text || '{}';
           const parsed = JSON.parse(rawText);
 
+          // Extract camera specs if available
+          const cameraSpecs = parsed.phone_model_camera_specs || null;
+          
           phoneDesc = parsed.phone_model_description || 'Phone description not returned.';
           caseDesc = parsed.case_description || 'Case description not returned.';
           finalPrompt =
             parsed.final_generation_prompt ||
             `Ultra realistic Amazon-style product photos of ${phoneModel} fully inserted in the exact same phone case as the reference image.`;
+
+          // Log camera specs to console for debugging
+          if (cameraSpecs) {
+            console.log('\n🔍 RESEARCHED CAMERA SPECS FOR:', phoneModel);
+            console.log('📸 Camera Count:', cameraSpecs.rear_camera_count);
+            console.log('🔦 Torch Light:', cameraSpecs.has_torch_light ? 'Yes' : 'No');
+            console.log('📐 Arrangement:', cameraSpecs.camera_arrangement);
+            console.log('🔲 Island Shape:', cameraSpecs.camera_island_shape);
+            console.log('📍 Position:', cameraSpecs.camera_module_position);
+            console.log('🎯 Lens Sizes:', cameraSpecs.lens_sizes);
+            console.log('\n');
+          }
 
           // Log text analysis API usage
           if (userId) {
@@ -260,12 +275,13 @@ export async function POST(request: NextRequest) {
             });
           }
 
-          // Send analysis to UI
+          // Send analysis to UI (include camera specs)
           writer.send('data_log', 'Analysis + master prompt ready', 40, {
             phone_model_description: phoneDesc,
             case_description: caseDesc,
             final_generation_prompt: finalPrompt,
             prompt: finalPrompt,
+            camera_specs: cameraSpecs, // Include specs in the data sent to UI
           });
         }
 

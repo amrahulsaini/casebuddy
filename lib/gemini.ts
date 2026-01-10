@@ -39,26 +39,28 @@ export async function callGemini(
 }
 
 export function buildAnalysisPrompt(phoneModel: string): string {
-  return `You are analyzing for product photography.
+  return `You are creating product photos for a phone case seller.
 
-STEP 1: Research "${phoneModel}" specifications
-Look up the REAL specifications of "${phoneModel}" phone:
-- Exact camera count on back (2, 3, 4, 5?)
-- Torch/flash present? (yes/no)
-- Camera arrangement (vertical, grid, L-shape, circular?)
-- Camera island shape (rectangular, square, circular, pill?)
-- Position on back (top-left, top-center?)
+SITUATION: The seller uploaded a photo of their ACTUAL PHYSICAL CASE they want to sell. They want to show what this case looks like when "${phoneModel}" phone is inserted into it.
 
-STEP 2: Analyze the case image
-Look at the uploaded case:
-- Material type (transparent center with black frame = doyers style)
-- Camera cutout area visible
-- How phone will fit inside
+STEP 1: Research "${phoneModel}" phone specs
+- Camera count (2, 3, 4, 5?)
+- Torch light? (yes/no)
+- Camera arrangement (vertical, grid, etc.)
+- Camera position (top-left, center, etc.)
 
-STEP 3: Describe how phone fits in case
-Explain how the ${phoneModel}'s cameras will align with the case cutout when phone is inserted.
+STEP 2: Analyze the ACTUAL case in the uploaded image
+- What does THIS SPECIFIC case look like?
+- Material/color (black frame with clear center, fully clear, solid black?)
+- Camera cutout shape and position
+- Any design patterns or branding on the case
 
-Return ONLY this JSON:
+STEP 3: Describe insertion
+- How will ${phoneModel} look when inserted into THIS EXACT case from the image
+- Where cameras align with case cutout
+- What parts of phone are visible
+
+Return JSON:
 
 {
   "phone_model_camera_specs": {
@@ -70,12 +72,12 @@ Return ONLY this JSON:
     "camera_module_position": "top-left",
     "lens_sizes": "main + ultrawide + macro"
   },
-  "phone_model_description": "The ${phoneModel} has 3 cameras in vertical arrangement at top-left with torch below",
-  "case_description": "Black frame doyers case with clear transparent center panel. Camera cutout in black frame at top-left",
-  "final_generation_prompt": "Product photos of ${phoneModel}. This phone has 3 rear cameras arranged vertically with torch below. Black frame case with transparent center showing phone body and color through clear panel. Cameras fit precisely in frame cutout."
+  "phone_model_description": "${phoneModel} has 3 vertical cameras at top-left with torch",
+  "case_description": "Describe the EXACT case from uploaded image - colors, patterns, material, cutouts",
+  "final_generation_prompt": "Show ${phoneModel} phone inserted into the EXACT case from reference image. Phone has 3 vertical cameras. Keep case design IDENTICAL to uploaded image. Just show phone inside it."
 }
 
-Be accurate. Research the model properly.`;
+CRITICAL: Describe the ACTUAL uploaded case. Don't imagine a different case.`;
 }
 
 export function buildBoundingBoxPrompt(): string {

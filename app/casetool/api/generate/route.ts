@@ -47,36 +47,33 @@ function buildCaseTypePrompt(
   angleListText: string
 ): string {
   
-  // For doyers cases specifically
-  const doyersInstructions = `
-PHONE MODEL: ${phoneModel}
+  const mainPrompt = `
+PRODUCT PHOTOGRAPHY FOR AMAZON LISTING:
+You have a REFERENCE IMAGE showing the ACTUAL PHYSICAL CASE being sold.
+Your job: Create product photos showing ${phoneModel} phone INSERTED INTO this EXACT CASE.
+
 ${finalPrompt}
 
-CASE STRUCTURE - DOYERS STYLE:
-- BLACK FRAME/BUMPER wrapping all edges (solid black borders)
-- TRANSPARENT CENTER PANEL showing phone body, color, and branding through clear material
-- Camera cutout in the black frame (cameras visible through cutout)
-- Phone fits perfectly inside - black frame around edges, phone visible through center
+CRITICAL RULES:
+1. Use the EXACT case design from the reference image - DO NOT change it
+2. DO NOT modify case colors, patterns, or structure
+3. Simply show what this ACTUAL case looks like when ${phoneModel} is inserted into it
+4. The case in all 4 panels MUST match the uploaded reference case EXACTLY
 
-CRITICAL: When inserting ${phoneModel} into this case:
-1. The phone's cameras MUST align with the camera cutout in the black frame
-2. The phone body is visible through the TRANSPARENT CENTER (color, branding, design visible)
-3. Black frame wraps around edges - you see black borders
-4. Center is crystal clear - you see the actual phone through it
+PHONE INSERTION:
+- ${phoneModel} fits inside this case
+- Cameras align with case cutout (match phone's actual camera specs as stated above)
+- For doyers/transparent center: phone body visible through clear part
+- For solid cases: only cameras visible through cutout
+- Case design stays IDENTICAL to reference image
 
-CREATE 4-PANEL GRID (2x2):
+CREATE 4 PANELS:
 ${angleListText}
 
-RENDERING RULES:
-- Use EXACT camera count and arrangement for ${phoneModel} as specified above
-- Phone MUST be visible through transparent center (show phone color/design)
-- Black frame MUST be visible wrapping edges
-- Cameras fit in frame cutout precisely
-- 4K quality, professional product photography
-- Clean white or dark backgrounds as specified per panel
+RENDERING: 4K quality, professional Amazon product photos. The case must look EXACTLY like the reference image in all panels. Just show the phone inserted into it.
 `;
 
-  return doyersInstructions;
+  return mainPrompt;
 }
 
 export async function POST(request: NextRequest) {

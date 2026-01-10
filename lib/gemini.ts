@@ -120,22 +120,6 @@ ALIGNMENT RULES:
 
 Output ONLY the JSON. No markdown, no explanations.`;
 }
-     • bright, clean, Amazon-style backgrounds (mostly light grey or white, simple studio pedestals or soft 3D shapes)
-     • strong but soft studio lighting with clear reflections on camera glass and subtle shadows under the phone
-     • For transparent cases: lighting must show the clarity and transparency of the material, with the ${phoneModel} phone's original design, color, and branding clearly visible through the case
-     • For opaque cases: focus on the case material texture, color, and finish.
-   - Mention that we will generate five e-commerce angles:
-     1) combined front-and-back hero shot in one frame (front screen + rear case), main listing style
-     2) clean back-only 3/4 studio angle showing camera area clearly
-     3) shock-absorbing TPU + soft lining showcase: case open or peeled, inner soft lining visible, with a round zoom circle focusing on the lining texture and a short text label
-     4) case alone, bent in the air in a smooth curve to highlight flexibility / hybrid design (NO phone in this shot)
-     5) case alone laid flat or slightly tilted, top-down catalog shot that clearly shows all cutouts and edges (NO phone in this shot).
-
-IMPORTANT OUTPUT RULE:
-- Return ONLY valid JSON with the three keys:
-  "phone_model_description", "case_description", "final_generation_prompt"
-- Do NOT include markdown or any text outside the JSON.`;
-}
 
 export function buildBoundingBoxPrompt(): string {
   return `You will receive a single composite product image that may contain between 2 and 8 separate phone-case product shots (sub-images) arranged in an arbitrary layout.

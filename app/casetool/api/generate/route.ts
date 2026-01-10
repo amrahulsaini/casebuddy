@@ -18,7 +18,7 @@ import { StreamWriter } from '@/lib/stream-helpers';
 import { logAPIUsage } from '@/lib/pricing';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
-const TEXT_MODEL = process.env.TEXT_MODEL || 'gemini-2.0-flash';
+const TEXT_MODEL = process.env.TEXT_MODEL || 'gemini-3-pro-preview';
 const IMAGE_MODEL = process.env.IMAGE_MODEL || 'gemini-2.5-flash-image';
 const IMAGE_ENHANCE_MODEL = process.env.IMAGE_ENHANCE_MODEL || 'gemini-3-pro-image-preview';
 

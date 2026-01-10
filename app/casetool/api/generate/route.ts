@@ -48,30 +48,31 @@ function buildCaseTypePrompt(
 ): string {
   
   const mainPrompt = `
-PRODUCT PHOTOGRAPHY FOR AMAZON LISTING:
-You have a REFERENCE IMAGE showing the ACTUAL PHYSICAL CASE being sold.
-Your job: Create product photos showing ${phoneModel} phone INSERTED INTO this EXACT CASE.
-
+STRICT CAMERA CONFIGURATION REQUIREMENT:
 ${finalPrompt}
 
-CRITICAL RULES:
-1. Use the EXACT case design from the reference image - DO NOT change it
-2. DO NOT modify case colors, patterns, or structure
-3. Simply show what this ACTUAL case looks like when ${phoneModel} is inserted into it
-4. The case in all 4 panels MUST match the uploaded reference case EXACTLY
+YOU MUST USE THE EXACT CAMERA SPECIFICATIONS STATED ABOVE. DO NOT MAKE UP RANDOM CAMERAS.
 
-PHONE INSERTION:
-- ${phoneModel} fits inside this case
-- Cameras align with case cutout (match phone's actual camera specs as stated above)
-- For doyers/transparent center: phone body visible through clear part
-- For solid cases: only cameras visible through cutout
-- Case design stays IDENTICAL to reference image
+REFERENCE CASE IMAGE:
+The uploaded image shows the ACTUAL case being sold. Use its EXACT design (colors, patterns, structure).
 
-CREATE 4 PANELS:
+TASK:
+Show ${phoneModel} phone inserted into this EXACT case in 4 different product photo panels.
+
+MANDATORY CAMERA RENDERING RULES (FOLLOW EXACTLY):
+- Count: Use ONLY the exact number of cameras specified above for ${phoneModel}
+- Position: Place cameras ONLY where specified (top-left, center, etc.)
+- Arrangement: Follow ONLY the arrangement stated (vertical, grid, etc.)
+- Torch: Include torch light ONLY if stated as "has_torch_light: true"
+- DO NOT add extra cameras
+- DO NOT change camera positions
+- DO NOT invent camera layouts
+- REPLICATE THE EXACT CONFIGURATION from the camera specs above
+
+4 PANELS TO CREATE:
 ${angleListText}
 
-RENDERING: 4K quality, professional Amazon product photos. The case must look EXACTLY like the reference image in all panels. Just show the phone inserted into it.
-`;
+QUALITY: 4K Amazon product photography. Case design must match reference image exactly.`;
 
   return mainPrompt;
 }

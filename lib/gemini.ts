@@ -74,10 +74,10 @@ Return JSON:
   },
   "phone_model_description": "${phoneModel} has 3 vertical cameras at top-left with torch",
   "case_description": "Describe the EXACT case from uploaded image - colors, patterns, material, cutouts",
-  "final_generation_prompt": "Show ${phoneModel} phone inserted into the EXACT case from reference image. Phone has 3 vertical cameras. Keep case design IDENTICAL to uploaded image. Just show phone inside it."
+  "final_generation_prompt": "CAMERA SPECS FOR ${phoneModel}: EXACTLY 2 rear cameras + 1 torch light arranged vertically at top-left corner. MANDATORY: You MUST render EXACTLY 2 cameras (not 3, not 4, ONLY 2) plus 1 torch light in vertical line. DO NOT add extra cameras. DO NOT change arrangement. Phone inserted into the exact case from reference image."
 }
 
-CRITICAL: Describe the ACTUAL uploaded case. Don't imagine a different case.`;
+CRITICAL: In final_generation_prompt, START with camera specs and say "EXACTLY X cameras" where X is the actual count. Be very explicit and repetitive about the camera count.`;
 }
 
 export function buildBoundingBoxPrompt(): string {
@@ -110,12 +110,12 @@ Rules:
 }
 
 export const ANGLE_DESCRIPTIONS = [
-  'PANEL 1 (White Background): Two phones side-by-side at 3/4 angle. LEFT: Back view showing case - black frame edges with transparent center (phone body/color visible through center). Cameras in frame cutout match exact phone model specs. RIGHT: Front screen view showing model name. Both phones same angle, slight overlap, professional Amazon style.',
+  'PANEL 1 (White Background): Two phones at 3/4 angle. LEFT: Back view - EXACT case from reference with phone inside. CAMERAS: Render ONLY the exact number and arrangement specified in camera specs (e.g., if 2 cameras + torch, show EXACTLY 2 cameras + torch, NOT 3 or 4). RIGHT: Front screen with model name. Professional Amazon style.',
   
-  'PANEL 2 (Dark Background): Two phones. LEFT: Empty case only (black frame + clear center with NO phone inside). RIGHT: Phone in case (black frame edges + phone visible through transparent center with exact camera configuration). Both at 3/4 angle, reflective surface.',
+  'PANEL 2 (Dark Background): Two phones. LEFT: Empty case. RIGHT: Phone in case. CAMERAS: Use EXACT count and position from specs (if specs say 2 cameras vertical, show EXACTLY 2 cameras vertical, NOT random layout). Both at 3/4 angle.',
   
-  'PANEL 3 (Light Background): ONE empty case twisted/curved in S-shape showing flexibility. Black frame edges + transparent center visible. NO phone inside. Text "Hybrid Design" at top with material labels. Clean minimal 3D render.',
+  'PANEL 3 (Light Background): ONE empty case twisted in S-curve. NO phone. Text "Hybrid Design" at top. Match reference case design exactly.',
   
-  'PANEL 4 (Dark Background): Hand holding phone from back at angle. Black frame edges wrap around. Phone body/color/branding visible through transparent center. Cameras match exact model specs in frame cutout. Text "Flaunt The Original Look" at top. Lifestyle shot.',
+  'PANEL 4 (Dark Background): Hand holding phone in case from back. CAMERAS: Show EXACT camera configuration from specs (count, position, arrangement must match exactly as specified). Phone body visible through transparent parts. Text "Flaunt The Original Look".',
 ];
 

@@ -109,13 +109,39 @@ Rules:
 - Always return at least one region.`;
 }
 
-export const ANGLE_DESCRIPTIONS = [
-  'PANEL 1 (White Background): Two phones at 3/4 angle. LEFT: Back view - EXACT case from reference with phone inside. CAMERAS: Render ONLY the exact number and arrangement specified in camera specs (e.g., if 2 cameras + torch, show EXACTLY 2 cameras + torch, NOT 3 or 4). RIGHT: Front screen with model name. Professional Amazon style.',
+export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
+  doyers: [
+    'PANEL 1 (White Background): Two phones at 3/4 angle. LEFT: Back view - EXACT case from reference with phone inside. CAMERAS: Render ONLY the exact number and arrangement specified in camera specs. RIGHT: Front screen with model name. Professional Amazon style.',
+    
+    'PANEL 2 (Dark Background): Two phones. LEFT: Empty case. RIGHT: Phone in case. CAMERAS: Use EXACT count and position from specs. Both at 3/4 angle.',
+    
+    'PANEL 3 (Light Background): ONE empty case twisted in S-curve. NO phone. Text "Hybrid Design" at top. Match reference case design exactly.',
+    
+    'PANEL 4 (Dark Background): Hand holding phone in case from back. CAMERAS: Show EXACT camera configuration from specs. Phone body visible through transparent parts. Text "Flaunt The Original Look".',
+  ],
   
-  'PANEL 2 (Dark Background): Two phones. LEFT: Empty case. RIGHT: Phone in case. CAMERAS: Use EXACT count and position from specs (if specs say 2 cameras vertical, show EXACTLY 2 cameras vertical, NOT random layout). Both at 3/4 angle.',
+  black: [
+    'PANEL 1 (White Background): Two phones at 3/4 angle showing opposite sides. LEFT: Front screen view with model name. RIGHT: Back view with EXACT case design and EXACT camera configuration from specs. Professional Amazon style.',
+    
+    'PANEL 2 (Dark Background): Phone back side view at 3/4 angle. Show EXACT case design with EXACT camera count and position from specs. Professional lighting.',
+    
+    'PANEL 3 (Light Background): Hybrid design showcase. Phone in case at artistic angle. Text "Hybrid Design" at top. Match reference case design exactly.',
+    
+    'PANEL 4 (Dark Background): Inner velvet design of case. Show interior lining texture and soft velvet material. Text "Premium Velvet Interior". NO phone visible, just case interior.',
+  ],
   
-  'PANEL 3 (Light Background): ONE empty case twisted in S-curve. NO phone. Text "Hybrid Design" at top. Match reference case design exactly.',
-  
-  'PANEL 4 (Dark Background): Hand holding phone in case from back. CAMERAS: Show EXACT camera configuration from specs (count, position, arrangement must match exactly as specified). Phone body visible through transparent parts. Text "Flaunt The Original Look".',
-];
+  transparent: [
+    'PANEL 1 (White Background): Two phones at 3/4 angle showing opposite sides. LEFT: Front screen view with model name. RIGHT: Back view with transparent case showing phone body through case. CAMERAS: EXACT configuration from specs.',
+    
+    'PANEL 2 (Dark Background): Phone back side view at 3/4 angle. Transparent case showing original phone design visible through it. CAMERAS: EXACT count and position from specs.',
+    
+    'PANEL 3 (Light Background): Hybrid design showcase. Phone in transparent case at artistic angle. Text "Hybrid Design" at top. Show phone body visible through case.',
+    
+    'PANEL 4 (Dark Background): Hand holding phone in transparent case. Show back view with phone body visible through case. CAMERAS: EXACT configuration from specs. Text "Flaunt The Original Look".',
+  ],
+};
+
+export function getAngleDescriptions(caseType: string): string[] {
+  return ANGLE_DESCRIPTIONS[caseType] || ANGLE_DESCRIPTIONS.transparent;
+}
 

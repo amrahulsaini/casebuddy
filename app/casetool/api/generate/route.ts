@@ -12,7 +12,7 @@ import pool from '@/lib/db';
 import {
   callGemini,
   buildAnalysisPrompt,
-  ANGLE_DESCRIPTIONS,
+  getAngleDescriptions,
 } from '@/lib/gemini';
 import { StreamWriter } from '@/lib/stream-helpers';
 import { logAPIUsage } from '@/lib/pricing';
@@ -225,8 +225,9 @@ export async function POST(request: NextRequest) {
           });
         }
 
-        // Build angle descriptions text
-        const angleListText = ANGLE_DESCRIPTIONS.map((desc, idx) => `${idx + 1}) ${desc}`).join(' ');
+        // Build angle descriptions text based on case type
+        const angleDescriptions = getAngleDescriptions(caseType);
+        const angleListText = angleDescriptions.map((desc, idx) => `${idx + 1}) ${desc}`).join(' ');
 
         const ts = Date.now();
         const outputDir = join(process.cwd(), 'public', 'output');

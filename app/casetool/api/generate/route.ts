@@ -46,75 +46,33 @@ function buildCaseTypePrompt(
   finalPrompt: string,
   angleListText: string
 ): string {
-  // Base instructions that apply to all case types
-  const baseInstructions = 
-    `CRITICAL INSTRUCTION: Generate product images of the EXACT ${phoneModel} phone model with the EXACT case from the reference image. Do not substitute phone models or change case design. ` +
-    finalPrompt +
-    ` Create a SINGLE ultra-realistic, 4K HIGH-RESOLUTION (minimum 3840x2160 pixels) Amazon-style product collage containing FOUR DISTINCT PANELS arranged in a clean 2x2 grid. Each panel shows a different view/composition as specified in the angle descriptions below. ` +
-    'QUALITY REQUIREMENTS: Crystal-clear sharpness, no blur or artifacts, perfect focus on all details especially camera lenses and textures, 300 DPI print-ready quality, vibrant colors with smooth gradients, professional studio lighting with realistic shadows and reflections. ' +
-    `MANDATORY PHONE MODEL: Every panel must feature the ${phoneModel} phone - do not use generic phones or substitute models. The ${phoneModel} must be recognizable and accurate to the actual device specifications. `;
-
-  let specificInstructions = '';
-
+  
+  let caseInstructions = '';
+  
   switch (caseType) {
     case 'transparent':
-      // TODO: Custom prompt for transparent cases will be provided later
-      specificInstructions =
-        'TRANSPARENCY HANDLING: This is a TRANSPARENT/CLEAR case. The phone body, color, components, internal design, and branding MUST be FULLY VISIBLE through the transparent material. Show the phone\'s actual color and design through the clear case. The case material should have realistic transparency with subtle reflections and light refractions typical of clear TPU/silicone. DO NOT make the case opaque or black. ' +
-        `CASE ACCURACY: The transparent case must match the reference image EXACTLY - same transparency level, material finish (glossy/matte), and cutout positions. Showcase how the ${phoneModel}'s design is enhanced and protected by the clear case. `;
+      caseInstructions = `CASE TYPE: Fully transparent/clear case. The ${phoneModel} phone's body, color, and design must be visible through the clear material.`;
       break;
-
     case 'doyers':
-      // DOYERS STYLE: Black protective frame/bumper with transparent center panel
-      specificInstructions =
-        'DOYERS CASE STRUCTURE - CRITICAL: This is a BLACK OUTLINE/FRAME case with a TRANSPARENT CENTER PANEL. The case has TWO distinct parts that must be rendered correctly:\n' +
-        '\n1. BLACK PROTECTIVE FRAME/BUMPER:\n' +
-        '   - The outer frame, edges, and borders are SOLID BLACK (deep, rich black - not gray)\n' +
-        `   - Black frame wraps around all edges providing protection and grip\n` +
-        '   - Raised black bezels around screen and camera for protection\n' +
-        '   - Black frame should have matte or slightly textured TPU/silicone finish\n' +
-        '   - Show clear definition between the black frame and transparent center\n' +
-        '   - Black sections include: top edge, bottom edge, left side, right side, and protective lips\n' +
-        '\n2. TRANSPARENT CENTER PANEL:\n' +
-        `   - The CENTER BACK PANEL is COMPLETELY TRANSPARENT/CLEAR\n` +
-        `   - Through this transparent center, the ${phoneModel} phone body, color, design, and branding MUST be FULLY VISIBLE\n` +
-        `   - Show the actual phone color and finish through the clear center panel\n` +
-        '   - Render realistic transparency with subtle light refractions and reflections\n' +
-        '   - The transparent section allows the phone\'s beauty to show while the black frame provides protection\n' +
-        '   - DO NOT make the center opaque - it must remain crystal clear\n' +
-        '\n3. CONTRAST & DEFINITION:\n' +
-        '   - Sharp, clear boundary between black frame and transparent center\n' +
-        '   - The black outline should create a striking contrast with the visible phone inside\n' +
-        '   - Show how the black frame enhances and protects without hiding the phone design\n' +
-        '   - Camera cutouts in the black frame should be precise and well-defined\n' +
-        '\n4. MATERIAL ACCURACY:\n' +
-        '   - Black frame: premium TPU/silicone with subtle texture\n' +
-        '   - Transparent center: crystal clear polycarbonate or TPU with glass-like clarity\n' +
-        '   - Show realistic material interactions with studio lighting\n' +
-        '\nRENDER REQUIREMENTS: Maintain the EXACT black frame shape and transparent center area from the reference image. The case should showcase both protection (black frame) and aesthetics (visible phone through transparent center). ';
+      caseInstructions = `CASE TYPE: Black frame with transparent center (Doyers style). Black edges wrap around, but center is clear showing the ${phoneModel} phone's body and color.`;
       break;
-
     case 'black':
-      // TODO: Custom prompt for black bumper cases will be provided later
-      specificInstructions =
-        'BLACK BUMPER CASE: This is a solid BLACK protective bumper case. The case should be rendered with deep, rich black color - not gray or faded. ' +
-        'MATERIAL QUALITY: Show premium black material finish (matte or glossy TPU/silicone) with subtle texture details. Capture realistic light interactions - black cases absorb light but should show form definition through subtle highlights and shadows. ' +
-        'PROTECTION FOCUS: Emphasize the protective bumper design, raised edges for screen protection, reinforced corners, and precise button cutouts. The black color should contrast beautifully with the phone\'s design visible through camera cutouts. ';
+      caseInstructions = `CASE TYPE: Solid black protective case. Deep black color covering the phone.`;
       break;
-
     default:
-      specificInstructions =
-        'CASE ACCURACY: The case must match the reference image EXACTLY - same color, material, transparency, and cutout positions. Do not modify or reinterpret the case design. ';
+      caseInstructions = `CASE TYPE: Match the reference case exactly.`;
   }
 
-  const commonEnding =
-    '\n\nCRITICAL - PANEL COMPOSITION INSTRUCTIONS: The four panels MUST follow these EXACT specifications:\n' +
-    angleListText +
-    '\n\nIMPORTANT: Each panel has its own unique composition - some may show single phones, others may show multiple phones, and some may include text annotations. Follow each panel description PRECISELY. ' +
-    `Maintain the ${phoneModel} phone accuracy across all panels. Preserve exact case geometry from reference image including camera island shape and cutout positions. The ${phoneModel} phone body must always fit perfectly inside the case outline. ` +
-    'RENDERING QUALITY: Use maximum detail level, ray-traced lighting, photorealistic materials (TPU softness, silicone texture, glass reflections, transparent clarity for clear cases, matte/glossy finish for opaque cases), perfect geometric accuracy, no distortion or warping.';
+  return `Create a 4-panel product photo grid (2x2 layout) for ${phoneModel} in the case from the reference image.
 
-  return baseInstructions + specificInstructions + commonEnding;
+${finalPrompt}
+
+${caseInstructions}
+
+PANELS (follow EXACTLY):
+${angleListText}
+
+QUALITY: 4K resolution, Amazon-style product photography, professional studio lighting, clean backgrounds, sharp focus on cameras.`;
 }
 
 export async function POST(request: NextRequest) {

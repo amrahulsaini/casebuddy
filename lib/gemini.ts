@@ -39,86 +39,40 @@ export async function callGemini(
 }
 
 export function buildAnalysisPrompt(phoneModel: string): string {
-  return `You are an expert product photographer and smartphone hardware specialist.
+  return `You are analyzing a phone case image for "${phoneModel}".
 
-STEP 1 - MANDATORY PHONE MODEL RESEARCH:
-Before analyzing the case image, you MUST research the EXACT hardware specifications of "${phoneModel}".
+TASK: Research the ${phoneModel} phone and describe what you find.
 
-USE YOUR KNOWLEDGE BASE to answer these questions about "${phoneModel}":
-1. How many rear cameras does "${phoneModel}" have? (Example: 2, 3, 4, or 5 cameras)
-2. What is the exact arrangement of these cameras? (Example: "vertical line", "square 2x2 grid", "L-shaped", "triangular cluster")
-3. Does "${phoneModel}" have a torch/flash light on the back? (Yes/No, and where is it positioned?)
-4. What is the camera island shape on "${phoneModel}"? (Example: "rectangular", "square", "circular", "pill-shaped", "individual circles")
-5. Where is the camera module located on the back? (Example: "top-left corner", "top-center", "center-left")
-6. What are the camera sensor sizes? (Example: "large main + medium ultra-wide + small macro")
+STEP 1: Look up "${phoneModel}" specs:
+- How many cameras on the back?
+- Is there a flash/torch?
+- What arrangement (vertical, grid, L-shape)?
+- Where is the camera module (top-left, center, etc.)?
 
-CRITICAL: You MUST use your actual knowledge about "${phoneModel}" hardware. Do NOT make up information. Do NOT rely only on what you see in the case image.
+STEP 2: Look at the case image:
+- What material? (clear/transparent, black frame with clear center, solid black, etc.)
+- What can you see?
 
-STEP 2 - CASE IMAGE ANALYSIS:
-Now analyze the uploaded case image for:
-- Case material and color (transparent/black frame/solid)
-- Case structure and finish
-- Camera cutout area size and shape
-
-STEP 3 - OUTPUT REQUIREMENTS:
-Your output must be STRICT JSON with exactly these fields:
+Return ONLY this JSON (no markdown, no extra text):
 
 {
   "phone_model_camera_specs": {
     "model_name": "${phoneModel}",
-    "rear_camera_count": 0,
-    "has_torch_light": false,
-    "camera_arrangement": "",
-    "camera_island_shape": "",
-    "camera_module_position": "",
-    "lens_sizes": ""
+    "rear_camera_count": 3,
+    "has_torch_light": true,
+    "camera_arrangement": "vertical triple camera",
+    "camera_island_shape": "rectangular",
+    "camera_module_position": "top-left corner",
+    "lens_sizes": "50MP main, 8MP ultrawide, 2MP macro"
   },
-  "phone_model_description": "...",
-  "case_description": "...",
-  "final_generation_prompt": "..."
+  "phone_model_description": "The ${phoneModel} has 3 rear cameras arranged vertically...",
+  "case_description": "Transparent case with black frame (doyers style)...",
+  "final_generation_prompt": "Create product photos of ${phoneModel} with exactly 3 cameras arranged vertically in the case shown..."
 }
 
-FIELD DETAILS:
+IMPORTANT: The final_generation_prompt should start with: "Create a 4-panel product grid for ${phoneModel}. This phone has [X] cameras arranged [pattern] with [torch if present]. The case is [describe case type]."
 
-1) "phone_model_camera_specs" (MANDATORY - MUST BE FILLED):
-   - "model_name": Exactly "${phoneModel}"
-   - "rear_camera_count": INTEGER number (2, 3, 4, etc.) - the EXACT count for ${phoneModel}
-   - "has_torch_light": true or false - does ${phoneModel} have a torch/flash on the back?
-   - "camera_arrangement": String describing layout (e.g., "vertical triple camera", "2x2 square grid")
-   - "camera_island_shape": Shape of the camera module (e.g., "rectangular", "circular", "pill")
-   - "camera_module_position": Location on back (e.g., "top-left corner")
-   - "lens_sizes": Description of sensor sizes (e.g., "large main, medium ultrawide, small macro")
-
-2) "phone_model_description":
-   - Start with: "The ${phoneModel} features [X] rear cameras"
-   - Describe the RESEARCHED camera configuration from your knowledge base
-   - Explain how these cameras are arranged
-   - Mention torch light if present
-   - Include camera island shape and position
-
-3) "case_description":
-   - Describe the case from the uploaded image:
-     • Material (transparent/black frame/solid)
-     • Structure (doyers style with black frame and clear center, or fully transparent, or solid)
-     • Camera cutout area
-
-4) "final_generation_prompt":
-   - MUST start with: "Ultra realistic Amazon-style product photos of the ${phoneModel} phone"
-   - IMMEDIATELY follow with: "The ${phoneModel} has exactly [X] rear cameras arranged in [arrangement pattern] with [lens descriptions]. The camera island is [shape] located at [position]. [Include torch light if present]."
-   - Then describe the case structure
-   - Then continue with composition and quality requirements
-   - CRITICAL: The prompt must explicitly state the exact camera count and arrangement researched in step 1
-   - Example start: "Ultra realistic Amazon-style product photos of the Vivo V60 5G phone. The Vivo V60 5G has exactly 3 rear cameras arranged in a vertical line with a large 50MP main camera, 8MP ultra-wide, and 2MP macro sensor. The camera island is rectangular located at the top-left corner. A torch light is positioned below the cameras. The phone is inserted into a black frame doyers case with transparent center..."
-
-REMEMBER: You MUST research the actual "${phoneModel}" specifications using your knowledge base. The camera count, arrangement, and torch light presence must be ACCURATE to the real device.
-
-ALIGNMENT RULES:
-- Phone body must fit 100% inside the case
-- No part of phone can be outside case edges
-- Camera module must align with case cutout
-- Use EXACTLY "${phoneModel}" - no substitutions
-
-Output ONLY the JSON. No markdown, no explanations.`;
+Keep it simple and accurate.`;
 }
 
 export function buildBoundingBoxPrompt(): string {

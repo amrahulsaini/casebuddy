@@ -74,12 +74,10 @@ Return JSON:
   },
   "phone_model_description": "${phoneModel} has 2 vertical cameras at top-left with torch",
   "case_description": "Describe the EXACT case from uploaded image - colors, patterns, material, cutouts",
-  "final_generation_prompt": "⚠️ ${phoneModel} CAMERA COUNT ⚠️\n2 CAMERAS ONLY (not 3, not 4, ONLY TWO)\n1 TORCH\nTOTAL: 3 circles\nVertical line, top-left\n\n⚠️ RENDER EXACTLY 2 CAMERA CIRCLES + 1 TORCH CIRCLE = 3 TOTAL ⚠️\n\nCase: Use exact design from reference image.\n4K product photos, professional lighting."
+  "final_generation_prompt": "⚠️ ${phoneModel} CAMERA COUNT ⚠️\\n2 CAMERAS ONLY (not 3, not 4, ONLY TWO)\\n1 TORCH\\nTOTAL: 3 circles\\nVertical line, top-left\\n\\n⚠️ RENDER EXACTLY 2 CAMERA CIRCLES + 1 TORCH CIRCLE = 3 TOTAL ⚠️\\n\\nCase: Use exact design from reference image.\\n4K product photos, professional lighting."
 }
 
 Make final_generation_prompt SHORT and START with camera count using emojis and caps.`;
-}
-- Be extremely explicit and use numbers written as words AND digits`;
 }
 
 export function buildBoundingBoxPrompt(): string {

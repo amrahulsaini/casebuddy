@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server';
 export async function GET() {
   try {
     // Hardcoded credentials from your .env.local
-    const hardcodedEmail = 'a@casebuddy.co.in';
-    const hardcodedPassword = 'HnBXF%PHC8h2Kvt%ru8$z&zxitbVIh3p';
+    const hardcodedEmail = 'x@casebuddy.co.in';
+    const hardcodedPassword = 'S8Mbz4XJ@zWhrgvjZp3Mp&2v55YSWy*a';
     
     // Environment variables
     const envEmail = process.env.SHIPROCKET_EMAIL || '';

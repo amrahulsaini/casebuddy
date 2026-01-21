@@ -122,6 +122,7 @@ export async function GET(request: NextRequest) {
       price: parseFloat(p.price),
       compare_price: p.compare_price ? parseFloat(p.compare_price) : null,
       is_featured: Boolean(p.is_featured),
+      sort_order: p.sort_order != null ? Number(p.sort_order) : 0,
       category_slug: p.category_slug != null ? String(p.category_slug) : null,
       category_name: p.category_name != null ? String(p.category_name) : null,
     })) : [];

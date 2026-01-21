@@ -150,12 +150,12 @@ export async function POST(request: NextRequest) {
         `
       });
 
-      return NextResponse.json({ success: true, message: 'OTP sent to email' });
-    } else {
-      // Mobile OTP
-      if (!mobile) {
-        return NextResponse.json(
-          { error: 'Mobile number is required' },
-          { status: 400 }
-        );
-      }
+    return NextResponse.json({ success: true, message: 'OTP sent to email' });
+  } catch (error) {
+    console.error('Error sending OTP:', error);
+    return NextResponse.json(
+      { error: 'Failed to send OTP' },
+      { status: 500 }
+    );
+  }
+}

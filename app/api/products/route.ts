@@ -9,45 +9,62 @@ export async function GET(request: NextRequest) {
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : undefined;
     const offset = searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : undefined;
 
-    let query = `
-      SELECT 
-        p.id,
-        p.name,
-        p.slug,
-        p.short_description,
-        p.price,
-        p.compare_price,
-        p.is_featured,
-        pi.image_url,
-        pi.alt_text,
-        cat.category_slug,
-        cat.category_name,
-        cat.sort_order
-      FROM products p
-      LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = TRUE
-      LEFT JOIN (
-        SELECT
-          pc.product_id,
-          MIN(c.slug) AS category_slug,
-          MIN(c.name) AS category_name,
-          MIN(pc.sort_order) AS sort_order
-        FROM product_categories pc
-        JOIN categories c ON pc.category_id = c.id
-        GROUP BY pc.product_id
-      ) cat ON cat.product_id = p.id
-      WHERE p.is_active = TRUE
-    `;
-
+    let query: string;
     const params: any[] = [];
 
-    // Filter by category
+    // When filtering by category, get sort_order from that specific category
     if (categorySlug) {
-      query += ` AND p.id IN (
-        SELECT pc.product_id FROM product_categories pc
-        JOIN categories c ON pc.category_id = c.id
-        WHERE c.slug = ?
-      )`;
+      query = `
+        SELECT 
+          p.id,
+          p.name,
+          p.slug,
+          p.short_description,
+          p.price,
+          p.compare_price,
+          p.is_featured,
+          pi.image_url,
+          pi.alt_text,
+          c.slug AS category_slug,
+          c.name AS category_name,
+          pc.sort_order
+        FROM products p
+        INNER JOIN product_categories pc ON p.id = pc.product_id
+        INNER JOIN categories c ON pc.category_id = c.id AND c.slug = ?
+        LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = TRUE
+        WHERE p.is_active = TRUE
+      `;
       params.push(categorySlug);
+    } else {
+      // When not filtering, get sort_order from first category
+      query = `
+        SELECT 
+          p.id,
+          p.name,
+          p.slug,
+          p.short_description,
+          p.price,
+          p.compare_price,
+          p.is_featured,
+          pi.image_url,
+          pi.alt_text,
+          cat.category_slug,
+          cat.category_name,
+          cat.sort_order
+        FROM products p
+        LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = TRUE
+        LEFT JOIN (
+          SELECT
+            pc.product_id,
+            MIN(c.slug) AS category_slug,
+            MIN(c.name) AS category_name,
+            MIN(pc.sort_order) AS sort_order
+          FROM product_categories pc
+          JOIN categories c ON pc.category_id = c.id
+          GROUP BY pc.product_id
+        ) cat ON cat.product_id = p.id
+        WHERE p.is_active = TRUE
+      `;
     }
 
     // Filter by featured
@@ -79,7 +96,12 @@ export async function GET(request: NextRequest) {
     const [countResult]: any = await pool.execute(countQuery, countParams);
     const total = Number(countResult[0]?.total || 0);
 
-    query += ` ORDER BY cat.sort_order ASC, p.created_at DESC`;
+    // Order by sort_order - use direct column if filtering by category, else use cat alias
+    if (categorySlug) {
+      query += ` ORDER BY pc.sort_order ASC, p.created_at DESC`;
+    } else {
+      query += ` ORDER BY cat.sort_order ASC, p.created_at DESC`;
+    }
     
     if (limit) {
       query += ` LIMIT ?`;

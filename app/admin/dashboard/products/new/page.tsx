@@ -51,6 +51,7 @@ export default function ProductNewPage() {
     compare_price: '',
     sku: '',
     stock_quantity: '999',
+    sort_order: '0',
     is_featured: false,
     is_active: true,
     design_addon_enabled: false,
@@ -160,6 +161,7 @@ export default function ProductNewPage() {
       price: parseFloat(formData.price),
       compare_price: formData.compare_price ? parseFloat(formData.compare_price) : null,
       stock_quantity: parseInt(formData.stock_quantity),
+      sort_order: parseInt(formData.sort_order) || 0,
       categories: selectedCategories,
     };
 
@@ -309,6 +311,19 @@ export default function ProductNewPage() {
                 }
               />
             </div>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>Sort Order</label>
+            <input
+              type="number"
+              value={formData.sort_order}
+              onChange={(e) =>
+                setFormData({ ...formData, sort_order: e.target.value })
+              }
+              placeholder="0"
+            />
+            <small className={styles.hint}>Lower numbers appear first in category listings</small>
           </div>
         </div>
 

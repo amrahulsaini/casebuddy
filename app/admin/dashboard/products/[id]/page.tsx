@@ -55,6 +55,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
     compare_price: '',
     sku: '',
     stock_quantity: '0',
+    sort_order: '0',
     is_featured: false,
     is_active: true,
     design_addon_enabled: false,
@@ -83,6 +84,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
         compare_price: data.compare_price?.toString() || '',
         sku: data.sku || '',
         stock_quantity: data.stock_quantity.toString(),
+        sort_order: (data.sort_order || 0).toString(),
         is_featured: data.is_featured,
         is_active: data.is_active,
         design_addon_enabled: data.design_addon_enabled || false,
@@ -142,6 +144,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
       price: parseFloat(formData.price),
       compare_price: formData.compare_price ? parseFloat(formData.compare_price) : null,
       stock_quantity: parseInt(formData.stock_quantity),
+      sort_order: parseInt(formData.sort_order) || 0,
       categories: selectedCategories,
     };
 
@@ -280,6 +283,19 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
                 }
               />
             </div>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>Sort Order</label>
+            <input
+              type="number"
+              value={formData.sort_order}
+              onChange={(e) =>
+                setFormData({ ...formData, sort_order: e.target.value })
+              }
+              placeholder="0"
+            />
+            <small className={styles.hint}>Lower numbers appear first in category listings</small>
           </div>
         </div>
 

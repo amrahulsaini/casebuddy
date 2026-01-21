@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
     const [countResult]: any = await pool.execute(countQuery, countParams);
     const total = Number(countResult[0]?.total || 0);
 
-    query += ` ORDER BY p.created_at DESC`;
+    query += ` ORDER BY p.sort_order ASC, p.created_at DESC`;
     
     if (limit) {
       query += ` LIMIT ?`;

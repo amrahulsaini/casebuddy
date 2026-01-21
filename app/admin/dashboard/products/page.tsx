@@ -10,6 +10,7 @@ interface Product {
   slug: string;
   price: number;
   stock_quantity: number;
+  sort_order: number;
   is_featured: boolean;
   is_active: boolean;
   categories: string;
@@ -403,6 +404,7 @@ export default function ProductsPage() {
                   <th>SKU</th>
                   <th>Price</th>
                   <th>Stock</th>
+                  <th>Sort</th>
                   <th>Categories</th>
                   <th>Status</th>
                   <th>Actions</th>
@@ -437,6 +439,7 @@ export default function ProductsPage() {
                     <td>{product.slug.toUpperCase()}</td>
                     <td>₹{parseFloat(product.price.toString()).toFixed(2)}</td>
                     <td>{product.stock_quantity}</td>
+                    <td>{product.sort_order || 0}</td>
                     <td>{product.categories || '-'}</td>
                     <td>
                       <span

@@ -13,9 +13,9 @@ if (!global.otpStore) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, mobile, otp, type } = body;
+    const { email, otp, type } = body;
 
-    if (!type || (type !== 'email' && type !== 'mobile')) {
+    if (!type || type !== 'email') {
       return NextResponse.json(
         { error: 'Invalid request type' },
         { status: 400 }
@@ -29,7 +29,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const key = type === 'email' ? `email:${email}` : `mobile:${mobile}`;
+    if (!email) {
+      return NextResponse.json(
+        { error: 'Email is required' },
+        { status: 400 }
+      );
+    }
+
+    const key = `email:${email}`;
     
     if (!global.otpStore) {
       return NextResponse.json(

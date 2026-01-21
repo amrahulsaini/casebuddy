@@ -37,31 +37,29 @@ function generateOTP(): string {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, mobile, type } = body;
+    const { email, type } = body;
     const purpose = typeof body?.purpose === 'string' ? body.purpose : '';
     const normalizedPurpose = String(purpose)
       .trim()
       .toLowerCase()
       .replace(/[\s-]+/g, '_');
 
-    if (!type || (type !== 'email' && type !== 'mobile')) {
+    if (!type || type !== 'email') {
       return NextResponse.json(
         { error: 'Invalid request type' },
         { status: 400 }
       );
     }
 
-    const identifier = type === 'email' ? email : mobile;
-    
-    if (!identifier) {
+    if (!email) {
       return NextResponse.json(
-        { error: `${type === 'email' ? 'Email' : 'Mobile'} is required` },
+        { error: 'Email is required' },
         { status: 400 }
       );
     }
 
     // RATE LIMITING: Max 3 OTPs per 10 minutes
-    const rateLimitKey = `${type}:${identifier}`;
+    const rateLimitKey = `email:${email}`;
     const now = Date.now();
     
     if (!global.otpRateLimit) {
@@ -91,23 +89,15 @@ export async function POST(request: NextRequest) {
     const otp = generateOTP();
     const expires = Date.now() + 10 * 60 * 1000; // 10 minutes
 
-    if (type === 'email') {
-      if (!email) {
-        return NextResponse.json(
-          { error: 'Email is required' },
-          { status: 400 }
-        );
-      }
+    // Store OTP
+    if (!global.otpStore) {
+      global.otpStore = new Map();
+    }
+    global.otpStore.set(`email:${email}`, { otp, expires });
 
-      // Store OTP
-      if (!global.otpStore) {
-        global.otpStore = new Map();
-      }
-      global.otpStore.set(`email:${email}`, { otp, expires });
-
-      // Send email
-      const isOrdersLogin = normalizedPurpose === 'orders_login';
-      await transporter.sendMail({
+    // Send email
+    const isOrdersLogin = normalizedPurpose === 'orders_login';
+    await transporter.sendMail({
         from: `"CaseBuddy" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: isOrdersLogin
@@ -169,39 +159,3 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-
-      // Store OTP
-      if (!global.otpStore) {
-        global.otpStore = new Map();
-      }
-      global.otpStore.set(`mobile:${mobile}`, { otp, expires });
-
-      // TODO: Integrate SMS gateway (Twilio, MSG91, etc.)
-      // For now, we'll just log it (in production, send actual SMS)
-      console.log(`Mobile OTP for ${mobile}: ${otp}`);
-
-      // In development, send OTP via email as fallback
-      if (process.env.NODE_ENV === 'development') {
-        await transporter.sendMail({
-          from: `"CaseBuddy" <${process.env.EMAIL_USER}>`,
-          to: process.env.EMAIL_USER,
-          subject: `Mobile OTP for ${mobile}`,
-          text: `OTP for mobile ${mobile}: ${otp}`
-        });
-      }
-
-      return NextResponse.json({ 
-        success: true, 
-        message: 'OTP sent to mobile',
-        // In development, return OTP for testing
-        ...(process.env.NODE_ENV === 'development' && { otp })
-      });
-    }
-  } catch (error) {
-    console.error('Error sending OTP:', error);
-    return NextResponse.json(
-      { error: 'Failed to send OTP' },
-      { status: 500 }
-    );
-  }
-}

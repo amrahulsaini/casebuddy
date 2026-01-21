@@ -97,7 +97,7 @@ function CheckoutContent() {
     let interval: NodeJS.Timeout;
     if (emailResendTimer > 0) {
       interval = setInterval(() => {
-        setEmailResendTimer((prev) => prev - 1);
+        setEmailResendTimer((prev) => prev > 0 ? prev - 1 : 0);
       }, 1000);
     }
     return () => clearInterval(interval);
@@ -343,6 +343,8 @@ function CheckoutContent() {
       showToast('error', 'Verification failed. Please try again.');
     }
   };
+
+
 
 
 

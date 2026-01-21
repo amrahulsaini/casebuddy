@@ -40,6 +40,7 @@ export default function ProductNewPage() {
   const [selectedPage, setSelectedPage] = useState<string>('');
   const [selectedSection, setSelectedSection] = useState<string>('');
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
+  const [categorySortOrders, setCategorySortOrders] = useState<Record<number, number>>({});
   const [images, setImages] = useState<ProductImage[]>([]);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
@@ -51,7 +52,6 @@ export default function ProductNewPage() {
     compare_price: '',
     sku: '',
     stock_quantity: '999',
-    sort_order: '0',
     is_featured: false,
     is_active: true,
     design_addon_enabled: false,
@@ -161,8 +161,10 @@ export default function ProductNewPage() {
       price: parseFloat(formData.price),
       compare_price: formData.compare_price ? parseFloat(formData.compare_price) : null,
       stock_quantity: parseInt(formData.stock_quantity),
-      sort_order: parseInt(formData.sort_order) || 0,
-      categories: selectedCategories,
+      categories: selectedCategories.map(catId => ({
+        categoryId: catId,
+        sortOrder: categorySortOrders[catId] || 0
+      })),
     };
 
     try {
@@ -312,19 +314,6 @@ export default function ProductNewPage() {
               />
             </div>
           </div>
-
-          <div className={styles.formGroup}>
-            <label>Sort Order</label>
-            <input
-              type="number"
-              value={formData.sort_order}
-              onChange={(e) =>
-                setFormData({ ...formData, sort_order: e.target.value })
-              }
-              placeholder="0"
-            />
-            <small className={styles.hint}>Lower numbers appear first in category listings</small>
-          </div>
         </div>
 
         <div className={styles.formCard}>
@@ -387,14 +376,29 @@ export default function ProductNewPage() {
                     <p className={styles.hint}>No categories found for this section</p>
                   ) : (
                     categories.map((category) => (
-                      <label key={category.id} className={styles.categoryCheckbox}>
-                        <input
-                          type="checkbox"
-                          checked={selectedCategories.includes(category.id)}
-                          onChange={() => toggleCategory(category.id)}
-                        />
-                        {category.name}
-                      </label>
+                      <div key={category.id} className={styles.categoryItem}>
+                        <label className={styles.categoryCheckbox}>
+                          <input
+                            type="checkbox"
+                            checked={selectedCategories.includes(category.id)}
+                            onChange={() => toggleCategory(category.id)}
+                          />
+                          {category.name}
+                        </label>
+                        {selectedCategories.includes(category.id) && (
+                          <input
+                            type="number"
+                            placeholder="Sort order"
+                            value={categorySortOrders[category.id] || 0}
+                            onChange={(e) => setCategorySortOrders(prev => ({
+                              ...prev,
+                              [category.id]: parseInt(e.target.value) || 0
+                            }))}
+                            className={styles.sortOrderInput}
+                            min="0"
+                          />
+                        )}
+                      </div>
                     ))
                   )}
                 </div>

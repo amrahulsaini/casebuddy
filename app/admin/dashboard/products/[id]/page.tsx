@@ -40,6 +40,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
   const [product, setProduct] = useState<Product | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
+  const [categorySortOrders, setCategorySortOrders] = useState<Record<number, number>>({});
   const [images, setImages] = useState<ProductImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -55,7 +56,6 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
     compare_price: '',
     sku: '',
     stock_quantity: '0',
-    sort_order: '0',
     is_featured: false,
     is_active: true,
     design_addon_enabled: false,
@@ -84,12 +84,20 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
         compare_price: data.compare_price?.toString() || '',
         sku: data.sku || '',
         stock_quantity: data.stock_quantity.toString(),
-        sort_order: (data.sort_order || 0).toString(),
         is_featured: data.is_featured,
         is_active: data.is_active,
         design_addon_enabled: data.design_addon_enabled || false,
       });
       setSelectedCategories(data.categories.map((c: Category) => c.id));
+      
+      // Load category-specific sort orders
+      const sortOrders: Record<number, number> = {};
+      data.categories.forEach((c: any) => {
+        if (c.sort_order !== undefined) {
+          sortOrders[c.id] = c.sort_order;
+        }
+      });
+      setCategorySortOrders(sortOrders);
     } catch (error) {
       console.error('Error fetching product:', error);
     } finally {
@@ -144,8 +152,10 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
       price: parseFloat(formData.price),
       compare_price: formData.compare_price ? parseFloat(formData.compare_price) : null,
       stock_quantity: parseInt(formData.stock_quantity),
-      sort_order: parseInt(formData.sort_order) || 0,
-      categories: selectedCategories,
+      categories: selectedCategories.map(catId => ({
+        categoryId: catId,
+        sortOrder: categorySortOrders[catId] || 0
+      })),
     };
 
     try {
@@ -284,19 +294,6 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
               />
             </div>
           </div>
-
-          <div className={styles.formGroup}>
-            <label>Sort Order</label>
-            <input
-              type="number"
-              value={formData.sort_order}
-              onChange={(e) =>
-                setFormData({ ...formData, sort_order: e.target.value })
-              }
-              placeholder="0"
-            />
-            <small className={styles.hint}>Lower numbers appear first in category listings</small>
-          </div>
         </div>
 
         <div className={styles.formCard}>
@@ -313,14 +310,29 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
           <h2>Categories</h2>
           <div className={styles.categoryGrid}>
             {categories.map((category) => (
-              <label key={category.id} className={styles.categoryCheckbox}>
-                <input
-                  type="checkbox"
-                  checked={selectedCategories.includes(category.id)}
-                  onChange={() => toggleCategory(category.id)}
-                />
-                {category.name}
-              </label>
+              <div key={category.id} className={styles.categoryItem}>
+                <label className={styles.categoryCheckbox}>
+                  <input
+                    type="checkbox"
+                    checked={selectedCategories.includes(category.id)}
+                    onChange={() => toggleCategory(category.id)}
+                  />
+                  {category.name}
+                </label>
+                {selectedCategories.includes(category.id) && (
+                  <input
+                    type="number"
+                    placeholder="Sort order"
+                    value={categorySortOrders[category.id] || 0}
+                    onChange={(e) => setCategorySortOrders(prev => ({
+                      ...prev,
+                      [category.id]: parseInt(e.target.value) || 0
+                    }))}
+                    className={styles.sortOrderInput}
+                    min="0"
+                  />
+                )}
+              </div>
             ))}
           </div>
         </div>

@@ -21,14 +21,16 @@ export async function GET(request: NextRequest) {
         pi.image_url,
         pi.alt_text,
         cat.category_slug,
-        cat.category_name
+        cat.category_name,
+        cat.sort_order
       FROM products p
       LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = TRUE
       LEFT JOIN (
         SELECT
           pc.product_id,
           MIN(c.slug) AS category_slug,
-          MIN(c.name) AS category_name
+          MIN(c.name) AS category_name,
+          MIN(pc.sort_order) AS sort_order
         FROM product_categories pc
         JOIN categories c ON pc.category_id = c.id
         GROUP BY pc.product_id
@@ -77,7 +79,7 @@ export async function GET(request: NextRequest) {
     const [countResult]: any = await pool.execute(countQuery, countParams);
     const total = Number(countResult[0]?.total || 0);
 
-    query += ` ORDER BY p.sort_order ASC, p.created_at DESC`;
+    query += ` ORDER BY cat.sort_order ASC, p.created_at DESC`;
     
     if (limit) {
       query += ` LIMIT ?`;

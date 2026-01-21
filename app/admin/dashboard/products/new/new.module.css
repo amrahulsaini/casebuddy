@@ -104,6 +104,12 @@
   margin-bottom: 12px;
 }
 
+.categoryItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .categoryCheckbox {
   display: flex;
   align-items: center;
@@ -122,6 +128,22 @@
 .categoryCheckbox input[type='checkbox'] {
   width: auto;
   cursor: pointer;
+}
+
+.sortOrderInput {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  background: white;
+  transition: all 0.2s;
+}
+
+.sortOrderInput:focus {
+  outline: none;
+  border-color: #ff6b00;
+  background: #fff5f0;
 }
 
 .hint {

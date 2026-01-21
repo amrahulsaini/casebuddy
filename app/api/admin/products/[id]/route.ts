@@ -33,9 +33,9 @@ export async function GET(
         }
       }
 
-      // Get categories
+      // Get categories with sort_order
       const [categories] = await connection.execute(
-        `SELECT c.* FROM categories c
+        `SELECT c.*, pc.sort_order FROM categories c
          JOIN product_categories pc ON c.id = pc.category_id
          WHERE pc.product_id = ?`,
         [id]
@@ -82,7 +82,7 @@ export async function PUT(
         `UPDATE products SET
          name = ?, slug = ?, description = ?, short_description = ?,
          price = ?, compare_price = ?, sku = ?, stock_quantity = ?,
-         sort_order = ?, is_featured = ?, is_active = ?, design_addon_enabled = ?
+         is_featured = ?, is_active = ?, design_addon_enabled = ?
          WHERE id = ?`,
         [
           data.name,
@@ -93,7 +93,6 @@ export async function PUT(
           data.compare_price || null,
           data.sku || '',
           data.stock_quantity || 0,
-          data.sort_order || 0,
           data.is_featured || false,
           data.is_active ?? true,
           data.design_addon_enabled || false,
@@ -101,13 +100,15 @@ export async function PUT(
         ]
       );
 
-      // Update categories
+      // Update categories with sort_order
       if (data.categories) {
         await connection.execute('DELETE FROM product_categories WHERE product_id = ?', [id]);
-        for (const categoryId of data.categories) {
+        for (const cat of data.categories) {
+          const categoryId = typeof cat === 'object' ? cat.categoryId : cat;
+          const sortOrder = typeof cat === 'object' ? (cat.sortOrder || 0) : 0;
           await connection.execute(
-            'INSERT INTO product_categories (product_id, category_id) VALUES (?, ?)',
-            [id, categoryId]
+            'INSERT INTO product_categories (product_id, category_id, sort_order) VALUES (?, ?, ?)',
+            [id, categoryId, sortOrder]
           );
         }
       }

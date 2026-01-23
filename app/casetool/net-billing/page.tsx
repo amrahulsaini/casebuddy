@@ -14,7 +14,6 @@ interface UserBillingDetail {
   image_enhancement_count: number;
   total_tokens: number;
   total_images: number;
-  total_cost_usd: number;
   total_cost_inr: number;
   last_activity: string;
 }
@@ -23,22 +22,27 @@ interface ModelUsageDetail {
   model_name: string;
   operation_type: string;
   count: number;
-  total_cost_usd: number;
   total_cost_inr: number;
-  avg_cost_per_operation: number;
+}
+
+interface DailyReportRow {
+  day: string;
+  generations: number;
+  total_inr: number;
+  models: string[];
 }
 
 interface NetBillingData {
   summary: {
     total_users: number;
     total_operations: number;
-    total_cost_usd: number;
     total_cost_inr: number;
     total_tokens: number;
     total_images: number;
   };
   userBilling: UserBillingDetail[];
   modelUsage: ModelUsageDetail[];
+  dailyReport: DailyReportRow[];
 }
 
 export default function NetBillingPage() {
@@ -85,22 +89,27 @@ export default function NetBillingPage() {
     csvContent += 'SUMMARY\n';
     csvContent += `Total Users,${data.summary.total_users}\n`;
     csvContent += `Total Operations,${data.summary.total_operations}\n`;
-    csvContent += `Total Cost (USD),${data.summary.total_cost_usd.toFixed(4)}\n`;
     csvContent += `Total Cost (INR),${data.summary.total_cost_inr.toFixed(2)}\n`;
     csvContent += `Total Tokens,${data.summary.total_tokens}\n`;
     csvContent += `Total Images,${data.summary.total_images}\n\n`;
 
     // User billing section
     csvContent += 'USER BILLING DETAILS\n';
-    csvContent += 'Email,Total Operations,Text Analysis,Image Generation,Image Enhancement,Total Cost (USD),Total Cost (INR),Last Activity\n';
+    csvContent += 'Email,Total Operations,Text Analysis,Image Generation,Image Enhancement,Total Cost (INR),Last Activity\n';
     data.userBilling.forEach((user) => {
-      csvContent += `"${user.email}",${user.total_operations},${user.text_analysis_count},${user.image_generation_count},${user.image_enhancement_count},${user.total_cost_usd.toFixed(4)},${user.total_cost_inr.toFixed(2)},"${user.last_activity}"\n`;
+      csvContent += `"${user.email}",${user.total_operations},${user.text_analysis_count},${user.image_generation_count},${user.image_enhancement_count},${user.total_cost_inr.toFixed(2)},"${user.last_activity}"\n`;
     });
 
     csvContent += '\n\nMODEL USAGE DETAILS\n';
-    csvContent += 'Model,Operation Type,Count,Total Cost (USD),Total Cost (INR),Avg Cost Per Operation\n';
+    csvContent += 'Model,Operation Type,Count,Total Cost (INR)\n';
     data.modelUsage.forEach((model) => {
-      csvContent += `"${model.model_name}","${model.operation_type}",${model.count},${model.total_cost_usd.toFixed(4)},${model.total_cost_inr.toFixed(2)},${model.avg_cost_per_operation.toFixed(6)}\n`;
+      csvContent += `"${model.model_name}","${model.operation_type}",${model.count},${model.total_cost_inr.toFixed(2)}\n`;
+    });
+
+    csvContent += '\n\nDAILY REPORT\n';
+    csvContent += 'Date,Generations,Total Cost (INR),Models Used\n';
+    data.dailyReport.forEach((row) => {
+      csvContent += `${row.day},${row.generations},${row.total_inr.toFixed(2)},"${row.models.join('; ')}"\n`;
     });
 
     // Download CSV
@@ -119,7 +128,7 @@ export default function NetBillingPage() {
   }) || [];
 
   const sortedUsers = [...filteredUsers].sort((a, b) => {
-    if (sortBy === 'cost') return b.total_cost_usd - a.total_cost_usd;
+    if (sortBy === 'cost') return b.total_cost_inr - a.total_cost_inr;
     if (sortBy === 'operations') return b.total_operations - a.total_operations;
     return a.email.localeCompare(b.email);
   });
@@ -191,15 +200,7 @@ export default function NetBillingPage() {
           </div>
         </div>
 
-        <div className={styles.summaryCard}>
-          <div className={styles.cardIcon} style={{ backgroundColor: '#fff3e0' }}>
-            <DollarSign size={24} color="#f57c00" />
-          </div>
-          <div className={styles.cardContent}>
-            <p className={styles.cardLabel}>Total Cost (USD)</p>
-            <p className={styles.cardValue}>${data.summary.total_cost_usd.toFixed(4)}</p>
-          </div>
-        </div>
+
 
         <div className={styles.summaryCard}>
           <div className={styles.cardIcon} style={{ backgroundColor: '#e8f5e9' }}>
@@ -267,7 +268,6 @@ export default function NetBillingPage() {
                 <th>Image Enhancement</th>
                 <th>Tokens Used</th>
                 <th>Images Used</th>
-                <th>Cost (USD)</th>
                 <th>Cost (INR)</th>
                 <th>Last Activity</th>
               </tr>
@@ -283,7 +283,6 @@ export default function NetBillingPage() {
                     <td className={styles.textCenter}>{user.image_enhancement_count}</td>
                     <td className={styles.textCenter}>{user.total_tokens.toLocaleString()}</td>
                     <td className={styles.textCenter}>{user.total_images}</td>
-                    <td className={styles.costCell}>${user.total_cost_usd.toFixed(4)}</td>
                     <td className={styles.costCell}>₹{user.total_cost_inr.toFixed(2)}</td>
                     <td className={styles.dateCell}>{new Date(user.last_activity).toLocaleString()}</td>
                   </tr>
@@ -310,9 +309,7 @@ export default function NetBillingPage() {
                 <th>Model Name</th>
                 <th>Operation Type</th>
                 <th>Count</th>
-                <th>Total Cost (USD)</th>
                 <th>Total Cost (INR)</th>
-                <th>Avg Cost per Operation</th>
               </tr>
             </thead>
             <tbody>
@@ -322,9 +319,41 @@ export default function NetBillingPage() {
                     <td className={styles.modelCell}>{model.model_name}</td>
                     <td className={styles.operationCell}>{model.operation_type.replace(/_/g, ' ')}</td>
                     <td className={styles.textCenter}>{model.count}</td>
-                    <td className={styles.costCell}>${model.total_cost_usd.toFixed(4)}</td>
                     <td className={styles.costCell}>₹{model.total_cost_inr.toFixed(2)}</td>
-                    <td className={styles.costCell}>${model.avg_cost_per_operation.toFixed(6)}</td>
+                        {/* Daily Report Table */}
+                        <div className={styles.tableSection}>
+                          <h2>Daily Report</h2>
+                          <div className={styles.tableWrapper}>
+                            <table className={styles.table}>
+                              <thead>
+                                <tr>
+                                  <th>Date</th>
+                                  <th>Generations</th>
+                                  <th>Total Cost (INR)</th>
+                                  <th>Models Used</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {data.dailyReport.length > 0 ? (
+                                  data.dailyReport.map((row, idx) => (
+                                    <tr key={idx}>
+                                      <td className={styles.textCenter}>{row.day}</td>
+                                      <td className={styles.textCenter}>{row.generations}</td>
+                                      <td className={styles.costCell}>₹{row.total_inr.toFixed(2)}</td>
+                                      <td className={styles.modelCell}>{row.models.join(', ')}</td>
+                                    </tr>
+                                  ))
+                                ) : (
+                                  <tr>
+                                    <td colSpan={4} className={styles.noData}>
+                                      No daily report data available
+                                    </td>
+                                  </tr>
+                                )}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
                   </tr>
                 ))
               ) : (

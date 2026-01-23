@@ -18,12 +18,11 @@ export async function GET(request: NextRequest) {
   try {
     const connection = await pool.getConnection();
 
-    // Get summary data
+    // Get summary data (INR only)
     const summaryQuery = `
       SELECT 
         COUNT(DISTINCT u.id) as total_users,
         COALESCE(COUNT(aul.id), 0) as total_operations,
-        COALESCE(SUM(aul.cost_usd), 0) as total_cost_usd,
         COALESCE(SUM(aul.cost_inr), 0) as total_cost_inr,
         COALESCE(SUM(aul.input_tokens + aul.output_tokens), 0) as total_tokens,
         COALESCE(SUM(aul.input_images + aul.output_images), 0) as total_images
@@ -34,7 +33,7 @@ export async function GET(request: NextRequest) {
     const [summaryResult] = await connection.query<any>(summaryQuery);
     const summary = summaryResult[0] || {};
 
-    // Get per-user billing details
+    // Get per-user billing details (INR only)
     const userBillingQuery = `
       SELECT 
         u.id as user_id,
@@ -45,26 +44,23 @@ export async function GET(request: NextRequest) {
         COALESCE(SUM(CASE WHEN aul.operation_type = 'image_enhancement' THEN 1 ELSE 0 END), 0) as image_enhancement_count,
         COALESCE(SUM(aul.input_tokens + aul.output_tokens), 0) as total_tokens,
         COALESCE(SUM(aul.input_images + aul.output_images), 0) as total_images,
-        COALESCE(SUM(aul.cost_usd), 0) as total_cost_usd,
         COALESCE(SUM(aul.cost_inr), 0) as total_cost_inr,
         COALESCE(MAX(aul.created_at), u.created_at) as last_activity
       FROM users u
       LEFT JOIN api_usage_logs aul ON u.id = aul.user_id
       GROUP BY u.id, u.email
-      ORDER BY total_cost_usd DESC
+      ORDER BY total_cost_inr DESC
     `;
 
     const [userBillingResult] = await connection.query<any>(userBillingQuery);
 
-    // Get model usage breakdown
+    // Get model usage breakdown (INR only)
     const modelUsageQuery = `
       SELECT 
         model_name,
         operation_type,
         COUNT(*) as count,
-        SUM(cost_usd) as total_cost_usd,
-        SUM(cost_inr) as total_cost_inr,
-        AVG(cost_usd) as avg_cost_per_operation
+        SUM(cost_inr) as total_cost_inr
       FROM api_usage_logs
       GROUP BY model_name, operation_type
       ORDER BY model_name, operation_type
@@ -72,13 +68,26 @@ export async function GET(request: NextRequest) {
 
     const [modelUsageResult] = await connection.query<any>(modelUsageQuery);
 
+    // Get daily report: date, generations, INR, model(s)
+    const dailyReportQuery = `
+      SELECT 
+        DATE(created_at) as day,
+        COUNT(*) as generations,
+        SUM(cost_inr) as total_inr,
+        GROUP_CONCAT(DISTINCT model_name ORDER BY model_name) as models
+      FROM api_usage_logs
+      GROUP BY day
+      ORDER BY day DESC
+      LIMIT 60
+    `;
+    const [dailyReportResult] = await connection.query<any>(dailyReportQuery);
+
     connection.release();
 
     // Format response data
     const formattedSummary = {
       total_users: Number(summary.total_users) || 0,
       total_operations: Number(summary.total_operations) || 0,
-      total_cost_usd: parseFloat(summary.total_cost_usd) || 0,
       total_cost_inr: parseFloat(summary.total_cost_inr) || 0,
       total_tokens: Number(summary.total_tokens) || 0,
       total_images: Number(summary.total_images) || 0,
@@ -93,7 +102,6 @@ export async function GET(request: NextRequest) {
       image_enhancement_count: Number(user.image_enhancement_count) || 0,
       total_tokens: Number(user.total_tokens) || 0,
       total_images: Number(user.total_images) || 0,
-      total_cost_usd: parseFloat(user.total_cost_usd) || 0,
       total_cost_inr: parseFloat(user.total_cost_inr) || 0,
       last_activity: user.last_activity || new Date().toISOString(),
     }));
@@ -102,9 +110,14 @@ export async function GET(request: NextRequest) {
       model_name: model.model_name,
       operation_type: model.operation_type,
       count: Number(model.count) || 0,
-      total_cost_usd: parseFloat(model.total_cost_usd) || 0,
       total_cost_inr: parseFloat(model.total_cost_inr) || 0,
-      avg_cost_per_operation: parseFloat(model.avg_cost_per_operation) || 0,
+    }));
+
+    const formattedDailyReport = (dailyReportResult || []).map((row: any) => ({
+      day: row.day,
+      generations: Number(row.generations) || 0,
+      total_inr: parseFloat(row.total_inr) || 0,
+      models: (row.models || '').split(',').filter(Boolean),
     }));
 
     return NextResponse.json({
@@ -113,6 +126,7 @@ export async function GET(request: NextRequest) {
         summary: formattedSummary,
         userBilling: formattedUserBilling,
         modelUsage: formattedModelUsage,
+        dailyReport: formattedDailyReport,
       },
     });
   } catch (error) {

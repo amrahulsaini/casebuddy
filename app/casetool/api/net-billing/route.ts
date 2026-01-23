@@ -92,14 +92,11 @@ export async function GET(request: NextRequest) {
         userBillingParams.push(filterModel);
       }
     }
-
     userBillingQuery += `
       GROUP BY u.id, u.email
       ORDER BY (COALESCE(SUM(aul.cost_inr), 0) + COALESCE(SUM(dbl.amount_inr), 0)) DESC
     `;
 
-    const [userBillingResult] = userBillingParams.length > 0
-      ? await connection.query<any>(userBillingQuery, userBillingParams)
     const [userBillingResult] = userBillingParams.length > 0
       ? await connection.query<any>(userBillingQuery, userBillingParams)
       : await connection.query<any>(userBillingQuery);

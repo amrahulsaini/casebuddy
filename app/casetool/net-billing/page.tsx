@@ -2,24 +2,36 @@
 
 import { useState, useEffect } from 'react';
 import styles from './net-billing.module.css';
-import { ArrowLeft, IndianRupee, Activity, Calendar, Download, Users } from 'lucide-react';
+import { ArrowLeft, IndianRupee, Activity, Calendar, Users, Filter } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface DownloadLog {
-  day: string;
+  id: number;
   user_id: number;
+  generation_log_id: number;
+  amount_inr: number;
+  phone_model: string;
+  generated_image_url: string | null;
+  created_at: string;
   email: string;
-  images_downloaded: number;
-  total_inr: number;
-  models: string[];
 }
 
 interface BillingSummary {
   total_users: number;
   total_downloads: number;
-  total_download_cost_inr: number;
-  total_operations: number;
   total_cost_inr: number;
+}
+
+interface Pagination {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
+
+interface User {
+  id: number;
+  email: string;
 }
 
 export default function NetBillingPage() {
@@ -28,33 +40,38 @@ export default function NetBillingPage() {
   const [downloadLogs, setDownloadLogs] = useState<DownloadLog[]>([]);
   const [summary, setSummary] = useState<BillingSummary | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const [pagination, setPagination] = useState<Pagination>({ page: 1, pageSize: 100, total: 0, totalPages: 0 });
   const [filterDate, setFilterDate] = useState<string>('');
-  const [availableModels, setAvailableModels] = useState<string[]>([]);
-  const [filterModel, setFilterModel] = useState<string>('');
+  const [filterUserId, setFilterUserId] = useState<string>('');
+  const [availableUsers, setAvailableUsers] = useState<User[]>([]);
 
   useEffect(() => {
-    fetchBillingData();
-  }, [filterDate, filterModel]);
+    fetchBillingData(1);
+  }, [filterDate, filterUserId]);
 
-  const fetchBillingData = async () => {
+  const fetchBillingData = async (page: number) => {
     try {
       setLoading(true);
-      let url = '/casetool/api/net-billing';
       const params = new URLSearchParams();
+      params.append('page', page.toString());
+      params.append('pageSize', pagination.pageSize.toString());
       if (filterDate) params.append('filter_date', filterDate);
-      if (filterModel) params.append('filter_model', filterModel);
-      if (params.toString()) url += `?${params.toString()}`;
+      if (filterUserId) params.append('filter_user_id', filterUserId);
       
-      const response = await fetch(url);
-      const result = await response.json();
-
-      if (result.success) {
-        setDownloadLogs(result.data.downloadBilling || []);
-        setSummary(result.data.summary || null);
-        setAvailableModels(result.data.availableModels || []);
-        setErrorMessage('');
+      const response = await fetch(`/casetool/api/net-billing?${params.toString()}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setDownloadLogs(data.logs || []);
+        setSummary(data.summary || null);
+        setAvailableUsers(data.availableUsers || []);
+        setPagination(data.pagination || { page, pageSize: pagination.pageSize, total: 0, totalPages: 0 });
+        
+        if (data.message) {
+          setErrorMessage(data.message);
+        }
       } else {
-        setErrorMessage(result.error || 'Failed to load billing data');
+        setErrorMessage(data.error || 'Failed to load billing data');
       }
     } catch (error) {
       console.error('Failed to fetch billing data:', error);
@@ -64,12 +81,24 @@ export default function NetBillingPage() {
     }
   };
 
+  const goToPrevPage = () => {
+    if (pagination.page <= 1) return;
+    fetchBillingData(pagination.page - 1);
+  };
+
+  const goToNextPage = () => {
+    if (pagination.totalPages > 0 && pagination.page >= pagination.totalPages) return;
+    fetchBillingData(pagination.page + 1);
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   };
 
@@ -108,28 +137,8 @@ export default function NetBillingPage() {
               <Activity size={24} />
             </div>
             <div className={styles.cardContent}>
-              <div className={styles.cardLabel}>Total Operations</div>
-              <div className={styles.cardValue}>{summary.total_operations}</div>
-            </div>
-          </div>
-
-          <div className={styles.summaryCard}>
-            <div className={styles.cardIcon}>
-              <IndianRupee size={24} />
-            </div>
-            <div className={styles.cardContent}>
-              <div className={styles.cardLabel}>Generation Cost (INR)</div>
-              <div className={styles.cardValue}>₹{summary.total_cost_inr.toFixed(2)}</div>
-            </div>
-          </div>
-
-          <div className={styles.summaryCard}>
-            <div className={styles.cardIcon}>
-              <Download size={24} />
-            </div>
-            <div className={styles.cardContent}>
               <div className={styles.cardLabel}>Total Downloads</div>
-              <div className={styles.cardValue}>{summary.total_downloads || 0}</div>
+              <div className={styles.cardValue}>{summary.total_downloads}</div>
             </div>
           </div>
 
@@ -138,50 +147,71 @@ export default function NetBillingPage() {
               <IndianRupee size={24} />
             </div>
             <div className={styles.cardContent}>
-              <div className={styles.cardLabel}>Download Cost (INR)</div>
-              <div className={styles.cardValue}>₹{(summary.total_download_cost_inr || 0).toFixed(2)}</div>
+              <div className={styles.cardLabel}>Total Cost (INR)</div>
+              <div className={styles.cardValue}>₹{summary.total_cost_inr.toFixed(2)}</div>
             </div>
           </div>
         </div>
       )}
 
       <div className={styles.logsSection}>
-        <div className={styles.sectionHeader}>
+        <div className={styles.filterBar}>
           <h2 className={styles.sectionTitle}>
             <Calendar size={20} />
-            Download History - All Users
+            Download History
           </h2>
           
           <div className={styles.filters}>
+            <select 
+              value={filterUserId} 
+              onChange={(e) => setFilterUserId(e.target.value)}
+              className={styles.filterSelect}
+            >
+              <option value="">All Users</option>
+              {availableUsers.map((user) => (
+                <option key={user.id} value={user.id}>ID: {user.id} - {user.email}</option>
+              ))}
+            </select>
+            
             <input
               type="date"
               value={filterDate}
               onChange={(e) => setFilterDate(e.target.value)}
               className={styles.filterInput}
             />
-            {filterDate && (
-              <button className={styles.clearButton} onClick={() => setFilterDate('')}>
-                Clear Date
-              </button>
-            )}
             
-            <select 
-              value={filterModel} 
-              onChange={(e) => setFilterModel(e.target.value)}
-              className={styles.filterSelect}
-            >
-              <option value="">All Models</option>
-              {availableModels.map((model) => (
-                <option key={model} value={model}>{model}</option>
-              ))}
-            </select>
-            {filterModel && (
-              <button className={styles.clearButton} onClick={() => setFilterModel('')}>
-                Clear Model
+            {(filterUserId || filterDate) && (
+              <button 
+                className={styles.clearButton} 
+                onClick={() => { setFilterUserId(''); setFilterDate(''); }}
+              >
+                Clear Filters
               </button>
             )}
           </div>
         </div>
+
+        {pagination.totalPages > 1 && (
+          <div className={styles.paginationBar}>
+            <button
+              className={styles.pageButton}
+              onClick={goToPrevPage}
+              disabled={pagination.page <= 1}
+            >
+              Previous
+            </button>
+            <div className={styles.pageInfo}>
+              Page {pagination.page} of {pagination.totalPages}
+            </div>
+            <button
+              className={styles.pageButton}
+              onClick={goToNextPage}
+              disabled={pagination.totalPages > 0 && pagination.page >= pagination.totalPages}
+            >
+              Next
+            </button>
+          </div>
+        )}
 
         {errorMessage && (
           <div className={styles.errorMessage}>
@@ -191,29 +221,53 @@ export default function NetBillingPage() {
 
         {downloadLogs.length === 0 ? (
           <div className={styles.emptyState}>
-            <p>No download records found.</p>
+            <p>No downloads recorded yet.</p>
             <p>Billing is recorded when users download images.</p>
           </div>
         ) : (
           <div className={styles.table}>
             <div className={styles.tableHeader}>
-              <div className={styles.tableCell}>Date</div>
+              <div className={styles.tableCell}>Date & Time</div>
               <div className={styles.tableCell}>User ID</div>
               <div className={styles.tableCell}>Email</div>
-              <div className={styles.tableCell}>Images Downloaded</div>
-              <div className={styles.tableCell}>Phone Models</div>
+              <div className={styles.tableCell}>Phone Model</div>
               <div className={styles.tableCell}>Amount (INR)</div>
             </div>
-            {downloadLogs.map((log, index) => (
-              <div key={index} className={styles.tableRow}>
-                <div className={styles.tableCell}>{formatDate(log.day)}</div>
+            {downloadLogs.map((log) => (
+              <div key={log.id} className={styles.tableRow}>
+                <div className={styles.tableCell}>{formatDate(log.created_at)}</div>
                 <div className={styles.tableCell}>{log.user_id}</div>
                 <div className={styles.tableCell}>{log.email}</div>
-                <div className={styles.tableCell}>{log.images_downloaded}</div>
-                <div className={styles.tableCell}>{log.models.join(', ') || 'N/A'}</div>
-                <div className={styles.tableCell}>₹{log.total_inr.toFixed(2)}</div>
+                <div className={styles.tableCell}>
+                  <span className={styles.phoneModel}>{log.phone_model || 'N/A'}</span>
+                </div>
+                <div className={styles.tableCell}>
+                  <span className={styles.costInr}>₹{log.amount_inr.toFixed(2)}</span>
+                </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {pagination.totalPages > 1 && (
+          <div className={styles.paginationBarBottom}>
+            <button
+              className={styles.pageButton}
+              onClick={goToPrevPage}
+              disabled={pagination.page <= 1}
+            >
+              Previous
+            </button>
+            <div className={styles.pageInfo}>
+              Page {pagination.page} of {pagination.totalPages}
+            </div>
+            <button
+              className={styles.pageButton}
+              onClick={goToNextPage}
+              disabled={pagination.totalPages > 0 && pagination.page >= pagination.totalPages}
+            >
+              Next
+            </button>
           </div>
         )}
       </div>

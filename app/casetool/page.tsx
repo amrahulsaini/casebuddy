@@ -544,6 +544,10 @@ export default function ToolPage() {
               <Zap size={20} />
               <span>Usage & Billing</span>
             </Link>
+            <Link href="/casetool/net-billing" className={styles.navLink} onClick={() => setSidebarOpen(false)}>
+              <Zap size={20} />
+              <span>Net Billing Report</span>
+            </Link>
           </div>
           <div className={styles.navSection}>
             <div className={styles.navSectionTitle}>Resources</div>

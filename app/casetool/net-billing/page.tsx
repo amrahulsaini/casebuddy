@@ -32,6 +32,15 @@ interface DailyReportRow {
   models: string[];
 }
 
+interface DownloadBillingRow {
+  day: string;
+  user_id: number;
+  email: string;
+  images_downloaded: number;
+  total_inr: number;
+  models: string[];
+}
+
 interface NetBillingData {
   summary: {
     total_users: number;
@@ -43,6 +52,7 @@ interface NetBillingData {
   userBilling: UserBillingDetail[];
   modelUsage: ModelUsageDetail[];
   dailyReport: DailyReportRow[];
+  downloadBilling: DownloadBillingRow[];
 }
 
 export default function NetBillingPage() {
@@ -53,15 +63,20 @@ export default function NetBillingPage() {
   const [filterEmail, setFilterEmail] = useState<string>('');
   const [filterModel, setFilterModel] = useState<string>('');
   const [sortBy, setSortBy] = useState<'cost' | 'operations' | 'email'>('cost');
+  const [downloadDate, setDownloadDate] = useState<string>('');
 
   useEffect(() => {
     fetchNetBillingData();
-  }, []);
+  }, [downloadDate]);
 
   const fetchNetBillingData = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/casetool/api/net-billing');
+      let url = '/casetool/api/net-billing';
+      if (downloadDate) {
+        url += `?download_date=${downloadDate}`;
+      }
+      const response = await fetch(url);
       const result = await response.json();
 
       if (result.success) {
@@ -77,6 +92,56 @@ export default function NetBillingPage() {
       setLoading(false);
     }
   };
+      {/* Download Billing Table */}
+      <div className={styles.tableSection}>
+        <h2>Download Billing</h2>
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ fontWeight: 600, marginRight: 8 }}>Choose Date:</label>
+          <input
+            type="date"
+            value={downloadDate}
+            onChange={e => setDownloadDate(e.target.value)}
+            style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #ccc', fontSize: 14 }}
+          />
+          {downloadDate && (
+            <button style={{ marginLeft: 8, padding: '6px 12px', borderRadius: 6, border: 'none', background: '#eee', cursor: 'pointer' }} onClick={() => setDownloadDate('')}>
+              Clear
+            </button>
+          )}
+        </div>
+        <div className={styles.tableWrapper}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>User Email</th>
+                <th>Images Downloaded</th>
+                <th>Total Billed (INR)</th>
+                <th>Models Used</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data?.downloadBilling && data.downloadBilling.length > 0 ? (
+                data.downloadBilling.map((row, idx) => (
+                  <tr key={idx}>
+                    <td className={styles.textCenter}>{row.day}</td>
+                    <td className={styles.emailCell}>{row.email}</td>
+                    <td className={styles.textCenter}>{row.images_downloaded}</td>
+                    <td className={styles.costCell}>₹{row.total_inr.toFixed(2)}</td>
+                    <td className={styles.modelCell}>{row.models.join(', ')}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className={styles.noData}>
+                    No download billing data found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
   const handleExportCSV = () => {
     if (!data) return;

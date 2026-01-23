@@ -13,6 +13,34 @@ const pool = mysql.createPool({
 });
 
 export async function GET(request: NextRequest) {
+      // Parse date filter from query params
+      const url = new URL(request.url, 'http://localhost');
+      const dateParam = url.searchParams.get('download_date');
+      let downloadBillingWhere = '';
+      let downloadBillingParams: any[] = [];
+      if (dateParam) {
+        downloadBillingWhere = 'WHERE DATE(dbl.created_at) = ?';
+        downloadBillingParams.push(dateParam);
+      }
+
+      // Download billing report: by date, user, images, INR, model
+      const downloadBillingQuery = `
+        SELECT 
+          DATE(dbl.created_at) as day,
+          u.id as user_id,
+          u.email,
+          COUNT(dbl.id) as images_downloaded,
+          SUM(dbl.amount_inr) as total_inr,
+          GROUP_CONCAT(DISTINCT gl.model_name ORDER BY gl.model_name) as models
+        FROM download_billing_logs dbl
+        JOIN users u ON dbl.user_id = u.id
+        JOIN generation_logs gl ON dbl.generation_log_id = gl.id
+        ${downloadBillingWhere}
+        GROUP BY day, u.id, u.email
+        ORDER BY day DESC, images_downloaded DESC
+        LIMIT 200
+      `;
+      const [downloadBillingResult] = await connection.query<any>(downloadBillingQuery, downloadBillingParams);
   // Admin check removed: Net Billing is now public
 
   try {
@@ -127,6 +155,14 @@ export async function GET(request: NextRequest) {
         userBilling: formattedUserBilling,
         modelUsage: formattedModelUsage,
         dailyReport: formattedDailyReport,
+        downloadBilling: (downloadBillingResult || []).map((row: any) => ({
+          day: row.day,
+          user_id: row.user_id,
+          email: row.email,
+          images_downloaded: Number(row.images_downloaded) || 0,
+          total_inr: parseFloat(row.total_inr) || 0,
+          models: (row.models || '').split(',').filter(Boolean),
+        })),
       },
     });
   } catch (error) {

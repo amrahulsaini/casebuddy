@@ -340,15 +340,10 @@ export default function NetBillingPage() {
             <thead>
               <tr>
                 <th>User ID</th>
-                <th>Email ID</th>
-                <th>Total Operations</th>
-                <th>Text Analysis</th>
-                <th>Image Generation</th>
-                <th>Image Enhancement</th>
-                <th>Tokens Used</th>
-                <th>Images Used</th>
-                <th>API Cost (INR)</th>
-                <th>Downloads</th>
+                <th>Email</th>
+                <th>Images Generated</th>
+                <th>Generation Cost (INR)</th>
+                <th>Images Downloaded</th>
                 <th>Download Cost (INR)</th>
                 <th>Total Cost (INR)</th>
                 <th>Last Activity</th>
@@ -360,22 +355,17 @@ export default function NetBillingPage() {
                   <tr key={user.user_id}>
                     <td className={styles.textCenter}>{user.user_id}</td>
                     <td className={styles.emailCell}>{user.email}</td>
-                    <td className={styles.textCenter}>{user.total_operations}</td>
-                    <td className={styles.textCenter}>{user.text_analysis_count}</td>
-                    <td className={styles.textCenter}>{user.image_generation_count}</td>
-                    <td className={styles.textCenter}>{user.image_enhancement_count}</td>
-                    <td className={styles.textCenter}>{user.total_tokens.toLocaleString()}</td>
-                    <td className={styles.textCenter}>{user.total_images}</td>
+                    <td className={styles.textCenter}>{user.image_generation_count + user.image_enhancement_count}</td>
                     <td className={styles.costCell}>₹{user.total_cost_inr.toFixed(2)}</td>
                     <td className={styles.textCenter}>{user.downloads_count || 0}</td>
                     <td className={styles.costCell}>₹{(user.download_cost_inr || 0).toFixed(2)}</td>
-                    <td className={styles.costCell} style={{ fontWeight: 'bold' }}>₹{(user.total_cost_inr + (user.download_cost_inr || 0)).toFixed(2)}</td>
+                    <td className={styles.costCell} style={{ fontWeight: 'bold', background: '#f0f8ff' }}>₹{(user.total_cost_inr + (user.download_cost_inr || 0)).toFixed(2)}</td>
                     <td className={styles.dateCell}>{new Date(user.last_activity).toLocaleString()}</td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={13} className={styles.noData}>
+                  <td colSpan={8} className={styles.noData}>
                     No billing data found
                   </td>
                 </tr>
@@ -422,14 +412,14 @@ export default function NetBillingPage() {
 
       {/* Daily Report Table */}
       <div className={styles.tableSection}>
-        <h2>Daily Report</h2>
+        <h2>Daily Generation Report</h2>
         <div className={styles.tableWrapper}>
           <table className={styles.table}>
             <thead>
               <tr>
                 <th>Date</th>
-                <th>Generations</th>
-                <th>Total Cost (INR)</th>
+                <th>Images Generated</th>
+                <th>Generation Cost (INR)</th>
                 <th>Models Used</th>
               </tr>
             </thead>
@@ -457,16 +447,16 @@ export default function NetBillingPage() {
 
       {/* Download Billing Table */}
       <div className={styles.tableSection}>
-        <h2>Download Billing Details</h2>
+        <h2>Daily Download Report</h2>
         <div className={styles.tableWrapper}>
           <table className={styles.table}>
             <thead>
               <tr>
                 <th>Date</th>
                 <th>User ID</th>
-                <th>User Email</th>
+                <th>Email</th>
                 <th>Images Downloaded</th>
-                <th>Total Billed (INR)</th>
+                <th>Download Cost (INR)</th>
                 <th>Phone Models</th>
               </tr>
             </thead>
@@ -485,7 +475,7 @@ export default function NetBillingPage() {
               ) : (
                 <tr>
                   <td colSpan={6} className={styles.noData}>
-                    No download billing data found
+                    No download data found
                   </td>
                 </tr>
               )}

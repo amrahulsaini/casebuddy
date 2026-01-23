@@ -53,6 +53,17 @@ export default function proxy(request: NextRequest) {
       url.pathname = '/casetool/login';
       return NextResponse.redirect(url);
     }
+    
+    // After auth check passes, verify user has submitted email (except on email page itself)
+    if (pathname !== '/casetool/email') {
+      const userIdCookie = request.cookies.get('casetool_user_id');
+      
+      if (!userIdCookie) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/casetool/email';
+        return NextResponse.redirect(url);
+      }
+    }
   }
   
   return NextResponse.next();

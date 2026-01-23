@@ -5,6 +5,11 @@ export default function proxy(request: NextRequest) {
   const hostname = request.headers.get('host') || '';
   const { pathname } = request.nextUrl;
   
+  // If accessing casetool subdomain at root, redirect to /casetool
+  if (hostname.startsWith('casetool.') && pathname === '/') {
+    return NextResponse.redirect(new URL('/casetool', request.url));
+  }
+  
   // Protect admin dashboard routes
   if (pathname.startsWith('/admin/dashboard')) {
     const adminToken = request.cookies.get('admin_token');
@@ -55,6 +60,7 @@ export default function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/',
     '/admin/dashboard/:path*',
     '/casetool/:path*',
     '/editor/:path*',

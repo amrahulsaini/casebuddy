@@ -16,6 +16,7 @@ export async function GET(
     }
 
     // Build path to the uploaded file
+    // Use direct path, avoid broad patterns
     const filePath = join(process.cwd(), 'public', 'uploads', 'casetool', filename);
 
     // Check if file exists

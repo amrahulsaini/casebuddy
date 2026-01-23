@@ -56,7 +56,8 @@ export async function POST(request: NextRequest) {
     const uploadSubDir = type === 'category' ? 'categories' : 'products';
     
     // Always save to the Next.js public/cdn folder (this works in both dev and production)
-    const uploadDir = path.join(process.cwd(), 'public', 'cdn', uploadSubDir);
+    // Use direct path, avoid broad patterns
+    const uploadDir = path.resolve(process.cwd(), 'public', 'cdn', uploadSubDir);
     const filepath = path.join(uploadDir, filename);
     const url = `/cdn/${uploadSubDir}/${filename}`;
 

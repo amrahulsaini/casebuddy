@@ -23,7 +23,8 @@ export async function POST(request: NextRequest) {
     const filename = `${timestamp}-${originalName}`;
 
     // Create upload directory if it doesn't exist
-    const uploadDir = path.join(process.cwd(), 'public', 'cdn', folder);
+    // Use direct path, avoid broad patterns
+    const uploadDir = path.resolve(process.cwd(), 'public', 'cdn', folder);
     if (!existsSync(uploadDir)) {
       await mkdir(uploadDir, { recursive: true });
     }

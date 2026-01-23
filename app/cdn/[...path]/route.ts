@@ -10,7 +10,8 @@ export async function GET(
   try {
     const { path: pathSegments } = await params;
     const filePath = pathSegments.join('/');
-    const fullPath = path.join(process.cwd(), 'public', 'cdn', filePath);
+    // Use direct path, avoid broad patterns
+    const fullPath = path.resolve(process.cwd(), 'public', 'cdn', filePath);
 
     console.log('CDN file requested:', {
       requestedPath: filePath,

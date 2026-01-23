@@ -300,6 +300,7 @@ export async function POST(request: NextRequest) {
           const fileName = `${sanitizedModel}_${ts}.png`;
           const filePath = join(outputDir, fileName);
           await writeFile(filePath, Buffer.from(genB64, 'base64'));
+          // No broad pattern, just direct path
           console.log('Image saved to:', filePath);
 
           const generationTime = ((Date.now() - startTime) / 1000).toFixed(2);

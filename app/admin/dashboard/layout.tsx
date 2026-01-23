@@ -1,3 +1,9 @@
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+};
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/auth';
 import AdminSidebar from '@/components/admin/AdminSidebar';

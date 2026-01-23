@@ -92,56 +92,6 @@ export default function NetBillingPage() {
       setLoading(false);
     }
   };
-      {/* Download Billing Table */}
-      <div className={styles.tableSection}>
-        <h2>Download Billing</h2>
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ fontWeight: 600, marginRight: 8 }}>Choose Date:</label>
-          <input
-            type="date"
-            value={downloadDate}
-            onChange={e => setDownloadDate(e.target.value)}
-            style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #ccc', fontSize: 14 }}
-          />
-          {downloadDate && (
-            <button style={{ marginLeft: 8, padding: '6px 12px', borderRadius: 6, border: 'none', background: '#eee', cursor: 'pointer' }} onClick={() => setDownloadDate('')}>
-              Clear
-            </button>
-          )}
-        </div>
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>User Email</th>
-                <th>Images Downloaded</th>
-                <th>Total Billed (INR)</th>
-                <th>Models Used</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data?.downloadBilling && data.downloadBilling.length > 0 ? (
-                data.downloadBilling.map((row, idx) => (
-                  <tr key={idx}>
-                    <td className={styles.textCenter}>{row.day}</td>
-                    <td className={styles.emailCell}>{row.email}</td>
-                    <td className={styles.textCenter}>{row.images_downloaded}</td>
-                    <td className={styles.costCell}>₹{row.total_inr.toFixed(2)}</td>
-                    <td className={styles.modelCell}>{row.models.join(', ')}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} className={styles.noData}>
-                    No download billing data found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
 
   const handleExportCSV = () => {
     if (!data) return;
@@ -385,45 +335,11 @@ export default function NetBillingPage() {
                     <td className={styles.operationCell}>{model.operation_type.replace(/_/g, ' ')}</td>
                     <td className={styles.textCenter}>{model.count}</td>
                     <td className={styles.costCell}>₹{model.total_cost_inr.toFixed(2)}</td>
-                        {/* Daily Report Table */}
-                        <div className={styles.tableSection}>
-                          <h2>Daily Report</h2>
-                          <div className={styles.tableWrapper}>
-                            <table className={styles.table}>
-                              <thead>
-                                <tr>
-                                  <th>Date</th>
-                                  <th>Generations</th>
-                                  <th>Total Cost (INR)</th>
-                                  <th>Models Used</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {data.dailyReport.length > 0 ? (
-                                  data.dailyReport.map((row, idx) => (
-                                    <tr key={idx}>
-                                      <td className={styles.textCenter}>{row.day}</td>
-                                      <td className={styles.textCenter}>{row.generations}</td>
-                                      <td className={styles.costCell}>₹{row.total_inr.toFixed(2)}</td>
-                                      <td className={styles.modelCell}>{row.models.join(', ')}</td>
-                                    </tr>
-                                  ))
-                                ) : (
-                                  <tr>
-                                    <td colSpan={4} className={styles.noData}>
-                                      No daily report data available
-                                    </td>
-                                  </tr>
-                                )}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className={styles.noData}>
+                  <td colSpan={4} className={styles.noData}>
                     No model usage data available
                   </td>
                 </tr>
@@ -432,6 +348,93 @@ export default function NetBillingPage() {
           </table>
         </div>
       </div>
+
+      {/* Daily Report Table */}
+      <div className={styles.tableSection}>
+        <h2>Daily Report</h2>
+        <div className={styles.tableWrapper}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Generations</th>
+                <th>Total Cost (INR)</th>
+                <th>Models Used</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.dailyReport && data.dailyReport.length > 0 ? (
+                data.dailyReport.map((row, idx) => (
+                  <tr key={idx}>
+                    <td className={styles.textCenter}>{row.day}</td>
+                    <td className={styles.textCenter}>{row.generations}</td>
+                    <td className={styles.costCell}>₹{row.total_inr.toFixed(2)}</td>
+                    <td className={styles.modelCell}>{row.models.join(', ')}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={4} className={styles.noData}>
+                    No daily report data available
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Download Billing Table */}
+      <div className={styles.tableSection}>
+        <h2>Download Billing</h2>
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ fontWeight: 600, marginRight: 8 }}>Choose Date:</label>
+          <input
+            type="date"
+            value={downloadDate}
+            onChange={e => setDownloadDate(e.target.value)}
+            style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #ccc', fontSize: 14 }}
+          />
+          {downloadDate && (
+            <button style={{ marginLeft: 8, padding: '6px 12px', borderRadius: 6, border: 'none', background: '#eee', cursor: 'pointer' }} onClick={() => setDownloadDate('')}>
+              Clear
+            </button>
+          )}
+        </div>
+        <div className={styles.tableWrapper}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>User Email</th>
+                <th>Images Downloaded</th>
+                <th>Total Billed (INR)</th>
+                <th>Models Used</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data?.downloadBilling && data.downloadBilling.length > 0 ? (
+                data.downloadBilling.map((row, idx) => (
+                  <tr key={idx}>
+                    <td className={styles.textCenter}>{row.day}</td>
+                    <td className={styles.emailCell}>{row.email}</td>
+                    <td className={styles.textCenter}>{row.images_downloaded}</td>
+                    <td className={styles.costCell}>₹{row.total_inr.toFixed(2)}</td>
+                    <td className={styles.modelCell}>{row.models.join(', ')}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className={styles.noData}>
+                    No download billing data found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   );
 }

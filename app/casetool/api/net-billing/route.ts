@@ -72,6 +72,51 @@ export async function GET(request: NextRequest) {
 
     const [modelUsageResult] = await connection.query<any>(modelUsageQuery);
 
+    // Get daily report
+    const dailyReportQuery = `
+      SELECT 
+        DATE(created_at) as day,
+        COUNT(*) as generations,
+        SUM(cost_inr) as total_inr,
+        GROUP_CONCAT(DISTINCT model_name SEPARATOR ',') as models
+      FROM api_usage_logs
+      WHERE operation_type IN ('image_generation', 'image_enhancement')
+      GROUP BY DATE(created_at)
+      ORDER BY day DESC
+      LIMIT 30
+    `;
+
+    const [dailyReportResult] = await connection.query<any>(dailyReportQuery);
+
+    // Get download billing data
+    const { searchParams } = new URL(request.url);
+    const downloadDate = searchParams.get('download_date');
+    
+    let downloadBillingQuery = `
+      SELECT 
+        DATE(db.downloaded_at) as day,
+        u.id as user_id,
+        u.email,
+        COUNT(DISTINCT db.id) as images_downloaded,
+        SUM(db.cost_inr) as total_inr,
+        GROUP_CONCAT(DISTINCT db.model_name SEPARATOR ',') as models
+      FROM download_billing db
+      JOIN users u ON db.user_id = u.id
+    `;
+    
+    if (downloadDate) {
+      downloadBillingQuery += ` WHERE DATE(db.downloaded_at) = ?`;
+    }
+    
+    downloadBillingQuery += `
+      GROUP BY DATE(db.downloaded_at), u.id, u.email
+      ORDER BY day DESC, total_inr DESC
+    `;
+
+    const [downloadBillingResult] = downloadDate 
+      ? await connection.query<any>(downloadBillingQuery, [downloadDate])
+      : await connection.query<any>(downloadBillingQuery);
+
     connection.release();
 
     // Format response data
@@ -107,12 +152,30 @@ export async function GET(request: NextRequest) {
       avg_cost_per_operation: parseFloat(model.avg_cost_per_operation) || 0,
     }));
 
+    const formattedDailyReport = (dailyReportResult || []).map((row: any) => ({
+      day: row.day,
+      generations: Number(row.generations) || 0,
+      total_inr: parseFloat(row.total_inr) || 0,
+      models: row.models ? row.models.split(',').filter((m: string) => m) : [],
+    }));
+
+    const formattedDownloadBilling = (downloadBillingResult || []).map((row: any) => ({
+      day: row.day,
+      user_id: row.user_id,
+      email: row.email,
+      images_downloaded: Number(row.images_downloaded) || 0,
+      total_inr: parseFloat(row.total_inr) || 0,
+      models: row.models ? row.models.split(',').filter((m: string) => m) : [],
+    }));
+
     return NextResponse.json({
       success: true,
       data: {
         summary: formattedSummary,
         userBilling: formattedUserBilling,
         modelUsage: formattedModelUsage,
+        dailyReport: formattedDailyReport,
+        downloadBilling: formattedDownloadBilling,
       },
     });
   } catch (error) {

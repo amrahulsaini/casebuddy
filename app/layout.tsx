@@ -33,15 +33,8 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  // viewport moved to separate export below
   icons: {
     icon: [
-      export const viewport = {
-        width: 'device-width',
-        initialScale: 1,
-        maximumScale: 5,
-        userScalable: true,
-      };
       { url: '/favicon.ico' },
       { url: '/casebuddy-logo.png', sizes: '512x512', type: 'image/png' },
     ],
@@ -86,6 +79,13 @@ export const metadata: Metadata = {
     // yandex: 'your-yandex-verification-code',
     // bing: 'your-bing-verification-code',
   },
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
 };
 
 export default function RootLayout({

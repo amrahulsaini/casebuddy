@@ -242,7 +242,7 @@ export default function NetBillingPage() {
                   <span className={styles.phoneModel}>{log.phone_model || 'N/A'}</span>
                 </div>
                 <div className={styles.tableCell}>
-                  <span className={styles.costInr}>₹{log.amount_inr.toFixed(2)}</span>
+                  <span className={styles.costInr}>₹{Number(log.amount_inr).toFixed(2)}</span>
                 </div>
               </div>
             ))}

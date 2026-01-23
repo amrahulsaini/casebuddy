@@ -59,7 +59,7 @@ export default function ToolPage() {
   const [selectedModel, setSelectedModel] = useState<'normal' | 'high'>('normal');
   const [caseType, setCaseType] = useState<'transparent' | 'doyers' | 'black'>('transparent');
   const [cameraSpecs, setCameraSpecs] = useState<CameraSpecs | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  // isAdmin removed: Net Billing is now public
 
   // Drag and drop state
   const [isDragging, setIsDragging] = useState(false);
@@ -76,17 +76,7 @@ export default function ToolPage() {
   const [fullscreenModalOpen, setFullscreenModalOpen] = useState(false);
   const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null);
 
-  // Check if user is admin
-  useEffect(() => {
-    const checkAdminRole = () => {
-      const role = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('casetool_user_role='))
-        ?.split('=')[1];
-      setIsAdmin(role === 'admin');
-    };
-    checkAdminRole();
-  }, []);
+  // Admin check removed: Net Billing is now public
 
   // Initialize cropper when modal opens
   useEffect(() => {
@@ -614,58 +604,56 @@ export default function ToolPage() {
         </button>
       </header>
 
-      {/* Admin Net Billing Banner */}
-      {isAdmin && (
-        <div style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          padding: '16px',
-          margin: '0 auto 20px',
-          maxWidth: '1200px',
-          borderRadius: '12px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)',
-          flexWrap: 'wrap',
-          gap: '12px'
-        }}>
-          <div style={{ color: 'white' }}>
-            <div style={{ fontSize: '18px', fontWeight: '700', marginBottom: '4px' }}>
-              📊 Net Billing Dashboard Available
-            </div>
-            <div style={{ fontSize: '14px', opacity: 0.9 }}>
-              View comprehensive billing reports for all users, models used, and costs
-            </div>
+      {/* Net Billing Banner - now public for everyone */}
+      <div style={{
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        padding: '16px',
+        margin: '0 auto 20px',
+        maxWidth: '1200px',
+        borderRadius: '12px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)',
+        flexWrap: 'wrap',
+        gap: '12px'
+      }}>
+        <div style={{ color: 'white' }}>
+          <div style={{ fontSize: '18px', fontWeight: '700', marginBottom: '4px' }}>
+            📊 Net Billing Dashboard Available
           </div>
-          <Link 
-            href="/casetool/net-billing"
-            style={{
-              background: 'white',
-              color: '#667eea',
-              padding: '12px 24px',
-              borderRadius: '8px',
-              fontWeight: '600',
-              textDecoration: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'all 0.3s ease',
-              whiteSpace: 'nowrap'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
-          >
-            <Zap size={18} />
-            Open Net Billing
-          </Link>
+          <div style={{ fontSize: '14px', opacity: 0.9 }}>
+            View comprehensive billing reports for all users, models used, and costs
+          </div>
         </div>
-      )}
+        <Link 
+          href="/casetool/net-billing"
+          style={{
+            background: 'white',
+            color: '#667eea',
+            padding: '12px 24px',
+            borderRadius: '8px',
+            fontWeight: '600',
+            textDecoration: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            transition: 'all 0.3s ease',
+            whiteSpace: 'nowrap'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = 'none';
+          }}
+        >
+          <Zap size={18} />
+          Open Net Billing
+        </Link>
+      </div>
 
       <div className={styles.wrapper}>
         {/* Main Card - Hero Section */}

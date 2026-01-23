@@ -13,17 +13,7 @@ const pool = mysql.createPool({
 });
 
 export async function GET(request: NextRequest) {
-  const cookieStore = await cookies();
-  const userId = cookieStore.get('casetool_user_id')?.value;
-  const userRole = cookieStore.get('casetool_user_role')?.value;
-
-  // Check if user is admin
-  if (!userId || userRole !== 'admin') {
-    return NextResponse.json(
-      { success: false, error: 'Unauthorized: Admin access required' },
-      { status: 403 }
-    );
-  }
+  // Admin check removed: Net Billing is now public
 
   try {
     const connection = await pool.getConnection();

@@ -15,6 +15,8 @@ interface UserBillingDetail {
   total_tokens: number;
   total_images: number;
   total_cost_inr: number;
+  downloads_count: number;
+  download_cost_inr: number;
   last_activity: string;
 }
 
@@ -48,11 +50,14 @@ interface NetBillingData {
     total_cost_inr: number;
     total_tokens: number;
     total_images: number;
+    total_downloads: number;
+    total_download_cost_inr: number;
   };
   userBilling: UserBillingDetail[];
   modelUsage: ModelUsageDetail[];
   dailyReport: DailyReportRow[];
   downloadBilling: DownloadBillingRow[];
+  availableModels: string[];
 }
 
 export default function NetBillingPage() {
@@ -62,20 +67,21 @@ export default function NetBillingPage() {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [filterEmail, setFilterEmail] = useState<string>('');
   const [filterModel, setFilterModel] = useState<string>('');
+  const [filterDate, setFilterDate] = useState<string>('');
   const [sortBy, setSortBy] = useState<'cost' | 'operations' | 'email'>('cost');
-  const [downloadDate, setDownloadDate] = useState<string>('');
 
   useEffect(() => {
     fetchNetBillingData();
-  }, [downloadDate]);
+  }, [filterDate, filterModel]);
 
   const fetchNetBillingData = async () => {
     try {
       setLoading(true);
       let url = '/casetool/api/net-billing';
-      if (downloadDate) {
-        url += `?download_date=${downloadDate}`;
-      }
+      const params = new URLSearchParams();
+      if (filterDate) params.append('filter_date', filterDate);
+      if (filterModel) params.append('filter_model', filterModel);
+      if (params.toString()) url += `?${params.toString()}`;
       const response = await fetch(url);
       const result = await response.json();
 
@@ -246,10 +252,67 @@ export default function NetBillingPage() {
             <p className={styles.cardValue}>{data.summary.total_images}</p>
           </div>
         </div>
+
+        <div className={styles.summaryCard}>
+          <div className={styles.cardIcon} style={{ backgroundColor: '#fff3e0' }}>
+            <Download size={24} color="#e65100" />
+          </div>
+          <div className={styles.cardContent}>
+            <p className={styles.cardLabel}>Total Downloads</p>
+            <p className={styles.cardValue}>{data.summary.total_downloads || 0}</p>
+          </div>
+        </div>
+
+        <div className={styles.summaryCard}>
+          <div className={styles.cardIcon} style={{ backgroundColor: '#fce4ec' }}>
+            <IndianRupee size={24} color="#c2185b" />
+          </div>
+          <div className={styles.cardContent}>
+            <p className={styles.cardLabel}>Download Cost (INR)</p>
+            <p className={styles.cardValue}>₹{(data.summary.total_download_cost_inr || 0).toFixed(2)}</p>
+          </div>
+        </div>
       </div>
 
       {/* Filters and Sorting */}
       <div className={styles.filterSection}>
+        <div className={styles.filterGroup}>
+          <label style={{ fontWeight: 600, marginRight: 8 }}>Filter by Date:</label>
+          <input
+            type="date"
+            value={filterDate}
+            onChange={(e) => setFilterDate(e.target.value)}
+            style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #ccc', fontSize: 14, marginRight: 8 }}
+          />
+          {filterDate && (
+            <button 
+              style={{ padding: '6px 12px', borderRadius: 6, border: 'none', background: '#eee', cursor: 'pointer', marginRight: 16 }} 
+              onClick={() => setFilterDate('')}
+            >
+              Clear Date
+            </button>
+          )}
+          
+          <label style={{ fontWeight: 600, marginRight: 8 }}>Filter by Model:</label>
+          <select 
+            value={filterModel} 
+            onChange={(e) => setFilterModel(e.target.value)}
+            style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #ccc', fontSize: 14, marginRight: 8 }}
+          >
+            <option value="">All Models</option>
+            {data.availableModels && data.availableModels.map((model) => (
+              <option key={model} value={model}>{model}</option>
+            ))}
+          </select>
+          {filterModel && (
+            <button 
+              style={{ padding: '6px 12px', borderRadius: 6, border: 'none', background: '#eee', cursor: 'pointer' }} 
+              onClick={() => setFilterModel('')}
+            >
+              Clear Model
+            </button>
+          )}
+        </div>
         <div className={styles.filterGroup}>
           <input
             type="text"
@@ -276,6 +339,7 @@ export default function NetBillingPage() {
           <table className={styles.table}>
             <thead>
               <tr>
+                <th>User ID</th>
                 <th>Email ID</th>
                 <th>Total Operations</th>
                 <th>Text Analysis</th>
@@ -283,7 +347,10 @@ export default function NetBillingPage() {
                 <th>Image Enhancement</th>
                 <th>Tokens Used</th>
                 <th>Images Used</th>
-                <th>Cost (INR)</th>
+                <th>API Cost (INR)</th>
+                <th>Downloads</th>
+                <th>Download Cost (INR)</th>
+                <th>Total Cost (INR)</th>
                 <th>Last Activity</th>
               </tr>
             </thead>
@@ -291,6 +358,7 @@ export default function NetBillingPage() {
               {sortedUsers.length > 0 ? (
                 sortedUsers.map((user) => (
                   <tr key={user.user_id}>
+                    <td className={styles.textCenter}>{user.user_id}</td>
                     <td className={styles.emailCell}>{user.email}</td>
                     <td className={styles.textCenter}>{user.total_operations}</td>
                     <td className={styles.textCenter}>{user.text_analysis_count}</td>
@@ -299,12 +367,15 @@ export default function NetBillingPage() {
                     <td className={styles.textCenter}>{user.total_tokens.toLocaleString()}</td>
                     <td className={styles.textCenter}>{user.total_images}</td>
                     <td className={styles.costCell}>₹{user.total_cost_inr.toFixed(2)}</td>
+                    <td className={styles.textCenter}>{user.downloads_count || 0}</td>
+                    <td className={styles.costCell}>₹{(user.download_cost_inr || 0).toFixed(2)}</td>
+                    <td className={styles.costCell} style={{ fontWeight: 'bold' }}>₹{(user.total_cost_inr + (user.download_cost_inr || 0)).toFixed(2)}</td>
                     <td className={styles.dateCell}>{new Date(user.last_activity).toLocaleString()}</td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={10} className={styles.noData}>
+                  <td colSpan={13} className={styles.noData}>
                     No billing data found
                   </td>
                 </tr>
@@ -386,30 +457,17 @@ export default function NetBillingPage() {
 
       {/* Download Billing Table */}
       <div className={styles.tableSection}>
-        <h2>Download Billing</h2>
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ fontWeight: 600, marginRight: 8 }}>Choose Date:</label>
-          <input
-            type="date"
-            value={downloadDate}
-            onChange={e => setDownloadDate(e.target.value)}
-            style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #ccc', fontSize: 14 }}
-          />
-          {downloadDate && (
-            <button style={{ marginLeft: 8, padding: '6px 12px', borderRadius: 6, border: 'none', background: '#eee', cursor: 'pointer' }} onClick={() => setDownloadDate('')}>
-              Clear
-            </button>
-          )}
-        </div>
+        <h2>Download Billing Details</h2>
         <div className={styles.tableWrapper}>
           <table className={styles.table}>
             <thead>
               <tr>
                 <th>Date</th>
+                <th>User ID</th>
                 <th>User Email</th>
                 <th>Images Downloaded</th>
                 <th>Total Billed (INR)</th>
-                <th>Models Used</th>
+                <th>Phone Models</th>
               </tr>
             </thead>
             <tbody>
@@ -417,6 +475,7 @@ export default function NetBillingPage() {
                 data.downloadBilling.map((row, idx) => (
                   <tr key={idx}>
                     <td className={styles.textCenter}>{row.day}</td>
+                    <td className={styles.textCenter}>{row.user_id}</td>
                     <td className={styles.emailCell}>{row.email}</td>
                     <td className={styles.textCenter}>{row.images_downloaded}</td>
                     <td className={styles.costCell}>₹{row.total_inr.toFixed(2)}</td>
@@ -425,7 +484,7 @@ export default function NetBillingPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className={styles.noData}>
+                  <td colSpan={6} className={styles.noData}>
                     No download billing data found
                   </td>
                 </tr>

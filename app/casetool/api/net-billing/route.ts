@@ -18,28 +18,52 @@ export async function GET(request: NextRequest) {
   try {
     const connection = await pool.getConnection();
 
+    // Parse query parameters for filtering
+    const { searchParams } = new URL(request.url);
+    const filterDate = searchParams.get('filter_date');
+    const filterModel = searchParams.get('filter_model');
+
     // Get summary data
-    const summaryQuery = `
+    let summaryQuery = `
       SELECT 
         COUNT(DISTINCT u.id) as total_users,
         COALESCE(COUNT(aul.id), 0) as total_operations,
         COALESCE(SUM(aul.cost_usd), 0) as total_cost_usd,
         COALESCE(SUM(aul.cost_inr), 0) as total_cost_inr,
         COALESCE(SUM(aul.input_tokens + aul.output_tokens), 0) as total_tokens,
-        COALESCE(SUM(aul.input_images + aul.output_images), 0) as total_images
+        COALESCE(SUM(aul.input_images + aul.output_images), 0) as total_images,
+        COALESCE(COUNT(DISTINCT dbl.id), 0) as total_downloads,
+        COALESCE(SUM(dbl.amount_inr), 0) as total_download_cost_inr
       FROM users u
       LEFT JOIN api_usage_logs aul ON u.id = aul.user_id
+      LEFT JOIN download_billing_logs dbl ON u.id = dbl.user_id
     `;
 
-    const [summaryResult] = await connection.query<any>(summaryQuery);
+    const summaryParams: any[] = [];
+    
+    if (filterDate || filterModel) {
+      summaryQuery += ' WHERE 1=1';
+      if (filterDate) {
+        summaryQuery += ' AND (DATE(aul.created_at) = ? OR DATE(dbl.created_at) = ?)';
+        summaryParams.push(filterDate, filterDate);
+      }
+      if (filterModel) {
+        summaryQuery += ' AND aul.model_name = ?';
+        summaryParams.push(filterModel);
+      }
+    }
+
+    const [summaryResult] = summaryParams.length > 0 
+      ? await connection.query<any>(summaryQuery, summaryParams)
+      : await connection.query<any>(summaryQuery);
     const summary = summaryResult[0] || {};
 
-    // Get per-user billing details
-    const userBillingQuery = `
+    // Get per-user billing details with downloads
+    let userBillingQuery = `
       SELECT 
         u.id as user_id,
         u.email,
-        COALESCE(COUNT(aul.id), 0) as total_operations,
+        COALESCE(COUNT(DISTINCT aul.id), 0) as total_operations,
         COALESCE(SUM(CASE WHEN aul.operation_type = 'text_analysis' THEN 1 ELSE 0 END), 0) as text_analysis_count,
         COALESCE(SUM(CASE WHEN aul.operation_type = 'image_generation' THEN 1 ELSE 0 END), 0) as image_generation_count,
         COALESCE(SUM(CASE WHEN aul.operation_type = 'image_enhancement' THEN 1 ELSE 0 END), 0) as image_enhancement_count,
@@ -47,17 +71,41 @@ export async function GET(request: NextRequest) {
         COALESCE(SUM(aul.input_images + aul.output_images), 0) as total_images,
         COALESCE(SUM(aul.cost_usd), 0) as total_cost_usd,
         COALESCE(SUM(aul.cost_inr), 0) as total_cost_inr,
-        COALESCE(MAX(aul.created_at), u.created_at) as last_activity
+        COALESCE(COUNT(DISTINCT dbl.id), 0) as downloads_count,
+        COALESCE(SUM(dbl.amount_inr), 0) as download_cost_inr,
+        COALESCE(MAX(aul.created_at), COALESCE(MAX(dbl.created_at), u.created_at)) as last_activity
       FROM users u
       LEFT JOIN api_usage_logs aul ON u.id = aul.user_id
-      GROUP BY u.id, u.email
-      ORDER BY total_cost_usd DESC
+      LEFT JOIN download_billing_logs dbl ON u.id = dbl.user_id
     `;
 
-    const [userBillingResult] = await connection.query<any>(userBillingQuery);
+    const userBillingParams: any[] = [];
+    
+    if (filterDate || filterModel) {
+      userBillingQuery += ' WHERE 1=1';
+      if (filterDate) {
+        userBillingQuery += ' AND (DATE(aul.created_at) = ? OR DATE(dbl.created_at) = ?)';
+        userBillingParams.push(filterDate, filterDate);
+      }
+      if (filterModel) {
+        userBillingQuery += ' AND aul.model_name = ?';
+        userBillingParams.push(filterModel);
+      }
+    }
+
+    userBillingQuery += `
+      GROUP BY u.id, u.email
+      ORDER BY (COALESCE(SUM(aul.cost_inr), 0) + COALESCE(SUM(dbl.amount_inr), 0)) DESC
+    `;
+
+    const [userBillingResult] = userBillingParams.length > 0
+      ? await connection.query<any>(userBillingQuery, userBillingParams)
+    const [userBillingResult] = userBillingParams.length > 0
+      ? await connection.query<any>(userBillingQuery, userBillingParams)
+      : await connection.query<any>(userBillingQuery);
 
     // Get model usage breakdown
-    const modelUsageQuery = `
+    let modelUsageQuery = `
       SELECT 
         model_name,
         operation_type,
@@ -66,56 +114,99 @@ export async function GET(request: NextRequest) {
         SUM(cost_inr) as total_cost_inr,
         AVG(cost_usd) as avg_cost_per_operation
       FROM api_usage_logs
+    `;
+
+    const modelUsageParams: any[] = [];
+    
+    if (filterDate || filterModel) {
+      modelUsageQuery += ' WHERE 1=1';
+      if (filterDate) {
+        modelUsageQuery += ' AND DATE(created_at) = ?';
+        modelUsageParams.push(filterDate);
+      }
+      if (filterModel) {
+        modelUsageQuery += ' AND model_name = ?';
+        modelUsageParams.push(filterModel);
+      }
+    }
+
+    modelUsageQuery += `
       GROUP BY model_name, operation_type
       ORDER BY model_name, operation_type
     `;
 
-    const [modelUsageResult] = await connection.query<any>(modelUsageQuery);
+    const [modelUsageResult] = modelUsageParams.length > 0
+      ? await connection.query<any>(modelUsageQuery, modelUsageParams)
+      : await connection.query<any>(modelUsageQuery);
 
-    // Get daily report
-    const dailyReportQuery = `
+    // Get daily report (generations only)
+    let dailyReportQuery = `
       SELECT 
         DATE(created_at) as day,
         COUNT(*) as generations,
         SUM(cost_inr) as total_inr,
-        GROUP_CONCAT(DISTINCT model_name SEPARATOR ',') as models
+        GROUP_CONCAT(DISTINCT model_name ORDER BY model_name SEPARATOR ',') as models
       FROM api_usage_logs
       WHERE operation_type IN ('image_generation', 'image_enhancement')
+    `;
+
+    const dailyReportParams: any[] = [];
+    
+    if (filterDate) {
+      dailyReportQuery += ' AND DATE(created_at) = ?';
+      dailyReportParams.push(filterDate);
+    }
+    if (filterModel) {
+      dailyReportQuery += ' AND model_name = ?';
+      dailyReportParams.push(filterModel);
+    }
+
+    dailyReportQuery += `
       GROUP BY DATE(created_at)
       ORDER BY day DESC
       LIMIT 30
     `;
 
-    const [dailyReportResult] = await connection.query<any>(dailyReportQuery);
+    const [dailyReportResult] = dailyReportParams.length > 0
+      ? await connection.query<any>(dailyReportQuery, dailyReportParams)
+      : await connection.query<any>(dailyReportQuery);
 
-    // Get download billing data
-    const { searchParams } = new URL(request.url);
-    const downloadDate = searchParams.get('download_date');
-    
+    // Get download billing data - corrected table name
     let downloadBillingQuery = `
       SELECT 
-        DATE(db.downloaded_at) as day,
+        DATE(dbl.created_at) as day,
         u.id as user_id,
         u.email,
-        COUNT(DISTINCT db.id) as images_downloaded,
-        SUM(db.cost_inr) as total_inr,
-        GROUP_CONCAT(DISTINCT db.model_name SEPARATOR ',') as models
-      FROM download_billing db
-      JOIN users u ON db.user_id = u.id
+        COUNT(DISTINCT dbl.id) as images_downloaded,
+        SUM(dbl.amount_inr) as total_inr,
+        GROUP_CONCAT(DISTINCT gl.phone_model ORDER BY gl.phone_model SEPARATOR ',') as models
+      FROM download_billing_logs dbl
+      JOIN users u ON dbl.user_id = u.id
+      LEFT JOIN generation_logs gl ON dbl.generation_log_id = gl.id
     `;
     
-    if (downloadDate) {
-      downloadBillingQuery += ` WHERE DATE(db.downloaded_at) = ?`;
+    const downloadBillingParams: any[] = [];
+    
+    if (filterDate) {
+      downloadBillingQuery += ' WHERE DATE(dbl.created_at) = ?';
+      downloadBillingParams.push(filterDate);
     }
     
     downloadBillingQuery += `
-      GROUP BY DATE(db.downloaded_at), u.id, u.email
+      GROUP BY DATE(dbl.created_at), u.id, u.email
       ORDER BY day DESC, total_inr DESC
     `;
 
-    const [downloadBillingResult] = downloadDate 
-      ? await connection.query<any>(downloadBillingQuery, [downloadDate])
+    const [downloadBillingResult] = downloadBillingParams.length > 0
+      ? await connection.query<any>(downloadBillingQuery, downloadBillingParams)
       : await connection.query<any>(downloadBillingQuery);
+
+    // Get list of available models for filtering
+    const [modelListResult] = await connection.query<any>(`
+      SELECT DISTINCT model_name 
+      FROM api_usage_logs 
+      ORDER BY model_name
+    `);
 
     connection.release();
 
@@ -127,6 +218,8 @@ export async function GET(request: NextRequest) {
       total_cost_inr: parseFloat(summary.total_cost_inr) || 0,
       total_tokens: Number(summary.total_tokens) || 0,
       total_images: Number(summary.total_images) || 0,
+      total_downloads: Number(summary.total_downloads) || 0,
+      total_download_cost_inr: parseFloat(summary.total_download_cost_inr) || 0,
     };
 
     const formattedUserBilling = (userBillingResult || []).map((user: any) => ({
@@ -140,6 +233,8 @@ export async function GET(request: NextRequest) {
       total_images: Number(user.total_images) || 0,
       total_cost_usd: parseFloat(user.total_cost_usd) || 0,
       total_cost_inr: parseFloat(user.total_cost_inr) || 0,
+      downloads_count: Number(user.downloads_count) || 0,
+      download_cost_inr: parseFloat(user.download_cost_inr) || 0,
       last_activity: user.last_activity || new Date().toISOString(),
     }));
 
@@ -168,6 +263,8 @@ export async function GET(request: NextRequest) {
       models: row.models ? row.models.split(',').filter((m: string) => m) : [],
     }));
 
+    const formattedModelList = (modelListResult || []).map((row: any) => row.model_name);
+
     return NextResponse.json({
       success: true,
       data: {
@@ -176,6 +273,7 @@ export async function GET(request: NextRequest) {
         modelUsage: formattedModelUsage,
         dailyReport: formattedDailyReport,
         downloadBilling: formattedDownloadBilling,
+        availableModels: formattedModelList,
       },
     });
   } catch (error) {

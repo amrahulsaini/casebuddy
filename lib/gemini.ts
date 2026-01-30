@@ -143,13 +143,13 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
   
   matte: [
-    'GRID 1: Hand holding phone in case, back view. Phone body is VISIBLE through transparent center panel. Case matches reference: frame color + transparent center. Camera island at top with cutouts. Clean white studio background.',
+    'GRID 1: Hand holding phone in CASE from back view. CASE design from reference image: grey/olive frame + transparent center. Phone body visible through transparent center. Camera island at top. White studio background. 🚨 CASE = reference design, PHONE = realistic color for model.',
     
-    'GRID 2: Empty case (NO phone) twisted in S-curve shape, floating on white pedestal. Match reference case frame color and transparency exactly. Professional white studio background with soft lighting.',
+    'GRID 2: Empty CASE (NO phone inside) twisted in S-curve on white pedestal. CASE from reference: grey/olive frame + transparent center. White studio background. 🚨 Match reference CASE exactly.',
     
-    'GRID 3: Empty case (NO phone) tilted/angled on white pedestal, showing back panel clearly. Camera cutouts visible. Match reference case frame color and transparency. Clean white studio background.',
+    'GRID 3: Empty CASE (NO phone inside) tilted on white pedestal. CASE from reference: grey/olive frame + transparent center. Camera cutouts visible. White studio background. 🚨 Match reference CASE exactly.',
     
-    'GRID 4: Phone inserted in case, standing upright on white pedestal, back view. Case matches reference: frame color + TRANSPARENT center showing phone body through it. Phone back MUST be visible through transparent panel. Camera island with EXACT camera specs for phone model. Professional white studio background.',
+    'GRID 4: Phone in CASE standing on white pedestal, back view. CASE from reference: grey/olive frame + transparent center showing phone through it. Phone = realistic color for model. Cameras EXACT. White studio background. 🚨 CASE design from reference ONLY.',
   ],
 };
 

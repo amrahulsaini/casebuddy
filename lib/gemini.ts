@@ -143,7 +143,7 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
   
   matte: [
-    'GRID 1 (Pure White Background): Professional realistic human hand holding phone in EXACT case from reference (SAME colors, SAME design, SAME materials), back view. DO NOT change case colors or design. Phone model inserted inside. Phone back body visible through transparent center. CAMERAS: EXACT configuration from specs. Beautiful natural hand, professional studio lighting. Clean white studio background.',
+    'GRID 1 (Pure White Background): REAL HUMAN HAND (NOT plastic mannequin hand, NOT case display hand) holding phone in EXACT case from reference (SAME colors, SAME design, SAME materials), back view. Hand = photorealistic human hand with natural skin, realistic fingers, warm skin tone, professional model hand. DO NOT change case colors or design. Phone model inserted inside. Phone back body visible through transparent center. CAMERAS: EXACT configuration from specs. Clean white studio background.',
     
     'GRID 2 (Pure White Background): EXACT empty case from reference twisted in S-curve. Preserve ALL original colors, transparency, materials. NO phone inside. DO NOT alter case appearance. Clean white studio background.',    
     

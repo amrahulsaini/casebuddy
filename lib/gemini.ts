@@ -141,13 +141,13 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
   
   matte: [
-    'PANEL 1 (Pure White Background): � CRITICAL: LOOK AT REFERENCE IMAGE AND COPY IT EXACTLY 🔴 Hands holding upper part of case close-up. NO phone inside. CASE APPEARANCE: If reference shows BLACK FRAME with TRANSPARENT CENTER - render BLACK FRAME with TRANSPARENT CENTER. If reference shows solid color - render that exact color. If reference shows patterns - copy those patterns. EXACT match to upload required. DO NOT improvise. White background.',
+    'PANEL 1 (Pure White Background): 🔴 CASE = BLACK FRAME + TRANSPARENT CENTER (SEE-THROUGH MIDDLE) 🔴 Hands holding upper part of case close-up. NO phone inside. The reference case has BLACK protective edges/frame around borders with CLEAR TRANSPARENT center panel. You can see through the middle section. Copy exactly - black borders + see-through transparent center. White background.',
     
-    'PANEL 2 (Pure White Background): 🔴 CRITICAL: REFERENCE IMAGE = EXACT TEMPLATE 🔴 Empty case twisted in S-curve. NO phone. CASE APPEARANCE: Match reference image 100% - if BLACK FRAME with CLEAR CENTER in reference, show BLACK FRAME with CLEAR CENTER here. Same colors, same transparency, same frame thickness. Text "Hybrid Design". White background.',
+    'PANEL 2 (Pure White Background): 🔴 CASE = BLACK FRAME + TRANSPARENT CENTER (SEE-THROUGH MIDDLE) 🔴 Empty case twisted in S-curve. NO phone. Reference case has BLACK edges/frame with TRANSPARENT clear center that is see-through. Match this - black border + transparent middle. Text "Hybrid Design". White background.',
     
-    'PANEL 3 (Pure White Background): 🔴 CRITICAL: CLONE REFERENCE IMAGE EXACTLY 🔴 Camera area with LENS PROTECTOR rings close-up. NO phone. CASE APPEARANCE: Exact replica of reference case - same frame color (black if reference is black), same center transparency (clear if reference is clear), same material finish. Show raised rings. Text "WITH LENS PROTECTOR". White background.',
+    'PANEL 3 (Pure White Background): 🔴 CASE = BLACK FRAME + TRANSPARENT CENTER (SEE-THROUGH MIDDLE) 🔴 Camera area with LENS PROTECTOR rings close-up. NO phone. Reference case has BLACK camera island/frame with TRANSPARENT center back panel (clear see-through). Show raised protector rings. Black borders + transparent middle. Text "WITH LENS PROTECTOR". White background.',
     
-    'PANEL 4 (Pure White Background): 🔴 CRITICAL: REFERENCE IMAGE IS THE ONLY TRUTH 🔴 Phone in case, back view 3/4. ONLY panel with phone. CASE APPEARANCE: 100% match to reference - if BLACK FRAME + TRANSPARENT CENTER in upload, render BLACK FRAME + TRANSPARENT CENTER here with phone inside. CAMERAS: EXACT specs. White background.',
+    'PANEL 4 (Pure White Background): 🔴 CASE = BLACK FRAME + TRANSPARENT CENTER - PHONE BODY VISIBLE THROUGH CENTER 🔴 Phone in case, back view 3/4. ONLY panel with phone. Reference case has BLACK protective frame/edges with TRANSPARENT center panel. The PHONE BODY must be VISIBLE through the clear transparent center. Show phone back visible through see-through middle. CAMERAS: EXACT specs. Black frame + phone visible through transparent center. White background.',
   ],
 };
 

@@ -149,7 +149,7 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
     
     'GRID 3: Empty phone case tilted on white pedestal highlighting camera protection details, case must exactly match reference with same dark grey matte frame, same clear transparent center back, same raised glossy circular camera lens ring and cutout alignment, no phone, no texture change, no tint, no branding, macro product lighting, white background.',
     
-    'GRID 4: Phone in case standing on pedestal, back view. Case from reference (colored frame + CLEAR TRANSPARENT center like glass). Phone back body, logo, internal components MUST BE CLEARLY VISIBLE through transparent center (see-through like window to phone back). NOT solid opaque. NOT all black. Phone color = realistic neutral. Camera exact. White background.',
+    'GRID 4: EXACT phone model from specs inside case on white pedestal, back view. Case MUST match reference exactly (same frame color, same transparent center, same camera ring, ALL exact details from reference image). Phone = specific model with EXACT camera count and arrangement from analysis specs. Phone back body CLEARLY VISIBLE through transparent center (see-through to phone back). Phone color = realistic black/grey/silver (NOT blue). White background.',
   ],
 };
 

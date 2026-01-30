@@ -143,13 +143,13 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
   
   matte: [
-    'GRID 1: Hand holding phone in CASE from back view. CASE design from reference image: grey/olive frame + transparent center. Phone body visible through transparent center. Camera island at top. White studio background. 🚨 CASE = reference design, PHONE = realistic color for model.',
+    'GRID 1: Hand holding phone+case from back. 🚨 CASE = exact design from reference upload (copy frame color + center transparency). Phone inside = normal realistic phone for this model. Phone back VISIBLE through transparent center. Camera island at top. White background.',
     
-    'GRID 2: Empty CASE (NO phone inside) twisted in S-curve on white pedestal. CASE from reference: grey/olive frame + transparent center. White studio background. 🚨 Match reference CASE exactly.',
+    'GRID 2: Empty case twisted in S-curve on white pedestal. NO phone inside. 🚨 CASE = exact design from reference upload. Match all colors and transparency from reference. White background.',
     
-    'GRID 3: Empty CASE (NO phone inside) tilted on white pedestal. CASE from reference: grey/olive frame + transparent center. Camera cutouts visible. White studio background. 🚨 Match reference CASE exactly.',
+    'GRID 3: Empty case tilted on white pedestal. NO phone inside. 🚨 CASE = exact design from reference upload. Match all colors and transparency from reference. White background.',
     
-    'GRID 4: Phone in CASE standing on white pedestal, back view. CASE from reference: grey/olive frame + transparent center showing phone through it. Phone = realistic color for model. Cameras EXACT. White studio background. 🚨 CASE design from reference ONLY.',
+    'GRID 4: Phone+case on white pedestal, back view. 🚨 CRITICAL: Case has TRANSPARENT center panel - phone back body MUST BE VISIBLE AND SHOWING THROUGH the transparent part (like looking through glass at phone back). DO NOT make solid opaque back. Phone = realistic color for model (not blue). CASE frame = reference upload. Cameras EXACT. White background.',
   ],
 };
 

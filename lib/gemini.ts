@@ -141,13 +141,13 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
   
   matte: [
-    'PANEL 1 (Pure White Background): � LOOK AT REFERENCE IMAGE - COPY EXACT CASE DESIGN 🚨 Hands holding upper part of case close-up. NO phone inside. IMPORTANT: Study the reference case image carefully. Whatever colors, transparency, frame style, and design you see in that reference - recreate it EXACTLY here. If it has black frame + clear center, render that. If it has patterns, copy them. Reference image = absolute truth. White background.',
+    'PANEL 1 (Pure White Background): 🚨 ANALYZE REFERENCE CASE - COPY EXACT COLORS 🚨 Hands holding upper part of case close-up. NO phone. CRITICAL: Look at reference case frame color (grey, olive, beige, tan, etc.) - use THAT EXACT color, not black, not white. If frame is grey/olive in reference, render grey/olive here. Copy exact transparency of center panel. Reference colors = absolute truth. White background.',
     
-    'PANEL 2 (Pure White Background): � LOOK AT REFERENCE IMAGE - COPY EXACT CASE DESIGN 🚨 Empty case twisted in S-curve. NO phone. IMPORTANT: Study the reference case image. Whatever you see - the exact frame color, center transparency, materials, patterns - recreate it EXACTLY in twisted form. Reference image shows the truth. Match it perfectly. Text "Hybrid Design". White background.',
+    'PANEL 2 (Pure White Background): 🚨 ANALYZE REFERENCE CASE - COPY EXACT COLORS 🚨 Empty case twisted in S-curve. NO phone. CRITICAL: Examine reference frame color carefully (grey, olive, tan, beige, etc.) - use THAT EXACT shade, not black, not white. Match transparency of center. Render twisted case with exact reference colors. Text "Hybrid Design". White background.',
     
-    'PANEL 3 (Pure White Background): � LOOK AT REFERENCE IMAGE - COPY EXACT CASE DESIGN 🚨 Camera area with LENS PROTECTOR rings close-up. NO phone. IMPORTANT: Examine the reference case image. Recreate the EXACT frame style, colors, transparency, materials you see. Show raised lens protector rings. Reference = source of truth. Text "WITH LENS PROTECTOR". White background.',
+    'PANEL 3 (Pure White Background): 🚨 ANALYZE REFERENCE CASE - COPY EXACT COLORS 🚨 Camera area with LENS PROTECTOR rings close-up. NO phone. CRITICAL: Study reference frame/camera island color (grey, olive, tan, etc.) - render THAT EXACT color. Match center transparency. Show raised lens protector rings in same color as reference. Text "WITH LENS PROTECTOR". White background.',
     
-    'PANEL 4 (Pure White Background): � LOOK AT REFERENCE IMAGE - COPY EXACT CASE DESIGN + INSERT PHONE 🚨 Phone in case, back view 3/4. ONLY panel with phone. IMPORTANT: Study reference case - copy its EXACT frame style, colors, transparency. Insert phone model with EXACT camera specs. If case has transparent parts, show PHONE BODY VISIBLE through those parts. Reference case design = absolute truth. White background.',
+    'PANEL 4 (Pure White Background): 🚨 ANALYZE REFERENCE CASE - COPY EXACT COLORS + INSERT PHONE 🚨 Phone in case, back view 3/4. ONLY panel with phone. CRITICAL: Look at reference frame color (grey, olive, tan, beige, etc.) - use THAT EXACT shade. Match center transparency. Insert phone with EXACT camera specs. Phone body visible through transparent center. Reference colors = absolute truth. White background.',
   ],
 };
 

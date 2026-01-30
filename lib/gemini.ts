@@ -149,7 +149,7 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
     
     'GRID 3: Camera cutout area close-up with RAISED LENS PROTECTOR rings visible. NO phone inside. Text "WITH LENS PROTECTOR". White background. 🚨 MATCH REFERENCE IMAGE EXACTLY - same colors.',
     
-    'GRID 4: Phone inserted in case, back view at 3/4 angle. Phone body VISIBLE through transparent center. Insert phone model with EXACT camera configuration. White background. 🚨 CASE MATCHES REFERENCE IMAGE EXACTLY.',
+    'GRID 4: 📱 PHONE INSERTED IN CASE 📱 Back view at 3/4 angle. Case has SAME frame color as reference with TRANSPARENT center. Phone model inserted inside - PHONE BACK MUST BE VISIBLE through the clear transparent center panel. Render phone body showing through transparency. CAMERAS: EXACT specs. White background. 🚨 MANDATORY: PHONE VISIBLE THROUGH TRANSPARENT CENTER.',
   ],
 };
 

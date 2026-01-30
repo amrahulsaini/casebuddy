@@ -125,7 +125,7 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
     
     'PANEL 2 (Pure White Background): Phone back side view at 3/4 angle. Show EXACT case design with EXACT camera count and position from specs. Professional lighting. Clean white studio background.',
     
-    'PANEL 3 (Pure White Background): Hybrid design showcase. Phone in case at artistic angle. Text "Hybrid Design" at top. Match reference case design exactly. Clean white studio background.',
+    'PANEL 3 (Pure White Background): EMPTY case ONLY twisted in S-curve. NO phone inside. Show the EXACT case design from reference image (colors, patterns, materials) in flexible twisted form. Text "Hybrid Design" at top. Clean white studio background.',
     
     'PANEL 4 (Pure White Background): Inner velvet design of case. Show interior lining texture and soft velvet material. Text "Premium Velvet Interior". NO phone visible, just case interior. Clean white studio background.',
   ],
@@ -135,7 +135,7 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
     
     'PANEL 2 (Pure White Background): Phone back side view at 3/4 angle. Transparent case showing original phone design visible through it. CAMERAS: EXACT count and position from specs. Clean white studio background.',
     
-    'PANEL 3 (Pure White Background): Hybrid design showcase. Phone in transparent case at artistic angle. Text "Hybrid Design" at top. Show phone body visible through case. Clean white studio background.',
+    'PANEL 3 (Pure White Background): EMPTY transparent case ONLY twisted in S-curve. NO phone inside. Show the EXACT transparent case from reference image in flexible twisted form. Text "Hybrid Design" at top. Clean white studio background.',
     
     'PANEL 4 (Pure White Background): Hand holding phone in transparent case. Show back view with phone body visible through case. CAMERAS: EXACT configuration from specs. Text "Flaunt The Original Look". Clean white studio background.',
   ],

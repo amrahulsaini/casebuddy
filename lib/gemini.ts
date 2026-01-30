@@ -143,13 +143,13 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
   
   matte: [
-    'GRID 1: Hands holding case (close-up of top part). NO phone inside. White background. 🚨 MATCH REFERENCE IMAGE EXACTLY - same frame color, same transparency, same design.',
+    'GRID 1 (TOP-LEFT): Hand holding the UPPER PART of empty case in portrait orientation. Show top section with camera cutout area clearly visible. NO phone inside the case. Close-up detail view. White background. Match reference case exactly - same frame color and transparency.',
     
-    'GRID 2: Empty case twisted in S-curve showing flexibility. NO phone inside. Text "Hybrid Design" at top. White background. 🚨 MATCH REFERENCE IMAGE EXACTLY - same frame color, same transparency.',
+    'GRID 2 (TOP-RIGHT): Empty case ONLY, twisted/bent in smooth S-curve shape floating in air to demonstrate flexibility. NO phone inside. NO hands visible. Text "Hybrid Design" at top. White background. Match reference case exactly - same colors.',
     
-    'GRID 3: Camera cutout area close-up with RAISED LENS PROTECTOR rings visible. NO phone inside. Text "WITH LENS PROTECTOR". White background. 🚨 MATCH REFERENCE IMAGE EXACTLY - same colors.',
+    'GRID 3 (BOTTOM-LEFT): Extreme close-up of CAMERA ISLAND area showing LENS PROTECTOR raised rings around each camera opening. NO phone inside. Focus on protector detail. Text "WITH LENS PROTECTOR". White background. Match reference case colors.',
     
-    'GRID 4: 📱 PHONE INSERTED IN CASE 📱 Back view at 3/4 angle. Case has SAME frame color as reference with TRANSPARENT center. Phone model inserted inside - PHONE BACK MUST BE VISIBLE through the clear transparent center panel. Render phone body showing through transparency. CAMERAS: EXACT specs. White background. 🚨 MANDATORY: PHONE VISIBLE THROUGH TRANSPARENT CENTER.',
+    'GRID 4 (BOTTOM-RIGHT): Phone model INSERTED inside the case. Back view at 3/4 angle showing phone body VISIBLE through transparent center panel. Case frame matches reference color. Phone cameras align with cutouts. CAMERAS: EXACT count from specs. White background. MANDATORY: Phone visible through center.',
   ],
 };
 

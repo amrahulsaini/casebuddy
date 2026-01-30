@@ -143,13 +143,13 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
   
   matte: [
-    'GRID 1: Hand holding phone+case from back. Phone body visible through transparent center. Camera island at top. Match reference CASE color (frame+transparency) exactly. Clean white studio background with soft shadows. Professional product photography.',
+    'GRID 1: Hand holding phone in case, back view. Phone body is VISIBLE through transparent center panel. Case matches reference: frame color + transparent center. Camera island at top with cutouts. Clean white studio background.',
     
-    'GRID 2: Empty case twisted in S-curve floating in air. NO phone. NO text. Match reference CASE color exactly. Pure white background with subtle gradient. Professional studio lighting.',
+    'GRID 2: Empty case (NO phone) twisted in S-curve shape, floating on white pedestal. Match reference case frame color and transparency exactly. Professional white studio background with soft lighting.',
     
-    'GRID 3: Empty case tilted at 45-degree angle on white pedestal/platform. Camera island visible. NO phone. NO text. Match reference CASE color exactly. Clean white studio background. Professional product shot.',
+    'GRID 3: Empty case (NO phone) tilted/angled on white pedestal, showing back panel clearly. Camera cutouts visible. Match reference case frame color and transparency. Clean white studio background.',
     
-    'GRID 4: Phone+case standing upright on white pedestal, back view. Phone visible through transparent center. CAMERAS: exact specs. Match reference CASE color exactly. Clean white studio background. Professional product photography.',
+    'GRID 4: Phone inserted in case, standing upright on white pedestal, back view. Case matches reference: frame color + TRANSPARENT center showing phone body through it. Phone back MUST be visible through transparent panel. Camera island with EXACT camera specs for phone model. Professional white studio background.',
   ],
 };
 

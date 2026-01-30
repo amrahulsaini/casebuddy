@@ -143,13 +143,13 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
   
   matte: [
-    'GRID 1: Beautiful professional human hand holding phone in EXACT case from reference (SAME frame color, SAME transparency, SAME materials, SAME camera ring), back view. DO NOT change case colors or design. Hand = photorealistic AI-generated human hand with perfect smooth skin, natural warm skin tone, perfectly manicured fingers, elegant posture, studio lighting with soft shadows, professional model hand quality (NOT plastic/mannequin/case hand). Phone model inserted inside case. Phone back body CLEARLY VISIBLE through transparent center panel. CAMERAS: EXACT configuration from specs. BACKGROUND = PURE WHITE #FFFFFF, perfectly uniform, no gradients, no shadows on background, clean infinite white backdrop like Amazon product photos, professional e-commerce photography, studio quality.',
+    'GRID 1 (Pure White Background): Professional realistic human hand holding phone in EXACT case from reference (SAME colors, SAME design, SAME materials), back view. DO NOT change case colors or design. Phone model inserted inside. Phone back body visible through transparent center. CAMERAS: EXACT configuration from specs. Beautiful natural hand, professional studio lighting. Clean white studio background.',
     
-    'GRID 2: Empty phone case displayed twisted in a soft S-curve on a white pedestal, MUST be identical to the reference case with same frame color and thickness, same fully transparent clear back panel, same glossy circular camera ring structure, no phone, no redesign, no color shift, no frosted effect, no extra reflections, white background, studio product lighting, realistic materials.',    
+    'GRID 2 (Pure White Background): EXACT empty case from reference twisted in S-curve. Preserve ALL original colors, transparency, materials. NO phone inside. DO NOT alter case appearance. Clean white studio background.',    
     
-    'GRID 3: Empty phone case tilted on white pedestal highlighting camera protection details, case must exactly match reference with same frame color, same clear transparent center back, same raised glossy circular camera lens ring and cutout alignment, no phone, no texture change, no tint, no branding, macro product lighting, white background.',
+    'GRID 3 (Pure White Background): EXACT empty case from reference tilted on pedestal. Preserve ALL original colors, transparency, materials. NO phone inside. DO NOT alter case appearance. Clean white studio background.',
     
-    'GRID 4: EXACT phone model from specs inside EXACT case from reference (SAME frame color, SAME transparency, SAME materials, SAME camera ring, SAME design), on white pedestal, back view. DO NOT change case colors or appearance. Phone = specific model with EXACT camera count and arrangement from analysis specs. CAMERAS: EXACT configuration from specs. Phone back body CLEARLY VISIBLE through transparent center (see-through to phone back). Phone color = realistic black/grey/silver (NOT blue). BACKGROUND = PURE WHITE #FFFFFF, clean studio background.',
+    'GRID 4 (Pure White Background): Phone in EXACT case from reference (SAME colors, SAME design, SAME materials), back view. DO NOT change case colors or appearance. Phone model with EXACT camera count and arrangement from specs. Phone back body visible through transparent center. CAMERAS: EXACT configuration from specs. Clean white studio background.',
   ],
 };
 

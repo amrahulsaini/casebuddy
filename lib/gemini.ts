@@ -141,13 +141,13 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
   
   matte: [
-    'PANEL 1 (Pure White Background): Two phones at 3/4 angle showing opposite sides. LEFT: Front screen view with model name. RIGHT: Back view with GREY MATTE case. CAMERAS: EXACT configuration from specs. Clean white studio background, professional Amazon style.',
+    'PANEL 1 (Pure White Background): Two phones at 3/4 angle showing opposite sides. LEFT: Front screen view with model name. RIGHT: Back view with EXACT case from reference image showing EXACT colors/design. MATTE finish texture. CAMERAS: EXACT configuration from specs. Clean white studio background, professional Amazon style.',
     
-    'PANEL 2 (Pure White Background): Phone back side view at 3/4 angle. GREY MATTE case with premium matte finish texture. CAMERAS: EXACT count and position from specs. Soft shadows on white background.',
+    'PANEL 2 (Pure White Background): Phone back side view at 3/4 angle. Case with EXACT colors/design from reference image. Premium matte finish texture. CAMERAS: EXACT count and position from specs. Soft shadows on white background.',
     
-    'PANEL 3 (Pure White Background): GREY MATTE case only, no phone. Bent in S-curve to show flexibility. Text "Soft Matte Finish" at top. Show texture and premium feel. Clean white background.',
+    'PANEL 3 (Pure White Background): EMPTY case ONLY with EXACT colors/design from reference image. Bent in S-curve to show flexibility. Text "Soft Matte Finish" at top. Show matte texture and premium feel. NO phone inside. Clean white background.',
     
-    'PANEL 4 (Pure White Background): Hand holding phone in GREY MATTE case from back angle. Camera island with RAISED LENS PROTECTOR RING clearly visible around each camera lens. CAMERAS: EXACT configuration from specs. Text "WITH LENS PROTECTOR" with arrow pointing to raised ring. Show camera protection feature prominently.',
+    'PANEL 4 (Pure White Background): Hand holding phone in case with EXACT colors/design from reference image. Camera island with RAISED LENS PROTECTOR RING clearly visible around each camera lens. CAMERAS: EXACT configuration from specs. Text "WITH LENS PROTECTOR" with arrow pointing to raised ring. Show camera protection feature prominently.',
   ],
 };
 

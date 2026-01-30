@@ -111,43 +111,43 @@ Rules:
 
 export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   doyers: [
-    'PANEL 1 (Pure White Background): Two phones at 3/4 angle. LEFT: Back view - EXACT case from reference with phone inside. CAMERAS: Render ONLY the exact number and arrangement specified in camera specs. RIGHT: Front screen with model name. Professional Amazon style. Clean white studio background.',
+    'PANEL 1 (Pure White Background): Two phones at 3/4 angle. LEFT: Back view - EXACT case from reference (SAME colors, SAME design, SAME patterns, SAME materials) with specified phone model inserted inside. CAMERAS: EXACT count and arrangement from specs. RIGHT: Front screen with model name. DO NOT change case colors or design. Clean white studio background.',
     
-    'PANEL 2 (Pure White Background): Two phones. LEFT: Empty case. RIGHT: Phone in case. CAMERAS: Use EXACT count and position from specs. Both at 3/4 angle. Clean white studio background.',
+    'PANEL 2 (Pure White Background): Two phones. LEFT: EXACT empty case from reference (preserve ALL colors/patterns). RIGHT: Same case with phone model inserted. CAMERAS: EXACT count from specs. DO NOT alter case appearance. Clean white studio background.',
     
-    'PANEL 3 (Pure White Background): ONE empty case twisted in S-curve. NO phone. Text "Hybrid Design" at top. Match reference case design exactly. Clean white studio background.',
+    'PANEL 3 (Pure White Background): EXACT empty case from reference image twisted in S-curve. Preserve ALL original colors, patterns, materials. NO phone inside. Text "Hybrid Design" at top. DO NOT change case design. Clean white studio background.',
     
-    'PANEL 4 (Pure White Background): Hand holding phone in case from back. CAMERAS: Show EXACT camera configuration from specs. Phone body visible through transparent parts. Text "Flaunt The Original Look". Clean white studio background.',
+    'PANEL 4 (Pure White Background): Hand holding phone in EXACT case from reference (preserve ALL colors/patterns). CAMERAS: EXACT configuration from specs. Phone body visible through transparent parts. Text "Flaunt The Original Look". DO NOT modify case appearance. Clean white studio background.',
   ],
   
   black: [
-    'PANEL 1 (Pure White Background): Two phones at 3/4 angle showing opposite sides. LEFT: Front screen view with model name. RIGHT: Back view with EXACT case design and EXACT camera configuration from specs. Professional Amazon style. Clean white studio background.',
+    'PANEL 1 (Pure White Background): Two phones at 3/4 angle. LEFT: Front screen with model name. RIGHT: EXACT case from reference (SAME colors, SAME design, SAME finish) with phone model inserted. CAMERAS: EXACT configuration from specs. DO NOT change case colors or appearance. Clean white studio background.',
     
-    'PANEL 2 (Pure White Background): Phone back side view at 3/4 angle. Show EXACT case design with EXACT camera count and position from specs. Professional lighting. Clean white studio background.',
+    'PANEL 2 (Pure White Background): Phone back at 3/4 angle in EXACT case from reference. Preserve ALL original colors, patterns, finish. CAMERAS: EXACT count and position from specs. DO NOT alter case design. Clean white studio background.',
     
-    'PANEL 3 (Pure White Background): EMPTY case ONLY twisted in S-curve. NO phone inside. Show the EXACT case design from reference image (colors, patterns, materials) in flexible twisted form. Text "Hybrid Design" at top. Clean white studio background.',
+    'PANEL 3 (Pure White Background): EXACT empty case from reference twisted in S-curve. Preserve ALL original colors, patterns, materials. NO phone inside. Text "Hybrid Design" at top. DO NOT modify case appearance. Clean white studio background.',
     
-    'PANEL 4 (Pure White Background): Inner velvet design of case. Show interior lining texture and soft velvet material. Text "Premium Velvet Interior". NO phone visible, just case interior. Clean white studio background.',
+    'PANEL 4 (Pure White Background): EXACT case from reference showing interior lining. Preserve case colors and materials. Text "Premium Velvet Interior". NO phone visible. DO NOT change case design. Clean white studio background.',
   ],
   
   transparent: [
-    'PANEL 1 (Pure White Background): Two phones at 3/4 angle showing opposite sides. LEFT: Front screen view with model name. RIGHT: Back view with transparent case showing phone body through case. CAMERAS: EXACT configuration from specs. Clean white studio background.',
+    'PANEL 1 (Pure White Background): Two phones at 3/4 angle. LEFT: Front screen with model name. RIGHT: EXACT transparent case from reference (SAME transparency level, SAME tint, SAME materials) with phone model inserted showing phone body through case. CAMERAS: EXACT configuration from specs. DO NOT change case appearance. Clean white studio background.',
     
-    'PANEL 2 (Pure White Background): Phone back side view at 3/4 angle. Transparent case showing original phone design visible through it. CAMERAS: EXACT count and position from specs. Clean white studio background.',
+    'PANEL 2 (Pure White Background): Phone back at 3/4 angle in EXACT transparent case from reference. Preserve case transparency and finish. Phone design visible through case. CAMERAS: EXACT count and position from specs. DO NOT alter case. Clean white studio background.',
     
-    'PANEL 3 (Pure White Background): EMPTY transparent case ONLY twisted in S-curve. NO phone inside. Show the EXACT transparent case from reference image in flexible twisted form. Text "Hybrid Design" at top. Clean white studio background.',
+    'PANEL 3 (Pure White Background): EXACT empty transparent case from reference twisted in S-curve. Preserve transparency, tint, all original characteristics. NO phone inside. Text "Hybrid Design" at top. DO NOT modify case appearance. Clean white studio background.',
     
-    'PANEL 4 (Pure White Background): Hand holding phone in transparent case. Show back view with phone body visible through case. CAMERAS: EXACT configuration from specs. Text "Flaunt The Original Look". Clean white studio background.',
+    'PANEL 4 (Pure White Background): Hand holding phone in EXACT transparent case from reference. Preserve case appearance. Phone body visible through case. CAMERAS: EXACT configuration from specs. Text "Flaunt The Original Look". DO NOT change case design. Clean white studio background.',
   ],
   
   matte: [
-    'PANEL 1 (Pure White Background): Two phones at 3/4 angle showing opposite sides. LEFT: Front screen view with model name. RIGHT: Back view with EXACT case from reference image showing EXACT colors/design. MATTE finish texture. CAMERAS: EXACT configuration from specs. Clean white studio background, professional Amazon style.',
+    'PANEL 1 (Pure White Background): Two phones at 3/4 angle. LEFT: Front screen with model name. RIGHT: EXACT case from reference (SAME color, SAME design, SAME matte finish) with phone model inserted. CAMERAS: EXACT configuration from specs. DO NOT change case color or appearance. Clean white studio background.',
     
-    'PANEL 2 (Pure White Background): Phone back side view at 3/4 angle. Case with EXACT colors/design from reference image. Premium matte finish texture. CAMERAS: EXACT count and position from specs. Soft shadows on white background.',
+    'PANEL 2 (Pure White Background): Phone back at 3/4 angle in EXACT case from reference. Preserve ALL original colors, patterns, matte finish. CAMERAS: EXACT count and position from specs. DO NOT alter case appearance. Clean white studio background.',
     
-    'PANEL 3 (Pure White Background): EMPTY case ONLY with EXACT colors/design from reference image. Bent in S-curve to show flexibility. Text "Soft Matte Finish" at top. Show matte texture and premium feel. NO phone inside. Clean white background.',
+    'PANEL 3 (Pure White Background): EXACT empty case from reference twisted in S-curve. Preserve ALL original colors, patterns, matte texture. NO phone inside. Text "Soft Matte Finish" at top. DO NOT modify case color or design. Clean white studio background.',
     
-    'PANEL 4 (Pure White Background): Hand holding phone in case with EXACT colors/design from reference image. Camera island with RAISED LENS PROTECTOR RING clearly visible around each camera lens. CAMERAS: EXACT configuration from specs. Text "WITH LENS PROTECTOR" with arrow pointing to raised ring. Show camera protection feature prominently.',
+    'PANEL 4 (Pure White Background): Hand holding phone in EXACT case from reference (preserve ALL colors/finish). RAISED LENS PROTECTOR RING visible around camera lenses. CAMERAS: EXACT configuration from specs. Text "WITH LENS PROTECTOR" with arrow. DO NOT change case appearance. Clean white studio background.',
   ],
 };
 

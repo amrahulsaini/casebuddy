@@ -143,13 +143,13 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
   
   matte: [
-    'PANEL 1 (Pure White Background): 🚨 ANALYZE REFERENCE CASE - COPY EXACT COLORS 🚨 Hands holding upper part of case close-up. NO phone. CRITICAL: Look at reference case frame color (grey, olive, beige, tan, etc.) - use THAT EXACT color, not black, not white. If frame is grey/olive in reference, render grey/olive here. Copy exact transparency of center panel. Reference colors = absolute truth. White background.',
+    'GRID 1: Hands holding case (close-up of top part). NO phone inside. White background. 🚨 MATCH REFERENCE IMAGE EXACTLY - same frame color, same transparency, same design.',
     
-    'PANEL 2 (Pure White Background): 🚨 ANALYZE REFERENCE CASE - COPY EXACT COLORS 🚨 Empty case twisted in S-curve. NO phone. CRITICAL: Examine reference frame color carefully (grey, olive, tan, beige, etc.) - use THAT EXACT shade, not black, not white. Match transparency of center. Render twisted case with exact reference colors. Text "Hybrid Design". White background.',
+    'GRID 2: Empty case twisted in S-curve showing flexibility. NO phone inside. Text "Hybrid Design" at top. White background. 🚨 MATCH REFERENCE IMAGE EXACTLY - same frame color, same transparency.',
     
-    'PANEL 3 (Pure White Background): 🚨 ANALYZE REFERENCE CASE - COPY EXACT COLORS 🚨 Camera area with LENS PROTECTOR rings close-up. NO phone. CRITICAL: Study reference frame/camera island color (grey, olive, tan, etc.) - render THAT EXACT color. Match center transparency. Show raised lens protector rings in same color as reference. Text "WITH LENS PROTECTOR". White background.',
+    'GRID 3: Camera cutout area close-up with RAISED LENS PROTECTOR rings visible. NO phone inside. Text "WITH LENS PROTECTOR". White background. 🚨 MATCH REFERENCE IMAGE EXACTLY - same colors.',
     
-    'PANEL 4 (Pure White Background): 🚨 ANALYZE REFERENCE CASE - COPY EXACT COLORS + INSERT PHONE 🚨 Phone in case, back view 3/4. ONLY panel with phone. CRITICAL: Look at reference frame color (grey, olive, tan, beige, etc.) - use THAT EXACT shade. Match center transparency. Insert phone with EXACT camera specs. Phone body visible through transparent center. Reference colors = absolute truth. White background.',
+    'GRID 4: Phone inserted in case, back view at 3/4 angle. Phone body VISIBLE through transparent center. Insert phone model with EXACT camera configuration. White background. 🚨 CASE MATCHES REFERENCE IMAGE EXACTLY.',
   ],
 };
 

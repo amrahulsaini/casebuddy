@@ -143,13 +143,13 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
   
   matte: [
-    'GRID 1 (TOP-LEFT): Hand holding the UPPER PART of empty case in portrait orientation. Show top section with camera cutout area clearly visible. NO phone inside the case. Close-up detail view. White background. Match reference case exactly - same frame color and transparency.',
+    'GRID 1 (TOP-LEFT): Hand holding phone in case from BACK view. Camera island at top clearly visible. Phone body VISIBLE through transparent center panel of case. Match reference case frame color exactly. Portrait orientation. White background.',
     
-    'GRID 2 (TOP-RIGHT): Empty case ONLY, twisted/bent in smooth S-curve shape floating in air to demonstrate flexibility. NO phone inside. NO hands visible. Text "Hybrid Design" at top. White background. Match reference case exactly - same colors.',
+    'GRID 2 (TOP-RIGHT): Empty case ONLY twisted in smooth S-curve/figure-8 shape. NO phone, NO hands. Text "Hybrid Design" at top. Match reference case frame color and transparency exactly. White background.',
     
-    'GRID 3 (BOTTOM-LEFT): Extreme close-up of CAMERA ISLAND area showing LENS PROTECTOR raised rings around each camera opening. NO phone inside. Focus on protector detail. Text "WITH LENS PROTECTOR". White background. Match reference case colors.',
+    'GRID 3 (BOTTOM-LEFT): Angled close-up view of camera island area showing LENS PROTECTOR raised rings. Tilted perspective from side angle. Focus on protector rings detail. Text "WITH LENS PROTECTOR". Match reference case colors. White background.',
     
-    'GRID 4 (BOTTOM-RIGHT): Phone model INSERTED inside the case. Back view at 3/4 angle showing phone body VISIBLE through transparent center panel. Case frame matches reference color. Phone cameras align with cutouts. CAMERAS: EXACT count from specs. White background. MANDATORY: Phone visible through center.',
+    'GRID 4 (BOTTOM-RIGHT): Phone in case standing upright, full back view, slightly tilted. Phone body VISIBLE through transparent center. Match reference case frame color exactly. CAMERAS: EXACT count from specs. Professional product shot. White background.',
   ],
 };
 

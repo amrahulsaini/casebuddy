@@ -141,13 +141,13 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
   
   matte: [
-    'PANEL 1 (Pure White Background): ⚠️ CRITICAL: USE THE EXACT CASE COLOR FROM UPLOADED REFERENCE IMAGE - DO NOT CHANGE TO GREY OR ANY OTHER COLOR ⚠️ Two phones at 3/4 angle. LEFT: Front screen with model name. RIGHT: Case with IDENTICAL color as reference upload, matte finish, phone model inserted. CAMERAS: EXACT configuration from specs. Match reference case color EXACTLY. Clean white studio background.',
+    'PANEL 1 (Pure White Background): ⚠️ USE EXACT CASE FROM REFERENCE - IDENTICAL colors, transparency, design ⚠️ Close-up view of hands holding UPPER PART of case showing top details. EMPTY case (NO phone inside). Show the EXACT case design from reference image - preserve ALL colors, transparency levels, patterns. Clean white studio background.',
     
-    'PANEL 2 (Pure White Background): ⚠️ CRITICAL: PRESERVE EXACT CASE COLOR FROM REFERENCE - DO NOT MODIFY ⚠️ Phone back at 3/4 angle. Case must be SAME COLOR as uploaded reference image with matte finish. CAMERAS: EXACT count and position from specs. Match reference case appearance EXACTLY. Clean white studio background.',
+    'PANEL 2 (Pure White Background): ⚠️ USE EXACT CASE FROM REFERENCE - DO NOT ALTER ⚠️ HYBRID DESIGN: EMPTY case twisted in S-curve to show flexibility. NO phone inside. Use the EXACT case from uploaded reference - SAME colors, SAME transparency, SAME design, SAME patterns. Text "Hybrid Design" at top. Clean white studio background.',
     
-    'PANEL 3 (Pure White Background): ⚠️ CRITICAL: SAME COLOR AS REFERENCE UPLOAD - DO NOT ALTER ⚠️ Empty case twisted in S-curve. Case must be IDENTICAL COLOR to uploaded reference with matte texture. NO phone inside. Text "Soft Matte Finish" at top. Match reference color EXACTLY. Clean white studio background.',
+    'PANEL 3 (Pure White Background): ⚠️ USE EXACT CASE FROM REFERENCE ⚠️ LENS PROTECTOR focus view. EMPTY case showing camera cutout area with RAISED LENS PROTECTOR RINGS. NO phone inside. Show the EXACT case from reference - preserve ALL colors, transparency, design. Text "WITH LENS PROTECTOR" with arrow pointing to raised rings. Clean white studio background.',
     
-    'PANEL 4 (Pure White Background): ⚠️ CRITICAL: EXACT COLOR FROM REFERENCE IMAGE ONLY ⚠️ Hand holding phone. Case must be SAME COLOR as uploaded reference with matte finish. RAISED LENS PROTECTOR RING visible around camera lenses. CAMERAS: EXACT configuration from specs. Text "WITH LENS PROTECTOR" with arrow. Match reference case color EXACTLY. Clean white studio background.',
+    'PANEL 4 (Pure White Background): ⚠️ USE EXACT CASE FROM REFERENCE - ONLY THIS PANEL HAS PHONE ⚠️ Phone back view in case at 3/4 angle. Insert phone model with EXACT camera configuration from specs. Case must be IDENTICAL to uploaded reference - SAME colors, transparency, design, patterns. This is the ONLY panel with phone inside. Clean white studio background.',
   ],
 };
 

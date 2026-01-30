@@ -143,12 +143,12 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
   
   matte: [
-    'GRID 1: Professional realistic human hand holding phone in case from back view. Hand = well-lit, natural skin tone, clean, professional model hand. Phone INSIDE case. Case matches reference exactly (frame color + transparent center). Phone body VISIBLE through transparent center. Camera island at top. White studio background.',
+    'GRID 1: Hand holding phone in case, back view. Case from reference (colored frame + CLEAR TRANSPARENT center like glass). The phone back body, logo, design MUST BE CLEARLY VISIBLE through the transparent center panel (you can see through it to the phone). NOT solid black back. Camera island at top. Natural hand. White background.',
     
     'GRID 2: Empty phone case displayed twisted in a soft S-curve on a white pedestal, MUST be identical to the reference case with same dark grey frame color and thickness, same fully transparent clear back panel, same glossy circular camera ring structure, no phone, no redesign, no color shift, no frosted effect, no extra reflections, white background, studio product lighting, realistic materials.Empty phone case displayed twisted in a soft S-curve on a white pedestal, MUST be identical to the reference case with same dark grey frame color and thickness, same fully transparent clear back panel, same glossy circular camera ring structure, no phone, no redesign, no color shift, no frosted effect, no extra reflections, white background, studio product lighting, realistic materials.',    
     'GRID 3: Empty phone case tilted on white pedestal highlighting camera protection details, case must exactly match reference with same dark grey matte frame, same clear transparent center back, same raised glossy circular camera lens ring and cutout alignment, no phone, no texture change, no tint, no branding, macro product lighting, white background.',
     
-    'GRID 4: Phone in case on white pedestal, back view standing upright. Case matches reference (frame + transparent center). Phone inside case = BLACK, GREY, WHITE, or SILVER colored phone back (realistic phone colors, NOT BLUE, NOT COLORED). Phone back VISIBLE through transparent center panel. Camera alignment exact to phone model specs. White studio background. 🚨 NO BLUE PHONES 🚨',
+    'GRID 4: Phone in case standing on pedestal, back view. Case from reference (colored frame + CLEAR TRANSPARENT center like glass). Phone back body, logo, internal components MUST BE CLEARLY VISIBLE through transparent center (see-through like window to phone back). NOT solid opaque. NOT all black. Phone color = realistic neutral. Camera exact. White background. 🚨 TRANSPARENT CENTER = SEE PHONE THROUGH IT 🚨',
   ],
 };
 

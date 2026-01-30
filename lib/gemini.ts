@@ -49,16 +49,18 @@ STEP 1: Research "${phoneModel}" phone specs
 - Camera arrangement (vertical, grid, etc.)
 - Camera position (top-left, center, etc.)
 
-STEP 2: Analyze the ACTUAL case in the uploaded image
-- What does THIS SPECIFIC case look like?
-- Material/color (black frame with clear center, fully clear, solid black?)
-- Camera cutout shape and position
-- Any design patterns or branding on the case
+STEP 2: Analyze the ACTUAL case in the uploaded image - BE VERY SPECIFIC
+- Frame color: What is the EXACT color of the frame/edges? (grey, olive, tan, beige, black, white, etc.) - BE PRECISE
+- Center panel: Is it transparent/clear? What transparency level?
+- Material finish: Matte? Glossy? Textured?
+- Camera cutout: Exact shape, color, and position
+- Any patterns, textures, or special features
 
-STEP 3: Describe insertion
-- How will ${phoneModel} look when inserted into THIS EXACT case from the image
-- Where cameras align with case cutout
-- What parts of phone are visible
+🚨 CRITICAL: Your case_description will be used to recreate this case. Be extremely detailed about colors, especially frame color.
+
+STEP 3: Create generation prompt
+- Start with camera count for ${phoneModel}
+- Then describe EXACT case appearance from image (specific colors, transparency, etc.)
 
 Return JSON:
 
@@ -73,11 +75,11 @@ Return JSON:
     "lens_sizes": "main + ultrawide + macro"
   },
   "phone_model_description": "${phoneModel} has 2 vertical cameras at top-left with torch",
-  "case_description": "Describe the EXACT case from uploaded image - colors, patterns, material, cutouts",
-  "final_generation_prompt": "⚠️ ${phoneModel} CAMERA COUNT ⚠️\\n2 CAMERAS ONLY (not 3, not 4, ONLY TWO)\\n1 TORCH\\nTOTAL: 3 circles\\nVertical line, top-left\\n\\n⚠️ RENDER EXACTLY 2 CAMERA CIRCLES + 1 TORCH CIRCLE = 3 TOTAL ⚠️\\n\\nCase: Use exact design from reference image.\\n4K product photos, professional lighting."
+  "case_description": "DETAILED description: Frame color is [exact color like grey/olive/tan], center is [transparent/opaque/pattern], material is [matte/glossy], etc.",
+  "final_generation_prompt": "⚠️ ${phoneModel} CAMERA COUNT ⚠️\\n2 CAMERAS ONLY\\n1 TORCH\\nTOTAL: 3 circles\\nVertical, top-left\\n\\n🎨 CASE FROM REFERENCE IMAGE 🎨\\nFrame: [exact color]\\nCenter: [transparent/opaque]\\nMaterial: [matte/glossy]\\n\\n⚠️ USE REFERENCE IMAGE AS VISUAL TEMPLATE - COPY EXACT COLORS ⚠️"
 }
 
-Make final_generation_prompt SHORT and START with camera count using emojis and caps.`;
+Make case description VERY detailed with specific colors.`;
 }
 
 export function buildBoundingBoxPrompt(): string {

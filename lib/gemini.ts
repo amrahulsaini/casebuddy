@@ -143,13 +143,13 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
   
   matte: [
-    'GRID 1: Hand holding phone+case from back. Phone body visible through transparent center. Camera island at top. Match reference case color. White background.',
+    'GRID 1: Hand holding phone+case from back. Phone body visible through transparent center. Camera island at top. Match reference CASE color (frame+transparency) exactly. Clean white studio background with soft shadows. Professional product photography.',
     
-    'GRID 2: Empty case twisted in S-curve. NO phone. Text "Hybrid Design". Match reference case color. White background.',
+    'GRID 2: Empty case twisted in S-curve floating in air. NO phone. NO text. Match reference CASE color exactly. Pure white background with subtle gradient. Professional studio lighting.',
     
-    'GRID 3: Empty case tilted at 45-degree angle showing side+back. Camera island visible. NO phone inside. Text "WITH LENS PROTECTOR". Match reference case color. White background.',
+    'GRID 3: Empty case tilted at 45-degree angle on white pedestal/platform. Camera island visible. NO phone. NO text. Match reference CASE color exactly. Clean white studio background. Professional product shot.',
     
-    'GRID 4: Phone+case standing upright, back view, straight-on. Phone visible through transparent center. CAMERAS: exact specs. Match reference case color. White background.',
+    'GRID 4: Phone+case standing upright on white pedestal, back view. Phone visible through transparent center. CAMERAS: exact specs. Match reference CASE color exactly. Clean white studio background. Professional product photography.',
   ],
 };
 

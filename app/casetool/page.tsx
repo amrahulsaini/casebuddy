@@ -57,7 +57,7 @@ export default function ToolPage() {
   const [lastFormData, setLastFormData] = useState<FormData | null>(null);
   const [lastPrompt, setLastPrompt] = useState<string>('');
   const [selectedModel, setSelectedModel] = useState<'normal' | 'high'>('normal');
-  const [caseType, setCaseType] = useState<'transparent' | 'doyers' | 'black'>('transparent');
+  const [caseType, setCaseType] = useState<'transparent' | 'doyers' | 'black' | 'matte'>('transparent');
   const [cameraSpecs, setCameraSpecs] = useState<CameraSpecs | null>(null);
   // isAdmin removed: Net Billing is now public
 
@@ -716,6 +716,15 @@ export default function ToolPage() {
                   <div className={styles.caseTypeIcon}>⚫</div>
                   <span className={styles.caseTypeTitle}>Black</span>
                   <span className={styles.caseTypeDesc}>Black bumper cases</span>
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.caseTypeOption} ${caseType === 'matte' ? styles.caseTypeActive : ''}`}
+                  onClick={() => setCaseType('matte')}
+                >
+                  <div className={styles.caseTypeIcon}>⬜</div>
+                  <span className={styles.caseTypeTitle}>Matte Cover</span>
+                  <span className={styles.caseTypeDesc}>Grey matte with lens protector</span>
                 </button>
               </div>
             </div>

@@ -1,10 +1,11 @@
 # Case Type-Specific Prompts - TODO
 
 ## Overview
-The case type selector has been implemented with three options:
+The case type selector has been implemented with four options:
 1. **Transparent** - Fully clear TPU cases
 2. **Doyers** - Black outline/frame with transparent center panel (protective frame + clear back)
 3. **Black** - Solid black bumper cases
+4. **Matte Cover** - Grey matte finish with lens protector (4 grids with white backgrounds)
 
 ## Doyers Case Type - DEFINED ✅
 
@@ -68,6 +69,24 @@ case 'black':
 ```
 
 **TODO:** Replace with your optimized black case prompt
+
+---
+
+#### 4. Matte Cover (Grey with Lens Protector)
+```typescript
+case 'matte':
+  specificInstructions =
+    'MATTE GREY CASE: This is a GREY MATTE FINISH case with a premium soft-touch texture. The case color should be a SOPHISTICATED GREY (not black, not white) with a non-reflective matte surface. ' +
+    'LENS PROTECTOR FEATURE: The camera island MUST have RAISED PROTECTIVE RINGS around each individual camera lens. These raised rings are a KEY SELLING FEATURE - make them clearly visible and prominent in all camera views. ' +
+    'BACKGROUND: ALL 4 PANELS must have PURE WHITE BACKGROUNDS - clean, bright, professional Amazon-style white studio background with soft shadows. NO dark backgrounds. ' +
+    'GRID 1: Two phones (front + back) on white background. Grey matte case clearly visible. ' +
+    'GRID 2: Back 3/4 view on white background showing grey matte texture and camera details. ' +
+    'GRID 3: Empty grey matte case bent in S-curve on white background to show flexibility and material quality. ' +
+    'GRID 4: Hand holding phone from back showing LENS PROTECTOR RINGS around cameras. Add text label "WITH LENS PROTECTOR" with arrow pointing to the raised protective rings. White background. ';
+  break;
+```
+
+**TODO:** Replace with your optimized matte cover case prompt
 
 ---
 

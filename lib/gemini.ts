@@ -111,33 +111,43 @@ Rules:
 
 export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   doyers: [
-    'PANEL 1 (White Background): Two phones at 3/4 angle. LEFT: Back view - EXACT case from reference with phone inside. CAMERAS: Render ONLY the exact number and arrangement specified in camera specs. RIGHT: Front screen with model name. Professional Amazon style.',
+    'PANEL 1 (Pure White Background): Two phones at 3/4 angle. LEFT: Back view - EXACT case from reference with phone inside. CAMERAS: Render ONLY the exact number and arrangement specified in camera specs. RIGHT: Front screen with model name. Professional Amazon style. Clean white studio background.',
     
-    'PANEL 2 (Dark Background): Two phones. LEFT: Empty case. RIGHT: Phone in case. CAMERAS: Use EXACT count and position from specs. Both at 3/4 angle.',
+    'PANEL 2 (Pure White Background): Two phones. LEFT: Empty case. RIGHT: Phone in case. CAMERAS: Use EXACT count and position from specs. Both at 3/4 angle. Clean white studio background.',
     
-    'PANEL 3 (Light Background): ONE empty case twisted in S-curve. NO phone. Text "Hybrid Design" at top. Match reference case design exactly.',
+    'PANEL 3 (Pure White Background): ONE empty case twisted in S-curve. NO phone. Text "Hybrid Design" at top. Match reference case design exactly. Clean white studio background.',
     
-    'PANEL 4 (Dark Background): Hand holding phone in case from back. CAMERAS: Show EXACT camera configuration from specs. Phone body visible through transparent parts. Text "Flaunt The Original Look".',
+    'PANEL 4 (Pure White Background): Hand holding phone in case from back. CAMERAS: Show EXACT camera configuration from specs. Phone body visible through transparent parts. Text "Flaunt The Original Look". Clean white studio background.',
   ],
   
   black: [
-    'PANEL 1 (White Background): Two phones at 3/4 angle showing opposite sides. LEFT: Front screen view with model name. RIGHT: Back view with EXACT case design and EXACT camera configuration from specs. Professional Amazon style.',
+    'PANEL 1 (Pure White Background): Two phones at 3/4 angle showing opposite sides. LEFT: Front screen view with model name. RIGHT: Back view with EXACT case design and EXACT camera configuration from specs. Professional Amazon style. Clean white studio background.',
     
-    'PANEL 2 (Dark Background): Phone back side view at 3/4 angle. Show EXACT case design with EXACT camera count and position from specs. Professional lighting.',
+    'PANEL 2 (Pure White Background): Phone back side view at 3/4 angle. Show EXACT case design with EXACT camera count and position from specs. Professional lighting. Clean white studio background.',
     
-    'PANEL 3 (Light Background): Hybrid design showcase. Phone in case at artistic angle. Text "Hybrid Design" at top. Match reference case design exactly.',
+    'PANEL 3 (Pure White Background): Hybrid design showcase. Phone in case at artistic angle. Text "Hybrid Design" at top. Match reference case design exactly. Clean white studio background.',
     
-    'PANEL 4 (Dark Background): Inner velvet design of case. Show interior lining texture and soft velvet material. Text "Premium Velvet Interior". NO phone visible, just case interior.',
+    'PANEL 4 (Pure White Background): Inner velvet design of case. Show interior lining texture and soft velvet material. Text "Premium Velvet Interior". NO phone visible, just case interior. Clean white studio background.',
   ],
   
   transparent: [
-    'PANEL 1 (White Background): Two phones at 3/4 angle showing opposite sides. LEFT: Front screen view with model name. RIGHT: Back view with transparent case showing phone body through case. CAMERAS: EXACT configuration from specs.',
+    'PANEL 1 (Pure White Background): Two phones at 3/4 angle showing opposite sides. LEFT: Front screen view with model name. RIGHT: Back view with transparent case showing phone body through case. CAMERAS: EXACT configuration from specs. Clean white studio background.',
     
-    'PANEL 2 (Dark Background): Phone back side view at 3/4 angle. Transparent case showing original phone design visible through it. CAMERAS: EXACT count and position from specs.',
+    'PANEL 2 (Pure White Background): Phone back side view at 3/4 angle. Transparent case showing original phone design visible through it. CAMERAS: EXACT count and position from specs. Clean white studio background.',
     
-    'PANEL 3 (Light Background): Hybrid design showcase. Phone in transparent case at artistic angle. Text "Hybrid Design" at top. Show phone body visible through case.',
+    'PANEL 3 (Pure White Background): Hybrid design showcase. Phone in transparent case at artistic angle. Text "Hybrid Design" at top. Show phone body visible through case. Clean white studio background.',
     
-    'PANEL 4 (Dark Background): Hand holding phone in transparent case. Show back view with phone body visible through case. CAMERAS: EXACT configuration from specs. Text "Flaunt The Original Look".',
+    'PANEL 4 (Pure White Background): Hand holding phone in transparent case. Show back view with phone body visible through case. CAMERAS: EXACT configuration from specs. Text "Flaunt The Original Look". Clean white studio background.',
+  ],
+  
+  matte: [
+    'PANEL 1 (Pure White Background): Two phones at 3/4 angle showing opposite sides. LEFT: Front screen view with model name. RIGHT: Back view with GREY MATTE case. CAMERAS: EXACT configuration from specs. Clean white studio background, professional Amazon style.',
+    
+    'PANEL 2 (Pure White Background): Phone back side view at 3/4 angle. GREY MATTE case with premium matte finish texture. CAMERAS: EXACT count and position from specs. Soft shadows on white background.',
+    
+    'PANEL 3 (Pure White Background): GREY MATTE case only, no phone. Bent in S-curve to show flexibility. Text "Soft Matte Finish" at top. Show texture and premium feel. Clean white background.',
+    
+    'PANEL 4 (Pure White Background): Hand holding phone in GREY MATTE case from back angle. Camera island with RAISED LENS PROTECTOR RING clearly visible around each camera lens. CAMERAS: EXACT configuration from specs. Text "WITH LENS PROTECTOR" with arrow pointing to raised ring. Show camera protection feature prominently.',
   ],
 };
 

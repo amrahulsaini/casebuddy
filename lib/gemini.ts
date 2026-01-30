@@ -143,7 +143,7 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
   
   matte: [
-    'GRID 1: Professional human hand holding phone in case, back view, Amazon e-commerce product photography style. Hand = realistic AI-generated human hand (NOT case/mannequin hand), natural skin tone, well-lit, clean, professional model hand. Phone INSIDE case showing back. Case from reference (frame + transparent center). Phone back body, logo, camera CLEARLY VISIBLE through transparent center panel. Pure white background, professional studio lighting, clean Amazon-style product shot.',
+    'GRID 1: Beautiful professional human hand holding phone in case, back view. Hand = photorealistic AI-generated human hand with perfect smooth skin, natural warm skin tone, perfectly manicured fingers, elegant posture, studio lighting with soft shadows, professional model hand quality (NOT plastic/mannequin/case hand). Phone in case showing back. Case from reference (frame + transparent center). Phone back body visible through transparent center. BACKGROUND = PURE WHITE #FFFFFF, perfectly uniform, no gradients, no shadows on background, clean infinite white backdrop like Amazon product photos, professional e-commerce photography, studio quality.',
     
     'GRID 2: Empty phone case displayed twisted in a soft S-curve on a white pedestal, MUST be identical to the reference case with same frame color and thickness, same fully transparent clear back panel, same glossy circular camera ring structure, no phone, no redesign, no color shift, no frosted effect, no extra reflections, white background, studio product lighting, realistic materials.',    
     

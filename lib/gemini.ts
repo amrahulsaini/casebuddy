@@ -143,10 +143,9 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
   
   matte: [
-    'GRID 1: Hand holding phone+case from back. 🚨 CASE = exact design from reference upload (copy frame color + center transparency). Phone inside = normal realistic phone for this model. Phone back VISIBLE through transparent center. Camera island at top. White background.',
+    'GRID 1: A realistic human hand holding a mobile phone case from the back side.CRITICAL: The case design must EXACTLY match the reference image — copy the frame color, finish, and the transparent center panel precisely.The transparent center must remain fully clear and see-through (like glass).The hand should grip the edges naturally without covering the design.No phone inside the case.Clean white background, soft studio lighting, subtle product shadow, high-end product photography.',
     
-    'GRID 2: Empty case twisted in S-curve on white pedestal. NO phone inside. 🚨 CASE = exact design from reference upload. Match all colors and transparency from reference. White background.',
-    
+    'GRID 2: An empty hybrid phone case with solid colored frame and transparent center back displayed on a white pedestal, case slightly twisted in smooth S-curve to show flexibility, CRITICAL design must be IDENTICAL to reference with exact frame color, same finish, crystal clear transparent panel not frosted, NO phone inside, luxury studio lighting, clean white background, premium product showcase.',    
     'GRID 3: Empty case tilted on white pedestal. NO phone inside. 🚨 CASE = exact design from reference upload. Match all colors and transparency from reference. White background.',
     
     'GRID 4: Phone+case on white pedestal, back view. 🚨 CRITICAL: Case has TRANSPARENT center panel - phone back body MUST BE VISIBLE AND SHOWING THROUGH the transparent part (like looking through glass at phone back). DO NOT make solid opaque back. Phone = realistic color for model (not blue). CASE frame = reference upload. Cameras EXACT. White background.',

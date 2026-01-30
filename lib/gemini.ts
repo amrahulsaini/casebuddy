@@ -141,13 +141,13 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
   
   matte: [
-    'PANEL 1 (Pure White Background): ⚠️ USE EXACT CASE FROM REFERENCE - IDENTICAL colors, transparency, design ⚠️ Close-up view of hands holding UPPER PART of case showing top details. EMPTY case (NO phone inside). Show the EXACT case design from reference image - preserve ALL colors, transparency levels, patterns. Clean white studio background.',
+    'PANEL 1 (Pure White Background): 🚨 REFERENCE IMAGE IS SOURCE OF TRUTH - COPY EXACT CASE 100% 🚨 Hands holding upper part of case for close-up detail view. NO phone. The case in this panel MUST look IDENTICAL to reference image - exact same color, exact same transparency/opacity, exact same patterns, exact same material appearance. DO NOT invent or change anything. Clone the reference case exactly. White background.',
     
-    'PANEL 2 (Pure White Background): ⚠️ USE EXACT CASE FROM REFERENCE - DO NOT ALTER ⚠️ HYBRID DESIGN: EMPTY case twisted in S-curve to show flexibility. NO phone inside. Use the EXACT case from uploaded reference - SAME colors, SAME transparency, SAME design, SAME patterns. Text "Hybrid Design" at top. Clean white studio background.',
+    'PANEL 2 (Pure White Background): 🚨 REFERENCE IMAGE IS SOURCE OF TRUTH - COPY EXACT CASE 100% 🚨 Empty case twisted in S-curve (hybrid flexibility). NO phone. The case MUST be PIXEL-PERFECT match to reference upload - same color grade, same transparency, same design, same everything. DO NOT modify case appearance. Text "Hybrid Design". White background.',
     
-    'PANEL 3 (Pure White Background): ⚠️ USE EXACT CASE FROM REFERENCE ⚠️ LENS PROTECTOR focus view. EMPTY case showing camera cutout area with RAISED LENS PROTECTOR RINGS. NO phone inside. Show the EXACT case from reference - preserve ALL colors, transparency, design. Text "WITH LENS PROTECTOR" with arrow pointing to raised rings. Clean white studio background.',
+    'PANEL 3 (Pure White Background): 🚨 REFERENCE IMAGE IS SOURCE OF TRUTH - COPY EXACT CASE 100% 🚨 Camera area close-up showing LENS PROTECTOR rings. NO phone. Case MUST match reference image exactly - same color, same transparency, same material. Show raised protector rings around camera cutouts. Text "WITH LENS PROTECTOR". White background.',
     
-    'PANEL 4 (Pure White Background): ⚠️ USE EXACT CASE FROM REFERENCE - ONLY THIS PANEL HAS PHONE ⚠️ Phone back view in case at 3/4 angle. Insert phone model with EXACT camera configuration from specs. Case must be IDENTICAL to uploaded reference - SAME colors, transparency, design, patterns. This is the ONLY panel with phone inside. Clean white studio background.',
+    'PANEL 4 (Pure White Background): 🚨 REFERENCE IMAGE IS SOURCE OF TRUTH - COPY EXACT CASE 100% 🚨 Phone inserted in case, back view 3/4 angle. ONLY this panel has phone. Case MUST be 100% identical to reference image - exact color, transparency, patterns. Phone model with EXACT camera count/position from specs visible inside. White background.',
   ],
 };
 

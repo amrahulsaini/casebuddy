@@ -143,7 +143,7 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
   
   matte: [
-    'GRID 1 (Pure White Background): In this grid you have to make show the case in a best hand made as showcasing make the same case showw onlyyy in hands and best white classy background .',
+    'GRID 1 (Pure White Background): In this grid you have to make show the case in a best hand made as showcasing make the same case showw onlyyy in hands and best white classy background .Hand should not be of same of the caseee but you have to make it different and white background.',
     
     'GRID 2 (Pure White Background): EXACT empty case from reference twisted in S-curve. Preserve ALL original colors, transparency, materials. NO phone inside. DO NOT alter case appearance. Clean white studio background.',    
     

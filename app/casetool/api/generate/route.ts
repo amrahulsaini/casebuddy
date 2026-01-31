@@ -148,6 +148,28 @@ export async function POST(request: NextRequest) {
             final_generation_prompt: finalPrompt,
             prompt: finalPrompt,
           });
+        } else if (caseType === 'matte') {
+          // FOR MATTE CASE: Skip analysis, send direct system prompt with grids
+          writer.send('status', 'Preparing direct prompt for matte case...', 25);
+          
+          phoneDesc = `Phone Model: ${phoneModel}`;
+          caseDesc = 'Using reference image directly without analysis';
+          finalPrompt = `System Prompt: You are creating a 4-grid (2x2) product photography layout for a phone case.
+
+Phone Model: ${phoneModel}
+Reference Image: The uploaded image shows the EXACT phone case design to use.
+
+Task: Create a 2x2 grid image with 4 panels showing different views of this case with the phone model.
+
+IMPORTANT: DO NOT RECREATE OR REDESIGN THE CASE. Use the EXACT case from the reference image (same colors, materials, transparency, design).`;
+
+          // Send direct prompt info to UI
+          writer.send('data_log', 'Direct matte case prompt (no analysis)', 40, {
+            phone_model_description: phoneDesc,
+            case_description: caseDesc,
+            final_generation_prompt: finalPrompt,
+            prompt: finalPrompt,
+          });
         } else {
           // 2. Analyze image and build final prompt (first time only)
           writer.send('status', 'AI analyzing geometry & building master prompt...', 25);

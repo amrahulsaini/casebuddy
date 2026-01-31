@@ -143,13 +143,13 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
   
   matte: [
-    'GRID 1 (Pure White Background): You have to not remake the case , just see the same case and now out this case in a best hand show it till wrist and make sure  th ecase is same .',
+    'GRID 1 (Pure White Background): REAL HUMAN HAND AND WRIST (photorealistic, natural skin tone, living person hand, NOT mannequin, NOT plastic) holding phone with EXACT SAME case from reference image. DO NOT RECREATE THE CASE - USE THE EXACT CASE FROM THE REFERENCE IMAGE (same colors, same design, same materials, same transparency). Phone model inserted inside this exact case. Hand visible up to wrist. Phone back showing. CAMERAS: EXACT count from specs. Clean white background.',
     
     'GRID 2 (Pure White Background): EXACT empty case from reference twisted in S-curve. Preserve ALL original colors, transparency, materials. NO phone inside. DO NOT alter case appearance. Clean white studio background.',    
     
     'GRID 3 (Pure White Background): EXACT empty case from reference tilted on pedestal. Preserve ALL original colors, transparency, materials. NO phone inside. DO NOT alter case appearance. Clean white studio background.',
     
-    'GRID 4 (Pure White Background): In this grid make embedd the phone model as told in the same case as provided dont alter any changes in case .',
+    'GRID 4 (Pure White Background): Phone model embedded inside EXACT SAME case from reference image. DO NOT RECREATE OR ALTER THE CASE - USE THE EXACT CASE DESIGN FROM REFERENCE (same colors, same design, same materials, same transparency). Phone = specific model with EXACT camera count from specs. Phone back visible. CAMERAS: EXACT configuration from specs. Standing on pedestal, back view. Clean white background.',
   ],
 };
 

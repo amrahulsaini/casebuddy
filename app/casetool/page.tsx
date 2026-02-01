@@ -177,7 +177,7 @@ export default function ToolPage() {
     baseFormData.set('case_type', caseType);
     setLastFormData(baseFormData);
 
-    const totalRuns = 3;
+    const totalRuns = 1;
     let promptToReuse = '';
 
     const runOneGeneration = async (runIndex: number) => {

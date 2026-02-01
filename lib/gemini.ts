@@ -145,7 +145,7 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   matte: [
     'GRID 1 (Pure White Background): GENERATE A NEW REAL HUMAN HAND - DO NOT COPY THE HAND FROM REFERENCE IMAGE. Create a completely NEW photorealistic human hand and wrist (natural skin tone, living person, warm flesh, realistic fingers, NOT the plastic/mannequin hand from reference photo). This NEW human hand is holding phone with the EXACT SAME case from reference image. Case = copy from reference (same colors, design, materials, transparency). Hand = NEW and different from reference. Phone model inside case. Hand visible to wrist. Phone back showing. Clean white background.',
     
-    'GRID 2 (Pure White Background): EXACT empty case from reference twisted in S-curve. Preserve ALL original colors, transparency, materials. NO phone inside. DO NOT alter case appearance. Clean white studio background.',    
+    'GRID 2 (Pure White Background): GENERATE A NEW REAL HUMAN HAND holding phone in EXACT case from reference at an angled position (similar to product photography angle - phone tilted, hand visible). Hand = NEW photorealistic human hand (NOT from reference photo). Case = EXACT SAME from reference (same colors, design, materials, transparency). Phone model inside case. Show phone back with camera visible. Hand holding phone at dynamic angle. Clean white background.',    
     
     'GRID 3 (Pure White Background): EXACT empty case from reference tilted on pedestal. Preserve ALL original colors, transparency, materials. NO phone inside. DO NOT alter case appearance. Clean white studio background.',
     

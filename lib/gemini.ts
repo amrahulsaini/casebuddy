@@ -143,13 +143,13 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
   
   matte: [
-    'GRID 1 (Pure White Background): GENERATE A NEW REAL HUMAN HAND - DO NOT COPY THE HAND FROM REFERENCE IMAGE. Create a completely NEW photorealistic human hand and wrist (natural skin tone, living person, warm flesh, realistic fingers, NOT the plastic/mannequin hand from reference photo). This NEW human hand is holding phone with the EXACT SAME case from reference image. Case = copy from reference (same colors, design, materials, transparency). Hand = NEW and different from reference. Phone model inside case. Hand visible to wrist. Phone back showing. Clean white background.',
+    'GRID 1 (Pure White Background): In this grid you have to make image of case holding in a girl hand a beautiful hand , the same case should be held in a beautiful gir hand ',
     
     'GRID 2 (Pure White Background): EXACT empty case from reference image twisted in S-curve (HYBRID DESIGN style). Preserve ALL original colors, patterns, materials, transparency. NO phone inside. NO hand. Text "Hybrid Design" at top. DO NOT alter case appearance. Clean white studio background.',    
     
     'GRID 3 (Pure White Background): EXACT empty case from reference tilted on pedestal. Preserve ALL original colors, transparency, materials. NO phone inside. DO NOT alter case appearance. Clean white studio background.',
     
-    'GRID 4 (Pure White Background): Phone model embedded inside EXACT SAME case from reference image. DO NOT RECREATE OR ALTER THE CASE - USE THE EXACT CASE DESIGN FROM REFERENCE (same colors, same design, same materials, same transparency). Phone = specific model with EXACT camera count from specs. Phone back visible. CAMERAS: EXACT configuration from specs. Standing on pedestal, back view. Clean white background.',
+    'GRID 4 (Pure White Background): Make insert the phone model as stated into the same case on a pedestal .',
   ],
 };
 

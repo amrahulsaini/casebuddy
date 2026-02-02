@@ -18,7 +18,7 @@ interface DownloadLog {
 
 interface BillingSummary {
   total_users: number;
-  total_downloads: number;
+  total_generations: number;
   total_cost_inr: number;
 }
 
@@ -137,8 +137,8 @@ export default function NetBillingPage() {
               <Activity size={24} />
             </div>
             <div className={styles.cardContent}>
-              <div className={styles.cardLabel}>Total Downloads</div>
-              <div className={styles.cardValue}>{summary.total_downloads}</div>
+              <div className={styles.cardLabel}>Total Generations</div>
+              <div className={styles.cardValue}>{summary.total_generations}</div>
             </div>
           </div>
 

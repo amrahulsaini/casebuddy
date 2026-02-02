@@ -15,7 +15,7 @@ interface DownloadBillingLog {
 }
 
 interface BillingSummary {
-  total_downloads: number;
+  total_generations: number;
   total_cost_inr: number;
 }
 
@@ -49,7 +49,7 @@ export default function BillingPage() {
         const rawSummary = data.summary || null;
         if (rawSummary) {
           setSummary({
-            total_downloads: Number(rawSummary.total_downloads) || 0,
+            total_generations: Number(rawSummary.total_generations) || 0,
             total_cost_inr: Number(rawSummary.total_cost_inr) || 0,
           });
         }
@@ -64,7 +64,7 @@ export default function BillingPage() {
           });
         } else {
           // Backward compatible fallback
-          const total = Number(rawSummary?.total_downloads) || 0;
+          const total = Number(rawSummary?.total_generations) || 0;
           const totalPages = total > 0 ? Math.ceil(total / pagination.pageSize) : 0;
           setPagination({ page, pageSize: pagination.pageSize, total, totalPages });
         }
@@ -136,8 +136,8 @@ export default function BillingPage() {
               <Activity size={24} />
             </div>
             <div className={styles.cardContent}>
-              <div className={styles.cardLabel}>Total Downloads</div>
-              <div className={styles.cardValue}>{summary.total_downloads}</div>
+              <div className={styles.cardLabel}>Total Generations</div>
+              <div className={styles.cardValue}>{summary.total_generations}</div>
             </div>
           </div>
 
@@ -189,8 +189,8 @@ export default function BillingPage() {
 
         {downloadLogs.length === 0 ? (
           <div className={styles.emptyState}>
-            <p>No downloads recorded yet.</p>
-            <p>Billing is recorded when you download an image.</p>
+            <p>No generations recorded yet.</p>
+            <p>Billing is recorded when you generate an image.</p>
           </div>
         ) : (
           <div className={styles.table}>

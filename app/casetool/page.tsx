@@ -743,7 +743,7 @@ export default function ToolPage() {
                     <Zap size={20} />
                     <span className={styles.modelOptionTitle}>Standard Quality</span>
                   </div>
-                  <div className={styles.modelOptionDesc}>Fast generation • Good quality • ₹4.1</div>
+                  <div className={styles.modelOptionDesc}>Fast generation • Good quality • ₹3.65</div>
                   <div className={styles.modelOptionBadge}>gemini-2.5-flash</div>
                 </button>
                 <button
@@ -755,7 +755,7 @@ export default function ToolPage() {
                     <Sparkles size={20} />
                     <span className={styles.modelOptionTitle}>Ultra HD Quality</span>
                   </div>
-                  <div className={styles.modelOptionDesc}>4K resolution • Best quality • ₹9.39</div>
+                  <div className={styles.modelOptionDesc}>4K resolution • Best quality • ₹11.65</div>
                   <div className={styles.modelOptionBadge}>gemini-3-pro</div>
                 </button>
               </div>

@@ -31,42 +31,43 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({
         success: true,
         logs: [],
-        summary: { total_downloads: 0, total_cost_inr: 0 },
+        summary: { total_generations: 0, total_cost_inr: 0 },
         pagination: { page, pageSize, total: 0, totalPages: 0 },
-        message: 'Billing tables not yet created. Please run database/add-download-billing.sql.',
+        message: 'API usage tables exist. Using generation-based billing.',
       });
     }
 
-    // Download-based billing summary
+    // Generation-based billing summary from API usage logs
     const [summaryRows] = await pool.execute(
       `SELECT 
-        COUNT(*) as total_downloads,
-        COALESCE(SUM(amount_inr), 0) as total_cost_inr
-      FROM download_billing_logs
-      WHERE user_id = ?`,
+        COUNT(DISTINCT generation_log_id) as total_generations,
+        COALESCE(SUM(cost_inr), 0) as total_cost_inr
+      FROM api_usage_logs
+      WHERE user_id = ? AND operation_type = 'image_generation'`,
       [userId]
     );
 
     const summary = Array.isArray(summaryRows) && summaryRows.length > 0
       ? summaryRows[0]
-      : { total_downloads: 0, total_cost_inr: 0 };
+      : { total_generations: 0, total_cost_inr: 0 };
 
-    const total = Number((summary as any).total_downloads) || 0;
+    const total = Number((summary as any).total_generations) || 0;
     const totalPages = total > 0 ? Math.ceil(total / pageSize) : 0;
 
-    // Download billing logs (one row per downloaded generation)
+    // Generation billing logs (one row per image generation)
     const [logs] = await pool.execute(
       `SELECT
-        dbl.id,
-        dbl.generation_log_id,
-        dbl.amount_inr,
-        dbl.created_at,
+        aul.id,
+        aul.generation_log_id,
+        aul.cost_inr as amount_inr,
+        aul.created_at,
+        aul.model_name,
         gl.phone_model,
         gl.generated_image_url
-      FROM download_billing_logs dbl
-      LEFT JOIN generation_logs gl ON dbl.generation_log_id = gl.id
-      WHERE dbl.user_id = ?
-      ORDER BY dbl.created_at DESC
+      FROM api_usage_logs aul
+      LEFT JOIN generation_logs gl ON aul.generation_log_id = gl.id
+      WHERE aul.user_id = ? AND aul.operation_type = 'image_generation'
+      ORDER BY aul.created_at DESC
       LIMIT ? OFFSET ?`,
       [userId, pageSize, offset]
     );

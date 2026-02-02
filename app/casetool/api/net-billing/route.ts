@@ -11,15 +11,15 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * pageSize;
 
     // Check if table exists
-    const [tableCheck] = await pool.execute(`SHOW TABLES LIKE 'download_billing_logs'`);
+    const [tableCheck] = await pool.execute(`SHOW TABLES LIKE 'api_usage_logs'`);
     if (!Array.isArray(tableCheck) || tableCheck.length === 0) {
       return NextResponse.json({
         success: true,
         logs: [],
-        summary: { total_users: 0, total_downloads: 0, total_cost_inr: 0 },
+        summary: { total_users: 0, total_generations: 0, total_cost_inr: 0 },
         pagination: { page, pageSize, total: 0, totalPages: 0 },
         availableUsers: [],
-        message: 'Billing tables not yet created.',
+        message: 'API usage tables not yet created.',
       });
     }
 
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     const queryParams: any[] = [];
     
     if (filterDate) {
-      whereConditions.push('DATE(dbl.created_at) = ?');
+      whereConditions.push('DATE(aul.created_at) = ?');
       queryParams.push(filterDate);
     }
     if (filterUserId) {
@@ -42,11 +42,12 @@ export async function GET(request: NextRequest) {
     const summaryQuery = `
       SELECT 
         COUNT(DISTINCT u.id) as total_users,
-        COUNT(dbl.id) as total_downloads,
-        COALESCE(SUM(dbl.amount_inr), 0) as total_cost_inr
-      FROM download_billing_logs dbl
-      JOIN users u ON dbl.user_id = u.id
+        COUNT(DISTINCT aul.generation_log_id) as total_generations,
+        COALESCE(SUM(aul.cost_inr), 0) as total_cost_inr
+      FROM api_usage_logs aul
+      JOIN users u ON aul.user_id = u.id
       ${whereClause}
+      ${whereConditions.length === 0 ? "WHERE aul.operation_type = 'image_generation'" : "AND aul.operation_type = 'image_generation'"}
     `;
 
     const [summaryResult] = queryParams.length > 0
@@ -54,25 +55,27 @@ export async function GET(request: NextRequest) {
       : await pool.execute(summaryQuery);
     
     const summary = Array.isArray(summaryResult) && summaryResult.length > 0 ? summaryResult[0] : {};
-    const total = Number((summary as any).total_downloads) || 0;
+    const total = Number((summary as any).total_generations) || 0;
     const totalPages = total > 0 ? Math.ceil(total / pageSize) : 0;
 
-    // Get download logs
+    // Get generation logs
     const logsQuery = `
       SELECT
-        dbl.id,
-        dbl.user_id,
-        dbl.generation_log_id,
-        dbl.amount_inr,
-        dbl.created_at,
+        aul.id,
+        aul.user_id,
+        aul.generation_log_id,
+        aul.cost_inr as amount_inr,
+        aul.created_at,
+        aul.model_name,
         u.email,
         gl.phone_model,
         gl.generated_image_url
-      FROM download_billing_logs dbl
-      JOIN users u ON dbl.user_id = u.id
-      LEFT JOIN generation_logs gl ON dbl.generation_log_id = gl.id
+      FROM api_usage_logs aul
+      JOIN users u ON aul.user_id = u.id
+      LEFT JOIN generation_logs gl ON aul.generation_log_id = gl.id
       ${whereClause}
-      ORDER BY dbl.created_at DESC
+      ${whereConditions.length === 0 ? "WHERE aul.operation_type = 'image_generation'" : "AND aul.operation_type = 'image_generation'"}
+      ORDER BY aul.created_at DESC
       LIMIT ? OFFSET ?
     `;
 
@@ -83,14 +86,15 @@ export async function GET(request: NextRequest) {
     const [userListResult] = await pool.execute(`
       SELECT DISTINCT u.id, u.email 
       FROM users u
-      JOIN download_billing_logs dbl ON u.id = dbl.user_id
+      JOIN api_usage_logs aul ON u.id = aul.user_id
+      WHERE aul.operation_type = 'image_generation'
       ORDER BY u.id
     `);
 
     // Format response
     const formattedSummary = {
       total_users: Number((summary as any).total_users) || 0,
-      total_downloads: Number((summary as any).total_downloads) || 0,
+      total_generations: Number((summary as any).total_generations) || 0,
       total_cost_inr: parseFloat((summary as any).total_cost_inr) || 0,
     };
 

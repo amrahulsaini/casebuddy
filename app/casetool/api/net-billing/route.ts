@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
     const total = Number((summary as any).total_generations) || 0;
     const totalPages = total > 0 ? Math.ceil(total / pageSize) : 0;
 
-    // Get generation logs
+    // Get generation logs with download tracking
     const logsQuery = `
       SELECT
         aul.id,
@@ -69,10 +69,15 @@ export async function GET(request: NextRequest) {
         aul.model_name,
         u.email,
         gl.phone_model,
-        gl.generated_image_url
+        gl.case_type,
+        gl.original_image_url,
+        gl.generated_image_url,
+        CASE WHEN dbl.id IS NOT NULL THEN 1 ELSE 0 END as is_downloaded,
+        dbl.created_at as download_date
       FROM api_usage_logs aul
       JOIN users u ON aul.user_id = u.id
       LEFT JOIN generation_logs gl ON aul.generation_log_id = gl.id
+      LEFT JOIN download_billing_logs dbl ON dbl.generation_log_id = gl.id
       ${whereClause}
       ${whereConditions.length === 0 ? "WHERE aul.operation_type = 'image_generation'" : "AND aul.operation_type = 'image_generation'"}
       ORDER BY aul.created_at DESC

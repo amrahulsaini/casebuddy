@@ -11,9 +11,14 @@ interface DownloadLog {
   generation_log_id: number;
   amount_inr: number;
   phone_model: string;
+  case_type: string;
+  original_image_url: string | null;
   generated_image_url: string | null;
+  is_downloaded: number;
+  download_date: string | null;
   created_at: string;
   email: string;
+  model_name: string;
 }
 
 interface BillingSummary {
@@ -228,18 +233,65 @@ export default function NetBillingPage() {
           <div className={styles.table}>
             <div className={styles.tableHeader}>
               <div className={styles.tableCell}>Date & Time</div>
-              <div className={styles.tableCell}>User ID</div>
-              <div className={styles.tableCell}>Email</div>
+              <div className={styles.tableCell}>User</div>
               <div className={styles.tableCell}>Phone Model</div>
-              <div className={styles.tableCell}>Amount (INR)</div>
+              <div className={styles.tableCell}>Case Type</div>
+              <div className={styles.tableCell}>Original</div>
+              <div className={styles.tableCell}>Generated</div>
+              <div className={styles.tableCell}>Downloaded</div>
+              <div className={styles.tableCell}>Amount</div>
             </div>
             {downloadLogs.map((log) => (
               <div key={log.id} className={styles.tableRow}>
-                <div className={styles.tableCell}>{formatDate(log.created_at)}</div>
-                <div className={styles.tableCell}>{log.user_id}</div>
-                <div className={styles.tableCell}>{log.email}</div>
+                <div className={styles.tableCell}>
+                  <div>{formatDate(log.created_at)}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#666' }}>{log.model_name}</div>
+                </div>
+                <div className={styles.tableCell}>
+                  <div>ID: {log.user_id}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#666' }}>{log.email}</div>
+                </div>
                 <div className={styles.tableCell}>
                   <span className={styles.phoneModel}>{log.phone_model || 'N/A'}</span>
+                </div>
+                <div className={styles.tableCell}>
+                  <span className={styles.badge}>{log.case_type || 'N/A'}</span>
+                </div>
+                <div className={styles.tableCell}>
+                  {log.original_image_url ? (
+                    <a href={log.original_image_url} target="_blank" rel="noopener noreferrer">
+                      <img 
+                        src={log.original_image_url} 
+                        alt="Original" 
+                        style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px', cursor: 'pointer' }}
+                      />
+                    </a>
+                  ) : 'N/A'}
+                </div>
+                <div className={styles.tableCell}>
+                  {log.generated_image_url ? (
+                    <a href={log.generated_image_url} target="_blank" rel="noopener noreferrer">
+                      <img 
+                        src={log.generated_image_url} 
+                        alt="Generated" 
+                        style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px', cursor: 'pointer' }}
+                      />
+                    </a>
+                  ) : 'N/A'}
+                </div>
+                <div className={styles.tableCell}>
+                  {log.is_downloaded ? (
+                    <div>
+                      <span style={{ color: 'green', fontWeight: 'bold' }}>✓ Yes</span>
+                      {log.download_date && (
+                        <div style={{ fontSize: '0.7rem', color: '#666' }}>
+                          {formatDate(log.download_date)}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <span style={{ color: '#999' }}>✗ No</span>
+                  )}
                 </div>
                 <div className={styles.tableCell}>
                   <span className={styles.costInr}>₹{Number(log.amount_inr).toFixed(2)}</span>

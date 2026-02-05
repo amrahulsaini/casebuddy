@@ -112,14 +112,14 @@ export async function POST(request: NextRequest) {
         // Create initial log entry with user_id (+ optional original_image_url)
         try {
           const [result]: any = await pool.execute(
-            'INSERT INTO generation_logs (session_id, user_id, phone_model, original_image_name, original_image_url, status) VALUES (?, ?, ?, ?, ?, ?)',
-            [sessionId, userId, phoneModel, caseImage.name, originalImageUrl, 'generating']
+            'INSERT INTO generation_logs (session_id, user_id, phone_model, case_type, original_image_name, original_image_url, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [sessionId, userId, phoneModel, caseType, caseImage.name, originalImageUrl, 'generating']
           );
           logId = result.insertId;
         } catch (e: any) {
           // Backward-compatible fallback if DB schema isn't migrated yet
           const message = String(e?.message || '');
-          if (message.toLowerCase().includes('unknown column') && message.includes('original_image_url')) {
+          if (message.toLowerCase().includes('unknown column') && (message.includes('original_image_url') || message.includes('case_type'))) {
             const [result]: any = await pool.execute(
               'INSERT INTO generation_logs (session_id, user_id, phone_model, original_image_name, status) VALUES (?, ?, ?, ?, ?)',
               [sessionId, userId, phoneModel, caseImage.name, 'generating']

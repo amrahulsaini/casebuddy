@@ -47,7 +47,8 @@ export async function GET(request: NextRequest) {
       SELECT 
         COUNT(DISTINCT u.id) as total_users,
         COUNT(DISTINCT aul.generation_log_id) as total_generations,
-        COALESCE(SUM(aul.cost_inr), 0) as total_cost_inr
+        COALESCE(SUM(aul.cost_inr), 0) as total_cost_inr,
+        COALESCE(SUM(CASE WHEN dbl.id IS NOT NULL THEN aul.cost_inr ELSE 0 END), 0) as total_download_cost_inr
       FROM api_usage_logs aul
       JOIN users u ON aul.user_id = u.id
       LEFT JOIN generation_logs gl ON aul.generation_log_id = gl.id
@@ -107,6 +108,7 @@ export async function GET(request: NextRequest) {
       total_users: Number((summary as any).total_users) || 0,
       total_generations: Number((summary as any).total_generations) || 0,
       total_cost_inr: parseFloat((summary as any).total_cost_inr) || 0,
+      total_download_cost_inr: parseFloat((summary as any).total_download_cost_inr) || 0,
     };
 
     const formattedUserList = Array.isArray(userListResult) 

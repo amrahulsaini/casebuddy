@@ -25,6 +25,7 @@ interface BillingSummary {
   total_users: number;
   total_generations: number;
   total_cost_inr: number;
+  total_download_cost_inr: number;
 }
 
 interface Pagination {
@@ -156,6 +157,16 @@ export default function NetBillingPage() {
             <div className={styles.cardContent}>
               <div className={styles.cardLabel}>Total Cost (INR)</div>
               <div className={styles.cardValue}>₹{summary.total_cost_inr.toFixed(2)}</div>
+            </div>
+          </div>
+
+          <div className={styles.summaryCard}>
+            <div className={styles.cardIcon} style={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' }}>
+              <IndianRupee size={24} />
+            </div>
+            <div className={styles.cardContent}>
+              <div className={styles.cardLabel}>Download Cost (INR)</div>
+              <div className={styles.cardValue}>₹{summary.total_download_cost_inr.toFixed(2)}</div>
             </div>
           </div>
         </div>

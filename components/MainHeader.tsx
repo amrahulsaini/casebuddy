@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Truck, Package, Zap, ShoppingCart, User, Menu, Heart } from 'lucide-react';
 import { CartBadge, WishlistBadge } from '@/components/CartBadge';
 import SearchBar from '@/components/SearchBar';
+import Logo from '@/components/Logo';
 import { getShippingConfig } from '@/lib/shipping';
 import homeStyles from '@/app/home.module.css';
 
@@ -38,7 +39,7 @@ export default function MainHeader({ scrollY, headerVisible, mobileMenuOpen, set
       <header className={`${homeStyles.header} ${scrollY > 50 ? homeStyles.scrolled : ''} ${!headerVisible ? homeStyles.hidden : ''}`}>
         <nav className={homeStyles.nav}>
           <Link href="/" className={homeStyles.logo}>
-            <Image src="/casebuddy-logo.png" alt="CaseBuddy" width={180} height={50} className={homeStyles.logoImg} priority />
+            <Logo size="medium" />
           </Link>
           <div className={homeStyles.navLinks}>
             <Link href="/" className={homeStyles.navLink}>Home</Link>

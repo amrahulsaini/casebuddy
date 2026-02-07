@@ -143,13 +143,9 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
   
   matte: [
-    'GRID 1 (Pure White Background): GENERATE A NEW REAL HUMAN HAND - DO NOT COPY THE HAND FROM REFERENCE IMAGE. Create a completely NEW photorealistic human hand and wrist (natural skin tone, living person, warm flesh, realistic fingers, NOT the plastic/mannequin hand from reference photo). This NEW human hand is holding phone with the EXACT SAME case from reference image. Case = copy from reference (same colors, design, materials, transparency). Hand = NEW and different from reference. Phone model inside case. Hand visible to wrist. Phone back showing. Clean white background. ',
+    'PANEL 1 (Pure White Background): EXACT empty case from reference tilted at 45-degree angle on a white pedestal. Pedestal is VISIBLE but has NO shadow. Preserve ALL original colors, transparency, materials from reference. NO phone inside. 🚫 ABSOLUTELY NO BLACK SHADOWS 🚫 - Pedestal and case cast ZERO shadows. High-key studio lighting eliminates all shadows completely. Pure white seamless background. Both pedestal and case are completely shadowless. DO NOT alter case appearance.',
     
-    'GRID 2 (Pure White Background): EXACT empty case from reference image twisted in S-curve (HYBRID DESIGN style). Preserve ALL original colors, patterns, materials, transparency. NO phone inside. NO hand. Text "Hybrid Design" at top. 🚫 ZERO SHADOWS 🚫 - Pure white seamless background, high-key lighting, NO shadows underneath or behind. Object appears to float. DO NOT alter case appearance.',    
-    
-    'GRID 3 (Pure White Background): EXACT empty case from reference tilted on a white pedestal. Pedestal is VISIBLE but has NO shadow. Preserve ALL original colors, transparency, materials. NO phone inside. 🚫 ZERO SHADOWS 🚫 - Pedestal and case cast NO shadows at all. High-key lighting eliminates all shadows. Pure white seamless background. Both pedestal and case are shadowless. DO NOT alter case appearance.',
-    
-    'GRID 4 (Pure White Background): EXACT empty case from reference image on a white pedestal - back view only. Pedestal is VISIBLE but has NO shadow. Show ONLY the back view displaying camera cutouts and design. Preserve ALL original colors, patterns, materials, transparency from reference. NO phone inside. NO hand. 🚫 ZERO SHADOWS 🚫 - Pedestal and case cast NO shadows at all. High-key lighting eliminates all shadows. Pure white seamless background. Both pedestal and case are shadowless.',
+    'PANEL 2 (Pure White Background): EXACT empty case from reference image standing upright on a white pedestal - back view only showing camera cutouts. Pedestal is VISIBLE but has NO shadow. Show ONLY the back view displaying camera cutout design clearly. Preserve ALL original colors, patterns, materials, transparency from reference. NO phone inside. NO hand. 🚫 ABSOLUTELY NO BLACK SHADOWS 🚫 - Pedestal and case cast ZERO shadows. High-key studio lighting eliminates all shadows completely. Pure white seamless background. Both pedestal and case are completely shadowless.',
   ],
 };
 

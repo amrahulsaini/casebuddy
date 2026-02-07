@@ -161,7 +161,7 @@ export default function NetBillingPage() {
           </div>
 
           <div className={styles.summaryCard}>
-            <div className={styles.cardIcon}>
+            <div className={styles.cardIcon} style={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' }}>
               <IndianRupee size={24} />
             </div>
             <div className={styles.cardContent}>

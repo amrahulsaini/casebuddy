@@ -143,9 +143,9 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
   
   matte: [
-    'PANEL 1 (Pure White Background): EXACT same case from reference image - tilted 45-degree angle view. Use EXACT SAME case design, colors, patterns, materials from reference photo. Just show it at tilted angle. NO phone inside. Pure white background with NO shadows at all. Simple product shot.',
+    'PANEL 1 (Pure White Background): EXACT same case from reference image placed on white pedestal - tilted 45-degree angle view. Use EXACT SAME case design, colors, patterns, materials from reference photo. Just show it at tilted angle on pedestal. NO phone inside. Pure white background with NO shadows at all. Clean product photography.',
     
-    'PANEL 2 (Pure White Background): EXACT same case from reference image - back view showing camera cutouts. Use EXACT SAME case design, colors, patterns, materials from reference photo. Just show back side clearly. NO phone inside. Pure white background with NO shadows at all. Simple product shot.',
+    'PANEL 2 (Pure White Background): EXACT same case from reference image placed on white pedestal - back view showing camera cutouts. Use EXACT SAME case design, colors, patterns, materials from reference photo. Just show back side clearly on pedestal. NO phone inside. Pure white background with NO shadows at all. Clean product photography.',
   ],
 };
 

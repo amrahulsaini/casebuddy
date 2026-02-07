@@ -48,11 +48,12 @@ export default function NetBillingPage() {
   const [pagination, setPagination] = useState<Pagination>({ page: 1, pageSize: 100, total: 0, totalPages: 0 });
   const [filterDate, setFilterDate] = useState<string>('');
   const [filterUserId, setFilterUserId] = useState<string>('');
+  const [filterDownloaded, setFilterDownloaded] = useState<boolean>(false);
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
 
   useEffect(() => {
     fetchBillingData(1);
-  }, [filterDate, filterUserId]);
+  }, [filterDate, filterUserId, filterDownloaded]);
 
   const fetchBillingData = async (page: number) => {
     try {
@@ -62,6 +63,7 @@ export default function NetBillingPage() {
       params.append('pageSize', pagination.pageSize.toString());
       if (filterDate) params.append('filter_date', filterDate);
       if (filterUserId) params.append('filter_user_id', filterUserId);
+      if (filterDownloaded) params.append('filter_downloaded', '1');
       
       const response = await fetch(`/casetool/api/net-billing?${params.toString()}`);
       const data = await response.json();
@@ -163,10 +165,16 @@ export default function NetBillingPage() {
         <div className={styles.filterBar}>
           <h2 className={styles.sectionTitle}>
             <Calendar size={20} />
-            Download History
+            {filterDownloaded ? 'Downloaded Billing' : 'Download History'}
           </h2>
           
           <div className={styles.filters}>
+            <button
+              className={`${styles.downloadedButton} ${filterDownloaded ? styles.active : ''}`}
+              onClick={() => setFilterDownloaded(!filterDownloaded)}
+            >
+              {filterDownloaded ? '✓ Downloaded Only' : 'Show Downloaded'}
+            </button>
             <select 
               value={filterUserId} 
               onChange={(e) => setFilterUserId(e.target.value)}
@@ -185,10 +193,10 @@ export default function NetBillingPage() {
               className={styles.filterInput}
             />
             
-            {(filterUserId || filterDate) && (
+            {(filterUserId || filterDate || filterDownloaded) && (
               <button 
                 className={styles.clearButton} 
-                onClick={() => { setFilterUserId(''); setFilterDate(''); }}
+                onClick={() => { setFilterUserId(''); setFilterDate(''); setFilterDownloaded(false); }}
               >
                 Clear Filters
               </button>

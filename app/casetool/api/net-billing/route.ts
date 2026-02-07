@@ -6,6 +6,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const filterDate = searchParams.get('filter_date');
     const filterUserId = searchParams.get('filter_user_id');
+    const filterDownloaded = searchParams.get('filter_downloaded');
     const page = parseInt(searchParams.get('page') || '1', 10);
     const pageSize = parseInt(searchParams.get('pageSize') || '100', 10);
     const offset = (page - 1) * pageSize;
@@ -35,6 +36,9 @@ export async function GET(request: NextRequest) {
       whereConditions.push('u.id = ?');
       queryParams.push(filterUserId);
     }
+    if (filterDownloaded === '1') {
+      whereConditions.push('dbl.id IS NOT NULL');
+    }
     
     const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
 
@@ -46,6 +50,8 @@ export async function GET(request: NextRequest) {
         COALESCE(SUM(aul.cost_inr), 0) as total_cost_inr
       FROM api_usage_logs aul
       JOIN users u ON aul.user_id = u.id
+      LEFT JOIN generation_logs gl ON aul.generation_log_id = gl.id
+      LEFT JOIN download_billing_logs dbl ON dbl.generation_log_id = gl.id
       ${whereClause}
       ${whereConditions.length === 0 ? "WHERE aul.operation_type = 'image_generation'" : "AND aul.operation_type = 'image_generation'"}
     `;

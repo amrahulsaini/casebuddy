@@ -113,13 +113,13 @@ Rules:
 
 export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   doyers: [
-    'PANEL 1 (Pure White Background): Two phones at 3/4 angle. LEFT: Back view - EXACT case from reference (SAME colors, SAME design, SAME patterns, SAME materials) with specified phone model inserted inside. CAMERAS: EXACT count and arrangement from specs. RIGHT: Front screen. DO NOT change case colors or design. Clean white studio background.',
+    'PANEL 1 (Pure White Background): Two phones at 3/4 angle. LEFT: Back view - Phone with EXACT case from reference (SAME colors, SAME design, SAME patterns, SAME materials). CRITICAL: Use RESEARCHED camera specs - if specs say 3 cameras + 1 torch = show EXACTLY 3 cameras + 1 torch. COUNT CAREFULLY. Do NOT add extra cameras. RIGHT: Front screen. Clean white studio background.',
     
-    'PANEL 2 (Pure White Background): Two phones. LEFT: EXACT empty case from reference (preserve ALL colors/patterns). RIGHT: Same case with phone model inserted. CAMERAS: EXACT count from specs. DO NOT alter case appearance. Clean white studio background.',
+    'PANEL 2 (Pure White Background): Two phones. LEFT: EXACT empty case from reference (preserve ALL colors/patterns). RIGHT: Same case with phone inserted. CRITICAL: Camera count MUST MATCH researched specs EXACTLY. If specs say 2 cameras = show 2. If 3 cameras = show 3. Do NOT guess or add extra. Clean white studio background.',
     
     'PANEL 3 (Pure White Background): EXACT empty case from reference image twisted in S-curve. Preserve ALL original colors, patterns, materials. NO phone inside. Text "Hybrid Design" at top. DO NOT change case design. Clean white studio background.',
     
-    'PANEL 4 (Pure White Background): Hand holding phone in EXACT case from reference (preserve ALL colors/patterns). CAMERAS: EXACT configuration from specs. Phone body visible through transparent parts. Text "Flaunt The Original Look". DO NOT modify case appearance. Clean white studio background.',
+    'PANEL 4 (Pure White Background): Hand holding phone in EXACT case from reference (preserve ALL colors/patterns). CRITICAL: Camera configuration MUST MATCH researched specs EXACTLY. Count cameras carefully from specs. Phone body visible through transparent parts. Text "Flaunt The Original Look". Clean white studio background.',
   ],
   
   black: [
@@ -147,9 +147,9 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
     
     'GRID 2 (Pure White Background): EXACT empty case from reference image twisted in S-curve (HYBRID DESIGN style). Preserve ALL original colors, patterns, materials, transparency. NO phone inside. NO hand. Text "Hybrid Design" at top. DO NOT alter case appearance. Clean white studio background.',    
     
-    'GRID 3 (Pure White Background): EXACT empty case from reference tilted on pedestal. Preserve ALL original colors, transparency, materials. NO phone inside. DO NOT alter case appearance. Clean white studio background.',
+    'GRID 3 (Pure White Background): EXACT empty case from reference tilted on pedestal. Preserve ALL original colors, transparency, materials. NO phone inside. CRITICAL: NO black shadows, NO dark shadows, ONLY soft natural lighting. Pure white background with minimal shadow. DO NOT alter case appearance. Clean white studio background.',
     
-    'GRID 4 (Pure White Background): EXACT empty case from reference image shown from back view only on a pedestal. Show ONLY the back view of the case displaying camera cutouts and design. Preserve ALL original colors, patterns, materials, transparency from reference. NO phone inside. NO hand. Clean white studio background.',
+    'GRID 4 (Pure White Background): EXACT empty case from reference image shown from back view only on a pedestal. Show ONLY the back view of the case displaying camera cutouts and design. Preserve ALL original colors, patterns, materials, transparency from reference. NO phone inside. NO hand. CRITICAL: NO black shadows, NO dark shadows, ONLY soft natural lighting with minimal shadow. Pure white background. Clean white studio background.',
   ],
 };
 

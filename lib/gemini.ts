@@ -147,9 +147,9 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
     
     'GRID 2 (Pure White Background): EXACT empty case from reference image twisted in S-curve (HYBRID DESIGN style). Preserve ALL original colors, patterns, materials, transparency. NO phone inside. NO hand. Text "Hybrid Design" at top. DO NOT alter case appearance. Clean white studio background.',    
     
-    'GRID 3 (Pure White Background): EXACT empty case from reference tilted on pedestal. Preserve ALL original colors, transparency, materials. NO phone inside. CRITICAL: NO black shadows, NO dark shadows, ONLY soft natural lighting. Pure white background with minimal shadow. DO NOT alter case appearance. Clean white studio background.',
+    'GRID 3 (Pure White Background): EXACT empty case from reference tilted on pedestal. Preserve ALL original colors, transparency, materials. NO phone inside. 🚫 ABSOLUTELY NO SHADOWS 🚫 - NO black shadow, NO dark shadow, NO grey shadow, NO shadow of ANY kind. Use bright even lighting, completely eliminate shadows. Pure flat white background like product photography. Floating effect with NO visible pedestal shadow. DO NOT alter case appearance.',
     
-    'GRID 4 (Pure White Background): EXACT empty case from reference image shown from back view only on a pedestal. Show ONLY the back view of the case displaying camera cutouts and design. Preserve ALL original colors, patterns, materials, transparency from reference. NO phone inside. NO hand. CRITICAL: NO black shadows, NO dark shadows, ONLY soft natural lighting with minimal shadow. Pure white background. Clean white studio background.',
+    'GRID 4 (Pure White Background): EXACT empty case from reference image shown from back view only on a pedestal. Show ONLY the back view of the case displaying camera cutouts and design. Preserve ALL original colors, patterns, materials, transparency from reference. NO phone inside. NO hand. 🚫 ABSOLUTELY NO SHADOWS 🚫 - NO black shadow, NO dark shadow, NO grey shadow, NO shadow of ANY kind. Use bright even lighting to completely eliminate all shadows. Pure flat white background like product photography. Floating effect with NO visible pedestal shadow.',
   ],
 };
 

@@ -267,35 +267,29 @@ IMPORTANT: DO NOT RECREATE OR REDESIGN THE CASE. Use the EXACT case from the ref
 
         let currentProgress = 40;
 
-        // Check if matte case type - generate 3 individual images
+        // Check if matte case type - generate 3 identical 2-panel grid images
         if (caseType === 'matte') {
-          writer.send('image_start', `Starting matte case generation (3 images)...`, currentProgress);
+          writer.send('image_start', `Starting matte case generation (3 images with 2 panels each)...`, currentProgress);
           
           const generatedImages: { url: string; title: string; logId: number | null }[] = [];
           
-          // Generate 3 separate images one by one
+          // Generate 3 separate 2-panel grid images one by one
           for (let i = 0; i < 3; i++) {
             const imageNumber = i + 1;
             const progressStart = 40 + (i * 20);
             const progressEnd = progressStart + 20;
             
-            writer.send('status', `Generating matte case image ${imageNumber} of 3...`, progressStart);
+            writer.send('status', `Generating matte case image ${imageNumber} of 3 (2-panel grid)...`, progressStart);
             
-            // Use panel description if available, otherwise generic
-            const panelPrompt = angleDescriptions[i] || angleDescriptions[0];
-            const singleImagePrompt = `${finalPrompt}
-
-Reference image: EXACT case design to use (match colors/patterns exactly)
-
-Create single product image:
-${panelPrompt}`;
+            // Build 2-panel grid prompt
+            const gridPrompt = buildCaseTypePrompt(caseType, phoneModel, finalPrompt, angleListText);
 
             const imgPayload = {
               contents: [
                 {
                   role: 'user',
                   parts: [
-                    { text: singleImagePrompt },
+                    { text: gridPrompt },
                     {
                       inlineData: {
                         mimeType: caseImage.type || 'image/jpeg',

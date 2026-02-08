@@ -143,9 +143,9 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
   
   matte: [
-    'PANEL 1 (Pure White Background): EXACT same case from reference image floating in air - tilted 45-degree angle view. Use EXACT SAME case design, colors, patterns, materials from reference photo. Just show it at tilted angle floating. NO phone inside. NO pedestal. NO surface. ABSOLUTELY NO SHADOWS - infinite white void background, overexposed white floor that blends with background. Floating product photography style.',
+    'PANEL 1 (Pure White Background): EXACT same case from reference image on white cylindrical pedestal - tilted 45-degree angle view. Use EXACT SAME case design, colors, patterns, materials from reference photo. Just show it at tilted angle on pedestal. NO phone inside. ABSOLUTELY ZERO SHADOWS: Use extreme overexposed lighting that completely eliminates all shadows - no shadow under case, no shadow under pedestal, no ambient occlusion, no contact shadows. Pedestal blends seamlessly into pure white background. Apply digital post-processing to remove any trace of shadows. Pure white infinite background.',
     
-    'PANEL 2 (Pure White Background): EXACT same case from reference image floating in air - back view showing camera cutouts. Use EXACT SAME case design, colors, patterns, materials from reference photo. Just show back side clearly floating. NO phone inside. NO pedestal. NO surface. ABSOLUTELY NO SHADOWS - infinite white void background, overexposed white floor that blends with background. Floating product photography style.',
+    'PANEL 2 (Pure White Background): EXACT same case from reference image on white cylindrical pedestal - back view showing camera cutouts. Use EXACT SAME case design, colors, patterns, materials from reference photo. Just show back side clearly on pedestal. NO phone inside. ABSOLUTELY ZERO SHADOWS: Use extreme overexposed lighting that completely eliminates all shadows - no shadow under case, no shadow under pedestal, no ambient occlusion, no contact shadows. Pedestal blends seamlessly into pure white background. Apply digital post-processing to remove any trace of shadows. Pure white infinite background.',
   ],
 };
 

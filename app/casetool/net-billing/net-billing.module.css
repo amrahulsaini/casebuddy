@@ -48,6 +48,65 @@
   padding: 4rem;
 }
 
+.totalCostSection {
+  max-width: 1400px;
+  margin: 2rem auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.totalCostCard {
+  background: linear-gradient(135deg, rgba(255, 107, 0, 0.1) 0%, rgba(255, 149, 0, 0.05) 100%);
+  border: 2px solid rgba(255, 107, 0, 0.3);
+  border-radius: 20px;
+  padding: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+  box-shadow: 0 10px 40px rgba(255, 107, 0, 0.2);
+}
+
+.infoBox {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 2rem;
+  color: white;
+}
+
+.infoBox h3 {
+  color: #ff9500;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+}
+
+.infoBox p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+.infoBox code {
+  background: rgba(255, 107, 0, 0.2);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  color: #ff9500;
+  font-family: 'Courier New', monospace;
+}
+
+.infoBox ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  line-height: 1.8;
+}
+
+.infoBox li {
+  opacity: 0.85;
+}
+
 /* Google Cloud Section */
 .googleCloudSection {
   max-width: 1400px;

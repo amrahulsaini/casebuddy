@@ -140,9 +140,6 @@ export async function GET(request: NextRequest) {
       pagination: { page, pageSize, total, totalPages },
       availableUsers: formattedUserList,
     });
-      pagination: { page, pageSize, total, totalPages },
-      availableUsers: formattedUserList,
-    });
   } catch (error: any) {
     console.error('Error fetching net billing data:', error);
     return NextResponse.json(

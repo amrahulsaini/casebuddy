@@ -58,6 +58,13 @@
   box-shadow: 0 8px 32px rgba(66, 133, 244, 0.3);
 }
 
+.googleCloudHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
 .googleCloudTitle {
   display: flex;
   align-items: center;
@@ -65,7 +72,105 @@
   font-size: 1.25rem;
   font-weight: 600;
   color: white;
-  margin: 0 0 1rem;
+  margin: 0;
+}
+
+.addBillingButton {
+  background: rgba(255, 255, 255, 0.95);
+  color: #4285f4;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.addBillingButton:hover {
+  background: white;
+  transform: scale(1.05);
+}
+
+.billingForm {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formGroup label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.formInput {
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: #4285f4;
+  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+}
+
+.saveButton {
+  background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.saveButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.4);
+}
+
+.formNote {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: #666;
+  font-style: italic;
+  text-align: center;
+}
+
+.noBillingData {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.noBillingData p {
+  margin: 0.5rem 0;
+  color: #666;
+}
+
+.noBillingData p:first-child {
+  font-weight: 600;
+  color: #333;
+  font-size: 1.1rem;
 }
 
 .googleCloudCards {
@@ -102,6 +207,22 @@
   font-size: 0.75rem;
   color: #999;
   font-style: italic;
+}
+
+.calculatedSection {
+  max-width: 1400px;
+  margin: 0 auto 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.calculatedTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 1rem;
 }
 
 .summaryCards {

@@ -33,15 +33,6 @@ interface GoogleCloudBilling {
   google_cloud_cost_inr: number;
 }
 
-interface RealGoogleCloudBilling {
-  month: string;
-  total_cost_usd: number;
-  total_cost_inr: number;
-  gemini_cost_usd: number;
-  gemini_cost_inr: number;
-  last_updated?: string;
-}
-
 interface Pagination {
   page: number;
   pageSize: number;
@@ -60,11 +51,6 @@ export default function NetBillingPage() {
   const [downloadLogs, setDownloadLogs] = useState<DownloadLog[]>([]);
   const [summary, setSummary] = useState<BillingSummary | null>(null);
   const [googleCloud, setGoogleCloud] = useState<GoogleCloudBilling | null>(null);
-  const [realGoogleCloud, setRealGoogleCloud] = useState<RealGoogleCloudBilling | null>(null);
-  const [showBillingForm, setShowBillingForm] = useState(false);
-  const [billingMonth, setBillingMonth] = useState('');
-  const [billingCostUSD, setBillingCostUSD] = useState('');
-  const [geminiCostUSD, setGeminiCostUSD] = useState('');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [pagination, setPagination] = useState<Pagination>({ page: 1, pageSize: 100, total: 0, totalPages: 0 });
   const [filterDate, setFilterDate] = useState<string>('');
@@ -74,54 +60,7 @@ export default function NetBillingPage() {
 
   useEffect(() => {
     fetchBillingData(1);
-    fetchRealGoogleCloudBilling();
   }, [filterDate, filterUserId, filterDownloaded]);
-
-  const fetchRealGoogleCloudBilling = async () => {
-    try {
-      const response = await fetch('/casetool/api/google-cloud-billing');
-      const data = await response.json();
-      if (data.success && data.billing) {
-        setRealGoogleCloud(data.billing);
-      }
-    } catch (error) {
-      console.error('Failed to fetch real Google Cloud billing:', error);
-    }
-  };
-
-  const handleSaveBilling = async () => {
-    if (!billingMonth || !billingCostUSD) {
-      alert('Please enter month and total cost');
-      return;
-    }
-
-    try {
-      const response = await fetch('/casetool/api/google-cloud-billing', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          month: billingMonth,
-          total_cost_usd: parseFloat(billingCostUSD),
-          gemini_cost_usd: geminiCostUSD ? parseFloat(geminiCostUSD) : parseFloat(billingCostUSD),
-        }),
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        alert('Billing data saved successfully!');
-        setShowBillingForm(false);
-        setBillingMonth('');
-        setBillingCostUSD('');
-        setGeminiCostUSD('');
-        fetchRealGoogleCloudBilling();
-      } else {
-        alert('Failed to save: ' + data.error);
-      }
-    } catch (error) {
-      console.error('Failed to save billing:', error);
-      alert('Network error');
-    }
-  };
 
   const fetchBillingData = async (page: number) => {
     try {
@@ -196,98 +135,14 @@ export default function NetBillingPage() {
         <h1 className={styles.title}>Net Billing - All Users</h1>
       </div>
 
-      {/* Real Google Cloud Billing from Console */}
-      <div className={styles.googleCloudSection}>
-        <div className={styles.googleCloudHeader}>
+      {googleCloud && (
+        <div className={styles.googleCloudSection}>
           <h2 className={styles.googleCloudTitle}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12.19 2.38a8.03 8.03 0 0 1 5.16 2.18 8.01 8.01 0 0 1 2.37 5.73v.5h.5a4.5 4.5 0 0 1 0 9h-4v-2h4a2.5 2.5 0 0 0 0-5h-2.5v-2a6 6 0 0 0-6-6 6 6 0 0 0-5.82 4.5h-.75a4.5 4.5 0 0 0 0 9h4v2h-4a6.5 6.5 0 0 1 0-13h.1A8.02 8.02 0 0 1 12.19 2.38z"/>
             </svg>
-            Google Cloud Billing (Actual from Console)
+            Google Cloud API Usage (Total)
           </h2>
-          <button 
-            className={styles.addBillingButton} 
-            onClick={() => setShowBillingForm(!showBillingForm)}
-          >
-            {showBillingForm ? '✕ Close' : '+ Update Billing'}
-          </button>
-        </div>
-
-        {showBillingForm && (
-          <div className={styles.billingForm}>
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label>Month (YYYY-MM)</label>
-                <input 
-                  type="month" 
-                  value={billingMonth} 
-                  onChange={(e) => setBillingMonth(e.target.value)}
-                  className={styles.formInput}
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Total Cost (USD)</label>
-                <input 
-                  type="number" 
-                  step="0.01"
-                  value={billingCostUSD} 
-                  onChange={(e) => setBillingCostUSD(e.target.value)}
-                  className={styles.formInput}
-                  placeholder="e.g., 25.50"
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Gemini Cost (USD) - Optional</label>
-                <input 
-                  type="number" 
-                  step="0.01"
-                  value={geminiCostUSD} 
-                  onChange={(e) => setGeminiCostUSD(e.target.value)}
-                  className={styles.formInput}
-                  placeholder="e.g., 20.00"
-                />
-              </div>
-              <button className={styles.saveButton} onClick={handleSaveBilling}>
-                Save Billing
-              </button>
-            </div>
-            <div className={styles.formNote}>
-              Get actual costs from: Google Cloud Console {'>'} Billing {'>'} Reports
-            </div>
-          </div>
-        )}
-
-        {realGoogleCloud ? (
-          <div className={styles.googleCloudCards}>
-            <div className={styles.googleCloudCard}>
-              <div className={styles.googleCloudLabel}>Billing Month</div>
-              <div className={styles.googleCloudValue} style={{ fontSize: '1.5rem' }}>{realGoogleCloud.month}</div>
-              {realGoogleCloud.last_updated && (
-                <div className={styles.googleCloudNote}>Updated: {new Date(realGoogleCloud.last_updated).toLocaleString()}</div>
-              )}
-            </div>
-            <div className={styles.googleCloudCard}>
-              <div className={styles.googleCloudLabel}>Total Google Cloud Cost</div>
-              <div className={styles.googleCloudValue}>${realGoogleCloud.total_cost_usd.toFixed(2)}</div>
-              <div className={styles.googleCloudNote}>₹{realGoogleCloud.total_cost_inr.toFixed(2)} INR</div>
-            </div>
-            <div className={styles.googleCloudCard}>
-              <div className={styles.googleCloudLabel}>Gemini API Cost</div>
-              <div className={styles.googleCloudValue}>${realGoogleCloud.gemini_cost_usd.toFixed(2)}</div>
-              <div className={styles.googleCloudNote}>₹{realGoogleCloud.gemini_cost_inr.toFixed(2)} INR</div>
-            </div>
-          </div>
-        ) : (
-          <div className={styles.noBillingData}>
-            <p>No Google Cloud billing data available</p>
-            <p>Click "Update Billing" to add data from your Google Cloud Console</p>
-          </div>
-        )}
-      </div>
-
-      {googleCloud && (
-        <div className={styles.calculatedSection}>
-          <h3 className={styles.calculatedTitle}>Calculated API Usage (From Database)</h3>
           <div className={styles.googleCloudCards}>
             <div className={styles.googleCloudCard}>
               <div className={styles.googleCloudLabel}>Total API Calls</div>
@@ -295,9 +150,9 @@ export default function NetBillingPage() {
               <div className={styles.googleCloudNote}>Text Analysis + Image Generation</div>
             </div>
             <div className={styles.googleCloudCard}>
-              <div className={styles.googleCloudLabel}>Calculated Cost</div>
+              <div className={styles.googleCloudLabel}>Google Cloud Cost</div>
               <div className={styles.googleCloudValue}>₹{googleCloud.google_cloud_cost_inr.toFixed(2)}</div>
-              <div className={styles.googleCloudNote}>From api_usage_logs</div>
+              <div className={styles.googleCloudNote}>Calculated from api_usage_logs</div>
             </div>
           </div>
         </div>

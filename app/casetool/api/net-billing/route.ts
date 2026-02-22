@@ -42,6 +42,18 @@ export async function GET(request: NextRequest) {
     
     const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
 
+    // Get Google Cloud API usage summary (total API calls and costs)
+    const googleCloudQuery = `
+      SELECT
+        COUNT(*) as total_api_calls,
+        COALESCE(SUM(cost_inr), 0) as google_cloud_cost_inr
+      FROM api_usage_logs
+      WHERE operation_type IN ('text_analysis', 'image_generation')
+    `;
+    
+    const [googleCloudResult] = await pool.execute(googleCloudQuery);
+    const googleCloud = Array.isArray(googleCloudResult) && googleCloudResult.length > 0 ? googleCloudResult[0] : {};
+
     // Get summary
     const summaryQuery = `
       SELECT 
@@ -111,6 +123,11 @@ export async function GET(request: NextRequest) {
       total_download_cost_inr: parseFloat((summary as any).total_download_cost_inr) || 0,
     };
 
+    const formattedGoogleCloud = {
+      total_api_calls: Number((googleCloud as any).total_api_calls) || 0,
+      google_cloud_cost_inr: parseFloat((googleCloud as any).google_cloud_cost_inr) || 0,
+    };
+
     const formattedUserList = Array.isArray(userListResult) 
       ? userListResult.map((row: any) => ({ id: row.id, email: row.email }))
       : [];
@@ -119,6 +136,10 @@ export async function GET(request: NextRequest) {
       success: true,
       logs,
       summary: formattedSummary,
+      googleCloud: formattedGoogleCloud,
+      pagination: { page, pageSize, total, totalPages },
+      availableUsers: formattedUserList,
+    });
       pagination: { page, pageSize, total, totalPages },
       availableUsers: formattedUserList,
     });

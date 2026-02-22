@@ -28,6 +28,11 @@ interface BillingSummary {
   total_download_cost_inr: number;
 }
 
+interface GoogleCloudBilling {
+  total_api_calls: number;
+  google_cloud_cost_inr: number;
+}
+
 interface Pagination {
   page: number;
   pageSize: number;
@@ -45,6 +50,7 @@ export default function NetBillingPage() {
   const [loading, setLoading] = useState(true);
   const [downloadLogs, setDownloadLogs] = useState<DownloadLog[]>([]);
   const [summary, setSummary] = useState<BillingSummary | null>(null);
+  const [googleCloud, setGoogleCloud] = useState<GoogleCloudBilling | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [pagination, setPagination] = useState<Pagination>({ page: 1, pageSize: 100, total: 0, totalPages: 0 });
   const [filterDate, setFilterDate] = useState<string>('');
@@ -72,6 +78,7 @@ export default function NetBillingPage() {
       if (data.success) {
         setDownloadLogs(data.logs || []);
         setSummary(data.summary || null);
+        setGoogleCloud(data.googleCloud || null);
         setAvailableUsers(data.availableUsers || []);
         setPagination(data.pagination || { page, pageSize: pagination.pageSize, total: 0, totalPages: 0 });
         
@@ -127,6 +134,29 @@ export default function NetBillingPage() {
         </button>
         <h1 className={styles.title}>Net Billing - All Users</h1>
       </div>
+
+      {googleCloud && (
+        <div className={styles.googleCloudSection}>
+          <h2 className={styles.googleCloudTitle}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12.19 2.38a8.03 8.03 0 0 1 5.16 2.18 8.01 8.01 0 0 1 2.37 5.73v.5h.5a4.5 4.5 0 0 1 0 9h-4v-2h4a2.5 2.5 0 0 0 0-5h-2.5v-2a6 6 0 0 0-6-6 6 6 0 0 0-5.82 4.5h-.75a4.5 4.5 0 0 0 0 9h4v2h-4a6.5 6.5 0 0 1 0-13h.1A8.02 8.02 0 0 1 12.19 2.38z"/>
+            </svg>
+            Google Cloud API Usage (Total)
+          </h2>
+          <div className={styles.googleCloudCards}>
+            <div className={styles.googleCloudCard}>
+              <div className={styles.googleCloudLabel}>Total API Calls</div>
+              <div className={styles.googleCloudValue}>{googleCloud.total_api_calls.toLocaleString()}</div>
+              <div className={styles.googleCloudNote}>Text Analysis + Image Generation</div>
+            </div>
+            <div className={styles.googleCloudCard}>
+              <div className={styles.googleCloudLabel}>Google Cloud Cost</div>
+              <div className={styles.googleCloudValue}>₹{googleCloud.google_cloud_cost_inr.toFixed(2)}</div>
+              <div className={styles.googleCloudNote}>Calculated from api_usage_logs</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {summary && (
         <div className={styles.summaryCards}>

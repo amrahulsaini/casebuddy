@@ -33,12 +33,14 @@ export async function GET(request: NextRequest) {
       queryParams.push(filterDate);
     }
     if (filterUserId) {
-      whereConditions.push('u.id = ?');
+      whereConditions.push('gl.user_id = ?');
       queryParams.push(filterUserId);
     }
     if (filterDownloaded === '1') {
       whereConditions.push('dbl.id IS NOT NULL');
     }
+    
+    const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
 
     // Get Google Cloud API usage summary (total API calls and costs)
     const googleCloudQuery = `
@@ -55,17 +57,16 @@ export async function GET(request: NextRequest) {
     // Get summary - Pull from generation_logs directly (ALL statuses)
     const summaryQuery = `
       SELECT 
-        COUNT(DISTINCT u.id) as total_users,
+        COUNT(DISTINCT gl.user_id) as total_users,
         COUNT(DISTINCT gl.id) as total_generations,
         COUNT(DISTINCT CASE WHEN gl.status = 'completed' THEN gl.id END) as completed_generations,
         COUNT(DISTINCT CASE WHEN gl.status = 'failed' THEN gl.id END) as failed_generations,
         COALESCE(SUM(CASE WHEN aul.operation_type = 'image_generation' THEN aul.cost_inr ELSE 0 END), 0) as total_cost_inr,
         COALESCE(SUM(dbl.amount_inr), 0) as total_download_cost_inr
       FROM generation_logs gl
-      JOIN users u ON gl.user_id = u.id
       LEFT JOIN api_usage_logs aul ON aul.generation_log_id = gl.id
       LEFT JOIN download_billing_logs dbl ON dbl.generation_log_id = gl.id
-      ${whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : ''}
+      ${whereClause}
     `;
 
     const [summaryResult] = queryParams.length > 0
@@ -97,7 +98,7 @@ export async function GET(request: NextRequest) {
       JOIN users u ON gl.user_id = u.id
       LEFT JOIN api_usage_logs aul ON aul.generation_log_id = gl.id AND aul.operation_type = 'image_generation'
       LEFT JOIN download_billing_logs dbl ON dbl.generation_log_id = gl.id
-      ${whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : ''}
+      ${whereClause}
       ORDER BY gl.created_at DESC
       LIMIT ? OFFSET ?
     `;

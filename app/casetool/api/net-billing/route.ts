@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     const queryParams: any[] = [];
     
     if (filterDate) {
-      whereConditions.push('DATE(aul.created_at) = ?');
+      whereConditions.push('DATE(gl.created_at) = ?');
       queryParams.push(filterDate);
     }
     if (filterUserId) {
@@ -39,8 +39,6 @@ export async function GET(request: NextRequest) {
     if (filterDownloaded === '1') {
       whereConditions.push('dbl.id IS NOT NULL');
     }
-    
-    const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
 
     // Get Google Cloud API usage summary (total API calls and costs)
     const googleCloudQuery = `
@@ -54,19 +52,19 @@ export async function GET(request: NextRequest) {
     const [googleCloudResult] = await pool.execute(googleCloudQuery);
     const googleCloud = Array.isArray(googleCloudResult) && googleCloudResult.length > 0 ? googleCloudResult[0] : {};
 
-    // Get summary
+    // Get summary - Pull from generation_logs directly
     const summaryQuery = `
       SELECT 
         COUNT(DISTINCT u.id) as total_users,
-        COUNT(DISTINCT aul.generation_log_id) as total_generations,
-        COALESCE(SUM(aul.cost_inr), 0) as total_cost_inr,
+        COUNT(DISTINCT gl.id) as total_generations,
+        COALESCE(SUM(CASE WHEN aul.operation_type = 'image_generation' THEN aul.cost_inr ELSE 0 END), 0) as total_cost_inr,
         COALESCE(SUM(dbl.amount_inr), 0) as total_download_cost_inr
-      FROM api_usage_logs aul
-      JOIN users u ON aul.user_id = u.id
-      LEFT JOIN generation_logs gl ON aul.generation_log_id = gl.id
+      FROM generation_logs gl
+      JOIN users u ON gl.user_id = u.id
+      LEFT JOIN api_usage_logs aul ON aul.generation_log_id = gl.id
       LEFT JOIN download_billing_logs dbl ON dbl.generation_log_id = gl.id
-      ${whereClause}
-      ${whereConditions.length === 0 ? "WHERE aul.operation_type = 'image_generation'" : "AND aul.operation_type = 'image_generation'"}
+      WHERE gl.status = 'completed'
+      ${whereConditions.length > 0 ? `AND ${whereConditions.join(' AND ')}` : ''}
     `;
 
     const [summaryResult] = queryParams.length > 0
@@ -77,15 +75,15 @@ export async function GET(request: NextRequest) {
     const total = Number((summary as any).total_generations) || 0;
     const totalPages = total > 0 ? Math.ceil(total / pageSize) : 0;
 
-    // Get generation logs with download tracking
+    // Get generation logs with download tracking - Pull from generation_logs
     const logsQuery = `
       SELECT
-        aul.id,
-        aul.user_id,
-        aul.generation_log_id,
-        aul.cost_inr as amount_inr,
-        aul.created_at,
-        aul.model_name,
+        gl.id,
+        gl.user_id,
+        gl.id as generation_log_id,
+        COALESCE(aul.cost_inr, 0) as amount_inr,
+        gl.created_at,
+        COALESCE(aul.model_name, 'N/A') as model_name,
         u.email,
         gl.phone_model,
         gl.case_type,
@@ -93,13 +91,13 @@ export async function GET(request: NextRequest) {
         gl.generated_image_url,
         CASE WHEN dbl.id IS NOT NULL THEN 1 ELSE 0 END as is_downloaded,
         dbl.created_at as download_date
-      FROM api_usage_logs aul
-      JOIN users u ON aul.user_id = u.id
-      LEFT JOIN generation_logs gl ON aul.generation_log_id = gl.id
+      FROM generation_logs gl
+      JOIN users u ON gl.user_id = u.id
+      LEFT JOIN api_usage_logs aul ON aul.generation_log_id = gl.id AND aul.operation_type = 'image_generation'
       LEFT JOIN download_billing_logs dbl ON dbl.generation_log_id = gl.id
-      ${whereClause}
-      ${whereConditions.length === 0 ? "WHERE aul.operation_type = 'image_generation'" : "AND aul.operation_type = 'image_generation'"}
-      ORDER BY aul.created_at DESC
+      WHERE gl.status = 'completed'
+      ${whereConditions.length > 0 ? `AND ${whereConditions.join(' AND ')}` : ''}
+      ORDER BY gl.created_at DESC
       LIMIT ? OFFSET ?
     `;
 
@@ -110,8 +108,8 @@ export async function GET(request: NextRequest) {
     const [userListResult] = await pool.execute(`
       SELECT DISTINCT u.id, u.email 
       FROM users u
-      JOIN api_usage_logs aul ON u.id = aul.user_id
-      WHERE aul.operation_type = 'image_generation'
+      JOIN generation_logs gl ON u.id = gl.user_id
+      WHERE gl.status = 'completed'
       ORDER BY u.id
     `);
 

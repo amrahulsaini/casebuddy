@@ -9,6 +9,7 @@ interface DownloadLog {
   id: number;
   user_id: number;
   generation_log_id: number;
+  status: string;
   amount_inr: number;
   phone_model: string;
   case_type: string;
@@ -24,6 +25,8 @@ interface DownloadLog {
 interface BillingSummary {
   total_users: number;
   total_generations: number;
+  completed_generations: number;
+  failed_generations: number;
   total_cost_inr: number;
   total_download_cost_inr: number;
 }
@@ -156,6 +159,9 @@ export default function NetBillingPage() {
             <div className={styles.cardContent}>
               <div className={styles.cardLabel}>Total Generations</div>
               <div className={styles.cardValue}>{summary.total_generations}</div>
+              <div className={styles.cardNote}>
+                ✓ {summary.completed_generations} Completed | ✗ {summary.failed_generations} Failed
+              </div>
             </div>
           </div>
 
@@ -255,8 +261,8 @@ export default function NetBillingPage() {
 
         {downloadLogs.length === 0 ? (
           <div className={styles.emptyState}>
-            <p>No downloads recorded yet.</p>
-            <p>Billing is recorded when users download images.</p>
+            <p>No generation logs found.</p>
+            <p>All generation attempts will be shown here.</p>
           </div>
         ) : (
           <div className={styles.table}>
@@ -265,6 +271,7 @@ export default function NetBillingPage() {
               <div className={styles.tableCell}>User</div>
               <div className={styles.tableCell}>Phone Model</div>
               <div className={styles.tableCell}>Case Type</div>
+              <div className={styles.tableCell}>Status</div>
               <div className={styles.tableCell}>Original</div>
               <div className={styles.tableCell}>Generated</div>
               <div className={styles.tableCell}>Downloaded</div>
@@ -287,6 +294,21 @@ export default function NetBillingPage() {
                   <span className={styles.badge}>{log.case_type || 'N/A'}</span>
                 </div>
                 <div className={styles.tableCell}>
+                  <span className={styles.badge} style={{
+                    background: log.status === 'completed' ? 'rgba(34, 197, 94, 0.2)' : 
+                                log.status === 'failed' ? 'rgba(239, 68, 68, 0.2)' : 
+                                'rgba(251, 191, 36, 0.2)',
+                    color: log.status === 'completed' ? '#22c55e' : 
+                           log.status === 'failed' ? '#ef4444' : 
+                           '#fbbf24',
+                    borderColor: log.status === 'completed' ? '#22c55e' : 
+                                 log.status === 'failed' ? '#ef4444' : 
+                                 '#fbbf24'
+                  }}>
+                    {log.status || 'unknown'}
+                  </span>
+                </div>
+                <div className={styles.tableCell}>
                   {log.original_image_url ? (
                     <a href={log.original_image_url} target="_blank" rel="noopener noreferrer">
                       <img 
@@ -306,6 +328,12 @@ export default function NetBillingPage() {
                         style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px', cursor: 'pointer' }}
                       />
                     </a>
+                  ) : (
+                    <span style={{ color: '#999', fontSize: '0.75rem' }}>
+                      {log.status === 'failed' ? '❌ Failed' : log.status === 'generating' ? '⏳ Processing' : 'N/A'}
+                    </span>
+                  )}
+                </div>
                   ) : 'N/A'}
                 </div>
                 <div className={styles.tableCell}>

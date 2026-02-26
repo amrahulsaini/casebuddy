@@ -52,19 +52,20 @@ export async function GET(request: NextRequest) {
     const [googleCloudResult] = await pool.execute(googleCloudQuery);
     const googleCloud = Array.isArray(googleCloudResult) && googleCloudResult.length > 0 ? googleCloudResult[0] : {};
 
-    // Get summary - Pull from generation_logs directly
+    // Get summary - Pull from generation_logs directly (ALL statuses)
     const summaryQuery = `
       SELECT 
         COUNT(DISTINCT u.id) as total_users,
         COUNT(DISTINCT gl.id) as total_generations,
+        COUNT(DISTINCT CASE WHEN gl.status = 'completed' THEN gl.id END) as completed_generations,
+        COUNT(DISTINCT CASE WHEN gl.status = 'failed' THEN gl.id END) as failed_generations,
         COALESCE(SUM(CASE WHEN aul.operation_type = 'image_generation' THEN aul.cost_inr ELSE 0 END), 0) as total_cost_inr,
         COALESCE(SUM(dbl.amount_inr), 0) as total_download_cost_inr
       FROM generation_logs gl
       JOIN users u ON gl.user_id = u.id
       LEFT JOIN api_usage_logs aul ON aul.generation_log_id = gl.id
       LEFT JOIN download_billing_logs dbl ON dbl.generation_log_id = gl.id
-      WHERE gl.status = 'completed'
-      ${whereConditions.length > 0 ? `AND ${whereConditions.join(' AND ')}` : ''}
+      ${whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : ''}
     `;
 
     const [summaryResult] = queryParams.length > 0
@@ -75,12 +76,13 @@ export async function GET(request: NextRequest) {
     const total = Number((summary as any).total_generations) || 0;
     const totalPages = total > 0 ? Math.ceil(total / pageSize) : 0;
 
-    // Get generation logs with download tracking - Pull from generation_logs
+    // Get generation logs with download tracking - SHOW ALL STATUSES
     const logsQuery = `
       SELECT
         gl.id,
         gl.user_id,
         gl.id as generation_log_id,
+        gl.status,
         COALESCE(aul.cost_inr, 0) as amount_inr,
         gl.created_at,
         COALESCE(aul.model_name, 'N/A') as model_name,
@@ -95,8 +97,7 @@ export async function GET(request: NextRequest) {
       JOIN users u ON gl.user_id = u.id
       LEFT JOIN api_usage_logs aul ON aul.generation_log_id = gl.id AND aul.operation_type = 'image_generation'
       LEFT JOIN download_billing_logs dbl ON dbl.generation_log_id = gl.id
-      WHERE gl.status = 'completed'
-      ${whereConditions.length > 0 ? `AND ${whereConditions.join(' AND ')}` : ''}
+      ${whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : ''}
       ORDER BY gl.created_at DESC
       LIMIT ? OFFSET ?
     `;
@@ -109,7 +110,6 @@ export async function GET(request: NextRequest) {
       SELECT DISTINCT u.id, u.email 
       FROM users u
       JOIN generation_logs gl ON u.id = gl.user_id
-      WHERE gl.status = 'completed'
       ORDER BY u.id
     `);
 
@@ -117,6 +117,8 @@ export async function GET(request: NextRequest) {
     const formattedSummary = {
       total_users: Number((summary as any).total_users) || 0,
       total_generations: Number((summary as any).total_generations) || 0,
+      completed_generations: Number((summary as any).completed_generations) || 0,
+      failed_generations: Number((summary as any).failed_generations) || 0,
       total_cost_inr: parseFloat((summary as any).total_cost_inr) || 0,
       total_download_cost_inr: parseFloat((summary as any).total_download_cost_inr) || 0,
     };

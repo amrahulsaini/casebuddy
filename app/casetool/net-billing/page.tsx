@@ -334,8 +334,6 @@ export default function NetBillingPage() {
                     </span>
                   )}
                 </div>
-                  ) : 'N/A'}
-                </div>
                 <div className={styles.tableCell}>
                   {log.is_downloaded ? (
                     <div>

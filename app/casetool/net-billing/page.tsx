@@ -27,7 +27,6 @@ interface BillingSummary {
   total_generations: number;
   completed_generations: number;
   failed_generations: number;
-  total_cost_inr: number;
   total_download_cost_inr: number;
 }
 
@@ -158,9 +157,9 @@ export default function NetBillingPage() {
             </div>
             <div className={styles.cardContent}>
               <div className={styles.cardLabel}>Total Generations</div>
-              <div className={styles.cardValue}>{summary.total_generations}</div>
+              <div className={styles.cardValue}>{summary.completed_generations}</div>
               <div className={styles.cardNote}>
-                ✓ {summary.completed_generations} Completed | ✗ {summary.failed_generations} Failed
+                {summary.total_generations} Total | ✗ {summary.failed_generations} Failed
               </div>
             </div>
           </div>

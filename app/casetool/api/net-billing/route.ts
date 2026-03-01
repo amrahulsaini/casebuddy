@@ -61,10 +61,8 @@ export async function GET(request: NextRequest) {
         COUNT(DISTINCT gl.id) as total_generations,
         COUNT(DISTINCT CASE WHEN gl.status = 'completed' THEN gl.id END) as completed_generations,
         COUNT(DISTINCT CASE WHEN gl.status = 'failed' THEN gl.id END) as failed_generations,
-        COALESCE(SUM(CASE WHEN aul.operation_type = 'image_generation' THEN aul.cost_inr ELSE 0 END), 0) as total_cost_inr,
         COALESCE(SUM(dbl.amount_inr), 0) as total_download_cost_inr
       FROM generation_logs gl
-      LEFT JOIN api_usage_logs aul ON aul.generation_log_id = gl.id
       LEFT JOIN download_billing_logs dbl ON dbl.generation_log_id = gl.id
       ${whereClause}
     `;
@@ -120,7 +118,6 @@ export async function GET(request: NextRequest) {
       total_generations: Number((summary as any).total_generations) || 0,
       completed_generations: Number((summary as any).completed_generations) || 0,
       failed_generations: Number((summary as any).failed_generations) || 0,
-      total_cost_inr: parseFloat((summary as any).total_cost_inr) || 0,
       total_download_cost_inr: parseFloat((summary as any).total_download_cost_inr) || 0,
     };
 

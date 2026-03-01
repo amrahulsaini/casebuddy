@@ -267,108 +267,90 @@ IMPORTANT: DO NOT RECREATE OR REDESIGN THE CASE. Use the EXACT case from the ref
 
         let currentProgress = 40;
 
-        // Check if matte case type - generate 3 identical 2-panel grid images
+        // Check if matte case type - generate 1 grid image
         if (caseType === 'matte') {
-          writer.send('image_start', `Starting matte case generation (3 images with 2 panels each)...`, currentProgress);
-          
-          const generatedImages: { url: string; title: string; logId: number | null }[] = [];
-          
-          // Generate 3 separate 2-panel grid images one by one
-          for (let i = 0; i < 3; i++) {
-            const imageNumber = i + 1;
-            const progressStart = 40 + (i * 20);
-            const progressEnd = progressStart + 20;
-            
-            writer.send('status', `Generating matte case image ${imageNumber} of 3 (2-panel grid)...`, progressStart);
-            
-            // Build 2-panel grid prompt
-            const gridPrompt = buildCaseTypePrompt(caseType, phoneModel, finalPrompt, angleListText);
+          writer.send('image_start', `Starting matte case generation...`, currentProgress);
+          writer.send('status', `Generating matte case mockup image...`, 55);
 
-            const imgPayload = {
-              contents: [
-                {
-                  role: 'user',
-                  parts: [
-                    { text: gridPrompt },
-                    {
-                      inlineData: {
-                        mimeType: caseImage.type || 'image/jpeg',
-                        data: imgB64,
-                      },
+          // Build 2-panel grid prompt
+          const gridPrompt = buildCaseTypePrompt(caseType, phoneModel, finalPrompt, angleListText);
+
+          const imgPayload = {
+            contents: [
+              {
+                role: 'user',
+                parts: [
+                  { text: gridPrompt },
+                  {
+                    inlineData: {
+                      mimeType: caseImage.type || 'image/jpeg',
+                      data: imgB64,
                     },
-                  ],
-                },
-              ],
-              generationConfig: {
-                temperature: 0.2,
-                topP: 0.9,
-                topK: 40,
-                candidateCount: 1,
+                  },
+                ],
               },
-            };
+            ],
+            generationConfig: {
+              temperature: 0.2,
+              topP: 0.9,
+              topK: 40,
+              candidateCount: 1,
+            },
+          };
 
-            const imgRes = await callGemini(
-              `https://generativelanguage.googleapis.com/v1beta/models/${selectedImageModel}:generateContent`,
-              imgPayload,
-              GEMINI_API_KEY
-            );
+          const imgRes = await callGemini(
+            `https://generativelanguage.googleapis.com/v1beta/models/${selectedImageModel}:generateContent`,
+            imgPayload,
+            GEMINI_API_KEY
+          );
 
-            // Find first inlineData (image bytes)
-            let genB64: string | null = null;
-            const parts = imgRes.candidates[0]?.content?.parts || [];
-            for (const p of parts) {
-              if (p.inlineData?.data) {
-                genB64 = p.inlineData.data;
-                break;
-              }
+          // Find first inlineData (image bytes)
+          let genB64: string | null = null;
+          const matteparts = imgRes.candidates[0]?.content?.parts || [];
+          for (const p of matteparts) {
+            if (p.inlineData?.data) {
+              genB64 = p.inlineData.data;
+              break;
             }
+          }
 
-            if (!genB64) {
-              writer.send('error', `Image ${imageNumber} was generated but no inlineData was returned.`, progressStart);
-              throw new Error(`No image data returned for image ${imageNumber}`);
-            }
+          if (!genB64) {
+            writer.send('error', `Image was generated but no inlineData was returned.`, 55);
+            throw new Error('No image data returned for matte case');
+          }
 
-            // Create filename with phone model and image number
-            const sanitizedModel = phoneModel.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-            const fileName = `${sanitizedModel}_${ts}_img${imageNumber}.png`;
-            const filePath = join(outputDir, fileName);
-            await writeFile(filePath, Buffer.from(genB64, 'base64'));
-            console.log(`Matte case image ${imageNumber} saved to:`, filePath);
+          const sanitizedModel = phoneModel.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+          const fileName = `${sanitizedModel}_${ts}_img1.png`;
+          const filePath = join(outputDir, fileName);
+          await writeFile(filePath, Buffer.from(genB64, 'base64'));
+          console.log('Matte case image saved to:', filePath);
 
-            const imageUrl = `/output/${fileName}`;
+          const imageUrl = `/output/${fileName}`;
+          const generationTime = ((Date.now() - startTime) / 1000).toFixed(2);
 
-            // Log image generation API usage
-            if (userId && logId) {
-              await logAPIUsage(userId, logId, {
-                modelName: selectedImageModel,
-                operationType: 'image_generation',
-                inputImages: 1,
-                outputImages: 1,
-              });
-            }
-
-            generatedImages.push({
-              url: imageUrl,
-              title: `${phoneModel} Matte Case - Image ${imageNumber}`,
-              logId: logId,
-            });
-
-            writer.send('image_result', `Matte case image ${imageNumber} of 3 ready`, progressEnd, {
-              url: imageUrl,
-              title: `${phoneModel} Matte Case - Image ${imageNumber}`,
-              logId: logId,
+          // Log image generation API usage
+          if (userId && logId) {
+            await logAPIUsage(userId, logId, {
+              modelName: selectedImageModel,
+              operationType: 'image_generation',
+              inputImages: 1,
+              outputImages: 1,
             });
           }
 
-          const generationTime = ((Date.now() - startTime) / 1000).toFixed(2);
-
-          // Update log with all images (use first image URL as primary)
+          // Update log
           if (logId) {
             await pool.execute(
               'UPDATE generation_logs SET generated_image_url = ?, ai_prompt = ?, generation_time = ?, status = ? WHERE id = ?',
-              [generatedImages[0].url, finalPrompt, generationTime, 'completed', logId]
+              [imageUrl, finalPrompt, generationTime, 'completed', logId]
             );
           }
+
+          writer.send('image_result', `Matte case mockup ready`, 90, {
+            url: imageUrl,
+            title: `${phoneModel} Matte Case`,
+            logId: logId,
+          });
 
         } else {
           // Original behavior for non-matte cases: Generate 1 grid image

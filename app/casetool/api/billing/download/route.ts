@@ -57,9 +57,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Billing amount is a fixed price per downloaded generation.
-    // This avoids under-charging when prompt reuse skips the analysis step (previously showed ₹2.10).
-    const STANDARD_PRICE_INR = 4.10;
-    const ULTRA_HD_PRICE_INR = 9.39;
+    const STANDARD_PRICE_INR = 3.65;
+    const ULTRA_HD_PRICE_INR = 11.65;
 
     let amountINR = STANDARD_PRICE_INR;
     try {

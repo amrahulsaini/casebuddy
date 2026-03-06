@@ -21,6 +21,7 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const TEXT_MODEL = process.env.TEXT_MODEL || 'gemini-3-pro-preview';
 const IMAGE_MODEL = process.env.IMAGE_MODEL || 'gemini-2.5-flash-image';
 const IMAGE_ENHANCE_MODEL = process.env.IMAGE_ENHANCE_MODEL || 'gemini-3-pro-image-preview';
+const IMAGE_NANO_MODEL = process.env.IMAGE_NANO_MODEL || 'gemini-3.1-flash-image-preview';
 
 function sanitizeFileName(name: string) {
   return name
@@ -85,7 +86,7 @@ export async function POST(request: NextRequest) {
         const caseType = (formData.get('case_type') as string) || 'transparent';
         
         // Select model based on user choice
-        const selectedImageModel = imageModel === 'high' ? IMAGE_ENHANCE_MODEL : IMAGE_MODEL;
+        const selectedImageModel = imageModel === 'high' ? IMAGE_ENHANCE_MODEL : imageModel === 'nano' ? IMAGE_NANO_MODEL : IMAGE_MODEL;
 
         if (!caseImage) {
           throw new Error('Image upload failed');

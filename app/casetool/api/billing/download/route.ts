@@ -59,19 +59,22 @@ export async function POST(req: NextRequest) {
     // Billing amount is a fixed price per downloaded generation.
     const STANDARD_PRICE_INR = 3.65;
     const ULTRA_HD_PRICE_INR = 11.65;
+    const NANO_PRICE_INR = 2.00;
 
     let amountINR = STANDARD_PRICE_INR;
     try {
       const [rows]: any = await pool.execute(
         `SELECT
-           MAX(CASE WHEN model_name = 'gemini-3-pro-image-preview' THEN 1 ELSE 0 END) AS has_ultra
+           MAX(CASE WHEN model_name = 'gemini-3-pro-image-preview' THEN 1 ELSE 0 END) AS has_ultra,
+           MAX(CASE WHEN model_name = 'gemini-3.1-flash-image-preview' THEN 1 ELSE 0 END) AS has_nano
          FROM api_usage_logs
          WHERE user_id = ? AND generation_log_id = ?`,
         [userId, logId]
       );
 
       const hasUltra = Number(rows?.[0]?.has_ultra) === 1;
-      amountINR = hasUltra ? ULTRA_HD_PRICE_INR : STANDARD_PRICE_INR;
+      const hasNano = Number(rows?.[0]?.has_nano) === 1;
+      amountINR = hasUltra ? ULTRA_HD_PRICE_INR : hasNano ? NANO_PRICE_INR : STANDARD_PRICE_INR;
     } catch {
       // api_usage_logs might not exist in some deployments; default to standard price
       amountINR = STANDARD_PRICE_INR;

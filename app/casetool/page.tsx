@@ -56,7 +56,7 @@ export default function ToolPage() {
   const [uploadedFileName, setUploadedFileName] = useState<string>('');
   const [lastFormData, setLastFormData] = useState<FormData | null>(null);
   const [lastPrompt, setLastPrompt] = useState<string>('');
-  const [selectedModel, setSelectedModel] = useState<'normal' | 'high'>('normal');
+  const [selectedModel, setSelectedModel] = useState<'normal' | 'high' | 'nano'>('normal');
   const [caseType, setCaseType] = useState<'transparent' | 'doyers' | 'black' | 'matte'>('transparent');
   const [cameraSpecs, setCameraSpecs] = useState<CameraSpecs | null>(null);
   // isAdmin removed: Net Billing is now public
@@ -757,6 +757,18 @@ export default function ToolPage() {
                   </div>
                   <div className={styles.modelOptionDesc}>4K resolution • Best quality • ₹11.65</div>
                   <div className={styles.modelOptionBadge}>gemini-3-pro</div>
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.modelOption} ${selectedModel === 'nano' ? styles.modelOptionActive : ''}`}
+                  onClick={() => setSelectedModel('nano')}
+                >
+                  <div className={styles.modelOptionHeader}>
+                    <Zap size={20} />
+                    <span className={styles.modelOptionTitle}>🍌 Nano Banana 2</span>
+                  </div>
+                  <div className={styles.modelOptionDesc}>512px • Fastest • ₹2.00</div>
+                  <div className={styles.modelOptionBadge}>gemini-3.1-flash</div>
                 </button>
               </div>
             </div>

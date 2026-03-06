@@ -767,7 +767,7 @@ export default function ToolPage() {
                     <Zap size={20} />
                     <span className={styles.modelOptionTitle}>🍌 Nano Banana 2</span>
                   </div>
-                  <div className={styles.modelOptionDesc}>512px • Fastest • ₹4.99</div>
+                  <div className={styles.modelOptionDesc}>512px • Fastest • ₹6.54</div>
                   <div className={styles.modelOptionBadge}>gemini-3.1-flash</div>
                 </button>
               </div>

@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
     // Billing amount is a fixed price per downloaded generation.
     const STANDARD_PRICE_INR = 3.65;
     const ULTRA_HD_PRICE_INR = 11.65;
-    const NANO_PRICE_INR = 2.00;
+    const NANO_PRICE_INR = 4.99;
 
     let amountINR = STANDARD_PRICE_INR;
     try {

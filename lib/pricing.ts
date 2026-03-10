@@ -16,6 +16,12 @@ export const PRICING = {
     outputImage: 0.134, // $0.134 per 1K/2K image
     outputImage4K: 0.24, // $0.24 per 4K image
   },
+  'gemini-3.1-flash-image-preview': {
+    inputImage: 0.50, // $0.50 per 1M tokens (text/image input)
+    outputText: 3.00, // $3.00 per 1M tokens (text/thinking)
+    outputImage: 0.067, // $0.067 per 1K image
+    outputImage4K: 0.151, // $0.151 per 4K image
+  },
 };
 
 export const USD_TO_INR = 83.5;
@@ -62,10 +68,13 @@ export function calculateCost(usage: UsageCost): { usd: number; inr: number } {
   // Display cost per generation (generation-based billing)
   let displayCostINR = costINR;
   if (usage.operationType === 'image_generation') {
-    // Check if using gemini-3-pro-image model for high quality
+    // Check model for correct billing amount
     if (usage.modelName === 'gemini-3-pro-image-preview') {
       // Show ₹11.65 per generation for Ultra HD quality
       displayCostINR = 11.65;
+    } else if (usage.modelName === 'gemini-3.1-flash-image-preview') {
+      // Show ₹6.54 per generation for Nano Banana 2
+      displayCostINR = 6.54;
     } else {
       // Show ₹3.65 per generation for standard quality
       displayCostINR = 3.65;

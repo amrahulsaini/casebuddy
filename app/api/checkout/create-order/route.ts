@@ -315,6 +315,22 @@ export async function POST(request: NextRequest) {
       // Continue even if payment session creation fails
     }
 
+    if (!paymentSessionId) {
+      try {
+        await caseMainPool.query('DELETE FROM orders WHERE id = ? AND payment_status = ?', [orderId, 'pending']);
+      } catch (cleanupError) {
+        console.error('Failed to cleanup pending order after payment session failure:', cleanupError);
+      }
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Unable to initiate Cashfree payment. Please check Cashfree configuration and try again.',
+        },
+        { status: 502 }
+      );
+    }
+
     return NextResponse.json({ 
       success: true, 
       orderId,

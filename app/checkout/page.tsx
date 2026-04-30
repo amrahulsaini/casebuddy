@@ -434,10 +434,7 @@ function CheckoutContent() {
           };
           document.body.appendChild(script);
         } else {
-          // Fallback if payment session creation failed
-          setTimeout(() => {
-            router.push(`/order-confirmation?orderId=${orderId}`);
-          }, 1500);
+          showToast('error', 'Payment gateway unavailable. Order was not confirmed. Please try again.');
         }
       } else {
         const data = await response.json();

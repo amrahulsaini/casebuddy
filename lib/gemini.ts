@@ -113,13 +113,13 @@ Rules:
 
 export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   doyers: [
-    'PANEL 1 (Pure White Background): Two phones at 3/4 angle. LEFT: Back view - Phone with EXACT case from reference (SAME colors, SAME design, SAME patterns, SAME materials). CRITICAL: Use RESEARCHED camera specs - if specs say 3 cameras + 1 torch = show EXACTLY 3 cameras + 1 torch. COUNT CAREFULLY. Do NOT add extra cameras. RIGHT: Front screen. Clean white studio background.',
+    'PANEL 1 (Pure White Background): Two phones at 3/4 angle. LEFT: Back view - Phone with EXACT case from reference (SAME colors, SAME design, SAME patterns, SAME materials). CRITICAL: Use RESEARCHED camera specs - if specs say 3 cameras + 1 torch = show EXACTLY 3 cameras + 1 torch. COUNT CAREFULLY. Do NOT add extra cameras. CRITICAL NEGATIVE PROMPT: DO NOT include any company name, logo (e.g., SAMSUNG, APPLE), or phone model text anywhere on the case or screen. MUST be completely unbranded. RIGHT: Front screen. Clean white studio background.',
     
-    'PANEL 2 (Pure White Background): Two phones. LEFT: EXACT empty case from reference (preserve ALL colors/patterns). RIGHT: Same case with phone inserted. CRITICAL: Camera count MUST MATCH researched specs EXACTLY. If specs say 2 cameras = show 2. If 3 cameras = show 3. Do NOT guess or add extra. Clean white studio background.',
+    'PANEL 2 (Pure White Background): Two phones. LEFT: EXACT empty case from reference (preserve ALL colors/patterns). RIGHT: Same case with phone inserted. CRITICAL: Camera count MUST MATCH researched specs EXACTLY. If specs say 2 cameras = show 2. If 3 cameras = show 3. Do NOT guess or add extra. CRITICAL NEGATIVE PROMPT: DO NOT include any company name, logo (e.g., SAMSUNG, APPLE), or phone model text anywhere on the case or screen. MUST be completely unbranded. Clean white studio background.',
     
-    'PANEL 3 (Pure White Background): EXACT empty case from reference image twisted in S-curve. Preserve ALL original colors, patterns, materials. NO phone inside. Text "Hybrid Design" at top. DO NOT change case design. Clean white studio background.',
+    'PANEL 3 (Pure White Background): EXACT empty case from reference image twisted in S-curve. Preserve ALL original colors, patterns, materials. NO phone inside. Text "Hybrid Design" at top. DO NOT change case design. CRITICAL NEGATIVE PROMPT: DO NOT include any company name, logo (e.g., SAMSUNG, APPLE), or phone model text anywhere on the case or screen. MUST be completely unbranded. Clean white studio background.',
     
-    'PANEL 4 (Pure White Background): Hand holding phone in EXACT case from reference (preserve ALL colors/patterns). CRITICAL: Camera configuration MUST MATCH researched specs EXACTLY. Count cameras carefully from specs. Phone body visible through transparent parts. Text "Flaunt The Original Look". Clean white studio background.',
+    'PANEL 4 (Pure White Background): Hand holding phone in EXACT case from reference (preserve ALL colors/patterns). CRITICAL: Camera configuration MUST MATCH researched specs EXACTLY. Count cameras carefully from specs. Phone body visible through transparent parts. Text "Flaunt The Original Look". CRITICAL NEGATIVE PROMPT: DO NOT include any company name, logo (e.g., SAMSUNG, APPLE), or phone model text anywhere on the case or screen. MUST be completely unbranded. Clean white studio background.',
   ],
   
   black: [

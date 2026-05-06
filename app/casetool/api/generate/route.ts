@@ -47,15 +47,35 @@ function buildCaseTypePrompt(
   finalPrompt: string,
   angleListText: string
 ): string {
-  
   // Matte case only needs 2 panels (1x2 horizontal layout)
   const gridLayout = caseType === 'matte' ? '2-panel grid (1x2 horizontal layout)' : '4-panel grid (2x2)';
-  
-  const mainPrompt = `${finalPrompt}
 
-Reference image: EXACT case design to use (match colors/patterns exactly)
+  const backgroundGuidance =
+    caseType === 'transparent' || caseType === 'doyers'
+      ? 'Use a soft pearl, light warm-gray, or very subtle neutral gradient studio background so transparent sections remain readable. Do not blow the background out to pure white behind clear sections.'
+      : 'Use a clean premium light-neutral studio background with enough contrast to define the product. Avoid harsh overexposed white that washes out edges or openings.';
 
-Create ${gridLayout}:
+  const mainPrompt = `Create a premium ${gridLayout} ecommerce collage for "${phoneModel}" using the uploaded reference image as the non-negotiable case template.
+
+MASTER CASE ANALYSIS:
+${finalPrompt}
+
+GLOBAL HARD CONSTRAINTS:
+- Preserve the case geometry from the reference image exactly: outer silhouette, camera island placement, lens opening sizes, corner radius, button cutouts, side lip thickness, and material finish.
+- Copy the case colors, transparency, tint, artwork, and surface texture exactly from the reference image. Do not reinterpret, simplify, recolor, or redesign anything.
+- Use one identical phone-and-case asset consistently across all panels. Only the viewing angle, crop, or hand pose may change.
+- Keep the same authentic factory phone finish in every panel.
+- If the case has transparent, frosted, or open sections, the real phone body must remain visible underneath in its authentic finish. Never replace the visible phone area with flat white, flat black, blank filler, paper inserts, or empty placeholders.
+- Any front-facing phone screen must show realistic front glass, correct bezels and cutouts, and a tasteful unbranded abstract wallpaper or dim lockscreen gradient. Never output a blank white screen or a pure black screen.
+- ${backgroundGuidance}
+- Lighting must stay premium and catalog-clean, but still give enough edge separation so transparent materials remain visible.
+- No logos, no brand names, no phone model text, no watermarks, and no extra invented copy beyond explicitly requested panel text.
+- Keep every panel visually consistent as if photographed in the same product shoot.
+
+REFERENCE IMAGE PRIORITY:
+- If any instruction conflicts with the uploaded reference image, follow the uploaded reference image for case geometry, case color, transparency, and material finish.
+
+Create ${gridLayout} with these exact panels:
 ${angleListText}`;
 
   return mainPrompt;
@@ -158,12 +178,12 @@ export async function POST(request: NextRequest) {
           
           phoneDesc = `Phone Model: ${phoneModel}`;
           caseDesc = 'Using reference image directly without analysis';
-          finalPrompt = `System Prompt: You are creating a 4-grid (2x2) product photography layout for a phone case.
+          finalPrompt = `System Prompt: You are creating a 2-panel product photography layout for a phone case.
 
 Phone Model: ${phoneModel}
 Reference Image: The uploaded image shows the EXACT phone case design to use.
 
-Task: Create a 2x2 grid image with 4 panels showing different views of this case with the phone model.
+Task: Create a 1x2 grid image with 2 panels showing different views of this case without changing its original color or finish.
 
 IMPORTANT: DO NOT RECREATE OR REDESIGN THE CASE. Use the EXACT case from the reference image (same colors, materials, transparency, design).`;
 
@@ -220,13 +240,13 @@ IMPORTANT: DO NOT RECREATE OR REDESIGN THE CASE. Use the EXACT case from the ref
 
           // Log camera specs to console for debugging
           if (cameraSpecs) {
-            console.log('\n🔍 RESEARCHED CAMERA SPECS FOR:', phoneModel);
-            console.log('📸 Camera Count:', cameraSpecs.rear_camera_count);
-            console.log('🔦 Torch Light:', cameraSpecs.has_torch_light ? 'Yes' : 'No');
-            console.log('📐 Arrangement:', cameraSpecs.camera_arrangement);
-            console.log('🔲 Island Shape:', cameraSpecs.camera_island_shape);
-            console.log('📍 Position:', cameraSpecs.camera_module_position);
-            console.log('🎯 Lens Sizes:', cameraSpecs.lens_sizes);
+            console.log('\nRESEARCHED CAMERA SPECS FOR:', phoneModel);
+            console.log('Camera Count:', cameraSpecs.rear_camera_count);
+            console.log('Torch Light:', cameraSpecs.has_torch_light ? 'Yes' : 'No');
+            console.log('Arrangement:', cameraSpecs.camera_arrangement);
+            console.log('Island Shape:', cameraSpecs.camera_island_shape);
+            console.log('Position:', cameraSpecs.camera_module_position);
+            console.log('Lens Sizes:', cameraSpecs.lens_sizes);
             console.log('\n');
           }
 
@@ -237,7 +257,7 @@ IMPORTANT: DO NOT RECREATE OR REDESIGN THE CASE. Use the EXACT case from the ref
               operationType: 'text_analysis',
               inputImages: 1,
               outputImages: 0,
-              outputTokens: rawText.length / 4, // Rough estimate: 1 token ≈ 4 chars
+              outputTokens: rawText.length / 4, // Rough estimate: 1 token ~= 4 chars
             });
           }
 

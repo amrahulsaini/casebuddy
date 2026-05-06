@@ -39,30 +39,52 @@ export async function callGemini(
 }
 
 export function buildAnalysisPrompt(phoneModel: string): string {
-  return `You are creating product photos for a phone case seller.
+  return `You are preparing a master prompt for premium ecommerce phone-case mockups.
 
-SITUATION: The seller uploaded a photo of their ACTUAL PHYSICAL CASE they want to sell. They want to show what this case looks like when "${phoneModel}" phone is inserted into it.
+Context:
+- The uploaded image is the seller's real physical case reference.
+- Final images must show "${phoneModel}" fitted into this exact case.
+- Main failure to avoid: the visible phone area turning into flat white or flat black.
+- Main failure to avoid: a blank white front screen.
 
-STEP 1: Research "${phoneModel}" phone specs
-- Camera count (2, 3, 4, 5?)
-- Torch light? (yes/no)
-- Camera arrangement (vertical, grid, etc.)
-- Camera position (top-left, center, etc.)
+STEP 1: Determine "${phoneModel}" hardware and authentic appearance
+- Rear camera count
+- Torch / flash presence
+- Camera arrangement
+- Camera module position
+- Front camera style (punch-hole, notch, bezel)
+- One realistic factory body finish / hero color strongly associated with this model
+- If multiple official colors exist, choose one premium realistic factory finish and keep it consistent
+- Do not default to plain white or plain black unless that is genuinely the most recognizable factory finish
 
-STEP 2: Analyze the ACTUAL case in the uploaded image - BE VERY SPECIFIC
-- Frame color: What is the EXACT color of the frame/edges? (grey, olive, tan, beige, black, white, etc.) - BE PRECISE
-- Center panel: Is it transparent/clear? What transparency level?
-- Material finish: Matte? Glossy? Textured?
-- Camera cutout: Exact shape, color, and position
-- Any patterns, textures, or special features
+STEP 2: Analyze the uploaded case reference with precision
+- Exact frame / bumper color
+- Exact back panel color or transparency
+- Transparency level, tint, frost, smokiness, or gloss
+- Material finish and surface texture
+- Camera cutout shape, outline color, and placement
+- Side lip thickness, corner shape, and cutouts
+- Whether the phone body should be clearly visible through transparent or open sections
+- Any details needed so the clear area does not disappear into a bright background
 
-🚨 CRITICAL: Your case_description will be used to recreate this case. Be extremely detailed about colors, especially frame color.
+CRITICAL:
+- The case description will be used to recreate this product. Be exact about color, transparency, and finish.
+- The visible phone body must stay realistic and must not be replaced with white fill, black fill, or an empty placeholder.
 
-STEP 3: Create generation prompt
-- Start with camera count for ${phoneModel}
-- Then describe EXACT case appearance from image (specific colors, transparency, etc.)
+STEP 3: Create the generation prompt
+Hard requirements for final_generation_prompt:
+- State the exact camera count and camera layout for ${phoneModel}
+- State the chosen authentic factory phone finish / body color and require it consistently in every panel
+- State that any transparent or open case area must reveal the actual phone body beneath it
+- Explicitly forbid flat white, flat black, blank filler, or paper-like insert areas inside the case
+- State that any front-facing phone screen must show realistic front glass with a tasteful neutral abstract wallpaper or lockscreen gradient
+- Explicitly forbid a blank white screen and a solid black screen
+- State that the case colors, transparency, texture, and geometry must match the uploaded reference image exactly
+- State that all panels must reuse one identical phone-and-case asset, changing only angle, crop, or hand pose
+- State that backgrounds should be soft light neutral studio backgrounds that keep transparent materials readable
+- Forbid logos, brand names, watermarks, and phone model text anywhere on the case or screen
 
-Return JSON:
+Return strict JSON:
 
 {
   "phone_model_camera_specs": {
@@ -72,14 +94,17 @@ Return JSON:
     "camera_arrangement": "vertical",
     "camera_island_shape": "rectangular",
     "camera_module_position": "top-left",
+    "front_camera_style": "center punch-hole",
     "lens_sizes": "main + ultrawide + macro"
   },
-  "phone_model_description": "${phoneModel} has 2 vertical cameras at top-left with torch",
-  "case_description": "DETAILED description: Frame color is [exact color like grey/olive/tan], center is [transparent/opaque/pattern], material is [matte/glossy], etc.",
-  "final_generation_prompt": "⚠️ ${phoneModel} CAMERA COUNT ⚠️\\n2 CAMERAS ONLY\\n1 TORCH\\nTOTAL: 3 circles\\nVertical, top-left\\n\\n🎨 CASE FROM REFERENCE IMAGE 🎨\\nFrame: [exact color]\\nCenter: [transparent/opaque]\\nMaterial: [matte/glossy]\\n\\n⚠️ USE REFERENCE IMAGE AS VISUAL TEMPLATE - COPY EXACT COLORS ⚠️"
+  "phone_model_description": "${phoneModel} has 3 rear cameras in a top-left rectangular module with flash.",
+  "phone_finish_description": "Chosen authentic factory finish: graphite gray satin aluminum with matching dark glass back.",
+  "screen_treatment": "Front display uses realistic dark glass with a subtle premium abstract gradient wallpaper, not plain white or solid black.",
+  "case_description": "Detailed case description with exact frame color, transparent panel behavior, material finish, and camera cutout geometry.",
+  "final_generation_prompt": "Exact prompt text that combines the phone specs, phone finish, case appearance, screen treatment, and hard constraints above."
 }
 
-Make case description VERY detailed with specific colors.`;
+Make case_description very detailed and color-accurate.`;
 }
 
 export function buildBoundingBoxPrompt(): string {
@@ -113,43 +138,42 @@ Rules:
 
 export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   doyers: [
-    'PANEL 1 (Pure White Background): Two phones at 3/4 angle. LEFT: Back view - Phone with EXACT case from reference (SAME colors, SAME design, SAME patterns, SAME materials). CRITICAL: Use RESEARCHED camera specs - if specs say 3 cameras + 1 torch = show EXACTLY 3 cameras + 1 torch. COUNT CAREFULLY. Do NOT add extra cameras. CRITICAL NEGATIVE PROMPT: DO NOT include any company name, logo (e.g., SAMSUNG, APPLE), or phone model text anywhere on the case or screen. MUST be completely unbranded. RIGHT: Front screen. Clean white studio background.',
-    
-    'PANEL 2 (Pure White Background): Two phones. LEFT: EXACT empty case from reference (preserve ALL colors/patterns). RIGHT: Same case with phone inserted. CRITICAL: Camera count MUST MATCH researched specs EXACTLY. If specs say 2 cameras = show 2. If 3 cameras = show 3. Do NOT guess or add extra. CRITICAL NEGATIVE PROMPT: DO NOT include any company name, logo (e.g., SAMSUNG, APPLE), or phone model text anywhere on the case or screen. MUST be completely unbranded. Clean white studio background.',
-    
-    'PANEL 3 (Pure White Background): Back view of phone inserted into EXACT case from reference image. Preserve ALL original colors, patterns, materials. Phone model is inside the case and only back view is shown. Camera configuration MUST MATCH researched specs EXACTLY. DO NOT change case design. CRITICAL NEGATIVE PROMPT: DO NOT include any company name, logo (e.g., SAMSUNG, APPLE), or phone model text anywhere on the case or screen. MUST be completely unbranded. Clean white studio background.',
-    
-    'PANEL 4 (Pure White Background): Hand holding phone in EXACT case from reference (preserve ALL colors/patterns). CRITICAL: Camera configuration MUST MATCH researched specs EXACTLY. Count cameras carefully from specs. Phone body visible through transparent parts. Text "Flaunt The Original Look". CRITICAL NEGATIVE PROMPT: DO NOT include any company name, logo (e.g., SAMSUNG, APPLE), or phone model text anywhere on the case or screen. MUST be completely unbranded. Clean white studio background.',
+    'PANEL 1 (Soft pearl studio background, not harsh pure white): Two phones at 3/4 angle. LEFT: back view with the exact doyers case from reference fitted on the phone. The transparent center must reveal the authentic phone back finish beneath it. RIGHT: front view of the same phone with realistic front glass, correct punch-hole or notch, and a tasteful unbranded abstract wallpaper. Never show a blank white or solid black screen. Camera count and flash must match researched specs exactly. No logos or phone model text anywhere.',
+
+    'PANEL 2 (Soft light neutral background): Two items. LEFT: exact empty case from reference, positioned so the clear center remains readable and does not disappear into the backdrop. Preserve all original colors, tint, and material finish. RIGHT: same case with phone inserted, showing the same authentic phone body color through the transparent area. Camera count must match researched specs exactly. No logos or phone model text anywhere.',
+
+    'PANEL 3 (Clean light neutral studio background): Straight back view of the phone inserted into the exact case from reference. Preserve all original case colors, tint, transparency, and materials. The phone body visible through the clear center must keep the same authentic factory finish as panel 1, never generic white or black. Camera configuration must match researched specs exactly. No logos or phone model text anywhere.',
+
+    'PANEL 4 (Premium soft neutral studio background): Hand holding the phone in the exact case from reference. Preserve all case colors, patterns, transparency, and materials. The phone body must remain visible through transparent parts in the same authentic factory finish used in every other panel. Camera configuration must match researched specs exactly. Add only the text "Flaunt The Original Look". No other logos or phone model text.',
   ],
-  
+
   black: [
-    'PANEL 1 (Pure White Background): Two phones at 3/4 angle. LEFT: Front screen. RIGHT: EXACT case from reference (SAME colors, SAME design, SAME finish) with phone model inserted. CAMERAS: EXACT configuration from specs. DO NOT change case colors or appearance. Clean white studio background.',
-    
-    'PANEL 2 (Pure White Background): Phone back at 3/4 angle in EXACT case from reference. Preserve ALL original colors, patterns, finish. CAMERAS: EXACT count and position from specs. DO NOT alter case design. Clean white studio background.',
-    
-    'PANEL 3 (Pure White Background): EXACT empty case from reference twisted in S-curve. Preserve ALL original colors, patterns, materials. NO phone inside. Text "Hybrid Design" at top. DO NOT modify case appearance. Clean white studio background.',
-    
-    'PANEL 4 (Pure White Background): EXACT case from reference showing interior lining. Preserve case colors and materials. Text "Premium Velvet Interior". NO phone visible. DO NOT change case design. Clean white studio background.',
+    'PANEL 1 (Clean light neutral studio background): Two phones at 3/4 angle. LEFT: front view with realistic front glass, correct bezel and punch-hole or notch, and a tasteful unbranded abstract wallpaper. Never show a blank white or solid black screen. RIGHT: exact case from reference with phone inserted. Cameras must match specs exactly. Do not change case colors or appearance.',
+
+    'PANEL 2 (Clean light neutral studio background): Phone back at 3/4 angle in the exact case from reference. Preserve all original colors, patterns, and finish. Keep the same authentic factory phone finish across the visible phone body. Cameras must match specs exactly. Do not alter case design.',
+
+    'PANEL 3 (Soft neutral background): Exact empty case from reference twisted in an S-curve. Preserve all original colors, patterns, and materials. No phone inside. Keep enough backdrop contrast so openings and edges remain clearly visible. Add text "Hybrid Design" at top. Do not modify case appearance.',
+
+    'PANEL 4 (Soft neutral background): Exact case from reference showing interior lining. Preserve case colors and materials. Add text "Premium Velvet Interior". No phone visible. Do not change case design.',
   ],
-  
+
   transparent: [
-    'PANEL 1 (Pure White Background): Two phones at 3/4 angle. LEFT: Front screen. RIGHT: EXACT transparent case from reference (SAME transparency level, SAME tint, SAME materials) with phone model inserted showing phone body through case. CAMERAS: EXACT configuration from specs. DO NOT change case appearance. Clean white studio background.',
-    
-    'PANEL 2 (Pure White Background): Phone back at 3/4 angle in EXACT transparent case from reference. Preserve case transparency and finish. Phone design visible through case. CAMERAS: EXACT count and position from specs. DO NOT alter case. Clean white studio background.',
-    
-    'PANEL 3 (Pure White Background): EXACT empty transparent case from reference twisted in S-curve. Preserve transparency, tint, all original characteristics. NO phone inside. Text "Hybrid Design" at top. DO NOT modify case appearance. Clean white studio background.',
-    
-    'PANEL 4 (Pure White Background): Hand holding phone in EXACT transparent case from reference. Preserve case appearance. Phone body visible through case. CAMERAS: EXACT configuration from specs. Text "Flaunt The Original Look". DO NOT change case design. Clean white studio background.',
+    'PANEL 1 (Soft pearl studio background, not harsh pure white): Two phones at 3/4 angle. LEFT: front view with realistic glass, correct bezel and punch-hole or notch, and a tasteful unbranded abstract wallpaper. Never blank white or solid black. RIGHT: exact transparent case from reference with phone inserted, clearly showing the authentic phone body finish through the case. Cameras must match specs exactly. Do not change case appearance.',
+
+    'PANEL 2 (Soft light neutral background): Phone back at 3/4 angle in the exact transparent case from reference. Preserve case transparency, tint, and finish. The phone body visible through the case must keep the same authentic factory finish and must never become plain white or plain black. Cameras must match specs exactly. Do not alter the case.',
+
+    'PANEL 3 (Soft pearl or light gray background): Exact empty transparent case from reference twisted in an S-curve. Preserve transparency, tint, and all original characteristics. No phone inside. Keep the backdrop soft but visible enough that the transparent case does not disappear. Add text "Hybrid Design" at top. Do not modify case appearance.',
+
+    'PANEL 4 (Premium soft neutral studio background): Hand holding phone in the exact transparent case from reference. Preserve case appearance. The phone body must remain visible through the case in the same authentic factory finish used in the other panels. Cameras must match specs exactly. Add text "Flaunt The Original Look". Do not change case design.',
   ],
-  
+
   matte: [
-    'PANEL 1 (Pure White Background): CRITICAL COLOR MATCH: Use EXACT colors, EXACT materials, EXACT design from reference image - pixel-perfect color reproduction. DO NOT alter colors even slightly. Same phone case from reference image at tilted 45-degree angle. NO phone inside. Case positioned on white cylindrical pedestal. Pedestal is a flat white shape with no physical interaction. Ultra high-key overexposed studio lighting. Even lighting from all directions. No highlights, no reflections, no shading. Pure #FFFFFF infinite background. No gradients, no tonal variation. Ecommerce catalog cutout style. Photoshop background-removed packshot. NEGATIVE CONSTRAINTS: no shadows of any kind, no contact shadow, no grounding shadow, no soft shadow, no pedestal shadow, no ambient occlusion, no depth cues, no realism grounding, no vignette, no lighting falloff, no gradient under object, no base shadow, no color changes, no color shifts, no color adjustments. If any shadow appears or colors change, image is incorrect.',
-    
-    'PANEL 2 (Pure White Background): CRITICAL COLOR MATCH: Use EXACT colors, EXACT materials, EXACT design from reference image - pixel-perfect color reproduction. DO NOT alter colors even slightly. Same phone case from reference image - back view showing camera cutouts. NO phone inside. Case positioned on white cylindrical pedestal. Pedestal is a flat white shape with no physical interaction. Ultra high-key overexposed studio lighting. Even lighting from all directions. No highlights, no reflections, no shading. Pure #FFFFFF infinite background. No gradients, no tonal variation. Ecommerce catalog cutout style. Photoshop background-removed packshot. NEGATIVE CONSTRAINTS: no shadows of any kind, no contact shadow, no grounding shadow, no soft shadow, no pedestal shadow, no ambient occlusion, no depth cues, no realism grounding, no vignette, no lighting falloff, no gradient under object, no base shadow, no color changes, no color shifts, no color adjustments. If any shadow appears or colors change, image is incorrect.',
+    'PANEL 1 (Pure White Background): CRITICAL COLOR MATCH: Use exact colors, exact materials, and exact design from the reference image with pixel-accurate color reproduction. Do not alter colors even slightly. Same phone case from reference image at tilted 45-degree angle. No phone inside. Case positioned on a white cylindrical pedestal. Pedestal is a flat white shape with no physical interaction. Ultra high-key overexposed studio lighting. Even lighting from all directions. No highlights, no reflections, no shading. Pure #FFFFFF infinite background. No gradients, no tonal variation. Ecommerce catalog cutout style. Photoshop background-removed packshot. Negative constraints: no shadows of any kind, no contact shadow, no grounding shadow, no soft shadow, no pedestal shadow, no ambient occlusion, no depth cues, no realism grounding, no vignette, no lighting falloff, no gradient under object, no base shadow, no color changes, no color shifts, no color adjustments. If any shadow appears or colors change, image is incorrect.',
+
+    'PANEL 2 (Pure White Background): CRITICAL COLOR MATCH: Use exact colors, exact materials, and exact design from the reference image with pixel-accurate color reproduction. Do not alter colors even slightly. Same phone case from reference image, back view showing camera cutouts. No phone inside. Case positioned on a white cylindrical pedestal. Pedestal is a flat white shape with no physical interaction. Ultra high-key overexposed studio lighting. Even lighting from all directions. No highlights, no reflections, no shading. Pure #FFFFFF infinite background. No gradients, no tonal variation. Ecommerce catalog cutout style. Photoshop background-removed packshot. Negative constraints: no shadows of any kind, no contact shadow, no grounding shadow, no soft shadow, no pedestal shadow, no ambient occlusion, no depth cues, no realism grounding, no vignette, no lighting falloff, no gradient under object, no base shadow, no color changes, no color shifts, no color adjustments. If any shadow appears or colors change, image is incorrect.',
   ],
 };
 
 export function getAngleDescriptions(caseType: string): string[] {
   return ANGLE_DESCRIPTIONS[caseType] || ANGLE_DESCRIPTIONS.transparent;
 }
-

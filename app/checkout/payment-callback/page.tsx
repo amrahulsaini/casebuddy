@@ -18,65 +18,32 @@ function PaymentCallbackContent() {
 
   useEffect(() => {
     const orderId = searchParams.get('order_id');
-    
+    const paymentStatus = searchParams.get('status'); // 'success' or 'failed' set by Razorpay handler
+
     if (!orderId) {
       setStatus('failed');
       setMessage('Invalid payment callback. Order ID missing.');
       return;
     }
 
-    // ALWAYS verify payment with Cashfree API - don't trust URL parameters
-    console.log('Payment callback received for order:', orderId);
-    setStatus('loading');
-    setMessage('Verifying payment with Cashfree...');
-    
-    // Verify payment status via API
-    sendPaymentConfirmation(orderId);
-    fetchOrderDetails(orderId);
-  }, [searchParams]);
-
-  const sendPaymentConfirmation = async (orderId: string) => {
-    try {
-      console.log('Calling payment confirmation API for order:', orderId);
-      const response = await fetch('/api/checkout/payment-confirmation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId })
-      });
-      
-      const data = await response.json();
-      console.log('Payment confirmation response:', data);
-      
-      if (!response.ok) {
-        console.error('Payment confirmation failed:', data);
-        setStatus('failed');
-        setMessage(`Payment verification failed: ${data.error || 'Unknown error'}`);
-        setErrorDetails(JSON.stringify(data, null, 2));
-      } else if (data.success) {
-        // Payment was successful
-        setStatus('success');
-        setMessage(data.message || 'Payment successful! Your order has been confirmed.');
-
-        // Clear cart after successful payment
-        try {
-          clearCart();
-          localStorage.removeItem('casebuddy_cart');
-        } catch {
-          // ignore
-        }
-      } else {
-        // Payment not completed (pending or failed)
-        setStatus('failed');
-        setMessage(data.message || 'Payment not completed');
-        setErrorDetails(`Cashfree Status: ${data.paymentStatus || 'Unknown'}`);
+    if (paymentStatus === 'success') {
+      setStatus('success');
+      setMessage('Payment successful! Your order has been confirmed.');
+      try {
+        clearCart();
+        localStorage.removeItem('casebuddy_cart');
+      } catch {
+        // ignore
       }
-    } catch (error) {
-      console.error('Error sending payment confirmation:', error);
+      fetchOrderDetails(orderId);
+    } else if (paymentStatus === 'failed') {
       setStatus('failed');
-      setMessage(`Error verifying payment: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      setErrorDetails(error instanceof Error ? error.stack || '' : '');
+      setMessage('Payment was not completed. Please try again.');
+    } else {
+      setStatus('failed');
+      setMessage('Invalid payment callback.');
     }
-  };
+  }, [searchParams]);
 
   const fetchOrderDetails = async (orderId: string) => {
     try {
@@ -97,7 +64,7 @@ function PaymentCallbackContent() {
           <div className={styles.statusSection}>
             <Loader2 size={64} className={`${styles.icon} ${styles.loading}`} />
             <h1 className={styles.title}>Processing Payment...</h1>
-            <p className={styles.message}>Please wait while we verify your payment.</p>
+            <p className={styles.message}>Please wait while we confirm your payment.</p>
           </div>
         )}
 

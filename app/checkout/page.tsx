@@ -408,29 +408,63 @@ function CheckoutContent() {
       });
 
       if (response.ok) {
-        const { orderId, orderNumber, paymentSessionId } = await response.json();
-        
-        if (paymentSessionId) {
-          showToast('success', 'Order created! Redirecting to payment...');
-          
-          // Load Cashfree SDK and initiate payment
+        const { orderId, razorpayOrderId, amount } = await response.json();
+
+        if (razorpayOrderId && amount) {
+          showToast('success', 'Order created! Opening payment...');
+
+          // Load Razorpay SDK and open checkout modal
           const script = document.createElement('script');
-          script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
+          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
           script.onload = () => {
-            // @ts-ignore
-            const cashfree = Cashfree({
-              mode: process.env.NEXT_PUBLIC_CASHFREE_ENV === 'PROD' ? 'production' : 'sandbox'
-            });
-            
-            const checkoutOptions = {
-              paymentSessionId: paymentSessionId,
-              returnUrl: `https://casebuddy.co.in/checkout/payment-callback?order_id=${orderId}`
+            const options = {
+              key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+              amount: amount, // already in paise from server
+              currency: 'INR',
+              name: 'CaseBuddy',
+              description: 'Custom Phone Case',
+              order_id: razorpayOrderId,
+              prefill: {
+                name: formData.fullName,
+                email: formData.email,
+                contact: formData.mobile
+              },
+              theme: { color: '#4CAF50' },
+              modal: {
+                ondismiss: () => {
+                  setProcessing(false);
+                }
+              },
+              handler: async (razorpayResponse: any) => {
+                try {
+                  const confirmRes = await fetch('/api/checkout/payment-confirmation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      orderId,
+                      razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+                      razorpay_order_id: razorpayResponse.razorpay_order_id,
+                      razorpay_signature: razorpayResponse.razorpay_signature
+                    })
+                  });
+
+                  if (confirmRes.ok) {
+                    router.push(`/checkout/payment-callback?order_id=${orderId}&status=success`);
+                  } else {
+                    router.push(`/checkout/payment-callback?order_id=${orderId}&status=failed`);
+                  }
+                } catch {
+                  router.push(`/checkout/payment-callback?order_id=${orderId}&status=failed`);
+                }
+              }
             };
-            
+
             // @ts-ignore
-            cashfree.checkout(checkoutOptions).then(() => {
-              console.log('Payment initiated');
+            const rzp = new Razorpay(options);
+            rzp.on('payment.failed', () => {
+              router.push(`/checkout/payment-callback?order_id=${orderId}&status=failed`);
             });
+            rzp.open();
           };
           document.body.appendChild(script);
         } else {
@@ -804,7 +838,7 @@ function CheckoutContent() {
 
           <div className={styles.secureNote}>
             <Lock size={14} />
-            Secure checkout powered by Cashfree
+            Secure checkout powered by Razorpay
           </div>
         </div>
       </div>

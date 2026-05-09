@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import pool from '@/lib/db-main';
 import { RowDataPacket } from 'mysql2';
 import nodemailer from 'nodemailer';
+import crypto from 'crypto';
 
 interface Order extends RowDataPacket {
   id: number;
@@ -127,133 +128,86 @@ function parseEmailItemsFromOrder(order: Order): { items: EmailItem[]; singleCus
 
 export async function POST(request: Request) {
   try {
-    const { orderId } = await request.json();
+    const { orderId, razorpay_payment_id, razorpay_order_id, razorpay_signature } = await request.json();
 
     if (!orderId) {
       return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
     }
 
+    if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+      return NextResponse.json({ error: 'Razorpay payment details are required' }, { status: 400 });
+    }
+
+    const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
+    if (!RAZORPAY_KEY_SECRET) {
+      console.error('RAZORPAY_KEY_SECRET not configured');
+      return NextResponse.json({ error: 'Payment gateway not configured' }, { status: 500 });
+    }
+
+    // Verify Razorpay payment signature
+    // Razorpay signs: HMAC-SHA256(razorpay_order_id + '|' + razorpay_payment_id, key_secret) → hex
+    const expectedSignature = crypto
+      .createHmac('sha256', RAZORPAY_KEY_SECRET)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest('hex');
+
+    if (expectedSignature !== razorpay_signature) {
+      console.error('Razorpay signature mismatch for order:', orderId);
+      return NextResponse.json({ error: 'Invalid payment signature' }, { status: 400 });
+    }
+
+    console.log('Razorpay signature verified for order:', orderId);
+
     const connection = await pool.getConnection();
 
     try {
-      // First, get the Cashfree order ID from our database
+      // Fetch order to ensure it exists and is still pending
       const [orderRows] = await connection.execute<Order[]>(
-        'SELECT payment_id FROM orders WHERE id = ?',
+        'SELECT * FROM orders WHERE id = ?',
         [orderId]
       );
-
-      console.log('Order query result:', orderRows);
 
       if (orderRows.length === 0) {
         console.error('Order not found in database:', orderId);
         throw new Error('Order not found');
       }
 
-      const cashfreeOrderId = orderRows[0].payment_id;
-      console.log('Cashfree order ID from DB:', cashfreeOrderId);
+      const order = orderRows[0];
 
-      if (!cashfreeOrderId) {
-        console.error('Payment ID not found for order:', orderId);
-        throw new Error('Payment ID not found for this order');
-      }
-
-      // Verify payment with Cashfree API using the correct order ID
-      console.log('Verifying payment with Cashfree for order ID:', cashfreeOrderId);
-      const cashfreeResponse = await fetch(
-        `https://api.cashfree.com/pg/orders/${cashfreeOrderId}`,
-        {
-          method: 'GET',
-          headers: {
-            'x-client-id': process.env.CASHFREE_APP_ID || '',
-            'x-client-secret': process.env.CASHFREE_SECRET_KEY || '',
-            'x-api-version': '2023-08-01'
-          }
-        }
+      // Mark order as paid
+      await connection.execute(
+        `UPDATE orders SET
+          payment_status = ?,
+          order_status = ?,
+          updated_at = NOW()
+        WHERE id = ?`,
+        ['completed', 'processing', orderId]
       );
 
-      const paymentData = await cashfreeResponse.json();
+      console.log(`Order ${orderId} marked as completed after signature verification`);
 
-      console.log('Cashfree payment verification response:', {
-        status: cashfreeResponse.status,
-        data: paymentData
-      });
-
-      // Update order status based on payment verification
-      if (paymentData.order_status === 'PAID') {
-        console.log('Payment verified as PAID, updating order status...');
-        await connection.execute(
-          'UPDATE orders SET payment_status = ?, order_status = ? WHERE id = ?',
-          ['completed', 'processing', orderId]
-        );
-        console.log('Order status updated successfully');
-
-        // Fetch order details
-        const [orderRows] = await connection.execute<Order[]>(
-          'SELECT * FROM orders WHERE id = ?',
-          [orderId]
-        );
-
-        if (orderRows.length === 0) {
-          throw new Error('Order not found');
-        }
-
-        const order = orderRows[0];
-        console.log('Sending confirmation emails for order:', order.order_number);
-
-        // Send emails (order has product info embedded, no separate items table)
-        try {
-          await sendOrderConfirmationEmails(order);
-          console.log('Confirmation emails sent successfully');
-        } catch (emailError) {
-          console.error('Failed to send emails, but payment was successful:', emailError);
-          // Don't fail the whole request if email fails
-        }
-
-        return NextResponse.json({
-          success: true,
-          message: 'Payment confirmed and emails sent'
-        });
-      } else {
-        console.log('Payment not completed, status:', paymentData.order_status);
-        // Payment failed or pending
-        const paymentStatus = paymentData.order_status === 'ACTIVE' ? 'pending' : 'failed';
-        const orderStatus = paymentData.order_status === 'ACTIVE' ? 'pending' : 'cancelled';
-        
-        await connection.execute(
-          'UPDATE orders SET payment_status = ?, order_status = ? WHERE id = ?',
-          [paymentStatus, orderStatus, orderId]
-        );
-        console.log('Order marked as:', paymentStatus);
-
-        // TRANSACTION ROLLBACK: Delete order if payment failed (not just pending)
-        if (paymentData.order_status !== 'ACTIVE') {
-          // Emails disabled (confirmation-only policy)
-
-          console.log('Payment failed, deleting order from database...');
-          await connection.execute(
-            'DELETE FROM orders WHERE id = ?',
-            [orderId]
-          );
-          console.log(`Order ${orderId} deleted due to payment failure`);
-        }
-
-        return NextResponse.json({
-          success: false,
-          message: `Payment not completed. Status: ${paymentData.order_status}`,
-          paymentStatus: paymentData.order_status
-        });
+      // Send confirmation emails
+      try {
+        await sendOrderConfirmationEmails(order);
+        console.log('Confirmation emails sent successfully');
+      } catch (emailError) {
+        console.error('Failed to send emails, but payment was verified:', emailError);
       }
+
+      return NextResponse.json({
+        success: true,
+        message: 'Payment confirmed and emails sent'
+      });
     } finally {
       connection.release();
     }
   } catch (error) {
     console.error('Payment confirmation error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Error details:', errorMessage);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to confirm payment',
-        details: errorMessage 
+        details: errorMessage
       },
       { status: 500 }
     );

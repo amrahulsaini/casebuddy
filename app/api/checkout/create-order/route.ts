@@ -5,13 +5,9 @@ import crypto from 'crypto';
 import DOMPurify from 'isomorphic-dompurify';
 import validator from 'validator';
 
-// Cashfree Configuration
-const CASHFREE_APP_ID = process.env.CASHFREE_APP_ID;
-const CASHFREE_SECRET_KEY = process.env.CASHFREE_SECRET_KEY;
-const CASHFREE_ENV = process.env.CASHFREE_ENV || 'TEST';
-const CASHFREE_API_URL = CASHFREE_ENV === 'PROD' 
-  ? 'https://api.cashfree.com' 
-  : 'https://sandbox.cashfree.com';
+// Razorpay Configuration
+const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID;
+const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
 
 export async function POST(request: NextRequest) {
   try {
@@ -224,120 +220,85 @@ export async function POST(request: NextRequest) {
     const orderNumber = `CB${String(orderId).padStart(5, '0')}`;
     await caseMainPool.query('UPDATE orders SET order_number = ? WHERE id = ?', [orderNumber, orderId]);
 
-    // Create Cashfree payment session
-    let paymentSessionId = null;
-    let paymentUrl = null;
+    // Create Razorpay order
+    let razorpayOrderId: string | null = null;
+    let amountInPaise: number | null = null;
 
     try {
-      const cashfreeOrderId = `order_${orderId}_${Date.now()}`;
-      
-      const paymentSessionRequest = {
-        order_id: cashfreeOrderId,
-        order_amount: calculatedTotal, // Use server-validated total
-        order_currency: 'INR',
-        customer_details: {
-          customer_id: `cust_${orderId}`,
+      const razorpayPayload = {
+        amount: Math.round(calculatedTotal * 100), // Razorpay requires paise (integer)
+        currency: 'INR',
+        receipt: orderNumber,
+        notes: {
+          internal_order_id: String(orderId),
           customer_email: email,
-          customer_phone: mobile,
           customer_name: sanitizedName
-        },
-        order_meta: {
-          return_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/checkout/payment-callback?order_id=${orderId}`
-        },
-        order_note: notes || `Order for ${storedProductName}`
+        }
       };
 
-      console.log('Creating Cashfree payment session:', {
-        url: `${CASHFREE_API_URL}/pg/orders`,
-        appId: CASHFREE_APP_ID,
-        request: paymentSessionRequest
-      });
+      console.log('Creating Razorpay order:', razorpayPayload);
 
-      const response = await fetch(`${CASHFREE_API_URL}/pg/orders`, {
+      const credentials = Buffer.from(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`).toString('base64');
+      const response = await fetch('https://api.razorpay.com/v1/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-version': '2023-08-01',
-          'x-client-id': CASHFREE_APP_ID!,
-          'x-client-secret': CASHFREE_SECRET_KEY!
+          'Authorization': `Basic ${credentials}`
         },
-        body: JSON.stringify(paymentSessionRequest)
+        body: JSON.stringify(razorpayPayload)
       });
 
       const responseData = await response.json();
-      
-      console.log('Cashfree API Response:', {
+
+      console.log('Razorpay API Response:', {
         status: response.status,
-        statusText: response.statusText,
         data: responseData
       });
-      
+
       if (response.ok) {
-        paymentSessionId = responseData.payment_session_id;
-        
-        // Use the payment_link from response if available, otherwise construct URL
-        if (responseData.payment_link) {
-          paymentUrl = responseData.payment_link;
-        } else {
-          // Construct payment URL using session ID
-          // For both production and sandbox, use the checkout URL format
-          const paymentBaseUrl = CASHFREE_ENV === 'PROD' 
-            ? 'https://payments.cashfree.com/forms' 
-            : 'https://payments-test.cashfree.com/forms';
-          
-          paymentUrl = `${paymentBaseUrl}/${paymentSessionId}`;
-        }
+        razorpayOrderId = responseData.id;
+        amountInPaise = responseData.amount;
 
-        console.log('Payment session created successfully:', {
-          sessionId: paymentSessionId,
-          cashfreeOrderId: cashfreeOrderId,
-          paymentUrl: paymentUrl,
-          environment: CASHFREE_ENV,
-          hasPaymentLink: !!responseData.payment_link
-        });
-
-        // Update order with Cashfree order ID (CRITICAL: Store order ID, not session ID)
+        // Store Razorpay order ID as payment_id
         await caseMainPool.query(
           'UPDATE orders SET payment_id = ?, payment_method = ? WHERE id = ?',
-          [cashfreeOrderId, 'Cashfree', orderId]
+          [razorpayOrderId, 'Razorpay', orderId]
         );
-        
-        console.log(`Order ${orderId} updated with Cashfree order ID: ${cashfreeOrderId}`);
+
+        console.log(`Order ${orderId} updated with Razorpay order ID: ${razorpayOrderId}`);
       } else {
-        console.error('Cashfree API Error:', {
+        console.error('Razorpay API Error:', {
           status: response.status,
-          statusText: response.statusText,
           error: responseData
         });
       }
     } catch (paymentError) {
-      console.error('Error creating Cashfree payment session:', paymentError);
-      // Continue even if payment session creation fails
+      console.error('Error creating Razorpay order:', paymentError);
     }
 
-    if (!paymentSessionId) {
+    if (!razorpayOrderId) {
       try {
         await caseMainPool.query('DELETE FROM orders WHERE id = ? AND payment_status = ?', [orderId, 'pending']);
       } catch (cleanupError) {
-        console.error('Failed to cleanup pending order after payment session failure:', cleanupError);
+        console.error('Failed to cleanup pending order after Razorpay order creation failure:', cleanupError);
       }
 
       return NextResponse.json(
         {
           success: false,
-          error: 'Unable to initiate Cashfree payment. Please check Cashfree configuration and try again.',
+          error: 'Unable to initiate payment. Please check Razorpay configuration and try again.',
         },
         { status: 502 }
       );
     }
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       orderId,
       orderNumber,
-      paymentUrl,
-      paymentSessionId,
-      message: 'Order created successfully. Complete payment to confirm.' 
+      razorpayOrderId,
+      amount: amountInPaise,
+      message: 'Order created successfully. Complete payment to confirm.'
     });
   } catch (error) {
     console.error('Error creating order:', error);

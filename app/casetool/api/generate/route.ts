@@ -69,7 +69,7 @@ GLOBAL HARD CONSTRAINTS:
 - Any front-facing phone screen must show realistic front glass, correct bezels and cutouts, and a tasteful unbranded abstract wallpaper or dim lockscreen gradient. Never output a blank white screen or a pure black screen.
 - ${backgroundGuidance}
 - Lighting must stay premium and catalog-clean, but still give enough edge separation so transparent materials remain visible.
-- No logos, no brand names, no phone model text, no watermarks, and no extra invented copy beyond explicitly requested panel text.
+- ABSOLUTE RULE — NO TEXT ON THE PHONE OR CASE: Do NOT render any phone model name, brand name, manufacturer name, logo, serial number, regulatory text, or any lettering anywhere on the phone body, the case, the screen bezel, or anywhere in the image. This includes text like "Samsung", "iPhone", "Realme", "Redmi", "OnePlus", "Poco", "Vivo", "Oppo", model numbers, or any other identifier. The phone and case surfaces must be completely clean of all text and logos. If the real phone has a brand embossed on the back, do NOT render it — leave that area clean and blank. Violating this rule makes the image unusable.
 - Keep every panel visually consistent as if photographed in the same product shoot.
 
 REFERENCE IMAGE PRIORITY:

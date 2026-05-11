@@ -71,11 +71,17 @@ function CheckoutContent() {
   
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   
-  // Verification states
+  // Email verification states
   const [emailOtp, setEmailOtp] = useState('');
   const [emailVerified, setEmailVerified] = useState(false);
   const [emailOtpSent, setEmailOtpSent] = useState(false);
   const [emailResendTimer, setEmailResendTimer] = useState(0);
+
+  // Mobile OTP verification states
+  const [mobileOtp, setMobileOtp] = useState('');
+  const [mobileVerified, setMobileVerified] = useState(false);
+  const [mobileOtpSent, setMobileOtpSent] = useState(false);
+  const [mobileResendTimer, setMobileResendTimer] = useState(0);
   
   // Processing state
   const [processing, setProcessing] = useState(false);
@@ -92,7 +98,6 @@ function CheckoutContent() {
     setToast({ show: true, type, message, title });
   };
 
-  // Resend timers
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (emailResendTimer > 0) {
@@ -102,6 +107,16 @@ function CheckoutContent() {
     }
     return () => clearInterval(interval);
   }, [emailResendTimer]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (mobileResendTimer > 0) {
+      interval = setInterval(() => {
+        setMobileResendTimer((prev) => prev > 0 ? prev - 1 : 0);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [mobileResendTimer]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -272,11 +287,16 @@ function CheckoutContent() {
       setFormErrors(prev => ({ ...prev, [name]: '' }));
     }
     
-    // Reset verification if email changed
     if (name === 'email' && emailVerified) {
       setEmailVerified(false);
       setEmailOtpSent(false);
       setEmailOtp('');
+    }
+
+    if (name === 'mobile' && mobileVerified) {
+      setMobileVerified(false);
+      setMobileOtpSent(false);
+      setMobileOtp('');
     }
   };
 
@@ -344,6 +364,68 @@ function CheckoutContent() {
     }
   };
 
+  // Send Mobile OTP
+  const sendMobileOtp = async () => {
+    const error = validateField('mobile', formData.mobile);
+    if (error) {
+      setFormErrors(prev => ({ ...prev, mobile: error }));
+      showToast('error', error);
+      return;
+    }
+
+    if (mobileResendTimer > 0) {
+      showToast('warning', `Please wait ${mobileResendTimer} seconds before resending`);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/checkout/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: formData.mobile, type: 'sms' })
+      });
+
+      if (response.ok) {
+        setMobileOtpSent(true);
+        setMobileResendTimer(60);
+        showToast('success', 'OTP sent to your mobile number!');
+      } else {
+        const data = await response.json();
+        showToast('error', data.error || 'Failed to send OTP');
+      }
+    } catch (error) {
+      console.error('Error sending mobile OTP:', error);
+      showToast('error', 'Failed to send OTP. Please try again.');
+    }
+  };
+
+  // Verify Mobile OTP
+  const verifyMobileOtp = async () => {
+    if (!mobileOtp || mobileOtp.length !== 6) {
+      showToast('warning', 'Please enter a valid 6-digit OTP');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/checkout/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: formData.mobile, otp: mobileOtp, type: 'sms' })
+      });
+
+      if (response.ok) {
+        setMobileVerified(true);
+        showToast('success', 'Mobile number verified successfully!');
+      } else {
+        const data = await response.json();
+        showToast('error', data.error || 'Invalid OTP. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error verifying mobile OTP:', error);
+      showToast('error', 'Verification failed. Please try again.');
+    }
+  };
+
 
 
 
@@ -379,7 +461,10 @@ function CheckoutContent() {
       return;
     }
 
-
+    if (!mobileVerified) {
+      showToast('warning', 'Please verify your mobile number');
+      return;
+    }
 
     if (!orderItems || orderItems.length === 0) {
       showToast('error', 'Order details not found');
@@ -398,7 +483,8 @@ function CheckoutContent() {
         subtotal,
         shipping,
         total,
-        emailVerified
+        emailVerified,
+        mobileVerified
       };
 
       const response = await fetch('/api/checkout/create-order', {
@@ -635,16 +721,62 @@ function CheckoutContent() {
                 <label className={styles.label}>
                   Mobile Number <span className={styles.required}>*</span>
                 </label>
-                <input
-                  type="tel"
-                  name="mobile"
-                  className={styles.input}
-                  placeholder="10-digit mobile number"
-                  value={formData.mobile}
-                  onChange={handleInputChange}
-                  maxLength={10}
-                />
+                <div className={styles.inputGroup}>
+                  <input
+                    type="tel"
+                    name="mobile"
+                    className={styles.input}
+                    placeholder="10-digit mobile number"
+                    value={formData.mobile}
+                    onChange={handleInputChange}
+                    maxLength={10}
+                    disabled={mobileVerified}
+                  />
+                  {!mobileVerified && (
+                    <button
+                      type="button"
+                      className={styles.verifyBtn}
+                      onClick={sendMobileOtp}
+                      disabled={!formData.mobile || (mobileOtpSent && mobileResendTimer > 0)}
+                    >
+                      {mobileOtpSent && mobileResendTimer > 0 ? `Resend in ${mobileResendTimer}s` : mobileOtpSent ? 'Resend OTP' : 'Send OTP'}
+                    </button>
+                  )}
+                </div>
                 {formErrors.mobile && <span className={styles.error}>{formErrors.mobile}</span>}
+
+                {mobileOtpSent && !mobileVerified && (
+                  <>
+                    <div className={styles.inputGroup} style={{ marginTop: '10px' }}>
+                      <input
+                        type="text"
+                        className={styles.input}
+                        placeholder="Enter 6-digit OTP"
+                        value={mobileOtp}
+                        onChange={(e) => setMobileOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        maxLength={6}
+                      />
+                      <button
+                        type="button"
+                        className={styles.otpBtn}
+                        onClick={verifyMobileOtp}
+                        disabled={mobileOtp.length !== 6}
+                      >
+                        Verify
+                      </button>
+                    </div>
+                    <p className={styles.otpInfo}>
+                      OTP sent to <span className={styles.highlight}>+91 {formData.mobile}</span>
+                    </p>
+                  </>
+                )}
+
+                {mobileVerified && (
+                  <div className={styles.verified}>
+                    <Check size={18} />
+                    Mobile verified
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -830,7 +962,7 @@ function CheckoutContent() {
           <button
             className={styles.checkoutBtn}
             onClick={handleCheckout}
-            disabled={processing || !emailVerified}
+            disabled={processing || !emailVerified || !mobileVerified}
           >
             {processing ? 'Processing...' : 'Proceed to Payment'}
             {!processing && <Lock size={18} />}

@@ -107,3 +107,39 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.info {
+  padding: 12px;
+  background: #eef6ff;
+  border: 1px solid #c6dafc;
+  border-radius: 6px;
+  color: #2b4a8b;
+  font-size: 13px;
+  text-align: center;
+}
+
+.actionsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.linkButton {
+  background: none;
+  border: none;
+  color: #667eea;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 4px;
+}
+
+.linkButton:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.linkButton:disabled {
+  color: #a0aec0;
+  cursor: not-allowed;
+}

@@ -110,10 +110,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate absolute URL with proper domain detection
-    const forwardedHost = request.headers.get('x-forwarded-host');
-    const forwardedProto = request.headers.get('x-forwarded-proto');
-    const host = forwardedHost || request.headers.get('host') || 'localhost:3000';
+    // Generate absolute URL with proper domain detection.
+    // x-forwarded-* headers may contain comma-separated lists when the request
+    // passes through multiple proxies (e.g. Cloudflare → Nginx). Always take the
+    // first value, otherwise we end up with URLs like "https, https://host/..."
+    // which browsers treat as a relative path and 404.
+    const firstHeaderValue = (v: string | null) => v?.split(',')[0]?.trim() || '';
+    const forwardedHost = firstHeaderValue(request.headers.get('x-forwarded-host'));
+    const forwardedProto = firstHeaderValue(request.headers.get('x-forwarded-proto'));
+    const host = forwardedHost || firstHeaderValue(request.headers.get('host')) || 'localhost:3000';
     const protocol = forwardedProto || (host.includes('localhost') ? 'http' : 'https');
     const origin = `${protocol}://${host}`;
     const absoluteUrl = `${origin}${url}`;

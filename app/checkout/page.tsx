@@ -547,8 +547,14 @@ function CheckoutContent() {
 
             // @ts-ignore
             const rzp = new Razorpay(options);
-            rzp.on('payment.failed', () => {
-              router.push(`/checkout/payment-callback?order_id=${orderId}&status=failed`);
+            // NOTE: do NOT navigate away on payment.failed. With UPI a single
+            // attempt commonly fails (collect expired, wrong PIN) and Razorpay
+            // keeps the modal open so the user can retry. Navigating here would
+            // close the modal and block the retry that actually succeeds.
+            // A genuinely abandoned payment is handled by modal.ondismiss, and
+            // the authoritative status always comes from the server webhook.
+            rzp.on('payment.failed', (resp: any) => {
+              console.error('Razorpay payment attempt failed:', resp?.error?.description);
             });
             rzp.open();
           };

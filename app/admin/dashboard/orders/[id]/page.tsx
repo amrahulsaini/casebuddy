@@ -230,10 +230,12 @@ export default function AdminOrderDetailPage() {
 
   if (!order) return null;
 
+  // Only a genuinely cancelled ORDER disables shipping actions.
+  // Payment status (failed / pending / completed) must NOT block the admin
+  // from creating a shipment — the admin can ship for any payment status.
   const isOrderCancelled = (() => {
     const os = String(order.order_status || '').toLowerCase();
-    const ps = String(order.payment_status || '').toLowerCase();
-    return os.includes('cancel') || ps.includes('cancel') || ps === 'failed';
+    return os.includes('cancel');
   })();
 
   const shipNowTriggered = !!shipment?.shiprocket_awb;

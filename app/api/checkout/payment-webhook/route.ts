@@ -33,7 +33,10 @@ export async function POST(request: NextRequest) {
 
     console.log('Razorpay Webhook event:', event);
 
-    // payment.captured - user paid successfully
+    // payment.captured - user paid successfully.
+    // This is the source of truth for "money received" and must ALWAYS win,
+    // even if a stale payment.failed event (from an earlier UPI attempt)
+    // arrives afterwards. We never downgrade a captured order.
     if (event === 'payment.captured') {
       const payment = payload.payment?.entity;
       if (!payment) {
@@ -53,11 +56,11 @@ export async function POST(request: NextRequest) {
           order_status = ?,
           payment_method = ?,
           updated_at = NOW()
-        WHERE id = ?`,
-        ['completed', 'processing', payment.method || 'Razorpay', orderId]
+        WHERE id = ? AND payment_status <> ?`,
+        ['completed', 'processing', payment.method || 'Razorpay', orderId, 'completed']
       );
 
-      console.log(`Order ${orderId} marked as completed via webhook`);
+      console.log(`Order ${orderId} marked as completed via webhook (payment ${payment.id})`);
     }
 
     // order.paid - fired when full order amount is paid (use as backup)
@@ -87,7 +90,13 @@ export async function POST(request: NextRequest) {
       console.log(`Order ${orderId} marked as completed via order.paid webhook`);
     }
 
-    // payment.failed - payment attempt failed
+    // payment.failed - a single payment ATTEMPT failed.
+    // With UPI, a user typically makes several attempts on the same order
+    // (collect request expired, wrong PIN, retried in another app) before the
+    // one that succeeds. Razorpay fires payment.failed for each failed attempt
+    // and does NOT guarantee these arrive before payment.captured. So we must
+    // only mark the order failed if it is STILL pending — never clobber an
+    // order that has already been captured/completed.
     if (event === 'payment.failed') {
       const payment = payload.payment?.entity;
       if (!payment) {
@@ -101,16 +110,24 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: true });
       }
 
-      await caseMainPool.query(
+      // Mark only the PAYMENT as failed. Do NOT cancel the order: a failed
+      // payment attempt is not the same as a cancelled order, and the admin
+      // must still be able to create a shipment (e.g. when the customer
+      // actually paid but Razorpay reported an earlier attempt as failed).
+      // Order cancellation is a separate, deliberate action.
+      const [result]: any = await caseMainPool.query(
         `UPDATE orders SET
           payment_status = ?,
-          order_status = ?,
           updated_at = NOW()
-        WHERE id = ?`,
-        ['failed', 'cancelled', orderId]
+        WHERE id = ? AND payment_status = ?`,
+        ['failed', orderId, 'pending']
       );
 
-      console.log(`Order ${orderId} marked as failed via webhook`);
+      if (result?.affectedRows > 0) {
+        console.log(`Order ${orderId} marked as failed via webhook`);
+      } else {
+        console.log(`Ignored payment.failed for order ${orderId} (already captured/not pending)`);
+      }
     }
 
     return NextResponse.json({ success: true });

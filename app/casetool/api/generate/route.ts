@@ -55,6 +55,13 @@ function buildCaseTypePrompt(
       ? 'Use a soft pearl, light warm-gray, or very subtle neutral gradient studio background so transparent sections remain readable. Do not blow the background out to pure white behind clear sections.'
       : 'Use a clean premium light-neutral studio background with enough contrast to define the product. Avoid harsh overexposed white that washes out edges or openings.';
 
+  // For clear/transparent-window cases, the clear panel must NOT tint the phone.
+  // It is optically clear glass; the phone's real factory back-panel color shows through.
+  const clearPanelConstraint =
+    caseType === 'doyers' || caseType === 'transparent'
+      ? '\n- CLEAR-PANEL COLOR RULE: Render the transparent area of the case as crystal-clear, colorless, optically transparent glass. It must NOT add any grey shade, silver haze, smoke tint, frost, matte film, or darkening of its own. The phone body seen through it must keep its REAL original factory back-panel color and finish, reproduced faithfully and vividly — never replaced by a flat grey, silver, or smoky shade, and never desaturated or washed out.'
+      : '';
+
   const mainPrompt = `Create a premium ${gridLayout} ecommerce collage for "${phoneModel}" using the uploaded reference image as the non-negotiable case template.
 
 MASTER CASE ANALYSIS:
@@ -67,7 +74,7 @@ GLOBAL HARD CONSTRAINTS:
 - Keep the same authentic factory phone finish in every panel.
 - If the case has transparent, frosted, or open sections, the real phone body must remain visible underneath in its authentic finish. Never replace the visible phone area with flat white, flat black, blank filler, paper inserts, or empty placeholders.
 - Any front-facing phone screen must show realistic front glass, correct bezels and cutouts, and a tasteful unbranded abstract wallpaper or dim lockscreen gradient. Never output a blank white screen or a pure black screen.
-- ${backgroundGuidance}
+- ${backgroundGuidance}${clearPanelConstraint}
 - Lighting must stay premium and catalog-clean, but still give enough edge separation so transparent materials remain visible.
 - ABSOLUTE RULE — NO TEXT ON THE PHONE OR CASE: Do NOT render any phone model name, brand name, manufacturer name, logo, serial number, regulatory text, or any lettering anywhere on the phone body, the case, the screen bezel, or anywhere in the image. This includes text like "Samsung", "iPhone", "Realme", "Redmi", "OnePlus", "Poco", "Vivo", "Oppo", model numbers, or any other identifier. The phone and case surfaces must be completely clean of all text and logos. If the real phone has a brand embossed on the back, do NOT render it — leave that area clean and blank. Violating this rule makes the image unusable.
 - Keep every panel visually consistent as if photographed in the same product shoot.

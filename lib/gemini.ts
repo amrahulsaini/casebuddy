@@ -53,9 +53,10 @@ STEP 1: Determine "${phoneModel}" hardware and authentic appearance
 - Camera arrangement
 - Camera module position
 - Front camera style (punch-hole, notch, bezel)
-- One realistic factory body finish / hero color strongly associated with this model
+- One realistic factory body finish / hero color strongly associated with this model, expressed as a SOLID, OPAQUE back panel of one single definite color
 - If multiple official colors exist, choose one premium realistic factory finish and keep it consistent
-- Do not default to plain white or plain black unless that is genuinely the most recognizable factory finish
+- Prefer the model's recognizable signature color. Do NOT default to plain white, plain black, graphite, gunmetal, smoke grey, or a generic silver/grey gradient — a translucent smoky grey back is the exact wrong-look failure we must avoid, unless that is genuinely the single most recognizable factory finish for this exact model
+- The phone back must read as a real solid painted or glass panel of one true color, never as a see-through translucent smoky gradient
 
 STEP 2: Analyze the uploaded case reference with precision
 - Exact frame / bumper color
@@ -76,6 +77,8 @@ Hard requirements for final_generation_prompt:
 - State the exact camera count and camera layout for ${phoneModel}
 - State the chosen authentic factory phone finish / body color and require it consistently in every panel
 - State that any transparent or open case area must reveal the actual phone body beneath it
+- State that the phone seen through any clear/transparent case area is a SOLID, OPAQUE back panel of one true factory color that fills the entire window, with the clear case acting only as colorless glass on top (it adds no tint of its own)
+- Explicitly forbid rendering the back as a translucent smoke-grey, gunmetal, or silver gradient, or as an empty see-through clear panel showing only reflections — there must be a real solid colored phone back behind the glass
 - Explicitly forbid flat white, flat black, blank filler, or paper-like insert areas inside the case
 - State that any front-facing phone screen must show realistic front glass with a tasteful neutral abstract wallpaper or lockscreen gradient
 - Explicitly forbid a blank white screen and a solid black screen
@@ -98,7 +101,7 @@ Return strict JSON:
     "lens_sizes": "main + ultrawide + macro"
   },
   "phone_model_description": "${phoneModel} has 3 rear cameras in a top-left rectangular module with flash.",
-  "phone_finish_description": "Chosen authentic factory finish: graphite gray satin aluminum with matching dark glass back.",
+  "phone_finish_description": "Chosen authentic factory finish stated as a SOLID OPAQUE back panel in the model's real signature color as actually sold (e.g., a true blue, green, purple, red, gold, or black), never a smoke-grey, gunmetal, or silver see-through gradient.",
   "screen_treatment": "Front display uses realistic dark glass with a subtle premium abstract gradient wallpaper, not plain white or solid black.",
   "case_description": "Detailed case description with exact frame color, transparent panel behavior, material finish, and camera cutout geometry.",
   "final_generation_prompt": "Exact prompt text that combines the phone specs, phone finish, case appearance, screen treatment, and hard constraints above."

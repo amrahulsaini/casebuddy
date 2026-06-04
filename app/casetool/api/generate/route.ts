@@ -72,7 +72,24 @@ function buildCaseTypePrompt(
       ? `\n- BACK PANEL COLOR OVERRIDE (MANDATORY, HIGHEST PRIORITY): Paint the phone's entire back panel as ONE FLAT, FULLY MATTE, UNIFORM block of "${trimmedBackColor}" — the exact same "${trimmedBackColor}" color value in every pixel, edge to edge, like a flat painted color chip lit by soft even diffuse light. ABSOLUTELY NO reflections of any kind on the back: NO diagonal light streak or bright band running across it, NO specular highlight, NO glossy sheen, NO window or softbox reflection, NO glare, NO light-to-dark gradient, NO smoke, NO grey or black shade. The panel never catches or mirrors studio light anywhere; it stays one even matte "${trimmedBackColor}" color with zero bright spots and zero darker spots. The clear case over it is anti-glare and also shows no reflection streak. Use no other color, no pattern, no texture. This overrides any color or finish described anywhere else.`
       : '';
 
-  const mainPrompt = `Create a premium ${gridLayout} ecommerce collage for "${phoneModel}" using the uploaded reference image as the non-negotiable case template.
+  const hasBackColor = !!trimmedBackColor && (caseType === 'doyers' || caseType === 'transparent');
+
+  // Stated FIRST so it wins over any finish the analysis invented (e.g. "graphite/black").
+  const colorLock = hasBackColor
+    ? `TOP-PRIORITY COLOR LOCK — READ THIS FIRST AND OBEY IT ABOVE EVERYTHING BELOW: The phone's back panel must be a solid, uniform, flat "${trimmedBackColor}" in EVERY panel. If anything below — including the MASTER CASE ANALYSIS or any finish description — names a different phone body color or finish (for example black, graphite, gunmetal, titanium, midnight, grey, or silver), treat that as WRONG and use "${trimmedBackColor}" instead. The "${trimmedBackColor}" back panel is mandatory and non-negotiable.\n\n`
+    : '';
+
+  // Don't let "keep the same factory finish" re-assert the analysis color.
+  const phoneFinishLine = hasBackColor
+    ? `Keep the phone back panel a consistent solid "${trimmedBackColor}" in every panel; this color overrides any finish named in the analysis.`
+    : 'Keep the same authentic factory phone finish in every panel.';
+
+  // Put the exact color right inside each panel instruction, where the model renders.
+  const panelText = hasBackColor
+    ? angleListText.replace(/back panel/gi, `back panel (solid uniform ${trimmedBackColor})`)
+    : angleListText;
+
+  const mainPrompt = `${colorLock}Create a premium ${gridLayout} ecommerce collage for "${phoneModel}" using the uploaded reference image as the non-negotiable case template.
 
 MASTER CASE ANALYSIS:
 ${finalPrompt}
@@ -81,7 +98,7 @@ GLOBAL HARD CONSTRAINTS:
 - Preserve the case geometry from the reference image exactly: outer silhouette, camera island placement, lens opening sizes, corner radius, button cutouts, side lip thickness, and material finish.
 - Copy the case colors, transparency, tint, artwork, and surface texture exactly from the reference image. Do not reinterpret, simplify, recolor, or redesign anything.
 - Use one identical phone-and-case asset consistently across all panels. Only the viewing angle, crop, or hand pose may change.
-- Keep the same authentic factory phone finish in every panel.
+- ${phoneFinishLine}
 - If the case has transparent, frosted, or open sections, the real phone body must remain visible underneath in its authentic finish. Never replace the visible phone area with flat white, flat black, blank filler, paper inserts, or empty placeholders.
 - Any front-facing phone screen must show realistic front glass, correct bezels and cutouts, and a tasteful unbranded abstract wallpaper or dim lockscreen gradient. Never output a blank white screen or a pure black screen.
 - ${backgroundGuidance}${clearPanelConstraint}${backColorConstraint}
@@ -93,7 +110,7 @@ REFERENCE IMAGE PRIORITY:
 - If any instruction conflicts with the uploaded reference image, follow the uploaded reference image for case geometry, case color, transparency, and material finish.
 
 Create ${gridLayout} with these exact panels:
-${angleListText}`;
+${panelText}`;
 
   return mainPrompt;
 }

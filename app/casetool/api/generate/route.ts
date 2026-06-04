@@ -45,7 +45,8 @@ function buildCaseTypePrompt(
   caseType: string,
   phoneModel: string,
   finalPrompt: string,
-  angleListText: string
+  angleListText: string,
+  backColor: string = ''
 ): string {
   // Matte case only needs 2 panels (1x2 horizontal layout)
   const gridLayout = caseType === 'matte' ? '2-panel grid (1x2 horizontal layout)' : '4-panel grid (2x2)';
@@ -62,6 +63,15 @@ function buildCaseTypePrompt(
       ? '\n- CLEAR-PANEL COLOR RULE: Render the transparent area of the case as crystal-clear, colorless, optically transparent glass. It must NOT add any grey shade, silver haze, smoke tint, frost, matte film, or darkening of its own. The phone body seen through it must keep its REAL original factory back-panel color and finish, reproduced faithfully and vividly — never replaced by a flat grey, silver, or smoky shade, and never desaturated or washed out.'
       : '';
 
+  // When the seller specifies the exact back-panel color, force a solid even fill of
+  // that color through the clear window. This overrides color guessing and kills the
+  // smoky-grey gradient (a solid fill leaves no room for a shade).
+  const trimmedBackColor = backColor.trim();
+  const backColorConstraint =
+    trimmedBackColor && (caseType === 'doyers' || caseType === 'transparent')
+      ? `\n- BACK PANEL COLOR OVERRIDE (MANDATORY, HIGHEST PRIORITY): The phone's back panel is a SOLID, OPAQUE, EVENLY-FILLED "${trimmedBackColor}" panel. This exact "${trimmedBackColor}" color fills the entire area seen through every clear/transparent part of the case, edge to edge, with a clean smooth realistic phone-glass finish and uniform color. Do NOT use any other color for the back, do NOT darken it toward black, do NOT add a grey/smoke/silver gradient, haze, or shade, and do NOT add any pattern or texture. The clear case is only colorless glass on top; the "${trimmedBackColor}" panel must be fully and uniformly visible. This color instruction overrides any other color described elsewhere.`
+      : '';
+
   const mainPrompt = `Create a premium ${gridLayout} ecommerce collage for "${phoneModel}" using the uploaded reference image as the non-negotiable case template.
 
 MASTER CASE ANALYSIS:
@@ -74,7 +84,7 @@ GLOBAL HARD CONSTRAINTS:
 - Keep the same authentic factory phone finish in every panel.
 - If the case has transparent, frosted, or open sections, the real phone body must remain visible underneath in its authentic finish. Never replace the visible phone area with flat white, flat black, blank filler, paper inserts, or empty placeholders.
 - Any front-facing phone screen must show realistic front glass, correct bezels and cutouts, and a tasteful unbranded abstract wallpaper or dim lockscreen gradient. Never output a blank white screen or a pure black screen.
-- ${backgroundGuidance}${clearPanelConstraint}
+- ${backgroundGuidance}${clearPanelConstraint}${backColorConstraint}
 - Lighting must stay premium and catalog-clean, but still give enough edge separation so transparent materials remain visible.
 - ABSOLUTE RULE — NO TEXT ON THE PHONE OR CASE: Do NOT render any phone model name, brand name, manufacturer name, logo, serial number, regulatory text, or any lettering anywhere on the phone body, the case, the screen bezel, or anywhere in the image. This includes text like "Samsung", "iPhone", "Realme", "Redmi", "OnePlus", "Poco", "Vivo", "Oppo", model numbers, or any other identifier. The phone and case surfaces must be completely clean of all text and logos. If the real phone has a brand embossed on the back, do NOT render it — leave that area clean and blank. Violating this rule makes the image unusable.
 - Keep every panel visually consistent as if photographed in the same product shoot.
@@ -111,6 +121,7 @@ export async function POST(request: NextRequest) {
         const reusePrompt = formData.get('reuse_prompt') as string | null;
         const imageModel = (formData.get('image_model') as string) || 'normal';
         const caseType = (formData.get('case_type') as string) || 'transparent';
+        const backColor = ((formData.get('back_color') as string) || '').trim();
         
         // Select model based on user choice
         const selectedImageModel = imageModel === 'high' ? IMAGE_ENHANCE_MODEL : imageModel === 'nano' ? IMAGE_NANO_MODEL : IMAGE_MODEL;
@@ -301,7 +312,7 @@ IMPORTANT: DO NOT RECREATE OR REDESIGN THE CASE. Use the EXACT case from the ref
           writer.send('status', `Generating matte case mockup image...`, 55);
 
           // Build 2-panel grid prompt
-          const gridPrompt = buildCaseTypePrompt(caseType, phoneModel, finalPrompt, angleListText);
+          const gridPrompt = buildCaseTypePrompt(caseType, phoneModel, finalPrompt, angleListText, backColor);
 
           const imgPayload = {
             contents: [
@@ -388,7 +399,7 @@ IMPORTANT: DO NOT RECREATE OR REDESIGN THE CASE. Use the EXACT case from the ref
           writer.send('status', `Generating mockup image...`, currentProgress);
 
           // Build prompt based on case type
-          const gridPrompt = buildCaseTypePrompt(caseType, phoneModel, finalPrompt, angleListText);
+          const gridPrompt = buildCaseTypePrompt(caseType, phoneModel, finalPrompt, angleListText, backColor);
 
           const imgPayload = {
             contents: [

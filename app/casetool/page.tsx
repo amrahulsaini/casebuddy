@@ -729,6 +729,23 @@ export default function ToolPage() {
               </div>
             </div>
 
+            {(caseType === 'doyers' || caseType === 'transparent') && (
+              <div className={styles.formGroup}>
+                <label className={styles.label}>
+                  Phone Back Color{' '}
+                  <span style={{ fontWeight: 400, opacity: 0.65 }}>
+                    (optional — fills the clear panel with this exact color)
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  name="back_color"
+                  placeholder="e.g. Titanium Black, Coral Green, Midnight Blue — leave blank to auto-detect"
+                  className={styles.input}
+                />
+              </div>
+            )}
+
             <div className={styles.formGroup}>
               <label className={styles.label}>
                 Quality Model

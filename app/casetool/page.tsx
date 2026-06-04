@@ -734,15 +734,20 @@ export default function ToolPage() {
                 <label className={styles.label}>
                   Phone Back Color{' '}
                   <span style={{ fontWeight: 400, opacity: 0.65 }}>
-                    (optional — fills the clear panel with this exact color)
+                    (type the exact color for accurate results)
                   </span>
                 </label>
                 <input
                   type="text"
                   name="back_color"
-                  placeholder="e.g. Titanium Black, Coral Green, Midnight Blue — leave blank to auto-detect"
+                  placeholder="e.g. Titanium Black, Coral Green, Midnight Blue"
                   className={styles.input}
                 />
+                <p style={{ margin: '6px 2px 0', fontSize: '0.8rem', lineHeight: 1.4, color: '#b45309' }}>
+                  ⚠️ Leave this empty and the AI will guess the color — it usually
+                  comes out a dark/black glossy shade. Type the real back color to
+                  fix the shade and get the exact look.
+                </p>
               </div>
             )}
 

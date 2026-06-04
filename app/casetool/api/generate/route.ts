@@ -60,7 +60,7 @@ function buildCaseTypePrompt(
   // It is optically clear glass; the phone's real factory back-panel color shows through.
   const clearPanelConstraint =
     caseType === 'doyers' || caseType === 'transparent'
-      ? '\n- CLEAR-PANEL COLOR RULE: Render the transparent area of the case as crystal-clear, colorless, optically transparent glass. It must NOT add any grey shade, silver haze, smoke tint, frost, matte film, or darkening of its own. The phone body seen through it must keep its REAL original factory back-panel color and finish, reproduced faithfully and vividly — never replaced by a flat grey, silver, or smoky shade, and never desaturated or washed out.'
+      ? '\n- CLEAR-PANEL COLOR RULE: Render the transparent area of the case as crystal-clear, colorless, optically transparent glass. It must NOT add any grey shade, silver haze, smoke tint, frost, matte film, or darkening of its own. The phone body seen through it must keep its REAL original factory back-panel color, lit flatly and evenly so it shows as ONE uniform color across the whole panel — like a flat painted surface, NOT a glossy mirror. Do NOT render the back as shiny reflective glass with a dark reflection or a light-to-dark sheen gradient; that reflective sheen is the exact "shade" failure to avoid. Keep it even, uniform, and true to the real color, never desaturated or darkened toward black.'
       : '';
 
   // When the seller specifies the exact back-panel color, force a solid even fill of
@@ -69,7 +69,7 @@ function buildCaseTypePrompt(
   const trimmedBackColor = backColor.trim();
   const backColorConstraint =
     trimmedBackColor && (caseType === 'doyers' || caseType === 'transparent')
-      ? `\n- BACK PANEL COLOR OVERRIDE (MANDATORY, HIGHEST PRIORITY): The phone's back panel is a SOLID, OPAQUE, EVENLY-FILLED "${trimmedBackColor}" panel. This exact "${trimmedBackColor}" color fills the entire area seen through every clear/transparent part of the case, edge to edge, with a clean smooth realistic phone-glass finish and uniform color. Do NOT use any other color for the back, do NOT darken it toward black, do NOT add a grey/smoke/silver gradient, haze, or shade, and do NOT add any pattern or texture. The clear case is only colorless glass on top; the "${trimmedBackColor}" panel must be fully and uniformly visible. This color instruction overrides any other color described elsewhere.`
+      ? `\n- BACK PANEL COLOR OVERRIDE (MANDATORY, HIGHEST PRIORITY): Paint the phone's entire back panel as ONE FLAT, UNIFORM, EVENLY-LIT block of "${trimmedBackColor}" — the same exact "${trimmedBackColor}" color value in every pixel of the panel, like a solid painted color chip or paint swatch lit flatly from the front. This "${trimmedBackColor}" fill covers the entire area seen through every clear part of the case, edge to edge. Do NOT render the back glossy, mirror-like, or reflective; NO dark reflection, NO bright specular highlight, NO sheen, NO light-to-dark gradient, NO smoke, NO grey or black shade. It must look like a uniform matte-to-satin painted surface of pure "${trimmedBackColor}", never a shiny glass that reflects the studio. Use no other color, no pattern, no texture. This overrides any color or finish described anywhere else.`
       : '';
 
   const mainPrompt = `Create a premium ${gridLayout} ecommerce collage for "${phoneModel}" using the uploaded reference image as the non-negotiable case template.

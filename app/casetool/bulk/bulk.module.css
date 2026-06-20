@@ -189,6 +189,9 @@
   border-radius: 14px;
   overflow: hidden;
   transition: border-color .2s, transform .1s;
+  /* Skip rendering work for off-screen cards so large folders stay smooth */
+  content-visibility: auto;
+  contain-intrinsic-size: 360px;
 }
 .card:hover { border-color: #34405460; }
 .cardRight { border-color: #2c7a5a; box-shadow: 0 0 0 1px #2c7a5a40; }

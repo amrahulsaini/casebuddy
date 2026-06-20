@@ -153,21 +153,73 @@ export default function BulkPage() {
   };
 
   const [savingSrc, setSavingSrc] = useState(false);
+  const [saveProg, setSaveProg] = useState({ done: 0, total: 0 });
+
+  // Downscale a reference to a small JPEG thumbnail for fast, reliable storage.
+  const makeThumb = async (file: File, maxW = 380): Promise<Blob | null> => {
+    try {
+      const bmp = await createImageBitmap(file);
+      const scale = Math.min(1, maxW / bmp.width);
+      const w = Math.max(1, Math.round(bmp.width * scale));
+      const h = Math.max(1, Math.round(bmp.height * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return null;
+      ctx.drawImage(bmp, 0, 0, w, h);
+      bmp.close?.();
+      return await new Promise<Blob | null>(res => canvas.toBlob(b => res(b), 'image/jpeg', 0.72));
+    } catch {
+      return null;
+    }
+  };
+
   const uploadSources = async (files: File[]) => {
     if (files.length === 0) return;
     setSavingSrc(true);
-    try {
-      const CHUNK = 12;
-      for (let i = 0; i < files.length; i += CHUNK) {
-        const fd = new FormData();
-        fd.append('case_type', category);
-        for (const f of files.slice(i, i + CHUNK)) fd.append('files', f);
-        await fetch('/casetool/api/bulk-upload', { method: 'POST', body: fd }).catch(() => {});
+    setSaveProg({ done: 0, total: files.length });
+    const CHUNK = 8;       // files per request
+    const PARALLEL = 3;    // concurrent requests
+    let done = 0;
+
+    // Build chunks of {blob, name}
+    const chunks: { thumb: Blob; name: string }[][] = [];
+    for (let i = 0; i < files.length; i += CHUNK) {
+      const group: { thumb: Blob; name: string }[] = [];
+      for (const f of files.slice(i, i + CHUNK)) {
+        const thumb = await makeThumb(f);
+        group.push({ thumb: thumb || f, name: f.name });
       }
-    } finally {
-      setSavingSrc(false);
+      chunks.push(group);
     }
+
+    const sendChunk = async (group: { thumb: Blob; name: string }[]) => {
+      const fd = new FormData();
+      fd.append('case_type', category);
+      for (const g of group) {
+        fd.append('files', g.thumb, g.name.replace(/\.[a-z0-9]+$/i, '.jpg'));
+        fd.append('orig_names', g.name);
+      }
+      await fetch('/casetool/api/bulk-upload', { method: 'POST', body: fd }).catch(() => {});
+      done += group.length;
+      setSaveProg({ done, total: files.length });
+    };
+
+    // Run chunks with limited concurrency
+    for (let i = 0; i < chunks.length; i += PARALLEL) {
+      await Promise.all(chunks.slice(i, i + PARALLEL).map(sendChunk));
+    }
+    setSavingSrc(false);
   };
+
+  // Warn before leaving while reference images are still being saved.
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (savingSrc) { e.preventDefault(); e.returnValue = ''; }
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [savingSrc]);
 
   const updateItem = useCallback((id: string, patch: Partial<Item>) => {
     setItems(prev => prev.map(it => (it.id === id ? { ...it, ...patch } : it)));
@@ -422,7 +474,7 @@ export default function BulkPage() {
           {/* @ts-expect-error webkitdirectory is non-standard */}
           <input type="file" webkitdirectory="" directory="" multiple accept="image/*" onChange={onFolder} hidden />
         </label>
-        {savingSrc && <span className={styles.savingTag}>saving refs…</span>}
+        {savingSrc && <span className={styles.savingTag}>saving refs… {saveProg.done}/{saveProg.total} (don’t refresh yet)</span>}
 
         <div className={styles.divider} />
 

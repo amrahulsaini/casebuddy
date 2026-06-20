@@ -121,8 +121,9 @@ LAYOUT ENFORCEMENT (CRITICAL — THE GRID MUST BE EXACT):
 - The output is ONE ${gridLayout} and nothing else. ${gridLayout.startsWith('2') ? 'Exactly TWO equal cells in a single horizontal row.' : 'Exactly FOUR equal cells arranged as 2 rows by 2 columns.'}
 - Each cell is the SAME size. Do NOT make any cell larger, do NOT add a big hero/feature panel, and do NOT add a wide left or right banner panel.
 - Render EXACTLY one panel per cell, in order: cell 1 = PANEL 1, cell 2 = PANEL 2, cell 3 = PANEL 3, cell 4 = PANEL 4. Do NOT skip a panel, do NOT repeat any panel, and do NOT add extra panels or cells.
+- IMPORTANT: A panel that describes two phones is still ONE SINGLE cell — both phones belong together inside that one cell as a single photo. Do NOT split the two phones into separate cells. ${gridLayout.startsWith('2') ? 'So cell 1 (left) holds BOTH phones of PANEL 1 together, and cell 2 (right) holds the empty case of PANEL 2. That is all — only two cells total.' : ''}
 - Each text label appears AT MOST ONCE total. Never duplicate "Hybrid Design", "Flaunt The Original Look", or any other label across cells.
-- The total cell count must equal exactly ${gridLayout.startsWith('2') ? 'TWO' : 'FOUR'}. No fifth panel, no inset, no collage-within-a-collage.
+- The total cell count must equal exactly ${gridLayout.startsWith('2') ? 'TWO (count them: 1, 2 — stop)' : 'FOUR'}. No third/fifth panel, no inset, no collage-within-a-collage, no stacking a second row.
 
 Create ${gridLayout} with these exact panels:
 ${panelText}`;

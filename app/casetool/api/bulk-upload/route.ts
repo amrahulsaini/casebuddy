@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
     const form = await request.formData();
     const caseType = (form.get('case_type') as string) || 'transparent';
     const files = form.getAll('files') as File[];
+    const origNames = form.getAll('orig_names') as string[];
     if (!files || files.length === 0) {
       return NextResponse.json({ success: false, error: 'No files' }, { status: 400 });
     }
@@ -41,13 +42,17 @@ export async function POST(request: NextRequest) {
     if (!existsSync(outputDir)) await mkdir(outputDir, { recursive: true });
 
     const saved: { file_name: string; src_url: string }[] = [];
-    for (const file of files) {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const origName = origNames[i] || file.name;
       const buffer = Buffer.from(await file.arrayBuffer());
-      const base = sanitizeBase(file.name);
-      const srcFile = `src_${base}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}${extOf(file.name)}`;
+      const base = sanitizeBase(origName);
+      // Thumbnails arrive as JPEG; fall back to the original extension otherwise.
+      const ext = (file.type && file.type.includes('jpeg')) ? '.jpg' : extOf(file.name);
+      const srcFile = `src_${base}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}${ext}`;
       await writeFile(join(outputDir, srcFile), buffer);
       const srcUrl = `/casetool/api/bulk-file?name=${encodeURIComponent(srcFile)}`;
-      const modelName = base.replace(/_/g, ' ').trim() || file.name;
+      const modelName = base.replace(/_/g, ' ').trim() || origName;
 
       // Insert a pending row if new; only refresh the source if it changed,
       // never touch generated fields or the right/wrong mark.
@@ -56,12 +61,12 @@ export async function POST(request: NextRequest) {
           `INSERT INTO bulk_generations (file_name, model_name, case_type, src_file, src_url, status)
            VALUES (?, ?, ?, ?, ?, 'pending')
            ON DUPLICATE KEY UPDATE src_file = VALUES(src_file), src_url = VALUES(src_url)`,
-          [file.name, modelName, caseType, srcFile, srcUrl]
+          [origName, modelName, caseType, srcFile, srcUrl]
         );
       } catch (e) {
         console.error('bulk-upload upsert failed:', e);
       }
-      saved.push({ file_name: file.name, src_url: srcUrl });
+      saved.push({ file_name: origName, src_url: srcUrl });
     }
 
     return NextResponse.json({ success: true, saved });

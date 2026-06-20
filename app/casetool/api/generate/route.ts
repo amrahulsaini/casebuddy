@@ -96,6 +96,7 @@ ${finalPrompt}
 
 GLOBAL HARD CONSTRAINTS:
 - Preserve the case geometry from the reference image exactly: outer silhouette, camera island placement, lens opening sizes, corner radius, button cutouts, side lip thickness, and material finish.
+- CORNER FIDELITY (CRITICAL): Reproduce the corners EXACTLY as they appear in the reference case — same thinness, same radius, same slim profile. Do NOT thicken, bulge, or round the corners into a chunky raised bumper, rugged armor corner, shock-absorber corner, or reinforced air-cushion corner. If the reference case has slim, low-profile corners, the generated case must keep those exact slim corners. Never add extra corner bulk that is not present in the reference image.
 - Copy the case colors, transparency, tint, artwork, and surface texture exactly from the reference image. Do not reinterpret, simplify, recolor, or redesign anything.
 - Use one identical phone-and-case asset consistently across all panels. Only the viewing angle, crop, or hand pose may change.
 - ${phoneFinishLine}

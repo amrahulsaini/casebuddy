@@ -82,6 +82,8 @@ export default function BulkPage() {
   // ---- Range inputs ----
   const [rangeFrom, setRangeFrom] = useState('');
   const [rangeTo, setRangeTo] = useState('');
+  const [genFrom, setGenFrom] = useState('');
+  const [genTo, setGenTo] = useState('');
 
   // ---- Preview modal ----
   const [preview, setPreview] = useState<Item | null>(null);
@@ -160,6 +162,24 @@ export default function BulkPage() {
     lastIndexRef.current = Math.min(lastIndexRef.current + 1, snapshot.length);
     setRunning(false);
   }, [apiKey, generateOne, items.length]);
+
+  // ---- Generate a specific serial range ----
+  const generateRange = useCallback(async () => {
+    if (!apiKey.trim()) { alert('Enter your Gemini API key in Settings first.'); return; }
+    const from = parseInt(genFrom, 10);
+    const to = parseInt(genTo, 10);
+    if (isNaN(from) || isNaN(to) || from < 1 || to < from) { alert('Enter a valid serial range to generate (e.g. 1 to 50).'); return; }
+    stopRef.current = false;
+    setRunning(true);
+    const snapshot = await new Promise<Item[]>(resolve => setItems(prev => { resolve(prev); return prev; }));
+    const end = Math.min(to, snapshot.length);
+    for (let i = from - 1; i < end; i++) {
+      if (stopRef.current) break;
+      lastIndexRef.current = i;
+      await generateOne(snapshot[i]);
+    }
+    setRunning(false);
+  }, [apiKey, generateOne, genFrom, genTo]);
 
   const stop = () => { stopRef.current = true; setRunning(false); };
 
@@ -343,6 +363,14 @@ export default function BulkPage() {
         <div className={styles.divider} />
 
         <div className={styles.rangeBox}>
+          <span>Generate</span>
+          <input type="number" min={1} value={genFrom} onChange={e => setGenFrom(e.target.value)} placeholder="from" />
+          <span>–</span>
+          <input type="number" min={1} value={genTo} onChange={e => setGenTo(e.target.value)} placeholder="to" />
+          <button className={styles.btnPrimary} disabled={running} onClick={generateRange}><Play size={14} /></button>
+        </div>
+
+        <div className={styles.rangeBox}>
           <span>Download</span>
           <input type="number" min={1} value={rangeFrom} onChange={e => setRangeFrom(e.target.value)} placeholder="from" />
           <span>–</span>
@@ -389,13 +417,13 @@ export default function BulkPage() {
 
               <div className={styles.thumbs}>
                 <div className={styles.thumb} onClick={() => setPreview(item)}>
-                  <img src={item.srcUrl} alt="source" />
+                  <img src={item.srcUrl} alt="source" loading="lazy" decoding="async" />
                   <span className={styles.thumbTag}>ref</span>
                 </div>
                 <div className={`${styles.thumb} ${styles.thumbOut}`} onClick={() => item.genUrl && setPreview(item)}>
                   {item.genUrl ? (
                     <>
-                      <img src={item.genUrl} alt="generated" />
+                      <img src={item.genUrl} alt="generated" loading="lazy" decoding="async" />
                       <span className={styles.thumbTag}>out</span>
                     </>
                   ) : item.status === 'generating' ? (

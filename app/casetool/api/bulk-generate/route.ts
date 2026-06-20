@@ -146,7 +146,9 @@ export async function POST(request: NextRequest) {
     const fileName = `${base}_${Date.now()}.png`;
     const filePath = join(outputDir, fileName);
     await writeFile(filePath, Buffer.from(genB64, 'base64'));
-    const imageUrl = `/output/bulk/${fileName}`;
+    // Serve through an API route so previews work in production too (Next does
+    // not statically serve files written to /public after build).
+    const imageUrl = `/casetool/api/bulk-file?name=${encodeURIComponent(fileName)}`;
 
     return NextResponse.json({ success: true, url: imageUrl, prompt: finalPrompt, fileBase: base });
   } catch (error: any) {

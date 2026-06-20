@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   const caseType = request.nextUrl.searchParams.get('case_type') || 'transparent';
   try {
     const [rows]: any = await pool.execute(
-      `SELECT id, file_name, model_name, case_type, src_url, gen_url, file_base, prompt, mark, status
+      `SELECT id, file_name, model_name, case_type, src_url, src_thumb, gen_url, file_base, prompt, mark, status
          FROM bulk_generations
         WHERE case_type = ?
         ORDER BY id ASC`,

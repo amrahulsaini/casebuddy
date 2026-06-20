@@ -6,9 +6,6 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
-import { existsSync } from 'fs';
 import pool from '@/lib/db';
 
 export const runtime = 'nodejs';
@@ -23,11 +20,6 @@ function sanitizeBase(name: string) {
     .slice(0, 120) || 'src';
 }
 
-function extOf(name: string) {
-  const m = name.match(/\.(png|jpe?g|webp|gif|bmp)$/i);
-  return m ? m[0].toLowerCase() : '.jpg';
-}
-
 export async function POST(request: NextRequest) {
   try {
     const form = await request.formData();
@@ -38,35 +30,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'No files' }, { status: 400 });
     }
 
-    const outputDir = join(process.cwd(), 'public', 'output', 'bulk');
-    if (!existsSync(outputDir)) await mkdir(outputDir, { recursive: true });
-
-    const saved: { file_name: string; src_url: string }[] = [];
+    const saved: { file_name: string }[] = [];
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const origName = origNames[i] || file.name;
       const buffer = Buffer.from(await file.arrayBuffer());
       const base = sanitizeBase(origName);
-      // Thumbnails arrive as JPEG; fall back to the original extension otherwise.
-      const ext = (file.type && file.type.includes('jpeg')) ? '.jpg' : extOf(file.name);
-      const srcFile = `src_${base}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}${ext}`;
-      await writeFile(join(outputDir, srcFile), buffer);
-      const srcUrl = `/casetool/api/bulk-file?name=${encodeURIComponent(srcFile)}`;
       const modelName = base.replace(/_/g, ' ').trim() || origName;
 
-      // Insert a pending row if new; only refresh the source if it changed,
+      // Store the reference thumbnail inline in the DB as a base64 data URL so
+      // it can never 404 (no disk dependency, survives redeploys).
+      const mime = (file.type && file.type.includes('jpeg')) ? 'image/jpeg' : 'image/jpeg';
+      const srcThumb = `data:${mime};base64,${buffer.toString('base64')}`;
+
+      // Insert a pending row if new; only refresh the source thumbnail,
       // never touch generated fields or the right/wrong mark.
       try {
         await pool.execute(
-          `INSERT INTO bulk_generations (file_name, model_name, case_type, src_file, src_url, status)
-           VALUES (?, ?, ?, ?, ?, 'pending')
-           ON DUPLICATE KEY UPDATE src_file = VALUES(src_file), src_url = VALUES(src_url)`,
-          [origName, modelName, caseType, srcFile, srcUrl]
+          `INSERT INTO bulk_generations (file_name, model_name, case_type, src_thumb, status)
+           VALUES (?, ?, ?, ?, 'pending')
+           ON DUPLICATE KEY UPDATE src_thumb = VALUES(src_thumb)`,
+          [origName, modelName, caseType, srcThumb]
         );
       } catch (e) {
         console.error('bulk-upload upsert failed:', e);
       }
-      saved.push({ file_name: origName, src_url: srcUrl });
+      saved.push({ file_name: origName });
     }
 
     return NextResponse.json({ success: true, saved });

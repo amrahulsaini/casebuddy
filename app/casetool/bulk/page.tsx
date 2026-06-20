@@ -92,7 +92,7 @@ export default function BulkPage() {
             file: null,
             fileName: r.file_name,
             name: r.model_name,
-            srcUrl: r.src_url || '',
+            srcUrl: r.src_thumb || r.src_url || '',
             status: (r.status as Status) || (r.gen_url ? 'done' : 'pending'),
             genUrl: r.gen_url || undefined,
             fileBase: r.file_base || undefined,

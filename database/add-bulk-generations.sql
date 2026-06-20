@@ -6,8 +6,9 @@ CREATE TABLE IF NOT EXISTS bulk_generations (
   file_name   VARCHAR(255) NOT NULL,                  -- original uploaded file name
   model_name  VARCHAR(255) NOT NULL,                  -- model name shown in the UI
   case_type   VARCHAR(50)  NOT NULL DEFAULT 'transparent',
-  src_file    VARCHAR(255) DEFAULT NULL,              -- saved reference image file
-  src_url     VARCHAR(512) DEFAULT NULL,              -- url to preview the reference
+  src_file    VARCHAR(255) DEFAULT NULL,              -- (legacy) saved reference image file
+  src_url     VARCHAR(512) DEFAULT NULL,              -- (legacy) url to preview the reference
+  src_thumb   MEDIUMTEXT   DEFAULT NULL,              -- reference thumbnail as base64 data URL
   gen_file    VARCHAR(255) DEFAULT NULL,              -- saved png file in /public/output/bulk
   gen_url     VARCHAR(512) DEFAULT NULL,              -- url used to preview/download
   file_base   VARCHAR(255) DEFAULT NULL,
@@ -23,5 +24,6 @@ CREATE TABLE IF NOT EXISTS bulk_generations (
 
 -- If you already created the table from an earlier version, run these instead:
 -- ALTER TABLE bulk_generations
---   ADD COLUMN src_file VARCHAR(255) DEFAULT NULL AFTER case_type,
---   ADD COLUMN src_url  VARCHAR(512) DEFAULT NULL AFTER src_file;
+--   ADD COLUMN src_file  VARCHAR(255) DEFAULT NULL AFTER case_type,
+--   ADD COLUMN src_url   VARCHAR(512) DEFAULT NULL AFTER src_file,
+--   ADD COLUMN src_thumb MEDIUMTEXT   DEFAULT NULL AFTER src_url;

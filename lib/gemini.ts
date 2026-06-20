@@ -85,7 +85,7 @@ Hard requirements for final_generation_prompt:
 - Explicitly forbid a blank white screen and a solid black screen
 - State that the case colors, transparency, texture, and geometry must match the uploaded reference image exactly
 - State that all panels must reuse one identical phone-and-case asset, changing only angle, crop, or hand pose
-- State that backgrounds should be soft light neutral studio backgrounds that keep transparent materials readable
+- State that backgrounds should be pure white (#FFFFFF) studio backgrounds with no cream, beige, or warm tint, while still keeping transparent materials readable
 - Forbid logos, brand names, watermarks, and phone model text anywhere on the case or screen
 
 Return strict JSON:
@@ -162,13 +162,13 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
 
   transparent: [
-    'PANEL 1 (Soft pearl studio background, not harsh pure white): TWO phones standing upright side by side, both tilted at the same gentle 3/4 angle and leaning slightly back, photographed from a low front camera position near floor level looking slightly upward so both devices rise from the floor toward the viewer. LEFT phone is angled to face the camera showing its FRONT screen with realistic front glass, correct bezel and punch-hole or notch, and a tasteful unbranded abstract wallpaper; never blank white or solid black. RIGHT phone is positioned just behind and overlapping the left one, turned to show its BACK inside the exact transparent case from reference, clearly revealing the authentic phone body finish through the clear case with cameras matching specs exactly. Both phones share the same scale, lighting, and floor. Do not change case appearance.',
+    'PANEL 1 (Pure white #FFFFFF studio background, no cream or beige tint): TWO phones standing upright side by side, both tilted at the same gentle 3/4 angle and leaning slightly back, photographed from a low front camera position near floor level looking slightly upward so both devices rise from the floor toward the viewer. LEFT phone is angled to face the camera showing its FRONT screen with realistic front glass, correct bezel and punch-hole or notch, and a tasteful unbranded abstract wallpaper; never blank white or solid black. RIGHT phone is positioned just behind and overlapping the left one, turned to show its BACK inside the exact transparent case from reference, clearly revealing the authentic phone body finish through the clear case with cameras matching specs exactly. Both phones share the same scale, lighting, and floor. Do not change case appearance.',
 
-    'PANEL 2 (Soft light neutral background): The exact EMPTY transparent case from reference, standing upright and shown from its BACK side only, with NO phone inside it — just the bare clear case shell by itself. Preserve case transparency, tint, finish, camera cutout shape and placement exactly. Do not insert any phone, do not fill the interior, and do not alter the case.',
+    'PANEL 2 (Pure white #FFFFFF background, no cream or beige tint): The exact EMPTY transparent case from reference, standing upright and shown from its BACK side only, with NO phone inside it — just the bare clear case shell by itself. Preserve case transparency, tint, finish, camera cutout shape and placement exactly. Do not insert any phone, do not fill the interior, and do not alter the case.',
 
-    'PANEL 3 (Soft pearl or light gray background): Exact empty transparent case from reference twisted in an S-curve. Preserve transparency, tint, and all original characteristics. No phone inside. Keep the backdrop soft but visible enough that the transparent case does not disappear. Add text "Hybrid Design" at top. Do not modify case appearance.',
+    'PANEL 3 (Pure white #FFFFFF background, no cream or beige tint): Exact empty transparent case from reference twisted in an S-curve. Preserve transparency, tint, and all original characteristics. No phone inside. Keep the backdrop soft but visible enough that the transparent case does not disappear. Add text "Hybrid Design" at top. Do not modify case appearance.',
 
-    'PANEL 4 (Premium soft neutral studio background): A realistic AI-generated human hand naturally holding the phone inside the exact transparent case from reference. The hand must look photoreal with natural skin, fingers, and grip wrapped around the case sides. Preserve case appearance. The phone body must remain visible through the case in the same authentic factory finish used in the other panels. Cameras must match specs exactly. Add text "Flaunt The Original Look". Do not change case design.',
+    'PANEL 4 (Pure white #FFFFFF studio background, no cream or beige tint): A realistic AI-generated human hand naturally holding the phone inside the exact transparent case from reference. The hand must look photoreal with natural skin, fingers, and grip wrapped around the case sides. Preserve case appearance. The phone body must remain visible through the case in the same authentic factory finish used in the other panels. Cameras must match specs exactly. Add text "Flaunt The Original Look". Do not change case design.',
   ],
 
   matte: [

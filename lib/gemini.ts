@@ -177,3 +177,95 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
 export function getAngleDescriptions(caseType: string): string[] {
   return ANGLE_DESCRIPTIONS[caseType] || ANGLE_DESCRIPTIONS.transparent;
 }
+
+// Case-type-specific prompt builder. Shared by the single-generate route and
+// the bulk-generate route so prompt changes apply everywhere.
+export function buildCaseTypePrompt(
+  caseType: string,
+  phoneModel: string,
+  finalPrompt: string,
+  angleListText: string,
+  backColor: string = ''
+): string {
+  // Matte and transparent only need 2 panels (1x2 horizontal layout)
+  const gridLayout = caseType === 'matte' || caseType === 'transparent' ? '2-panel grid (1x2 horizontal layout)' : '4-panel grid (2x2)';
+
+  const backgroundGuidance =
+    caseType === 'transparent' || caseType === 'doyers'
+      ? 'Use a clean pure white studio background (#FFFFFF, plain white, no cream, no beige, no warm tint, no grey, no gradient). Keep the white neutral and true white, and use soft edge lighting so transparent sections stay readable against the white.'
+      : 'Use a clean premium light-neutral studio background with enough contrast to define the product. Avoid harsh overexposed white that washes out edges or openings.';
+
+  // For clear/transparent-window cases, the clear panel must NOT tint the phone.
+  // It is optically clear glass; the phone's real factory back-panel color shows through.
+  const clearPanelConstraint =
+    caseType === 'doyers' || caseType === 'transparent'
+      ? '\n- CLEAR-PANEL COLOR RULE: Render the transparent area of the case as crystal-clear, colorless, anti-glare glass that shows no reflection streak. The phone body seen through it must keep its REAL original factory back-panel color, fully MATTE and lit by soft even diffuse light so it shows as ONE uniform color across the whole panel — like a flat painted surface, NOT a glossy mirror. Do NOT add a diagonal light streak or bright band, a specular highlight, a glossy sheen, a dark reflection, or a light-to-dark gradient; that reflective sheen/streak is the exact "shade" failure to avoid. Light the product with flat, even, ON-AXIS FRONTAL illumination (like a ring light at the camera or a flatbed scanner), with NO directional key light and NO side/top/window light, so no angled or diagonal highlight band can form. Keep it even, uniform, and true to the real color, with zero bright spots and never darkened toward black.'
+      : '';
+
+  // When the seller specifies the exact back-panel color, force a solid even fill of
+  // that color through the clear window. This overrides color guessing and kills the
+  // smoky-grey gradient (a solid fill leaves no room for a shade).
+  const trimmedBackColor = backColor.trim();
+  const backColorConstraint =
+    trimmedBackColor && (caseType === 'doyers' || caseType === 'transparent')
+      ? `\n- BACK PANEL COLOR OVERRIDE (MANDATORY, HIGHEST PRIORITY): Paint the phone's entire back panel as ONE FLAT, FULLY MATTE, UNIFORM block of "${trimmedBackColor}" — the exact same "${trimmedBackColor}" color value in every pixel, edge to edge, like a flat painted color chip lit by soft even diffuse light. ABSOLUTELY NO reflections of any kind on the back: NO diagonal light streak or bright band running across it, NO specular highlight, NO glossy sheen, NO window or softbox reflection, NO glare, NO light-to-dark gradient, NO smoke, NO grey or black shade. The panel never catches or mirrors studio light anywhere; it stays one even matte "${trimmedBackColor}" color with zero bright spots and zero darker spots. The clear case over it is anti-glare and also shows no reflection streak. Light the whole product with flat, even, ON-AXIS FRONTAL illumination — as if from a ring light at the camera position or a flatbed scanner — with NO directional key light, NO top or side light, and NO window/softbox reflection, so neither the glass nor the back panel ever forms an angled or diagonal highlight band. Use no other color, no pattern, no texture. This overrides any color or finish described anywhere else.`
+      : '';
+
+  const hasBackColor = !!trimmedBackColor && (caseType === 'doyers' || caseType === 'transparent');
+
+  // When NO back color is specified, the model keeps defaulting the phone body to
+  // plain white/silver/grey. Force a rich saturated factory color instead.
+  const noWhiteDefaultConstraint =
+    !hasBackColor && (caseType === 'doyers' || caseType === 'transparent')
+      ? '\n- PHONE BODY COLOR (MANDATORY): The phone body seen through the clear case must be a rich, saturated, attractive factory color such as deep green, blue, purple, teal, or black. It must NEVER be plain white, silver, light grey, off-white, cream, or any pale/washed-out color. Pick a vivid non-white color and keep it as ONE flat matte uniform fill across the whole back. If the analysis suggests white/silver/grey, override it with a vivid color instead.\n- BACK SURFACE MUST BE SMOOTH AND PLAIN (MANDATORY): The back panel is one smooth flat matte painted surface. Do NOT invent any texture or pattern: NO leather or faux-leather, NO stitching, NO seams, NO vertical or horizontal divider line down the middle, NO panel split, NO two-tone halves, NO carbon-fiber, NO weave, NO grain, NO ribs, NO frosted pattern, NO logo, NO embossing. It is a clean uniform colored surface edge to edge with nothing printed or molded on it.'
+      : '';
+
+  // Stated FIRST so it wins over any finish the analysis invented (e.g. "graphite/black").
+  const colorLock = hasBackColor
+    ? `TOP-PRIORITY COLOR LOCK — READ THIS FIRST AND OBEY IT ABOVE EVERYTHING BELOW: The phone's back panel must be a solid, uniform, flat "${trimmedBackColor}" in EVERY panel. If anything below — including the MASTER CASE ANALYSIS or any finish description — names a different phone body color or finish (for example black, graphite, gunmetal, titanium, midnight, grey, or silver), treat that as WRONG and use "${trimmedBackColor}" instead. The "${trimmedBackColor}" back panel is mandatory and non-negotiable.\n\n`
+    : '';
+
+  // Don't let "keep the same factory finish" re-assert the analysis color.
+  const phoneFinishLine = hasBackColor
+    ? `Keep the phone back panel a consistent solid "${trimmedBackColor}" in every panel; this color overrides any finish named in the analysis.`
+    : 'Keep the same authentic factory phone finish in every panel.';
+
+  // Put the exact color right inside each panel instruction, where the model renders.
+  const panelText = hasBackColor
+    ? angleListText.replace(/back panel/gi, `back panel (solid uniform ${trimmedBackColor})`)
+    : angleListText;
+
+  const mainPrompt = `${colorLock}Create a premium ${gridLayout} ecommerce collage for "${phoneModel}" using the uploaded reference image as the non-negotiable case template.
+
+MASTER CASE ANALYSIS:
+${finalPrompt}
+
+GLOBAL HARD CONSTRAINTS:
+- Preserve the case geometry from the reference image exactly: outer silhouette, camera island placement, lens opening sizes, corner radius, button cutouts, side lip thickness, and material finish.
+- CORNER FIDELITY (CRITICAL): Reproduce the corners EXACTLY as they appear in the reference case — same thinness, same radius, same slim profile. Do NOT thicken, bulge, or round the corners into a chunky raised bumper, rugged armor corner, shock-absorber corner, or reinforced air-cushion corner. If the reference case has slim, low-profile corners, the generated case must keep those exact slim corners. Never add extra corner bulk that is not present in the reference image.
+- Copy the case colors, transparency, tint, artwork, and surface texture exactly from the reference image. Do not reinterpret, simplify, recolor, or redesign anything.
+- Use one identical phone-and-case asset consistently across all panels. Only the viewing angle, crop, or hand pose may change.
+- ${phoneFinishLine}
+- If the case has transparent, frosted, or open sections, the real phone body must remain visible underneath in its authentic finish. Never replace the visible phone area with flat white, flat black, blank filler, paper inserts, or empty placeholders.
+- Any front-facing phone screen must show realistic front glass, correct bezels and cutouts, and a tasteful unbranded abstract wallpaper or dim lockscreen gradient. Never output a blank white screen or a pure black screen.
+- ${backgroundGuidance}${clearPanelConstraint}${backColorConstraint}${noWhiteDefaultConstraint}
+- Lighting must stay premium and catalog-clean, but still give enough edge separation so transparent materials remain visible.
+- ABSOLUTE RULE — NO TEXT ON THE PHONE OR CASE: Do NOT render any phone model name, brand name, manufacturer name, logo, serial number, regulatory text, or any lettering anywhere on the phone body, the case, the screen bezel, or anywhere in the image. This includes text like "Samsung", "iPhone", "Realme", "Redmi", "OnePlus", "Poco", "Vivo", "Oppo", model numbers, or any other identifier. The phone and case surfaces must be completely clean of all text and logos. If the real phone has a brand embossed on the back, do NOT render it — leave that area clean and blank. Violating this rule makes the image unusable.
+- Keep every panel visually consistent as if photographed in the same product shoot.
+
+REFERENCE IMAGE PRIORITY:
+- If any instruction conflicts with the uploaded reference image, follow the uploaded reference image for case geometry, case color, transparency, and material finish.
+
+LAYOUT ENFORCEMENT (CRITICAL — THE GRID MUST BE EXACT):
+- The output is ONE ${gridLayout} and nothing else. ${gridLayout.startsWith('2') ? 'Exactly TWO equal cells in a single horizontal row.' : 'Exactly FOUR equal cells arranged as 2 rows by 2 columns.'}
+- Each cell is the SAME size. Do NOT make any cell larger, do NOT add a big hero/feature panel, and do NOT add a wide left or right banner panel.
+- Render EXACTLY one panel per cell, in order: cell 1 = PANEL 1, cell 2 = PANEL 2, cell 3 = PANEL 3, cell 4 = PANEL 4. Do NOT skip a panel, do NOT repeat any panel, and do NOT add extra panels or cells.
+- IMPORTANT: A panel that describes two phones is still ONE SINGLE cell — both phones belong together inside that one cell as a single photo. Do NOT split the two phones into separate cells. ${gridLayout.startsWith('2') ? 'So cell 1 (left) holds BOTH phones of PANEL 1 together, and cell 2 (right) holds the empty case of PANEL 2. That is all — only two cells total.' : ''}
+- Each text label appears AT MOST ONCE total. Never duplicate "Hybrid Design", "Flaunt The Original Look", or any other label across cells.
+- The total cell count must equal exactly ${gridLayout.startsWith('2') ? 'TWO (count them: 1, 2 — stop)' : 'FOUR'}. No third/fifth panel, no inset, no collage-within-a-collage, no stacking a second row.
+
+Create ${gridLayout} with these exact panels:
+${panelText}`;
+
+  return mainPrompt;
+}

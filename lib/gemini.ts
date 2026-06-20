@@ -225,6 +225,16 @@ export function buildCaseTypePrompt(
     ? `TOP-PRIORITY COLOR LOCK — READ THIS FIRST AND OBEY IT ABOVE EVERYTHING BELOW: The phone's back panel must be a solid, uniform, flat "${trimmedBackColor}" in EVERY panel. If anything below — including the MASTER CASE ANALYSIS or any finish description — names a different phone body color or finish (for example black, graphite, gunmetal, titanium, midnight, grey, or silver), treat that as WRONG and use "${trimmedBackColor}" instead. The "${trimmedBackColor}" back panel is mandatory and non-negotiable.\n\n`
     : '';
 
+  // High-priority locks, stated at the very top, for clear/transparent cases.
+  const streakLock =
+    caseType === 'doyers' || caseType === 'transparent'
+      ? `TOP-PRIORITY NO-STREAK LOCK — OBEY ABOVE ALL ELSE: There must be ZERO diagonal light streak, reflection band, bright diagonal line, glossy sheen, specular highlight, or light-to-dark gradient anywhere on the phone back OR on the clear case. The phone back and the clear case are BOTH fully MATTE and lit by flat, even, head-on frontal light only (like a ring light at the camera), so no angled highlight can form. A diagonal streak or glossy band is a hard defect — the surface must read as one even matte tone edge to edge.\n\n`
+      : '';
+  const cornerLock =
+    caseType === 'doyers' || caseType === 'transparent'
+      ? `TOP-PRIORITY CORNER LOCK — OBEY ABOVE ALL ELSE: The case corners must be SLIM and the SAME thickness as the reference image — flush, low-profile, and only slightly thicker than the side walls. Do NOT enlarge, inflate, bulge, round, or pad the corners into chunky raised bumpers, big rounded blobs, thick air-cushion pads, shock-absorber knobs, or rugged-armor corners. Even if this is a shockproof / anti-drop case, keep the reinforced corners as small and thin as they appear in the reference — never bigger. Match the reference corner size exactly; any extra corner bulk is a hard defect.\n\n`
+      : '';
+
   // Don't let "keep the same factory finish" re-assert the analysis color.
   const phoneFinishLine = hasBackColor
     ? `Keep the phone back panel a consistent solid "${trimmedBackColor}" in every panel; this color overrides any finish named in the analysis.`
@@ -235,7 +245,7 @@ export function buildCaseTypePrompt(
     ? angleListText.replace(/back panel/gi, `back panel (solid uniform ${trimmedBackColor})`)
     : angleListText;
 
-  const mainPrompt = `${colorLock}Create a premium ${gridLayout} ecommerce collage for "${phoneModel}" using the uploaded reference image as the non-negotiable case template.
+  const mainPrompt = `${streakLock}${cornerLock}${colorLock}Create a premium ${gridLayout} ecommerce collage for "${phoneModel}" using the uploaded reference image as the non-negotiable case template.
 
 MASTER CASE ANALYSIS:
 ${finalPrompt}

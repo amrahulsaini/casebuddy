@@ -16,6 +16,7 @@ import {
   getAngleDescriptions,
   buildCaseTypePrompt,
 } from '@/lib/gemini';
+import pool from '@/lib/db';
 
 const ENV_GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const TEXT_MODEL = process.env.TEXT_MODEL || 'gemini-3-pro-preview';
@@ -149,6 +150,26 @@ export async function POST(request: NextRequest) {
     // Serve through an API route so previews work in production too (Next does
     // not statically serve files written to /public after build).
     const imageUrl = `/casetool/api/bulk-file?name=${encodeURIComponent(fileName)}`;
+
+    // Persist/Upsert the result. Keep any existing right/wrong mark intact.
+    try {
+      await pool.execute(
+        `INSERT INTO bulk_generations
+           (file_name, model_name, case_type, gen_file, gen_url, file_base, prompt, status)
+         VALUES (?, ?, ?, ?, ?, ?, ?, 'done')
+         ON DUPLICATE KEY UPDATE
+           model_name = VALUES(model_name),
+           gen_file   = VALUES(gen_file),
+           gen_url    = VALUES(gen_url),
+           file_base  = VALUES(file_base),
+           prompt     = VALUES(prompt),
+           status     = 'done'`,
+        [caseImage.name || base, phoneModel, caseType, fileName, imageUrl, base, finalPrompt]
+      );
+    } catch (e) {
+      // Don't fail the generation if the table isn't migrated yet.
+      console.error('bulk_generations upsert failed:', e);
+    }
 
     return NextResponse.json({ success: true, url: imageUrl, prompt: finalPrompt, fileBase: base });
   } catch (error: any) {

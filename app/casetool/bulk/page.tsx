@@ -15,9 +15,10 @@ type Status = 'pending' | 'generating' | 'done' | 'error';
 
 interface Item {
   id: string;
-  file: File;
+  file: File | null;  // null after a reload-restore until folder is re-uploaded
+  fileName: string;   // original file name (persistence key)
   name: string;       // model name from filename
-  srcUrl: string;     // object URL of source image
+  srcUrl: string;     // object URL of source image ('' when restored)
   status: Status;
   genUrl?: string;    // generated grid url
   fileBase?: string;
@@ -79,6 +80,31 @@ export default function BulkPage() {
   const stopRef = useRef(false);
   const lastIndexRef = useRef(0);
 
+  // Restore previously generated results + marks from the database on mount.
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(`/casetool/api/bulk-list?case_type=${encodeURIComponent(category)}`);
+        const data = await res.json();
+        if (data.success && Array.isArray(data.rows) && data.rows.length) {
+          setItems(data.rows.map((r: any, idx: number) => ({
+            id: `db_${r.id ?? idx}_${r.file_name}`,
+            file: null,
+            fileName: r.file_name,
+            name: r.model_name,
+            srcUrl: '',
+            status: (r.status as Status) || (r.gen_url ? 'done' : 'pending'),
+            genUrl: r.gen_url || undefined,
+            fileBase: r.file_base || undefined,
+            mark: (r.mark as Mark) || 'none',
+            prompt: r.prompt || undefined,
+          })));
+        }
+      } catch { /* offline / not migrated yet */ }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ---- Range inputs ----
   const [rangeFrom, setRangeFrom] = useState('');
   const [rangeTo, setRangeTo] = useState('');
@@ -100,15 +126,25 @@ export default function BulkPage() {
   const onFolder = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []).filter(f => /\.(png|jpe?g|webp|gif|bmp)$/i.test(f.name));
     files.sort((a, b) => naturalCompare(a.name, b.name));
-    const next: Item[] = files.map((file, idx) => ({
-      id: `${Date.now()}_${idx}_${file.name}`,
-      file,
-      name: modelNameFromFile(file.name),
-      srcUrl: URL.createObjectURL(file),
-      status: 'pending',
-      mark: 'none',
-    }));
-    setItems(next);
+    setItems(prev => {
+      // Carry over previously generated results + marks for matching filenames.
+      const byName = new Map(prev.map(i => [i.fileName, i]));
+      return files.map((file, idx) => {
+        const ex = byName.get(file.name);
+        return {
+          id: `${Date.now()}_${idx}_${file.name}`,
+          file,
+          fileName: file.name,
+          name: modelNameFromFile(file.name),
+          srcUrl: URL.createObjectURL(file),
+          status: (ex?.genUrl ? 'done' : 'pending') as Status,
+          genUrl: ex?.genUrl,
+          fileBase: ex?.fileBase,
+          mark: ex?.mark || 'none',
+          prompt: ex?.prompt,
+        };
+      });
+    });
     lastIndexRef.current = 0;
     e.target.value = '';
   };
@@ -119,6 +155,10 @@ export default function BulkPage() {
 
   // ---- Generate single ----
   const generateOne = useCallback(async (item: Item, customPrompt = '') => {
+    if (!item.file) {
+      alert('Re-upload the folder to generate — source images are not kept after a page reload (only results are).');
+      return;
+    }
     updateItem(item.id, { status: 'generating', error: undefined });
     try {
       const fd = new FormData();
@@ -240,8 +280,18 @@ export default function BulkPage() {
     }
   };
 
-  // ---- Mark ----
-  const mark = (item: Item, m: Mark) => updateItem(item.id, { mark: item.mark === m ? 'none' : m });
+  // ---- Mark (persisted to DB) ----
+  const mark = (item: Item, m: Mark) => {
+    if (!item.genUrl) return; // only judge generated output
+    const next: Mark = item.mark === m ? 'none' : m;
+    updateItem(item.id, { mark: next });
+    setPreview(p => (p && p.id === item.id ? { ...p, mark: next } : p));
+    const fd = new FormData();
+    fd.append('file_name', item.fileName);
+    fd.append('case_type', category);
+    fd.append('mark', next);
+    fetch('/casetool/api/bulk-mark', { method: 'POST', body: fd }).catch(() => {});
+  };
 
   // ---- Edit prompt + regenerate ----
   const openEdit = (item: Item) => { setEditItem(item); setEditText(''); };
@@ -252,11 +302,16 @@ export default function BulkPage() {
     await generateOne(it, editText);
   };
 
-  const clearAll = () => {
-    if (!confirm('Clear all uploaded images and results?')) return;
-    items.forEach(i => URL.revokeObjectURL(i.srcUrl));
+  const clearAll = async () => {
+    if (!confirm('Clear all uploaded images and saved results for this category?')) return;
+    items.forEach(i => i.srcUrl && URL.revokeObjectURL(i.srcUrl));
     setItems([]);
     lastIndexRef.current = 0;
+    try {
+      const fd = new FormData();
+      fd.append('case_type', category);
+      await fetch('/casetool/api/bulk-clear', { method: 'POST', body: fd });
+    } catch { /* ignore */ }
   };
 
   // ============ RENDER ============
@@ -437,8 +492,8 @@ export default function BulkPage() {
               </div>
 
               <div className={styles.cardActions}>
-                <button className={`${styles.act} ${item.mark === 'right' ? styles.actRightOn : ''}`} onClick={() => mark(item, 'right')} title="Mark right"><Check size={15} /></button>
-                <button className={`${styles.act} ${item.mark === 'wrong' ? styles.actWrongOn : ''}`} onClick={() => mark(item, 'wrong')} title="Mark wrong"><X size={15} /></button>
+                <button className={`${styles.act} ${item.mark === 'right' ? styles.actRightOn : ''}`} disabled={!item.genUrl} onClick={() => mark(item, 'right')} title="Mark generated image right"><Check size={15} /></button>
+                <button className={`${styles.act} ${item.mark === 'wrong' ? styles.actWrongOn : ''}`} disabled={!item.genUrl} onClick={() => mark(item, 'wrong')} title="Mark generated image wrong"><X size={15} /></button>
                 <button className={styles.act} disabled={!item.genUrl} onClick={() => setPreview(item)} title="Preview"><Eye size={15} /></button>
                 <button className={styles.act} disabled={!item.genUrl} onClick={() => downloadOne(item)} title="Download"><Download size={15} /></button>
                 <button className={styles.act} onClick={() => openEdit(item)} title="Edit prompt & regenerate"><Pencil size={15} /></button>
@@ -468,8 +523,8 @@ export default function BulkPage() {
               </div>
             </div>
             <div className={styles.modalFoot}>
-              <button className={`${styles.act} ${preview.mark === 'right' ? styles.actRightOn : ''}`} onClick={() => { mark(preview, 'right'); }}><Check size={15} /> Right</button>
-              <button className={`${styles.act} ${preview.mark === 'wrong' ? styles.actWrongOn : ''}`} onClick={() => { mark(preview, 'wrong'); }}><X size={15} /> Wrong</button>
+              <button className={`${styles.act} ${preview.mark === 'right' ? styles.actRightOn : ''}`} disabled={!preview.genUrl} onClick={() => { mark(preview, 'right'); }}><Check size={15} /> Right</button>
+              <button className={`${styles.act} ${preview.mark === 'wrong' ? styles.actWrongOn : ''}`} disabled={!preview.genUrl} onClick={() => { mark(preview, 'wrong'); }}><X size={15} /> Wrong</button>
               <button className={styles.btn} disabled={!preview.genUrl} onClick={() => downloadOne(preview)}><Download size={15} /> Download</button>
             </div>
           </div>

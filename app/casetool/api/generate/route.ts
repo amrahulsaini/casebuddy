@@ -74,6 +74,13 @@ function buildCaseTypePrompt(
 
   const hasBackColor = !!trimmedBackColor && (caseType === 'doyers' || caseType === 'transparent');
 
+  // When NO back color is specified, the model keeps defaulting the phone body to
+  // plain white/silver/grey. Force a rich saturated factory color instead.
+  const noWhiteDefaultConstraint =
+    !hasBackColor && (caseType === 'doyers' || caseType === 'transparent')
+      ? '\n- PHONE BODY COLOR (MANDATORY): The phone body seen through the clear case must be a rich, saturated, attractive factory color such as deep green, blue, purple, teal, or black. It must NEVER be plain white, silver, light grey, off-white, cream, or any pale/washed-out color. Pick a vivid non-white color and keep it as ONE flat matte uniform fill across the whole back. If the analysis suggests white/silver/grey, override it with a vivid color instead.'
+      : '';
+
   // Stated FIRST so it wins over any finish the analysis invented (e.g. "graphite/black").
   const colorLock = hasBackColor
     ? `TOP-PRIORITY COLOR LOCK — READ THIS FIRST AND OBEY IT ABOVE EVERYTHING BELOW: The phone's back panel must be a solid, uniform, flat "${trimmedBackColor}" in EVERY panel. If anything below — including the MASTER CASE ANALYSIS or any finish description — names a different phone body color or finish (for example black, graphite, gunmetal, titanium, midnight, grey, or silver), treat that as WRONG and use "${trimmedBackColor}" instead. The "${trimmedBackColor}" back panel is mandatory and non-negotiable.\n\n`
@@ -102,7 +109,7 @@ GLOBAL HARD CONSTRAINTS:
 - ${phoneFinishLine}
 - If the case has transparent, frosted, or open sections, the real phone body must remain visible underneath in its authentic finish. Never replace the visible phone area with flat white, flat black, blank filler, paper inserts, or empty placeholders.
 - Any front-facing phone screen must show realistic front glass, correct bezels and cutouts, and a tasteful unbranded abstract wallpaper or dim lockscreen gradient. Never output a blank white screen or a pure black screen.
-- ${backgroundGuidance}${clearPanelConstraint}${backColorConstraint}
+- ${backgroundGuidance}${clearPanelConstraint}${backColorConstraint}${noWhiteDefaultConstraint}
 - Lighting must stay premium and catalog-clean, but still give enough edge separation so transparent materials remain visible.
 - ABSOLUTE RULE — NO TEXT ON THE PHONE OR CASE: Do NOT render any phone model name, brand name, manufacturer name, logo, serial number, regulatory text, or any lettering anywhere on the phone body, the case, the screen bezel, or anywhere in the image. This includes text like "Samsung", "iPhone", "Realme", "Redmi", "OnePlus", "Poco", "Vivo", "Oppo", model numbers, or any other identifier. The phone and case surfaces must be completely clean of all text and logos. If the real phone has a brand embossed on the back, do NOT render it — leave that area clean and blank. Violating this rule makes the image unusable.
 - Keep every panel visually consistent as if photographed in the same product shoot.

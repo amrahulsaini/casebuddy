@@ -53,7 +53,7 @@ function buildCaseTypePrompt(
 
   const backgroundGuidance =
     caseType === 'transparent' || caseType === 'doyers'
-      ? 'Use a soft pearl, light warm-gray, or very subtle neutral gradient studio background so transparent sections remain readable. Do not blow the background out to pure white behind clear sections.'
+      ? 'Use a clean pure white studio background (#FFFFFF, plain white, no cream, no beige, no warm tint, no grey, no gradient). Keep the white neutral and true white, and use soft edge lighting so transparent sections stay readable against the white.'
       : 'Use a clean premium light-neutral studio background with enough contrast to define the product. Avoid harsh overexposed white that washes out edges or openings.';
 
   // For clear/transparent-window cases, the clear panel must NOT tint the phone.
@@ -109,6 +109,13 @@ GLOBAL HARD CONSTRAINTS:
 
 REFERENCE IMAGE PRIORITY:
 - If any instruction conflicts with the uploaded reference image, follow the uploaded reference image for case geometry, case color, transparency, and material finish.
+
+LAYOUT ENFORCEMENT (CRITICAL — THE GRID MUST BE EXACT):
+- The output is ONE ${gridLayout} and nothing else. ${gridLayout.startsWith('2') ? 'Exactly TWO equal cells in a single horizontal row.' : 'Exactly FOUR equal cells arranged as 2 rows by 2 columns.'}
+- Each cell is the SAME size. Do NOT make any cell larger, do NOT add a big hero/feature panel, and do NOT add a wide left or right banner panel.
+- Render EXACTLY one panel per cell, in order: cell 1 = PANEL 1, cell 2 = PANEL 2, cell 3 = PANEL 3, cell 4 = PANEL 4. Do NOT skip a panel, do NOT repeat any panel, and do NOT add extra panels or cells.
+- Each text label appears AT MOST ONCE total. Never duplicate "Hybrid Design", "Flaunt The Original Look", or any other label across cells.
+- The total cell count must equal exactly ${gridLayout.startsWith('2') ? 'TWO' : 'FOUR'}. No fifth panel, no inset, no collage-within-a-collage.
 
 Create ${gridLayout} with these exact panels:
 ${panelText}`;

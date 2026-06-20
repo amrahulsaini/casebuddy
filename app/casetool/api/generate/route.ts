@@ -49,7 +49,7 @@ function buildCaseTypePrompt(
   backColor: string = ''
 ): string {
   // Matte case only needs 2 panels (1x2 horizontal layout)
-  const gridLayout = caseType === 'matte' ? '2-panel grid (1x2 horizontal layout)' : '4-panel grid (2x2)';
+  const gridLayout = caseType === 'matte' || caseType === 'transparent' ? '2-panel grid (1x2 horizontal layout)' : '4-panel grid (2x2)';
 
   const backgroundGuidance =
     caseType === 'transparent' || caseType === 'doyers'

@@ -92,7 +92,7 @@ export default function BulkPage() {
             file: null,
             fileName: r.file_name,
             name: r.model_name,
-            srcUrl: '',
+            srcUrl: r.src_url || '',
             status: (r.status as Status) || (r.gen_url ? 'done' : 'pending'),
             genUrl: r.gen_url || undefined,
             fileBase: r.file_base || undefined,
@@ -147,6 +147,26 @@ export default function BulkPage() {
     });
     lastIndexRef.current = 0;
     e.target.value = '';
+    // Persist source images server-side in the background (batched) so the
+    // reference thumbnails survive a reload without re-uploading.
+    uploadSources(files);
+  };
+
+  const [savingSrc, setSavingSrc] = useState(false);
+  const uploadSources = async (files: File[]) => {
+    if (files.length === 0) return;
+    setSavingSrc(true);
+    try {
+      const CHUNK = 12;
+      for (let i = 0; i < files.length; i += CHUNK) {
+        const fd = new FormData();
+        fd.append('case_type', category);
+        for (const f of files.slice(i, i + CHUNK)) fd.append('files', f);
+        await fetch('/casetool/api/bulk-upload', { method: 'POST', body: fd }).catch(() => {});
+      }
+    } finally {
+      setSavingSrc(false);
+    }
   };
 
   const updateItem = useCallback((id: string, patch: Partial<Item>) => {
@@ -402,6 +422,7 @@ export default function BulkPage() {
           {/* @ts-expect-error webkitdirectory is non-standard */}
           <input type="file" webkitdirectory="" directory="" multiple accept="image/*" onChange={onFolder} hidden />
         </label>
+        {savingSrc && <span className={styles.savingTag}>saving refs…</span>}
 
         <div className={styles.divider} />
 

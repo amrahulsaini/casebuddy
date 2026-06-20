@@ -125,6 +125,7 @@
   z-index: 15;
 }
 .divider { width: 1px; height: 26px; background: #2a3140; }
+.savingTag { font-size: 11px; color: #e6c94f; font-weight: 600; }
 .uploadBtn, .btn, .btnPrimary, .btnStop, .btnExport, .btnGhost {
   display: inline-flex; align-items: center; gap: 7px;
   padding: 9px 14px; border-radius: 9px; font-size: 13px; font-weight: 600;

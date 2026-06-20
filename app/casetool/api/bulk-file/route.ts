@@ -12,10 +12,16 @@ import { existsSync } from 'fs';
 
 export const runtime = 'nodejs';
 
+const MIME: Record<string, string> = {
+  png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg',
+  webp: 'image/webp', gif: 'image/gif', bmp: 'image/bmp',
+};
+
 export async function GET(request: NextRequest) {
   const name = request.nextUrl.searchParams.get('name') || '';
-  // Only allow a bare filename ending in .png — block any path traversal.
-  if (!/^[A-Za-z0-9._-]+\.png$/.test(name)) {
+  // Only allow a bare image filename — block any path traversal.
+  const m = name.match(/^[A-Za-z0-9._-]+\.(png|jpe?g|webp|gif|bmp)$/i);
+  if (!m) {
     return NextResponse.json({ error: 'Invalid file name' }, { status: 400 });
   }
   const filePath = join(process.cwd(), 'public', 'output', 'bulk', name);
@@ -23,9 +29,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
   const buffer = await readFile(filePath);
+  const ext = m[1].toLowerCase();
   return new NextResponse(buffer, {
     headers: {
-      'Content-Type': 'image/png',
+      'Content-Type': MIME[ext] || 'application/octet-stream',
       'Cache-Control': 'public, max-age=31536000, immutable',
     },
   });

@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import { ensureBulkTable } from '@/lib/bulk-table';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -30,6 +31,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'No files' }, { status: 400 });
     }
 
+    await ensureBulkTable(pool);
     const saved: { file_name: string }[] = [];
     for (let i = 0; i < files.length; i++) {
       const file = files[i];

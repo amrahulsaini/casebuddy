@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import { ensureBulkTable } from '@/lib/bulk-table';
 
 export const runtime = 'nodejs';
 
@@ -20,6 +21,7 @@ export async function POST(request: NextRequest) {
     if (!['none', 'right', 'wrong'].includes(mark)) {
       return NextResponse.json({ success: false, error: 'invalid mark' }, { status: 400 });
     }
+    await ensureBulkTable(pool);
     await pool.execute(
       `UPDATE bulk_generations SET mark = ? WHERE file_name = ? AND case_type = ?`,
       [mark, fileName, caseType]

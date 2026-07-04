@@ -17,6 +17,7 @@ import {
   buildCaseTypePrompt,
 } from '@/lib/gemini';
 import pool from '@/lib/db';
+import { ensureBulkTable } from '@/lib/bulk-table';
 
 const ENV_GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const TEXT_MODEL = process.env.TEXT_MODEL || 'gemini-3-pro-preview';
@@ -153,6 +154,7 @@ export async function POST(request: NextRequest) {
 
     // Persist/Upsert the result. Keep any existing right/wrong mark intact.
     try {
+      await ensureBulkTable(pool);
       await pool.execute(
         `INSERT INTO bulk_generations
            (file_name, model_name, case_type, gen_file, gen_url, file_base, prompt, status)

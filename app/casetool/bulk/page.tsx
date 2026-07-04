@@ -545,7 +545,17 @@ export default function BulkPage() {
 
               <div className={styles.thumbs}>
                 <div className={styles.thumb} onClick={() => setPreview(item)}>
-                  <img src={item.srcUrl} alt="source" loading="lazy" decoding="async" />
+                  {item.srcUrl ? (
+                    <img
+                      src={item.srcUrl}
+                      alt="source"
+                      loading="lazy"
+                      decoding="async"
+                      onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                    />
+                  ) : (
+                    <div className={styles.thumbWait}>no ref</div>
+                  )}
                   <span className={styles.thumbTag}>ref</span>
                 </div>
                 <div className={`${styles.thumb} ${styles.thumbOut}`} onClick={() => item.genUrl && setPreview(item)}>
@@ -588,7 +598,7 @@ export default function BulkPage() {
             <div className={styles.modalBody}>
               <div className={styles.modalCol}>
                 <span>Reference</span>
-                <img src={preview.srcUrl} alt="ref" />
+                {preview.srcUrl ? <img src={preview.srcUrl} alt="ref" /> : <div className={styles.thumbWait}>No reference stored — re-upload the folder to restore it.</div>}
               </div>
               <div className={styles.modalCol}>
                 <span>Generated</span>

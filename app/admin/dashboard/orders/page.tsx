@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Package, Search, Download, Eye, RefreshCw, Trash2 } from 'lucide-react';
+import { Package, Search, Download, Eye, RefreshCw, Trash2, Ban, RotateCcw } from 'lucide-react';
 import styles from './orders.module.css';
 
 interface Order {
@@ -18,6 +18,7 @@ interface Order {
   quantity: number;
   total_amount: number | string;
   payment_status: string;
+  order_status: string;
   created_at: string;
   shipment_status?: string | null;
   shipment_updated_at?: string | null;
@@ -34,6 +35,8 @@ export default function AdminOrdersPage() {
   const [paymentFilter, setPaymentFilter] = useState('all');
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [cancelRefundConfirmId, setCancelRefundConfirmId] = useState<number | null>(null);
+  const [cancellingRefund, setCancellingRefund] = useState(false);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -108,6 +111,28 @@ export default function AdminOrdersPage() {
       alert('Failed to delete order');
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const cancelAndRefundOrder = async (orderId: number) => {
+    setCancellingRefund(true);
+    try {
+      const response = await fetch(`/api/admin/orders/${orderId}/cancel-refund`, {
+        method: 'POST',
+      });
+
+      if (response.ok) {
+        await fetchOrders();
+        setCancelRefundConfirmId(null);
+      } else {
+        const data = await response.json().catch(() => ({}));
+        alert(data.error || 'Failed to cancel and refund order');
+      }
+    } catch (error) {
+      console.error('Error cancelling/refunding order:', error);
+      alert('Failed to cancel and refund order');
+    } finally {
+      setCancellingRefund(false);
     }
   };
 
@@ -364,6 +389,15 @@ export default function AdminOrdersPage() {
                         <Eye size={16} />
                         View
                       </Link>
+                      {order.payment_status === 'completed' && order.order_status !== 'cancelled' && (
+                        <button
+                          onClick={() => setCancelRefundConfirmId(order.id)}
+                          className={styles.deleteBtn}
+                          title="Cancel order & refund payment"
+                        >
+                          <Ban size={16} />
+                        </button>
+                      )}
                       <button
                         onClick={() => setDeleteConfirmId(order.id)}
                         className={styles.deleteBtn}
@@ -469,6 +503,32 @@ export default function AdminOrdersPage() {
                 disabled={deleting}
               >
                 {deleting ? 'Deleting...' : 'Delete Order'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel & Refund Confirmation Modal */}
+      {cancelRefundConfirmId !== null && (
+        <div className={styles.modalOverlay} onClick={() => !cancellingRefund && setCancelRefundConfirmId(null)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <h2>Cancel Order & Refund</h2>
+            <p>This will cancel the order and refund the full payment via Razorpay. The customer will be notified by email. This action cannot be undone.</p>
+            <div className={styles.modalActions}>
+              <button
+                onClick={() => setCancelRefundConfirmId(null)}
+                className={styles.cancelBtn}
+                disabled={cancellingRefund}
+              >
+                Back
+              </button>
+              <button
+                onClick={() => cancelAndRefundOrder(cancelRefundConfirmId)}
+                className={styles.confirmDeleteBtn}
+                disabled={cancellingRefund}
+              >
+                {cancellingRefund ? 'Processing...' : 'Cancel Order & Refund'}
               </button>
             </div>
           </div>

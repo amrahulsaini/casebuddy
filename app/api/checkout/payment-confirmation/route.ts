@@ -3,6 +3,7 @@ import pool from '@/lib/db-main';
 import { RowDataPacket } from 'mysql2';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
+import { ensureRefundColumns } from '@/lib/ensure-refund-columns';
 
 interface Order extends RowDataPacket {
   id: number;
@@ -158,6 +159,7 @@ export async function POST(request: Request) {
 
     console.log('Razorpay signature verified for order:', orderId);
 
+    await ensureRefundColumns(pool);
     const connection = await pool.getConnection();
 
     try {
@@ -179,9 +181,10 @@ export async function POST(request: Request) {
         `UPDATE orders SET
           payment_status = ?,
           order_status = ?,
+          razorpay_payment_id = ?,
           updated_at = NOW()
         WHERE id = ?`,
-        ['completed', 'processing', orderId]
+        ['completed', 'processing', razorpay_payment_id, orderId]
       );
 
       console.log(`Order ${orderId} marked as completed after signature verification`);

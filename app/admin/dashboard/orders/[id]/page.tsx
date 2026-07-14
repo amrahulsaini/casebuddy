@@ -96,6 +96,11 @@ export default function AdminOrderDetailPage() {
   const [trackingData, setTrackingData] = useState<TrackingData | null>(null);
   const [trackingLoading, setTrackingLoading] = useState(false);
 
+  const [cancelRefundLoading, setCancelRefundLoading] = useState(false);
+  const [cancelRefundError, setCancelRefundError] = useState('');
+  const [cancelRefundSuccess, setCancelRefundSuccess] = useState('');
+  const [showCancelRefundConfirm, setShowCancelRefundConfirm] = useState(false);
+
   useEffect(() => {
     fetchOrderDetails();
   }, [params.id]);
@@ -182,6 +187,29 @@ export default function AdminOrderDetailPage() {
       setShipError('Shiprocket action failed');
     } finally {
       setShipLoading(false);
+    }
+  };
+
+  const cancelAndRefund = async () => {
+    setCancelRefundLoading(true);
+    setCancelRefundError('');
+    setCancelRefundSuccess('');
+    try {
+      const res = await fetch(`/api/admin/orders/${params.id}/cancel-refund`, {
+        method: 'POST',
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setCancelRefundError(data?.error || 'Failed to cancel and refund order');
+        return;
+      }
+      setCancelRefundSuccess('Order cancelled and payment refunded successfully.');
+      setShowCancelRefundConfirm(false);
+      await fetchOrderDetails();
+    } catch (e) {
+      setCancelRefundError('Failed to cancel and refund order');
+    } finally {
+      setCancelRefundLoading(false);
     }
   };
 
@@ -717,6 +745,44 @@ export default function AdminOrderDetailPage() {
                 <span className={styles.valueBold}>₹{order.total_amount}</span>
               </div>
             </div>
+
+            {cancelRefundError && <div className={styles.errorMsg}>{cancelRefundError}</div>}
+            {cancelRefundSuccess && <div className={styles.success}>{cancelRefundSuccess}</div>}
+
+            {order.payment_status === 'completed' && order.order_status !== 'cancelled' && (
+              !showCancelRefundConfirm ? (
+                <button
+                  onClick={() => setShowCancelRefundConfirm(true)}
+                  disabled={cancelRefundLoading}
+                  className={styles.saveBtn}
+                  style={{ marginTop: '12px', background: '#f44336' }}
+                >
+                  Cancel Order & Refund
+                </button>
+              ) : (
+                <div className={styles.notes} style={{ marginTop: '12px' }}>
+                  <strong>Confirm cancellation & refund</strong>
+                  <p>This will cancel the order, refund the full payment via Razorpay, and notify the customer by email.</p>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                    <button
+                      onClick={cancelAndRefund}
+                      disabled={cancelRefundLoading}
+                      className={styles.saveBtn}
+                      style={{ background: '#f44336' }}
+                    >
+                      {cancelRefundLoading ? 'Processing...' : 'Confirm'}
+                    </button>
+                    <button
+                      onClick={() => setShowCancelRefundConfirm(false)}
+                      disabled={cancelRefundLoading}
+                      className={styles.backBtn}
+                    >
+                      Back
+                    </button>
+                  </div>
+                </div>
+              )
+            )}
           </div>
 
           <div className={styles.card}>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import caseMainPool from '@/lib/db-main';
 import crypto from 'crypto';
+import { ensureRefundColumns } from '@/lib/ensure-refund-columns';
 
 const RAZORPAY_WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET;
 
@@ -50,14 +51,16 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: true });
       }
 
+      await ensureRefundColumns(caseMainPool);
       await caseMainPool.query(
         `UPDATE orders SET
           payment_status = ?,
           order_status = ?,
           payment_method = ?,
+          razorpay_payment_id = ?,
           updated_at = NOW()
         WHERE id = ? AND payment_status <> ?`,
-        ['completed', 'processing', payment.method || 'Razorpay', orderId, 'completed']
+        ['completed', 'processing', payment.method || 'Razorpay', payment.id, orderId, 'completed']
       );
 
       console.log(`Order ${orderId} marked as completed via webhook (payment ${payment.id})`);

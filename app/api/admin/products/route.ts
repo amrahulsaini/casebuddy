@@ -11,6 +11,8 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const search = searchParams.get('search') || '';
     const category = searchParams.get('category') || '';
+    const minPrice = searchParams.get('minPrice') ? parseFloat(searchParams.get('minPrice')!) : null;
+    const maxPrice = searchParams.get('maxPrice') ? parseFloat(searchParams.get('maxPrice')!) : null;
     const offset = (page - 1) * limit;
 
     const connection = await productsPool.getConnection();
@@ -39,6 +41,16 @@ export async function GET(request: Request) {
         params.push(category);
       }
 
+      if (minPrice != null && !isNaN(minPrice)) {
+        query += ` AND p.price >= ?`;
+        params.push(minPrice);
+      }
+
+      if (maxPrice != null && !isNaN(maxPrice)) {
+        query += ` AND p.price <= ?`;
+        params.push(maxPrice);
+      }
+
       query += ` GROUP BY p.id ORDER BY p.created_at DESC LIMIT ? OFFSET ?`;
       params.push(limit, offset);
 
@@ -46,7 +58,8 @@ export async function GET(request: Request) {
 
       // Get total count
       let countQuery = `SELECT COUNT(DISTINCT p.id) as total FROM products p`;
-      if (category || search) {
+      const hasPriceFilter = (minPrice != null && !isNaN(minPrice)) || (maxPrice != null && !isNaN(maxPrice));
+      if (category || search || hasPriceFilter) {
         countQuery += ` LEFT JOIN product_categories pc ON p.id = pc.product_id
                        LEFT JOIN categories c ON pc.category_id = c.id
                        WHERE 1=1`;
@@ -58,6 +71,14 @@ export async function GET(request: Request) {
         if (category) {
           countQuery += ` AND pc.category_id = ?`;
           countParams.push(category);
+        }
+        if (minPrice != null && !isNaN(minPrice)) {
+          countQuery += ` AND p.price >= ?`;
+          countParams.push(minPrice);
+        }
+        if (maxPrice != null && !isNaN(maxPrice)) {
+          countQuery += ` AND p.price <= ?`;
+          countParams.push(maxPrice);
         }
         const [countResult] = await connection.execute(countQuery, countParams);
         var total = (countResult as any[])[0].total;

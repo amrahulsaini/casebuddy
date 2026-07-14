@@ -45,6 +45,8 @@ export default function ProductsPage() {
   const [filterPage, setFilterPage] = useState<string>('');
   const [filterSection, setFilterSection] = useState<string>('');
   const [filterCategory, setFilterCategory] = useState<string>('');
+  const [minPrice, setMinPrice] = useState<string>('');
+  const [maxPrice, setMaxPrice] = useState<string>('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedProducts, setSelectedProducts] = useState<Set<number>>(new Set());
@@ -52,8 +54,14 @@ export default function ProductsPage() {
 
   useEffect(() => {
     fetchPages();
-    fetchProducts();
-  }, [page, search, filterCategory]);
+  }, []);
+
+  useEffect(() => {
+    const handle = setTimeout(() => {
+      fetchProducts();
+    }, 350);
+    return () => clearTimeout(handle);
+  }, [page, search, filterCategory, minPrice, maxPrice]);
 
   useEffect(() => {
     if (filterPage) {
@@ -121,6 +129,14 @@ export default function ProductsPage() {
 
       if (filterCategory) {
         params.append('category', filterCategory);
+      }
+
+      if (minPrice) {
+        params.append('minPrice', minPrice);
+      }
+
+      if (maxPrice) {
+        params.append('maxPrice', maxPrice);
       }
 
       const response = await fetch(`/api/admin/products?${params}`);
@@ -361,6 +377,38 @@ export default function ProductsPage() {
           </div>
         )}
         
+        <div className={styles.filterGroup}>
+          <label>Min Price:</label>
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="₹ Min"
+            value={minPrice}
+            onChange={(e) => {
+              setMinPrice(e.target.value);
+              setPage(1);
+            }}
+            className={styles.select}
+          />
+        </div>
+
+        <div className={styles.filterGroup}>
+          <label>Max Price:</label>
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="₹ Max"
+            value={maxPrice}
+            onChange={(e) => {
+              setMaxPrice(e.target.value);
+              setPage(1);
+            }}
+            className={styles.select}
+          />
+        </div>
+
         <input
           type="text"
           placeholder="Search products..."
@@ -368,13 +416,15 @@ export default function ProductsPage() {
           onChange={(e) => handleSearch(e.target.value)}
           className={styles.searchInput}
         />
-        
-        {(filterPage || filterSection || filterCategory) && (
+
+        {(filterPage || filterSection || filterCategory || minPrice || maxPrice) && (
           <button
             onClick={() => {
               setFilterPage('');
               setFilterSection('');
               setFilterCategory('');
+              setMinPrice('');
+              setMaxPrice('');
             }}
             className={styles.clearButton}
           >

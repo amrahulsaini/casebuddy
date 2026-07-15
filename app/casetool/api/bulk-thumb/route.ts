@@ -17,12 +17,23 @@ export async function GET(request: NextRequest) {
 
   try {
     await ensureBulkTable(pool);
-    const [rows]: any = await pool.execute(
-      `SELECT src_thumb FROM bulk_generations WHERE file_name = ? AND case_type = ? LIMIT 1`,
+    // Match on case_type when we can, but fall back to the filename alone so a
+    // ref saved under a different category still resolves.
+    let [rows]: any = await pool.execute(
+      `SELECT src_thumb, src_url FROM bulk_generations WHERE file_name = ? AND case_type = ? LIMIT 1`,
       [name, caseType]
     );
-    const thumb: string | null = rows?.[0]?.src_thumb || null;
+    if (!rows?.length) {
+      [rows] = await pool.execute(
+        `SELECT src_thumb, src_url FROM bulk_generations WHERE file_name = ? LIMIT 1`,
+        [name]
+      );
+    }
+    const row = rows?.[0];
+    const thumb: string | null = row?.src_thumb || null;
     if (!thumb || !thumb.startsWith('data:')) {
+      // Older rows stored the reference on disk instead of in the DB.
+      if (row?.src_url) return NextResponse.redirect(new URL(row.src_url, request.url));
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
     const comma = thumb.indexOf(',');

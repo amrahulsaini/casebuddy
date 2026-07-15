@@ -183,39 +183,6 @@ export default function BulkBillingPage() {
       </section>
 
       <section className={styles.panel}>
-        <h2>Generations per model</h2>
-        <p className={styles.note}>How many times each phone model was generated (every retry counts) and what it cost.</p>
-        {data && data.byPhone.length > 0 ? (
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr><th>Reference</th><th>Latest output</th><th>Model</th><th>Times generated</th><th>Success</th><th>Billed</th></tr>
-              </thead>
-              <tbody>
-                {data.byPhone.map(p => (
-                  <tr key={`${p.fileName}_${p.caseType}`}>
-                    <td>
-                      <img className={styles.thumb} src={refUrl(p.fileName, p.caseType)} alt="ref" loading="lazy" decoding="async"
-                           onError={e => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }} />
-                    </td>
-                    <td>
-                      {p.latestGen
-                        ? <img className={styles.thumbWide} src={p.latestGen} alt="out" loading="lazy" decoding="async" />
-                        : <span className={styles.dash}>—</span>}
-                    </td>
-                    <td><b>{p.modelName}</b></td>
-                    <td><span className={p.attempts > 1 ? styles.pillWarn : styles.pillPlain}>{p.attempts}×</span></td>
-                    <td>{p.ok}</td>
-                    <td><b>{fmt(p.inr)}</b></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : <p className={styles.empty}>No generations yet.</p>}
-      </section>
-
-      <section className={styles.panel}>
         <h2>All API calls ({data?.recent.length ?? 0})</h2>
         <p className={styles.note}>Every image API call ever made, newest first — including retries and regenerations.</p>
         {data && data.recent.length > 0 ? (

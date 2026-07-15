@@ -18,12 +18,10 @@ import {
 } from '@/lib/gemini';
 import pool from '@/lib/db';
 import { ensureBulkTable } from '@/lib/bulk-table';
+import { getModelByKey, estimateGenerationCost, type Resolution } from '@/lib/image-pricing';
 
 const ENV_GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const TEXT_MODEL = process.env.TEXT_MODEL || 'gemini-3-pro-preview';
-const IMAGE_MODEL = process.env.IMAGE_MODEL || 'gemini-2.5-flash-image';
-const IMAGE_ENHANCE_MODEL = process.env.IMAGE_ENHANCE_MODEL || 'gemini-3-pro-image-preview';
-const IMAGE_NANO_MODEL = process.env.IMAGE_NANO_MODEL || 'gemini-3.1-flash-image-preview';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -56,8 +54,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'No reference image uploaded.' }, { status: 400 });
     }
 
-    const selectedImageModel =
-      imageModel === 'high' ? IMAGE_ENHANCE_MODEL : imageModel === 'nano' ? IMAGE_NANO_MODEL : IMAGE_MODEL;
+    const modelSpec = getModelByKey(imageModel);
+    const selectedImageModel = modelSpec.id;
 
     const arrayBuffer = await caseImage.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
@@ -152,28 +150,44 @@ export async function POST(request: NextRequest) {
     // not statically serve files written to /public after build).
     const imageUrl = `/casetool/api/bulk-file?name=${encodeURIComponent(fileName)}`;
 
+    // Cost of this generation (analysis is skipped when a prompt is reused).
+    const resolution = ((formData.get('resolution') as string) || '1k') as Resolution;
+    const cost = estimateGenerationCost(imageModel, { resolution, withAnalysis: !reusePrompt });
+
     // Persist/Upsert the result. Keep any existing right/wrong mark intact.
     try {
       await ensureBulkTable(pool);
       await pool.execute(
         `INSERT INTO bulk_generations
-           (file_name, model_name, case_type, gen_file, gen_url, file_base, prompt, status)
-         VALUES (?, ?, ?, ?, ?, ?, ?, 'done')
+           (file_name, model_name, case_type, gen_file, gen_url, file_base, prompt, status,
+            image_model, cost_usd, cost_inr)
+         VALUES (?, ?, ?, ?, ?, ?, ?, 'done', ?, ?, ?)
          ON DUPLICATE KEY UPDATE
-           model_name = VALUES(model_name),
-           gen_file   = VALUES(gen_file),
-           gen_url    = VALUES(gen_url),
-           file_base  = VALUES(file_base),
-           prompt     = VALUES(prompt),
-           status     = 'done'`,
-        [caseImage.name || base, phoneModel, caseType, fileName, imageUrl, base, finalPrompt]
+           model_name  = VALUES(model_name),
+           gen_file    = VALUES(gen_file),
+           gen_url     = VALUES(gen_url),
+           file_base   = VALUES(file_base),
+           prompt      = VALUES(prompt),
+           status      = 'done',
+           image_model = VALUES(image_model),
+           cost_usd    = VALUES(cost_usd),
+           cost_inr    = VALUES(cost_inr)`,
+        [caseImage.name || base, phoneModel, caseType, fileName, imageUrl, base, finalPrompt,
+         selectedImageModel, cost.totalUsd, cost.totalInr]
       );
     } catch (e) {
       // Don't fail the generation if the table isn't migrated yet.
       console.error('bulk_generations upsert failed:', e);
     }
 
-    return NextResponse.json({ success: true, url: imageUrl, prompt: finalPrompt, fileBase: base });
+    return NextResponse.json({
+      success: true,
+      url: imageUrl,
+      prompt: finalPrompt,
+      fileBase: base,
+      cost,
+      modelId: selectedImageModel,
+    });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error?.message || 'Generation failed' }, { status: 500 });
   }

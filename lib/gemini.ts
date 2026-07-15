@@ -43,9 +43,11 @@ export function buildAnalysisPrompt(phoneModel: string): string {
 
 Context:
 - The uploaded image is the seller's real physical case reference.
+- IMPORTANT — HOW TO READ IT: it is a casual snapshot of the case HELD IN A HAND against a plain grey/white wall. The hand, palm, fingers, skin tone, and the wall are visible THROUGH the clear plastic. They are NOT part of the case. The case is colorless, water-clear plastic. Never describe the skin tone, the beige/brown/grey shading, or the diagonal light-to-dark boundary where the hand ends as if it were the case's own tint, frost, smoke, or gradient — that is just the hand behind clear plastic.
 - Final images must show "${phoneModel}" fitted into this exact case.
 - Main failure to avoid: the visible phone area turning into flat white or flat black.
 - Main failure to avoid: a blank white front screen.
+- Main failure to avoid: describing the case as tinted/smoky/shaded because a hand was behind it in the photo.
 
 STEP 1: Determine "${phoneModel}" hardware and authentic appearance
 - Rear camera count
@@ -58,18 +60,16 @@ STEP 1: Determine "${phoneModel}" hardware and authentic appearance
 - Reproduce the model's TRUE color exactly. Do NOT invent or substitute a different color, and do NOT add any pattern, print, weave, carbon-fiber look, or surface texture the real phone does not have. If the real phone is a neutral color (natural titanium, silver, midnight black, white), use that real neutral color; if it is a vivid color, use that real vivid color — but always the phone's actual color, never a guess from a color list
 - The back must read as the real phone's solid, smooth, opaque panel in its true color. The only wrong look to avoid is a translucent see-through smoky-grey gradient with no solid color behind the glass — neutral real colors are not the problem, invented colors and invented textures are
 
-STEP 2: Analyze the uploaded case reference with precision
-- Exact frame / bumper color
-- Exact back panel color or transparency
-- Transparency level, tint, frost, smokiness, or gloss
-- Material finish and surface texture
-- Camera cutout shape, outline color, and placement
-- Side lip thickness, corner shape, and cutouts
-- Whether the phone body should be clearly visible through transparent or open sections
-- Any details needed so the clear area does not disappear into a bright background
+STEP 2: Analyze the uploaded case reference — GEOMETRY ONLY
+Describe ONLY physical shape facts, ignoring the hand and the wall behind the case:
+- Camera cutout shape, size, and placement, and the raised camera-protection lip around it
+- Corner shape and how thick/reinforced the corners are (these slim TPU cases usually have only a modest corner reinforcement — do not overstate it)
+- Side lip thickness, button cutouts, and port cutout
+- Outer silhouette and proportions
 
 CRITICAL:
-- The case description will be used to recreate this product. Be exact about color, transparency, and finish.
+- The case is colorless, water-clear TPU. Do NOT report any tint, frost, smoke, gradient, shading, or color for it — anything like that in the photo is the hand or the room behind the clear plastic.
+- Do not mention the hand, fingers, skin, or the background anywhere in your output.
 - The visible phone body must stay realistic and must not be replaced with white fill, black fill, or an empty placeholder.
 
 STEP 3: Create the generation prompt
@@ -83,7 +83,8 @@ Hard requirements for final_generation_prompt:
 - Explicitly forbid flat white, flat black, blank filler, or paper-like insert areas inside the case
 - State that any front-facing phone screen must show realistic front glass with a tasteful neutral abstract wallpaper or lockscreen gradient
 - Explicitly forbid a blank white screen and a solid black screen
-- State that the case colors, transparency, texture, and geometry must match the uploaded reference image exactly
+- State that the case GEOMETRY (silhouette, corners, cutouts, camera lip, lip thickness) must match the uploaded reference exactly, and that the case itself is colorless water-clear plastic with no tint, frost, smoke, or shading of its own
+- State that the hand, skin tone, and grey backdrop seen through the clear plastic in the reference photo must be ignored entirely and never reproduced as case tint or shading
 - State that all panels must reuse one identical phone-and-case asset, changing only angle, crop, or hand pose
 - State that backgrounds should be pure white (#FFFFFF) studio backgrounds with no cream, beige, or warm tint, while still keeping transparent materials readable
 - Forbid logos, brand names, watermarks, and phone model text anywhere on the case or screen
@@ -251,10 +252,12 @@ MASTER CASE ANALYSIS:
 ${finalPrompt}
 
 GLOBAL HARD CONSTRAINTS:
-- Preserve the case geometry from the reference image exactly: outer silhouette, camera island placement, lens opening sizes, corner radius, button cutouts, side lip thickness, and material finish.
+- HOW TO READ THE REFERENCE PHOTO (READ FIRST — MOST IMPORTANT): The reference is a casual photo of the real physical case being HELD IN A HAND in front of a plain grey/white wall. Everything visible THROUGH the clear case is the photographer's hand and the room behind it — it is NOT part of the case and must NEVER be copied. Specifically IGNORE and DO NOT reproduce: the hand, palm, fingers, fingernails, knuckles, skin tone, arm hair, the grey/white backdrop, the room lighting, any beige/brown/tan/grey tint the skin casts through the plastic, the soft diagonal light-to-dark boundary where the hand ends and the wall begins, and any haze, shading, or gradient created by them. The case's actual material is 100% colorless, untinted, water-clear plastic with nothing behind it. Do NOT render a hand in any panel unless that panel explicitly asks for one.
+- TAKE ONLY GEOMETRY FROM THE REFERENCE: The ONLY things to copy from the reference photo are physical shape facts — outer silhouette and proportions, corner shape and thickness, camera opening shape/size/position, the raised camera lip, button cutouts, port cutout, and side lip thickness. Take NOTHING about color, tint, shading, or lighting from the photo, because those come from the hand and the room, not from the case.
+- Preserve the case geometry from the reference image exactly: outer silhouette, camera island placement, lens opening sizes, corner radius, button cutouts, and side lip thickness.
 - CAMERA PROTECTION LIP (CRITICAL — DO NOT OMIT): The case MUST include its raised camera-protection rim exactly as in the reference: a raised wall/lip of the case material that stands proud around the entire camera module opening and rises ABOVE the lens surface so the lenses never touch a flat surface. Render this raised border clearly with its visible thickness and edge highlight around the cutout. Do NOT flatten it, do NOT omit it, do NOT let the case end flush with the camera island, and do NOT leave the camera module sticking out uncovered past the case. The camera opening must read as a recessed well surrounded by a raised protective ring.
-- CORNER FIDELITY (CRITICAL): Reproduce the corners EXACTLY as they appear in the reference case — same thinness, same radius, same slim profile. Do NOT thicken, bulge, or round the corners into a chunky raised bumper, rugged armor corner, shock-absorber corner, or reinforced air-cushion corner. If the reference case has slim, low-profile corners, the generated case must keep those exact slim corners. Never add extra corner bulk that is not present in the reference image.
-- Copy the case colors, transparency, tint, artwork, and surface texture exactly from the reference image. Do not reinterpret, simplify, recolor, or redesign anything.
+- CORNER FIDELITY (CRITICAL): Match the corners to the reference at exactly the thickness shown — no more, no less. These slim TPU cases have only a MODEST corner reinforcement; if the reference shows a subtle reinforced/air-cushion corner, reproduce it at that same subtle scale. Do NOT exaggerate it into a chunky rugged-armor corner, a fat shock-absorber block, or a bulging bumper, and do NOT add corner bulk the reference does not have. If the reference corners are slim and low-profile, keep them slim.
+- THE CASE IS COLORLESS: Reproduce the case as clean, water-clear, completely colorless and untinted plastic. It has no color of its own, no print, no artwork, and no pattern. Any tint or shading you think you see in the reference is the hand behind it — ignore it. Copy shape from the reference, never color or shading.
 - Use one identical phone-and-case asset consistently across all panels. Only the viewing angle, crop, or hand pose may change.
 - ${phoneFinishLine}
 - If the case has transparent, frosted, or open sections, the real phone body must remain visible underneath in its authentic finish. Never replace the visible phone area with flat white, flat black, blank filler, paper inserts, or empty placeholders.
@@ -265,7 +268,8 @@ GLOBAL HARD CONSTRAINTS:
 - Keep every panel visually consistent as if photographed in the same product shoot.
 
 REFERENCE IMAGE PRIORITY:
-- If any instruction conflicts with the uploaded reference image, follow the uploaded reference image for case geometry, case color, transparency, and material finish.
+- If any instruction conflicts with the uploaded reference image, follow the reference image for CASE GEOMETRY ONLY (silhouette, corners, cutouts, camera lip, lip thickness).
+- Never follow the reference for color, tint, shading, lighting, or background — the reference is a hand-held snapshot, so those belong to the hand and the room, not the case. Colors, lighting, and background always come from the instructions above.
 
 LAYOUT ENFORCEMENT (CRITICAL — THE GRID MUST BE EXACT):
 - The output is ONE ${gridLayout} and nothing else. ${gridLayout.startsWith('2') ? 'Exactly TWO equal cells in a single horizontal row.' : 'Exactly FOUR equal cells arranged as 2 rows by 2 columns.'}

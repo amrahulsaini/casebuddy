@@ -22,6 +22,7 @@ import {
   getModelByKey, getRateInr, apiImageSize, classifyResolution, type Resolution,
 } from '@/lib/image-pricing';
 import sharp from 'sharp';
+import { whitenBackground } from '@/lib/whiten';
 
 const ENV_GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 // 'gemini-3-pro-preview' was retired and 404s; use the non-expiring alias.
@@ -180,7 +181,18 @@ export async function POST(request: NextRequest) {
     const base = sanitizeFileName(caseImage.name || phoneModel);
     const fileName = `${base}_${Date.now()}.png`;
     const filePath = join(outputDir, fileName);
-    const genBuffer = Buffer.from(genB64, 'base64');
+    let genBuffer: Buffer = Buffer.from(genB64, 'base64');
+
+    // Clear cases: the model still intermittently renders an off-white
+    // background and a faint grey wash over the empty shell even at
+    // temperature 0, so snap near-white neutral pixels to true white.
+    if (caseType === 'transparent' || caseType === 'doyers') {
+      try {
+        genBuffer = await whitenBackground(genBuffer);
+      } catch (e) {
+        console.error('whitenBackground failed, using raw output:', e);
+      }
+    }
     await writeFile(filePath, genBuffer);
 
     // Measure what was ACTUALLY produced so billing reflects reality rather

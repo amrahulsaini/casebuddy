@@ -15,6 +15,7 @@ import {
   getAngleDescriptions,
 } from '@/lib/gemini';
 import { StreamWriter } from '@/lib/stream-helpers';
+import { whitenBackground } from '@/lib/whiten';
 import { logAPIUsage } from '@/lib/pricing';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
@@ -495,7 +496,17 @@ IMPORTANT: DO NOT RECREATE OR REDESIGN THE CASE. Use the EXACT case from the ref
           const sanitizedModel = phoneModel.replace(/[^a-z0-9]/gi, '_').toLowerCase();
           const fileName = `${sanitizedModel}_${ts}.png`;
           const filePath = join(outputDir, fileName);
-          await writeFile(filePath, Buffer.from(genB64, 'base64'));
+          let outBuffer: Buffer = Buffer.from(genB64, 'base64');
+          // Clear cases: snap near-white neutral pixels to true white (the model
+          // still adds an off-white background / grey wash even at temperature 0).
+          if (caseType === 'transparent' || caseType === 'doyers') {
+            try {
+              outBuffer = await whitenBackground(outBuffer);
+            } catch (e) {
+              console.error('whitenBackground failed, using raw output:', e);
+            }
+          }
+          await writeFile(filePath, outBuffer);
           // No broad pattern, just direct path
           console.log('Image saved to:', filePath);
 

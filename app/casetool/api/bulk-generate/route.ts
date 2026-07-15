@@ -18,7 +18,10 @@ import {
 } from '@/lib/gemini';
 import pool from '@/lib/db';
 import { ensureBulkTable } from '@/lib/bulk-table';
-import { getModelByKey, estimateGenerationCost, type Resolution } from '@/lib/image-pricing';
+import {
+  getModelByKey, estimateGenerationCost, apiImageSize, classifyResolution, type Resolution,
+} from '@/lib/image-pricing';
+import sharp from 'sharp';
 
 const ENV_GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const TEXT_MODEL = process.env.TEXT_MODEL || 'gemini-3-pro-preview';
@@ -106,7 +109,10 @@ export async function POST(request: NextRequest) {
       gridPrompt += `\n\nADDITIONAL USER INSTRUCTION (HIGH PRIORITY, applies on top of everything above):\n${customPrompt}`;
     }
 
-    // 3. Generate the grid image
+    // 3. Generate the grid image. imageConfig.imageSize asks for the requested
+    // resolution; models that don't support it fall back to their default.
+    const requested = ((formData.get('resolution') as string) || '1k') as Resolution;
+    const wanted = modelSpec.resolutions.includes(requested) ? requested : '1k';
     const imgPayload = {
       contents: [
         {
@@ -117,7 +123,13 @@ export async function POST(request: NextRequest) {
           ],
         },
       ],
-      generationConfig: { temperature: 0.2, topP: 0.9, topK: 40, candidateCount: 1 },
+      generationConfig: {
+        temperature: 0.2,
+        topP: 0.9,
+        topK: 40,
+        candidateCount: 1,
+        imageConfig: { imageSize: apiImageSize(wanted) },
+      },
     };
     const imgRes = await callGemini(
       `https://generativelanguage.googleapis.com/v1beta/models/${selectedImageModel}:generateContent`,
@@ -145,14 +157,27 @@ export async function POST(request: NextRequest) {
     const base = sanitizeFileName(caseImage.name || phoneModel);
     const fileName = `${base}_${Date.now()}.png`;
     const filePath = join(outputDir, fileName);
-    await writeFile(filePath, Buffer.from(genB64, 'base64'));
+    const genBuffer = Buffer.from(genB64, 'base64');
+    await writeFile(filePath, genBuffer);
+
+    // Measure what was ACTUALLY produced so billing reflects reality rather
+    // than what was requested (models may ignore/clamp the requested size).
+    let genWidth = 0, genHeight = 0;
+    try {
+      const meta = await sharp(genBuffer).metadata();
+      genWidth = meta.width || 0;
+      genHeight = meta.height || 0;
+    } catch { /* fall back to the requested size */ }
+    const actualRes: Resolution = genWidth && genHeight
+      ? classifyResolution(genWidth, genHeight)
+      : wanted;
     // Serve through an API route so previews work in production too (Next does
     // not statically serve files written to /public after build).
     const imageUrl = `/casetool/api/bulk-file?name=${encodeURIComponent(fileName)}`;
 
-    // Cost of this generation (analysis is skipped when a prompt is reused).
-    const resolution = ((formData.get('resolution') as string) || '1k') as Resolution;
-    const cost = estimateGenerationCost(imageModel, { resolution, withAnalysis: !reusePrompt });
+    // Cost of this generation, based on the real output size. Analysis is
+    // skipped (and not billed) when a prompt is reused.
+    const cost = estimateGenerationCost(imageModel, { resolution: actualRes, withAnalysis: !reusePrompt });
 
     // Persist/Upsert the result. Keep any existing right/wrong mark intact.
     try {
@@ -160,8 +185,8 @@ export async function POST(request: NextRequest) {
       await pool.execute(
         `INSERT INTO bulk_generations
            (file_name, model_name, case_type, gen_file, gen_url, file_base, prompt, status,
-            image_model, cost_usd, cost_inr)
-         VALUES (?, ?, ?, ?, ?, ?, ?, 'done', ?, ?, ?)
+            image_model, cost_usd, cost_inr, gen_width, gen_height, resolution)
+         VALUES (?, ?, ?, ?, ?, ?, ?, 'done', ?, ?, ?, ?, ?, ?)
          ON DUPLICATE KEY UPDATE
            model_name  = VALUES(model_name),
            gen_file    = VALUES(gen_file),
@@ -171,9 +196,12 @@ export async function POST(request: NextRequest) {
            status      = 'done',
            image_model = VALUES(image_model),
            cost_usd    = VALUES(cost_usd),
-           cost_inr    = VALUES(cost_inr)`,
+           cost_inr    = VALUES(cost_inr),
+           gen_width   = VALUES(gen_width),
+           gen_height  = VALUES(gen_height),
+           resolution  = VALUES(resolution)`,
         [caseImage.name || base, phoneModel, caseType, fileName, imageUrl, base, finalPrompt,
-         selectedImageModel, cost.totalUsd, cost.totalInr]
+         selectedImageModel, cost.totalUsd, cost.totalInr, genWidth, genHeight, actualRes]
       );
     } catch (e) {
       // Don't fail the generation if the table isn't migrated yet.
@@ -187,6 +215,10 @@ export async function POST(request: NextRequest) {
       fileBase: base,
       cost,
       modelId: selectedImageModel,
+      width: genWidth,
+      height: genHeight,
+      resolution: actualRes,
+      requestedResolution: wanted,
     });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error?.message || 'Generation failed' }, { status: 500 });

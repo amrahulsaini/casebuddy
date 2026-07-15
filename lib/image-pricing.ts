@@ -86,6 +86,22 @@ export function getModelByKey(key: string): ImageModelSpec {
   return IMAGE_MODELS.find(m => m.key === key) || IMAGE_MODELS[1];
 }
 
+/** API value for the requested image size — must be uppercase K. */
+export function apiImageSize(r: Resolution): string {
+  return r.toUpperCase(); // '1K' | '2K' | '4K'
+}
+
+/**
+ * Classify an actually-generated image into its billing tier from its real
+ * pixel dimensions, so cost reflects what Google actually produced.
+ */
+export function classifyResolution(width: number, height: number): Resolution {
+  const longest = Math.max(width || 0, height || 0);
+  if (longest <= 1536) return '1k';
+  if (longest <= 3072) return '2k';
+  return '4k';
+}
+
 export interface CostBreakdown {
   analysisUsd: number;
   inputUsd: number;

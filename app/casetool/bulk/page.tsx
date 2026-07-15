@@ -26,6 +26,10 @@ interface Item {
   error?: string;
   mark: Mark;
   prompt?: string;    // reusable analysis prompt
+  width?: number;     // actual generated pixel size
+  height?: number;
+  resolution?: string; // actual billing tier (1k/2k/4k)
+  costInr?: number;   // actual cost of this generation
 }
 
 // Natural sort so "Vivo y2" < "Vivo y10"
@@ -99,6 +103,10 @@ export default function BulkPage() {
             fileBase: r.file_base || undefined,
             mark: (r.mark as Mark) || 'none',
             prompt: r.prompt || undefined,
+            width: r.gen_width || undefined,
+            height: r.gen_height || undefined,
+            resolution: r.resolution || undefined,
+            costInr: r.cost_inr != null ? Number(r.cost_inr) : undefined,
           })));
         }
       } catch { /* offline / not migrated yet */ }
@@ -125,9 +133,11 @@ export default function BulkPage() {
     () => estimateGenerationCost(imageModel, { resolution }),
     [imageModel, resolution]
   );
-  // Cost already spent in this browser session
+  // Cost already spent — uses the real per-row cost when we have it.
   const sessionInr = useMemo(
-    () => items.filter(i => i.status === 'done').length * perImage.totalInr,
+    () => items
+      .filter(i => i.status === 'done')
+      .reduce((sum, i) => sum + (i.costInr ?? perImage.totalInr), 0),
     [items, perImage]
   );
 
@@ -274,7 +284,11 @@ export default function BulkPage() {
       const res = await fetch('/casetool/api/bulk-generate', { method: 'POST', body: fd });
       const data = await res.json();
       if (data.success) {
-        updateItem(item.id, { status: 'done', genUrl: data.url, fileBase: data.fileBase, prompt: data.prompt });
+        updateItem(item.id, {
+          status: 'done', genUrl: data.url, fileBase: data.fileBase, prompt: data.prompt,
+          width: data.width, height: data.height, resolution: data.resolution,
+          costInr: data.cost?.totalInr,
+        });
       } else {
         updateItem(item.id, { status: 'error', error: data.error || 'Failed' });
       }
@@ -603,7 +617,10 @@ export default function BulkPage() {
                   {item.genUrl ? (
                     <>
                       <img src={item.genUrl} alt="generated" loading="lazy" decoding="async" />
-                      <span className={styles.thumbTag}>out</span>
+                      <span className={styles.thumbTag}>
+                        {item.width ? `${item.resolution?.toUpperCase()} · ${item.width}×${item.height}` : 'out'}
+                      </span>
+                      {item.costInr != null && <span className={styles.costTag}>₹{item.costInr.toFixed(2)}</span>}
                     </>
                   ) : item.status === 'generating' ? (
                     <div className={styles.spinner} />

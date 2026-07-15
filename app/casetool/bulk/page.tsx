@@ -4,9 +4,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import JSZip from 'jszip';
 import {
   Play, Square, Download, FolderUp, Check, X, Eye, Settings,
-  RotateCcw, Lock, KeyRound, Trash2, Pencil, FileArchive, ChevronRight, IndianRupee,
+  RotateCcw, Lock, KeyRound, Trash2, Pencil, FileArchive, ChevronRight,
 } from 'lucide-react';
-import { IMAGE_MODELS, estimateGenerationCost, getModelByKey, USD_TO_INR, type Resolution } from '@/lib/image-pricing';
+import { IMAGE_MODELS, getModelByKey, type Resolution } from '@/lib/image-pricing';
 import styles from './bulk.module.css';
 
 const BULK_PASS = 'Bulk@321';
@@ -123,33 +123,8 @@ export default function BulkPage() {
   // ---- Preview modal ----
   const [preview, setPreview] = useState<Item | null>(null);
 
-  // ---- Billing ----
-  const [showBilling, setShowBilling] = useState(false);
-  const [billing, setBilling] = useState<{ images: number; inr: number; usd: number; byModel: any[] } | null>(null);
+  // Output resolution (billing lives on /casetool/bulk/billing, not here)
   const [resolution, setResolution] = useState<Resolution>('1k');
-
-  // Live estimate for the currently selected model
-  const perImage = useMemo(
-    () => estimateGenerationCost(imageModel, { resolution }),
-    [imageModel, resolution]
-  );
-  // Cost already spent — uses the real per-row cost when we have it.
-  const sessionInr = useMemo(
-    () => items
-      .filter(i => i.status === 'done')
-      .reduce((sum, i) => sum + (i.costInr ?? perImage.totalInr), 0),
-    [items, perImage]
-  );
-
-  const loadBilling = useCallback(async () => {
-    try {
-      const res = await fetch(`/casetool/api/bulk-billing?case_type=${encodeURIComponent(category)}`);
-      const data = await res.json();
-      if (data.success) setBilling(data);
-    } catch { /* ignore */ }
-  }, [category]);
-
-  const openBilling = () => { setShowBilling(true); loadBilling(); };
 
   // ---- Edit prompt modal ----
   const [editItem, setEditItem] = useState<Item | null>(null);
@@ -467,9 +442,6 @@ export default function BulkPage() {
           <span className={styles.right}>Right <b>{rightCount}</b></span>
           <span className={styles.wrong}>Wrong <b>{wrongCount}</b></span>
         </div>
-        <button className={styles.iconBtn} onClick={openBilling} title="Billing & costs">
-          <IndianRupee size={16} /> Billing
-        </button>
         <button className={styles.iconBtn} onClick={() => setShowSettings(s => !s)} title="Settings">
           <Settings size={18} /> Settings
         </button>
@@ -497,9 +469,7 @@ export default function BulkPage() {
             <label>Image model</label>
             <select value={imageModel} onChange={e => setImageModel(e.target.value)}>
               {IMAGE_MODELS.map(m => (
-                <option key={m.key} value={m.key}>
-                  {m.label} — ₹{estimateGenerationCost(m.key, { resolution: m.resolutions.includes(resolution) ? resolution : '1k' }).totalInr}/image
-                </option>
+                <option key={m.key} value={m.key}>{m.label}</option>
               ))}
             </select>
           </div>
@@ -620,7 +590,6 @@ export default function BulkPage() {
                       <span className={styles.thumbTag}>
                         {item.width ? `${item.resolution?.toUpperCase()} · ${item.width}×${item.height}` : 'out'}
                       </span>
-                      {item.costInr != null && <span className={styles.costTag}>₹{item.costInr.toFixed(2)}</span>}
                     </>
                   ) : item.status === 'generating' ? (
                     <div className={styles.spinner} />
@@ -667,105 +636,6 @@ export default function BulkPage() {
               <button className={`${styles.act} ${preview.mark === 'right' ? styles.actRightOn : ''}`} disabled={!preview.genUrl} onClick={() => { mark(preview, 'right'); }}><Check size={15} /> Right</button>
               <button className={`${styles.act} ${preview.mark === 'wrong' ? styles.actWrongOn : ''}`} disabled={!preview.genUrl} onClick={() => { mark(preview, 'wrong'); }}><X size={15} /> Wrong</button>
               <button className={styles.btn} disabled={!preview.genUrl} onClick={() => downloadOne(preview)}><Download size={15} /> Download</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Billing modal */}
-      {showBilling && (
-        <div className={styles.modal} onClick={() => setShowBilling(false)}>
-          <div className={styles.modalCard} onClick={e => e.stopPropagation()}>
-            <div className={styles.modalHead}>
-              <b>Billing &amp; cost per image</b>
-              <button onClick={() => setShowBilling(false)}><X size={18} /></button>
-            </div>
-
-            <div className={styles.billTop}>
-              <div className={styles.billStat}>
-                <span>Selected model</span>
-                <b>{getModelByKey(imageModel).label}</b>
-              </div>
-              <div className={styles.billStat}>
-                <span>Cost per image</span>
-                <b className={styles.billBig}>₹{perImage.totalInr.toFixed(2)}</b>
-              </div>
-              <div className={styles.billStat}>
-                <span>This session ({items.filter(i => i.status === 'done').length} done)</span>
-                <b>₹{sessionInr.toFixed(2)}</b>
-              </div>
-              <div className={styles.billStat}>
-                <span>All time ({billing?.images ?? 0} images)</span>
-                <b>₹{(billing?.inr ?? 0).toFixed(2)}</b>
-              </div>
-            </div>
-
-            <p className={styles.modalNote}>
-              Official Google paid-tier rates, converted at <b>₹{USD_TO_INR}/$1</b>. Each mockup =
-              one analysis call + one image generation. Estimates use ~{'≈'}2,000 input tokens
-              per image; actual token counts vary slightly with reference size.
-            </p>
-
-            <div className={styles.billTableWrap}>
-              <table className={styles.billTable}>
-                <thead>
-                  <tr>
-                    <th>Model</th>
-                    <th>Model ID</th>
-                    <th>Res</th>
-                    <th>Image</th>
-                    <th>+ Input</th>
-                    <th>+ Analysis</th>
-                    <th>Total /image</th>
-                    <th>×1000</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {IMAGE_MODELS.flatMap(m =>
-                    m.resolutions.map(r => {
-                      const c = estimateGenerationCost(m.key, { resolution: r });
-                      const active = m.key === imageModel && r === resolution;
-                      return (
-                        <tr key={`${m.key}_${r}`} className={active ? styles.billRowActive : ''}>
-                          <td><b>{m.label}</b></td>
-                          <td><code>{m.id}</code></td>
-                          <td>{r.toUpperCase()}</td>
-                          <td>${c.outputImageUsd.toFixed(4)}</td>
-                          <td>${c.inputUsd.toFixed(4)}</td>
-                          <td>${c.analysisUsd.toFixed(4)}</td>
-                          <td><b>₹{c.totalInr.toFixed(2)}</b></td>
-                          <td>₹{(c.totalInr * 1000).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {billing && billing.byModel.length > 0 && (
-              <>
-                <p className={styles.modalNote}><b>Actual spend by model</b></p>
-                <div className={styles.billTableWrap}>
-                  <table className={styles.billTable}>
-                    <thead><tr><th>Model ID</th><th>Images</th><th>Spent</th></tr></thead>
-                    <tbody>
-                      {billing.byModel.map(b => (
-                        <tr key={b.model}>
-                          <td><code>{b.model}</code></td>
-                          <td>{b.images}</td>
-                          <td><b>₹{b.inr.toFixed(2)}</b></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            )}
-
-            <div className={styles.modalFoot}>
-              <button className={styles.btn} onClick={loadBilling}><RotateCcw size={15} /> Refresh</button>
-              <button className={styles.btnPrimary} onClick={() => setShowBilling(false)}>Done</button>
             </div>
           </div>
         </div>

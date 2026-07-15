@@ -37,6 +37,25 @@ export function ensureBulkTable(pool: Pool): Promise<void> {
         KEY idx_mark (mark)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `);
+    // Every image API call (including retries) is logged here for billing.
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS bulk_api_calls (
+        id          INT AUTO_INCREMENT PRIMARY KEY,
+        case_type   VARCHAR(50)  NOT NULL DEFAULT 'transparent',
+        file_name   VARCHAR(255) DEFAULT NULL,
+        model_name  VARCHAR(255) DEFAULT NULL,
+        image_model VARCHAR(64)  DEFAULT NULL,
+        model_key   VARCHAR(24)  DEFAULT NULL,
+        model_label VARCHAR(64)  DEFAULT NULL,
+        cost_inr    DECIMAL(10,2) NOT NULL DEFAULT 0,
+        status      VARCHAR(20)  NOT NULL DEFAULT 'success',
+        created_at  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+        KEY idx_case (case_type),
+        KEY idx_created (created_at),
+        KEY idx_model (image_model)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
     // Best-effort add columns for tables created by older versions.
     const adds = [
       "ADD COLUMN src_file VARCHAR(255) DEFAULT NULL",

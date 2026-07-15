@@ -64,7 +64,7 @@ export const IMAGE_MODELS: ImageModelSpec[] = [
 
 /** Text model used for the reference-image analysis step. */
 export const TEXT_MODEL_PRICING = {
-  id: 'gemini-3-pro-preview',
+  id: 'gemini-pro-latest',
   inputPerMTokens: 2.0,
   outputPerMTokens: 12.0,
 };

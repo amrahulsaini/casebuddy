@@ -82,6 +82,22 @@ export const TOKEN_ESTIMATES = {
 
 export const USD_TO_INR = Number(process.env.NEXT_PUBLIC_USD_TO_INR || 96);
 
+/**
+ * Billed rupee rate charged per image API call, by model key.
+ * These are fixed business rates (not derived from token math) — every image
+ * API call, including retries and regenerations, is counted at this rate.
+ */
+export const RATE_INR: Record<string, number> = {
+  lite: 7.32,    // Nano Banana 2 Lite
+  normal: 3.65,  // Nano Banana (2.5 Flash)
+  nano: 6.54,    // Nano Banana 2
+  high: 12.35,   // Nano Banana Pro
+};
+
+export function getRateInr(modelKey: string): number {
+  return RATE_INR[modelKey] ?? RATE_INR.normal;
+}
+
 export function getModelByKey(key: string): ImageModelSpec {
   return IMAGE_MODELS.find(m => m.key === key) || IMAGE_MODELS[1];
 }

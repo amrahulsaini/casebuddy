@@ -19,7 +19,7 @@ import {
 import pool from '@/lib/db';
 import { ensureBulkTable } from '@/lib/bulk-table';
 import {
-  getModelByKey, estimateGenerationCost, apiImageSize, classifyResolution, type Resolution,
+  getModelByKey, getRateInr, apiImageSize, classifyResolution, type Resolution,
 } from '@/lib/image-pricing';
 import sharp from 'sharp';
 
@@ -137,6 +137,25 @@ export async function POST(request: NextRequest) {
       apiKey
     );
 
+    // Bill the image API call the moment it completes — every call counts,
+    // including retries and regenerations, whether or not it returned usable
+    // image data (the request was still made and charged).
+    const callRate = getRateInr(imageModel);
+    const logCall = async (status: string) => {
+      try {
+        await ensureBulkTable(pool);
+        await pool.execute(
+          `INSERT INTO bulk_api_calls
+             (case_type, file_name, model_name, image_model, model_key, model_label, cost_inr, status)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          [caseType, caseImage.name || null, phoneModel, selectedImageModel,
+           imageModel, modelSpec.label, callRate, status]
+        );
+      } catch (e) {
+        console.error('bulk_api_calls log failed:', e);
+      }
+    };
+
     let genB64: string | null = null;
     const parts = imgRes.candidates[0]?.content?.parts || [];
     for (const p of parts) {
@@ -146,8 +165,10 @@ export async function POST(request: NextRequest) {
       }
     }
     if (!genB64) {
+      await logCall('no_image');
       return NextResponse.json({ success: false, error: 'Model returned no image data.', prompt: finalPrompt }, { status: 502 });
     }
+    await logCall('success');
 
     // 4. Save under public/output/bulk
     const outputDir = join(process.cwd(), 'public', 'output', 'bulk');
@@ -175,9 +196,8 @@ export async function POST(request: NextRequest) {
     // not statically serve files written to /public after build).
     const imageUrl = `/casetool/api/bulk-file?name=${encodeURIComponent(fileName)}`;
 
-    // Cost of this generation, based on the real output size. Analysis is
-    // skipped (and not billed) when a prompt is reused.
-    const cost = estimateGenerationCost(imageModel, { resolution: actualRes, withAnalysis: !reusePrompt });
+    // Billed at the fixed per-call rate for the selected model.
+    const cost = { totalInr: callRate, totalUsd: 0 };
 
     // Persist/Upsert the result. Keep any existing right/wrong mark intact.
     try {

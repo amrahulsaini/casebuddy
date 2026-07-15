@@ -80,7 +80,7 @@ export const TOKEN_ESTIMATES = {
   analysisOutputTokens: 700,
 };
 
-export const USD_TO_INR = Number(process.env.NEXT_PUBLIC_USD_TO_INR || 88);
+export const USD_TO_INR = Number(process.env.NEXT_PUBLIC_USD_TO_INR || 96);
 
 export function getModelByKey(key: string): ImageModelSpec {
   return IMAGE_MODELS.find(m => m.key === key) || IMAGE_MODELS[1];

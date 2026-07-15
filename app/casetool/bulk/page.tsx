@@ -390,16 +390,30 @@ export default function BulkPage() {
   };
 
   // ---- Mark (persisted to DB) ----
-  const mark = (item: Item, m: Mark) => {
+  const setMark = (item: Item, m: Mark) => {
     if (!item.genUrl) return; // only judge generated output
-    const next: Mark = item.mark === m ? 'none' : m;
-    updateItem(item.id, { mark: next });
-    setPreview(p => (p && p.id === item.id ? { ...p, mark: next } : p));
+    updateItem(item.id, { mark: m });
+    setPreview(p => (p && p.id === item.id ? { ...p, mark: m } : p));
     const fd = new FormData();
     fd.append('file_name', item.fileName);
     fd.append('case_type', category);
-    fd.append('mark', next);
+    fd.append('mark', m);
     fetch('/casetool/api/bulk-mark', { method: 'POST', body: fd }).catch(() => {});
+  };
+
+  // Right = accept it: mark right and download the generated image.
+  const acceptRight = async (item: Item) => {
+    if (!item.genUrl) return;
+    setMark(item, 'right');
+    await downloadOne(item);
+  };
+
+  // Wrong = reject it: mark wrong and generate this one again.
+  const rejectWrong = async (item: Item) => {
+    if (!item.genUrl) return;
+    setMark(item, 'wrong');
+    setPreview(null);
+    await generateOne(item);
   };
 
   // ---- Edit prompt + regenerate ----
@@ -623,8 +637,8 @@ export default function BulkPage() {
               </div>
 
               <div className={styles.cardActions}>
-                <button className={`${styles.act} ${item.mark === 'right' ? styles.actRightOn : ''}`} disabled={!item.genUrl} onClick={() => mark(item, 'right')} title="Mark generated image right"><Check size={15} /></button>
-                <button className={`${styles.act} ${item.mark === 'wrong' ? styles.actWrongOn : ''}`} disabled={!item.genUrl} onClick={() => mark(item, 'wrong')} title="Mark generated image wrong"><X size={15} /></button>
+                <button className={`${styles.act} ${item.mark === 'right' ? styles.actRightOn : ''}`} disabled={!item.genUrl} onClick={() => acceptRight(item)} title="Right — download this image"><Check size={15} /></button>
+                <button className={`${styles.act} ${item.mark === 'wrong' ? styles.actWrongOn : ''}`} disabled={!item.genUrl || running} onClick={() => rejectWrong(item)} title="Wrong — generate again"><X size={15} /></button>
                 <button className={styles.act} disabled={!item.genUrl} onClick={() => setPreview(item)} title="Preview"><Eye size={15} /></button>
                 <button className={styles.act} disabled={!item.genUrl} onClick={() => downloadOne(item)} title="Download"><Download size={15} /></button>
                 <button className={styles.act} onClick={() => openEdit(item)} title="Edit prompt & regenerate"><Pencil size={15} /></button>
@@ -654,8 +668,8 @@ export default function BulkPage() {
               </div>
             </div>
             <div className={styles.modalFoot}>
-              <button className={`${styles.act} ${preview.mark === 'right' ? styles.actRightOn : ''}`} disabled={!preview.genUrl} onClick={() => { mark(preview, 'right'); }}><Check size={15} /> Right</button>
-              <button className={`${styles.act} ${preview.mark === 'wrong' ? styles.actWrongOn : ''}`} disabled={!preview.genUrl} onClick={() => { mark(preview, 'wrong'); }}><X size={15} /> Wrong</button>
+              <button className={`${styles.act} ${preview.mark === 'right' ? styles.actRightOn : ''}`} disabled={!preview.genUrl} onClick={() => acceptRight(preview)}><Check size={15} /> Right — download</button>
+              <button className={`${styles.act} ${preview.mark === 'wrong' ? styles.actWrongOn : ''}`} disabled={!preview.genUrl || running} onClick={() => rejectWrong(preview)}><X size={15} /> Wrong — regenerate</button>
               <button className={styles.btn} disabled={!preview.genUrl} onClick={() => downloadOne(preview)}><Download size={15} /> Download</button>
             </div>
           </div>

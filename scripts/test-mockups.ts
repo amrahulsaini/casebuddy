@@ -27,7 +27,7 @@ function loadKey(): string {
   throw new Error('GEMINI_API_KEY not found. Put it in .env.local as GEMINI_API_KEY=your_key');
 }
 
-const TEXT_MODEL = process.env.TEXT_MODEL || 'gemini-3-pro-preview';
+const TEXT_MODEL = process.env.TEXT_MODEL || 'gemini-pro-latest';
 const CASE_TYPE = 'transparent';
 
 async function generateOne(

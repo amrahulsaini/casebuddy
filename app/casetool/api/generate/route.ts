@@ -18,7 +18,8 @@ import { StreamWriter } from '@/lib/stream-helpers';
 import { logAPIUsage } from '@/lib/pricing';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
-const TEXT_MODEL = process.env.TEXT_MODEL || 'gemini-3-pro-preview';
+// 'gemini-3-pro-preview' was retired and 404s; use the non-expiring alias.
+const TEXT_MODEL = process.env.TEXT_MODEL || 'gemini-pro-latest';
 const IMAGE_MODEL = process.env.IMAGE_MODEL || 'gemini-2.5-flash-image';
 const IMAGE_ENHANCE_MODEL = process.env.IMAGE_ENHANCE_MODEL || 'gemini-3-pro-image-preview';
 const IMAGE_NANO_MODEL = process.env.IMAGE_NANO_MODEL || 'gemini-3.1-flash-image-preview';

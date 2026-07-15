@@ -24,7 +24,8 @@ import {
 import sharp from 'sharp';
 
 const ENV_GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
-const TEXT_MODEL = process.env.TEXT_MODEL || 'gemini-3-pro-preview';
+// 'gemini-3-pro-preview' was retired and 404s; use the non-expiring alias.
+const TEXT_MODEL = process.env.TEXT_MODEL || 'gemini-pro-latest';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;

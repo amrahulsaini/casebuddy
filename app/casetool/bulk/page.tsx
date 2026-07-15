@@ -131,6 +131,7 @@ export default function BulkPage() {
   const [editText, setEditText] = useState('');
 
   const doneCount = useMemo(() => items.filter(i => i.status === 'done').length, [items]);
+  const genCount = useMemo(() => items.filter(i => i.genUrl).length, [items]);
   const rightCount = useMemo(() => items.filter(i => i.mark === 'right').length, [items]);
   const wrongCount = useMemo(() => items.filter(i => i.mark === 'wrong').length, [items]);
 
@@ -343,25 +344,44 @@ export default function BulkPage() {
     }
   };
 
-  // ---- Export marked-right as ZIP ----
+  // ---- Export ALL generated images as ZIP ----
+  // Zipped in chunks: a single zip of hundreds of PNGs would exhaust browser
+  // memory, so large batches download as multiple part files.
+  const CHUNK_PER_ZIP = 100;
   const [exporting, setExporting] = useState(false);
-  const exportRightZip = async () => {
-    const right = items.filter(i => i.mark === 'right' && i.genUrl);
-    if (right.length === 0) { alert('No images marked Right yet.'); return; }
+  const [exportProg, setExportProg] = useState({ done: 0, total: 0 });
+
+  const exportAllZip = async () => {
+    const all = items.filter(i => i.genUrl);
+    if (all.length === 0) { alert('Nothing generated yet.'); return; }
     setExporting(true);
+    setExportProg({ done: 0, total: all.length });
     try {
-      const zip = new JSZip();
-      const used: Record<string, number> = {};
-      for (const item of right) {
-        const res = await fetch(item.genUrl!);
-        const blob = await res.blob();
-        let fname = `${item.name}.png`;
-        if (used[fname]) { fname = `${item.name}_${used[fname]}.png`; used[`${item.name}.png`]++; }
-        else used[fname] = 1;
-        zip.file(fname, blob);
+      const parts = Math.ceil(all.length / CHUNK_PER_ZIP);
+      let done = 0;
+      for (let p = 0; p < parts; p++) {
+        const slice = all.slice(p * CHUNK_PER_ZIP, (p + 1) * CHUNK_PER_ZIP);
+        const zip = new JSZip();
+        const used: Record<string, number> = {};
+        for (const item of slice) {
+          try {
+            const res = await fetch(item.genUrl!);
+            if (!res.ok) continue;
+            const blob = await res.blob();
+            let fname = `${item.name}.png`;
+            if (used[fname]) { fname = `${item.name}_${used[fname]++}.png`; }
+            else used[fname] = 1;
+            zip.file(fname, blob);
+          } catch { /* skip unreachable image */ }
+          done++;
+          setExportProg({ done, total: all.length });
+        }
+        const content = await zip.generateAsync({ type: 'blob' });
+        const label = parts > 1 ? `_part${p + 1}of${parts}` : '';
+        downloadBlob(content, `${category}_mockups_${all.length}${label}.zip`);
+        // Give the browser a beat to flush each download
+        await new Promise(r => setTimeout(r, 600));
       }
-      const content = await zip.generateAsync({ type: 'blob' });
-      downloadBlob(content, `transparent_mockups_${right.length}.zip`);
     } catch (e: any) {
       alert('Export failed: ' + (e?.message || e));
     } finally {
@@ -533,8 +553,9 @@ export default function BulkPage() {
 
         <div className={styles.divider} />
 
-        <button className={styles.btnExport} disabled={exporting} onClick={exportRightZip}>
-          <FileArchive size={16} /> {exporting ? 'Zipping…' : `Export Right (${rightCount})`}
+        <button className={styles.btnExport} disabled={exporting} onClick={exportAllZip}>
+          <FileArchive size={16} />
+          {exporting ? `Zipping… ${exportProg.done}/${exportProg.total}` : `Export All Generated (${genCount})`}
         </button>
 
         {items.length > 0 && (

@@ -24,6 +24,9 @@ export function ensureBulkTable(pool: Pool): Promise<void> {
         prompt      MEDIUMTEXT   DEFAULT NULL,
         mark        ENUM('none','right','wrong') NOT NULL DEFAULT 'none',
         status      VARCHAR(20)  NOT NULL DEFAULT 'done',
+        image_model VARCHAR(64)  DEFAULT NULL,
+        cost_usd    DECIMAL(12,6) DEFAULT 0,
+        cost_inr    DECIMAL(10,2) DEFAULT 0,
         created_at  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
         updated_at  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         UNIQUE KEY uniq_file_case (file_name, case_type),
@@ -36,6 +39,9 @@ export function ensureBulkTable(pool: Pool): Promise<void> {
       "ADD COLUMN src_file VARCHAR(255) DEFAULT NULL",
       "ADD COLUMN src_url VARCHAR(512) DEFAULT NULL",
       "ADD COLUMN src_thumb MEDIUMTEXT DEFAULT NULL",
+      "ADD COLUMN image_model VARCHAR(64) DEFAULT NULL",
+      "ADD COLUMN cost_usd DECIMAL(12,6) DEFAULT 0",
+      "ADD COLUMN cost_inr DECIMAL(10,2) DEFAULT 0",
     ];
     for (const a of adds) {
       try { await pool.query(`ALTER TABLE bulk_generations ${a}`); }

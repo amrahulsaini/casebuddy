@@ -49,12 +49,23 @@ export function ensureBulkTable(pool: Pool): Promise<void> {
         model_label VARCHAR(64)  DEFAULT NULL,
         cost_inr    DECIMAL(10,2) NOT NULL DEFAULT 0,
         status      VARCHAR(20)  NOT NULL DEFAULT 'success',
+        gen_file    VARCHAR(255) DEFAULT NULL,
+        gen_url     VARCHAR(512) DEFAULT NULL,
         created_at  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
         KEY idx_case (case_type),
         KEY idx_created (created_at),
         KEY idx_model (image_model)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `);
+
+    // Best-effort add per-call image columns for older bulk_api_calls tables.
+    for (const a of [
+      "ADD COLUMN gen_file VARCHAR(255) DEFAULT NULL",
+      "ADD COLUMN gen_url VARCHAR(512) DEFAULT NULL",
+    ]) {
+      try { await pool.query(`ALTER TABLE bulk_api_calls ${a}`); }
+      catch { /* column already exists */ }
+    }
 
     // Best-effort add columns for tables created by older versions.
     const adds = [

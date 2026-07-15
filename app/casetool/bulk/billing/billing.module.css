@@ -92,11 +92,26 @@
 .table tr:last-child td { border-bottom: none; }
 .table code { background: #f0f1f3; padding: 2px 5px; border-radius: 4px; font-size: 11px; }
 
-.pillOk, .pillBad {
+.pillOk, .pillBad, .pillWarn, .pillPlain {
+  display: inline-block;
   font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 999px; text-transform: uppercase;
 }
 .pillOk { background: #dcfce7; color: #15803d; }
 .pillBad { background: #fee2e2; color: #dc2626; }
+.pillWarn { background: #fef3c7; color: #b45309; }
+.pillPlain { background: #f0f1f3; color: #6b7280; }
+
+/* Row thumbnails */
+.thumb, .thumbWide {
+  display: block; border: 1px solid #e6e8eb; border-radius: 6px; background: #fff; object-fit: contain;
+}
+.thumb { width: 42px; height: 56px; }
+.thumbWide { width: 96px; height: 56px; }
+.thumbWide:hover { border-color: #16181d; }
+.dash { color: #cdd1d6; }
+
+/* Keep long call logs fast to render */
+.callRow { content-visibility: auto; contain-intrinsic-size: 64px; }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 720px) {

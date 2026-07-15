@@ -53,11 +53,27 @@ export async function GET(request: NextRequest) {
       args
     );
 
+    // Every call, newest first — no limit.
     const [recent]: any = await pool.query(
-      `SELECT id, file_name, model_name, model_label, image_model, cost_inr, status, created_at
+      `SELECT id, case_type, file_name, model_name, model_label, image_model,
+              cost_inr, status, created_at, gen_url
          FROM bulk_api_calls ${where}
-        ORDER BY id DESC
-        LIMIT 100`,
+        ORDER BY id DESC`,
+      args
+    );
+
+    // How many times each phone model was generated, and what it cost.
+    const [byPhone]: any = await pool.query(
+      `SELECT c.file_name, c.case_type,
+              MAX(c.model_name) AS model_name,
+              COUNT(*) AS attempts,
+              SUM(c.status = 'success') AS ok,
+              COALESCE(SUM(c.cost_inr), 0) AS inr,
+              MAX(c.id) AS last_id,
+              SUBSTRING_INDEX(GROUP_CONCAT(c.gen_url ORDER BY c.id DESC SEPARATOR '||'), '||', 1) AS latest_gen
+         FROM bulk_api_calls c ${where}
+        GROUP BY c.file_name, c.case_type
+        ORDER BY attempts DESC, inr DESC`,
       args
     );
 
@@ -81,12 +97,23 @@ export async function GET(request: NextRequest) {
       })),
       recent: (recent || []).map((r: any) => ({
         id: r.id,
+        caseType: r.case_type,
         fileName: r.file_name,
         modelName: r.model_name,
         label: r.model_label || r.image_model,
         costInr: Number(r.cost_inr) || 0,
         status: r.status,
         createdAt: r.created_at,
+        genUrl: r.gen_url || null,
+      })),
+      byPhone: (byPhone || []).map((r: any) => ({
+        fileName: r.file_name,
+        caseType: r.case_type,
+        modelName: r.model_name,
+        attempts: Number(r.attempts) || 0,
+        ok: Number(r.ok) || 0,
+        inr: Number(r.inr) || 0,
+        latestGen: r.latest_gen || null,
       })),
     });
   } catch (e: any) {

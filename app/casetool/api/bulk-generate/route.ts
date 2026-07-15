@@ -141,15 +141,15 @@ export async function POST(request: NextRequest) {
     // including retries and regenerations, whether or not it returned usable
     // image data (the request was still made and charged).
     const callRate = getRateInr(imageModel);
-    const logCall = async (status: string) => {
+    const logCall = async (status: string, genFile?: string, genUrl?: string) => {
       try {
         await ensureBulkTable(pool);
         await pool.execute(
           `INSERT INTO bulk_api_calls
-             (case_type, file_name, model_name, image_model, model_key, model_label, cost_inr, status)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+             (case_type, file_name, model_name, image_model, model_key, model_label, cost_inr, status, gen_file, gen_url)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [caseType, caseImage.name || null, phoneModel, selectedImageModel,
-           imageModel, modelSpec.label, callRate, status]
+           imageModel, modelSpec.label, callRate, status, genFile || null, genUrl || null]
         );
       } catch (e) {
         console.error('bulk_api_calls log failed:', e);
@@ -168,7 +168,6 @@ export async function POST(request: NextRequest) {
       await logCall('no_image');
       return NextResponse.json({ success: false, error: 'Model returned no image data.', prompt: finalPrompt }, { status: 502 });
     }
-    await logCall('success');
 
     // 4. Save under public/output/bulk
     const outputDir = join(process.cwd(), 'public', 'output', 'bulk');
@@ -195,6 +194,10 @@ export async function POST(request: NextRequest) {
     // Serve through an API route so previews work in production too (Next does
     // not statically serve files written to /public after build).
     const imageUrl = `/casetool/api/bulk-file?name=${encodeURIComponent(fileName)}`;
+
+    // Bill this call now that we know which image it produced, so every
+    // attempt keeps its own generated image in the billing log.
+    await logCall('success', fileName, imageUrl);
 
     // Billed at the fixed per-call rate for the selected model.
     const cost = { totalInr: callRate, totalUsd: 0 };

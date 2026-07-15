@@ -16,8 +16,18 @@ interface Billing {
   today: { calls: number; inr: number };
   byModel: { imageModel: string; label: string; modelKey: string; calls: number; inr: number }[];
   daily: { day: string; calls: number; inr: number }[];
-  recent: { id: number; fileName: string; modelName: string; label: string; costInr: number; status: string; createdAt: string }[];
+  recent: {
+    id: number; caseType: string; fileName: string; modelName: string; label: string;
+    costInr: number; status: string; createdAt: string; genUrl: string | null;
+  }[];
+  byPhone: {
+    fileName: string; caseType: string; modelName: string;
+    attempts: number; ok: number; inr: number; latestGen: string | null;
+  }[];
 }
+
+const refUrl = (fileName: string, caseType: string) =>
+  `/casetool/api/bulk-thumb?name=${encodeURIComponent(fileName)}&case_type=${encodeURIComponent(caseType || 'transparent')}`;
 
 export default function BulkBillingPage() {
   const [authed, setAuthed] = useState(false);
@@ -173,20 +183,65 @@ export default function BulkBillingPage() {
       </section>
 
       <section className={styles.panel}>
-        <h2>Recent calls (last 100)</h2>
+        <h2>Generations per model</h2>
+        <p className={styles.note}>How many times each phone model was generated (every retry counts) and what it cost.</p>
+        {data && data.byPhone.length > 0 ? (
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr><th>Reference</th><th>Latest output</th><th>Model</th><th>Times generated</th><th>Success</th><th>Billed</th></tr>
+              </thead>
+              <tbody>
+                {data.byPhone.map(p => (
+                  <tr key={`${p.fileName}_${p.caseType}`}>
+                    <td>
+                      <img className={styles.thumb} src={refUrl(p.fileName, p.caseType)} alt="ref" loading="lazy" decoding="async"
+                           onError={e => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }} />
+                    </td>
+                    <td>
+                      {p.latestGen
+                        ? <img className={styles.thumbWide} src={p.latestGen} alt="out" loading="lazy" decoding="async" />
+                        : <span className={styles.dash}>—</span>}
+                    </td>
+                    <td><b>{p.modelName}</b></td>
+                    <td><span className={p.attempts > 1 ? styles.pillWarn : styles.pillPlain}>{p.attempts}×</span></td>
+                    <td>{p.ok}</td>
+                    <td><b>{fmt(p.inr)}</b></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : <p className={styles.empty}>No generations yet.</p>}
+      </section>
+
+      <section className={styles.panel}>
+        <h2>All API calls ({data?.recent.length ?? 0})</h2>
+        <p className={styles.note}>Every image API call ever made, newest first — including retries and regenerations.</p>
         {data && data.recent.length > 0 ? (
           <div className={styles.tableWrap}>
             <table className={styles.table}>
-              <thead><tr><th>#</th><th>Model name</th><th>Image model</th><th>Status</th><th>Billed</th><th>When</th></tr></thead>
+              <thead>
+                <tr><th>#</th><th>Reference</th><th>Generated</th><th>Model</th><th>Image model</th><th>Status</th><th>Billed</th><th>When</th></tr>
+              </thead>
               <tbody>
                 {data.recent.map(r => (
-                  <tr key={r.id}>
+                  <tr key={r.id} className={styles.callRow}>
                     <td>{r.id}</td>
+                    <td>
+                      <img className={styles.thumb} src={refUrl(r.fileName, r.caseType)} alt="ref" loading="lazy" decoding="async"
+                           onError={e => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }} />
+                    </td>
+                    <td>
+                      {r.genUrl
+                        ? <a href={r.genUrl} target="_blank" rel="noreferrer">
+                            <img className={styles.thumbWide} src={r.genUrl} alt="out" loading="lazy" decoding="async" />
+                          </a>
+                        : <span className={styles.dash}>—</span>}
+                    </td>
                     <td><b>{r.modelName}</b></td>
                     <td>{r.label}</td>
-                    <td>
-                      <span className={r.status === 'success' ? styles.pillOk : styles.pillBad}>{r.status}</span>
-                    </td>
+                    <td><span className={r.status === 'success' ? styles.pillOk : styles.pillBad}>{r.status}</span></td>
                     <td><b>{fmt(r.costInr)}</b></td>
                     <td>{new Date(r.createdAt).toLocaleString('en-IN')}</td>
                   </tr>

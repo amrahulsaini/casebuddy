@@ -27,6 +27,9 @@ export function ensureBulkTable(pool: Pool): Promise<void> {
         image_model VARCHAR(64)  DEFAULT NULL,
         cost_usd    DECIMAL(12,6) DEFAULT 0,
         cost_inr    DECIMAL(10,2) DEFAULT 0,
+        gen_width   INT          DEFAULT 0,
+        gen_height  INT          DEFAULT 0,
+        resolution  VARCHAR(8)   DEFAULT NULL,
         created_at  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
         updated_at  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         UNIQUE KEY uniq_file_case (file_name, case_type),
@@ -42,6 +45,9 @@ export function ensureBulkTable(pool: Pool): Promise<void> {
       "ADD COLUMN image_model VARCHAR(64) DEFAULT NULL",
       "ADD COLUMN cost_usd DECIMAL(12,6) DEFAULT 0",
       "ADD COLUMN cost_inr DECIMAL(10,2) DEFAULT 0",
+      "ADD COLUMN gen_width INT DEFAULT 0",
+      "ADD COLUMN gen_height INT DEFAULT 0",
+      "ADD COLUMN resolution VARCHAR(8) DEFAULT NULL",
     ];
     for (const a of adds) {
       try { await pool.query(`ALTER TABLE bulk_generations ${a}`); }

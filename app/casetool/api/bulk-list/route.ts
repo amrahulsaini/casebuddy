@@ -14,7 +14,8 @@ export async function GET(request: NextRequest) {
   try {
     await ensureBulkTable(pool);
     const [rows]: any = await pool.execute(
-      `SELECT id, file_name, model_name, case_type, src_url, src_thumb, gen_url, file_base, prompt, mark, status
+      `SELECT id, file_name, model_name, case_type, src_url, src_thumb, gen_url, file_base,
+              prompt, mark, status, image_model, cost_inr, gen_width, gen_height, resolution
          FROM bulk_generations
         WHERE case_type = ?
         ORDER BY id ASC`,

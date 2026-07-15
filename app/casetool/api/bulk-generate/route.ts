@@ -124,7 +124,9 @@ export async function POST(request: NextRequest) {
         },
       ],
       generationConfig: {
-        temperature: 0.2,
+        // Clear cases need literal reproduction, not creative lighting — any
+        // freedom here shows up as invented streaks/shading on the shell.
+        temperature: caseType === 'transparent' || caseType === 'doyers' ? 0 : 0.2,
         topP: 0.9,
         topK: 40,
         candidateCount: 1,

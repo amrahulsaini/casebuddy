@@ -460,7 +460,9 @@ IMPORTANT: DO NOT RECREATE OR REDESIGN THE CASE. Use the EXACT case from the ref
               },
             ],
             generationConfig: {
-              temperature: 0.2,
+              // Clear cases need literal reproduction, not creative lighting —
+              // freedom here shows up as invented streaks/shading on the shell.
+              temperature: caseType === 'transparent' || caseType === 'doyers' ? 0 : 0.2,
               topP: 0.9,
               topK: 40,
               candidateCount: 1,

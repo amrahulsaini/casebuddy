@@ -189,6 +189,14 @@ export function buildCaseTypePrompt(
   angleListText: string,
   backColor: string = ''
 ): string {
+  // TRANSPARENT: use ONLY the two panel instructions, with no extra global
+  // rules wrapped around them. The panels themselves carry every requirement.
+  if (caseType === 'transparent') {
+    const panels = getAngleDescriptions('transparent');
+    const panelList = panels.map((d, i) => `${i + 1}) ${d}`).join('\n\n');
+    return `Create 2-panel grid (1x2 horizontal layout) with these exact panels:\n${panelList}`;
+  }
+
   // Matte and transparent only need 2 panels (1x2 horizontal layout)
   const gridLayout = caseType === 'matte' || caseType === 'transparent' ? '2-panel grid (1x2 horizontal layout)' : '4-panel grid (2x2)';
 

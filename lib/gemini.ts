@@ -247,19 +247,38 @@ export function buildCaseTypePrompt(
     ? angleListText.replace(/back panel/gi, `back panel (solid uniform ${trimmedBackColor})`)
     : angleListText;
 
+  // Clear cases (transparent/doyers) get the water-clear / hand-through-plastic
+  // rules. Opaque cases (black, matte, etc.) must instead COPY the case's real
+  // color and finish from the reference — applying the clear rules to them makes
+  // the model render an opaque case as see-through.
+  const isClear = caseType === 'doyers' || caseType === 'transparent';
+
+  const referenceReadingRules = isClear
+    ? `- HOW TO READ THE REFERENCE PHOTO (READ FIRST — MOST IMPORTANT): The reference is a casual photo of the real physical case being HELD IN A HAND in front of a plain grey/white wall. Everything visible THROUGH the clear case is the photographer's hand and the room behind it — it is NOT part of the case and must NEVER be copied. Specifically IGNORE and DO NOT reproduce: the hand, palm, fingers, fingernails, knuckles, skin tone, arm hair, the grey/white backdrop, the room lighting, any beige/brown/tan/grey tint the skin casts through the plastic, the soft diagonal light-to-dark boundary where the hand ends and the wall begins, and any haze, shading, or gradient created by them. The case's actual material is 100% colorless, untinted, water-clear plastic with nothing behind it. Do NOT render a hand in any panel unless that panel explicitly asks for one.
+- TAKE ONLY GEOMETRY FROM THE REFERENCE: The ONLY things to copy from the reference photo are physical shape facts — outer silhouette and proportions, corner shape and thickness, camera opening shape/size/position, the raised camera lip, button cutouts, port cutout, and side lip thickness. Take NOTHING about color, tint, shading, or lighting from the photo, because those come from the hand and the room, not from the case.`
+    : `- The reference photo may show the case held in a hand; ignore the hand, fingers, and background — reproduce only the case itself.
+- Copy the case colors, transparency, tint, artwork, material, and surface finish exactly from the reference image. Do not reinterpret, simplify, recolor, or redesign anything.`;
+
+  const clearOnlyRules = isClear
+    ? `\n- REINFORCED AIR-CUSHION CORNERS (CRITICAL — REPRODUCE THEM, NEVER DELETE THEM): This is an anti-shock TPU case. Look at the reference: EACH of the four corners has a visibly THICKER, raised air-cushion corner pad — a reinforced block of clear plastic, usually with a subtle internal rib/hatch pattern inside it, that projects slightly further out than the slim side walls. These corner pads are a defining feature of this product and MUST appear in every panel, on all four corners, in the same position and at the same MODEST size and thickness as the reference. Do NOT delete them, do NOT flatten them into plain slim rounded corners, and do NOT smooth them away. Equally, do NOT exaggerate them into chunky rugged-armor blocks or fat bulging bumpers — reproduce the reference's restrained size exactly.
+- CASE MUST STAY VISIBLE ON THE PHONE: In the panel where the phone is inside the case, the case must read clearly as a separate protective shell around the phone — show its outer edge line, its side lip overlapping the phone's front, its reinforced corner pads, its button covers, and the raised rim around the camera opening. The case must never shrink into an invisible skin or a thin outline that looks like the bare phone.
+- THE CASE IS COLORLESS: Reproduce the case as clean, water-clear, completely colorless and untinted plastic. It has no color of its own, no print, no artwork, and no pattern. Any tint or shading you think you see in the reference is the hand behind it — ignore it. Copy shape from the reference, never color or shading.`
+    : '';
+
+  const referencePriority = isClear
+    ? `- If any instruction conflicts with the uploaded reference image, follow the reference image for CASE GEOMETRY ONLY (silhouette, corners, cutouts, camera lip, lip thickness).
+- Never follow the reference for color, tint, shading, lighting, or background — the reference is a hand-held snapshot, so those belong to the hand and the room, not the case. Colors, lighting, and background always come from the instructions above.`
+    : `- If any instruction conflicts with the uploaded reference image, follow the uploaded reference image for case geometry, case color, transparency, and material finish.`;
+
   const mainPrompt = `${streakLock}${cornerLock}${colorLock}Create a premium ${gridLayout} ecommerce collage for "${phoneModel}" using the uploaded reference image as the non-negotiable case template.
 
 MASTER CASE ANALYSIS:
 ${finalPrompt}
 
 GLOBAL HARD CONSTRAINTS:
-- HOW TO READ THE REFERENCE PHOTO (READ FIRST — MOST IMPORTANT): The reference is a casual photo of the real physical case being HELD IN A HAND in front of a plain grey/white wall. Everything visible THROUGH the clear case is the photographer's hand and the room behind it — it is NOT part of the case and must NEVER be copied. Specifically IGNORE and DO NOT reproduce: the hand, palm, fingers, fingernails, knuckles, skin tone, arm hair, the grey/white backdrop, the room lighting, any beige/brown/tan/grey tint the skin casts through the plastic, the soft diagonal light-to-dark boundary where the hand ends and the wall begins, and any haze, shading, or gradient created by them. The case's actual material is 100% colorless, untinted, water-clear plastic with nothing behind it. Do NOT render a hand in any panel unless that panel explicitly asks for one.
-- TAKE ONLY GEOMETRY FROM THE REFERENCE: The ONLY things to copy from the reference photo are physical shape facts — outer silhouette and proportions, corner shape and thickness, camera opening shape/size/position, the raised camera lip, button cutouts, port cutout, and side lip thickness. Take NOTHING about color, tint, shading, or lighting from the photo, because those come from the hand and the room, not from the case.
+${referenceReadingRules}
 - Preserve the case geometry from the reference image exactly: outer silhouette, camera island placement, lens opening sizes, corner radius, button cutouts, and side lip thickness.
-- CAMERA PROTECTION LIP (CRITICAL — DO NOT OMIT): The case MUST include its raised camera-protection rim exactly as in the reference: a raised wall/lip of the case material that stands proud around the entire camera module opening and rises ABOVE the lens surface so the lenses never touch a flat surface. Render this raised border clearly with its visible thickness and edge highlight around the cutout. Do NOT flatten it, do NOT omit it, do NOT let the case end flush with the camera island, and do NOT leave the camera module sticking out uncovered past the case. The camera opening must read as a recessed well surrounded by a raised protective ring.
-- REINFORCED AIR-CUSHION CORNERS (CRITICAL — REPRODUCE THEM, NEVER DELETE THEM): This is an anti-shock TPU case. Look at the reference: EACH of the four corners has a visibly THICKER, raised air-cushion corner pad — a reinforced block of clear plastic, usually with a subtle internal rib/hatch pattern inside it, that projects slightly further out than the slim side walls. These corner pads are a defining feature of this product and MUST appear in every panel, on all four corners, in the same position and at the same MODEST size and thickness as the reference. Do NOT delete them, do NOT flatten them into plain slim rounded corners, and do NOT smooth them away. Equally, do NOT exaggerate them into chunky rugged-armor blocks or fat bulging bumpers — reproduce the reference's restrained size exactly.
-- CASE MUST STAY VISIBLE ON THE PHONE: In the panel where the phone is inside the case, the case must read clearly as a separate protective shell around the phone — show its outer edge line, its side lip overlapping the phone's front, its reinforced corner pads, its button covers, and the raised rim around the camera opening. The case must never shrink into an invisible skin or a thin outline that looks like the bare phone.
-- THE CASE IS COLORLESS: Reproduce the case as clean, water-clear, completely colorless and untinted plastic. It has no color of its own, no print, no artwork, and no pattern. Any tint or shading you think you see in the reference is the hand behind it — ignore it. Copy shape from the reference, never color or shading.
+- CAMERA PROTECTION LIP (CRITICAL — DO NOT OMIT): The case MUST include its raised camera-protection rim exactly as in the reference: a raised wall/lip of the case material that stands proud around the entire camera module opening and rises ABOVE the lens surface so the lenses never touch a flat surface. Render this raised border clearly with its visible thickness and edge highlight around the cutout. Do NOT flatten it, do NOT omit it, do NOT let the case end flush with the camera island, and do NOT leave the camera module sticking out uncovered past the case. The camera opening must read as a recessed well surrounded by a raised protective ring.${clearOnlyRules}
 - Use one identical phone-and-case asset consistently across all panels. Only the viewing angle, crop, or hand pose may change.
 - ${phoneFinishLine}
 - If the case has transparent, frosted, or open sections, the real phone body must remain visible underneath in its authentic finish. Never replace the visible phone area with flat white, flat black, blank filler, paper inserts, or empty placeholders.
@@ -271,8 +290,7 @@ GLOBAL HARD CONSTRAINTS:
 - Keep every panel visually consistent as if photographed in the same product shoot.
 
 REFERENCE IMAGE PRIORITY:
-- If any instruction conflicts with the uploaded reference image, follow the reference image for CASE GEOMETRY ONLY (silhouette, corners, cutouts, camera lip, lip thickness).
-- Never follow the reference for color, tint, shading, lighting, or background — the reference is a hand-held snapshot, so those belong to the hand and the room, not the case. Colors, lighting, and background always come from the instructions above.
+${referencePriority}
 
 LAYOUT ENFORCEMENT (CRITICAL — THE GRID MUST BE EXACT):
 - The output is ONE ${gridLayout} and nothing else. ${gridLayout.startsWith('2') ? 'Exactly TWO equal cells in a single horizontal row.' : 'Exactly FOUR equal cells arranged as 2 rows by 2 columns.'}

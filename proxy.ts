@@ -43,6 +43,16 @@ export default function proxy(request: NextRequest) {
   if (pathname.startsWith('/editor')) {
     return NextResponse.next();
   }
+
+  // Prompt playground is a local prompt-testing tool. Open it without the
+  // casetool login in development only — in production it stays protected so
+  // the server's Gemini key is not exposed.
+  if (
+    process.env.NODE_ENV === 'development' &&
+    (pathname === '/casetool/playground' || pathname === '/casetool/api/playground')
+  ) {
+    return NextResponse.next();
+  }
   
   // Check authentication for casetool routes
   if (isCasetoolRoute) {

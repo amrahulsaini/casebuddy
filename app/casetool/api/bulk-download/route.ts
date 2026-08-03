@@ -14,10 +14,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createReadStream } from 'fs';
 import { join, extname } from 'path';
 import { existsSync } from 'fs';
-import JSZip from 'jszip';
+import { Readable } from 'stream';
+import { ZipArchive } from 'archiver';
 import pool from '@/lib/db';
 import { ensureBulkTable } from '@/lib/bulk-table';
 
@@ -118,30 +118,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No images found on disk for this period' }, { status: 404 });
     }
 
-    const zip = new JSZip();
-    for (const e of entries) {
-      // Lazy read streams — JSZip pulls each file only when it packs it.
-      zip.file(e.entry, createReadStream(e.path));
-    }
+    // archiver writes a standard, Explorer-readable archive: it seeks back to
+    // patch each entry header rather than emitting data descriptors, and it
+    // handles the Zip64 extensions an archive over 4 GB needs.
+    // store: PNG/JPEG are already compressed, so deflating only burns CPU.
+    const archive = new ZipArchive({ store: true, zip64: true });
+    for (const e of entries) archive.file(e.path, { name: e.entry });
 
-    // STORE: PNG/JPEG are already compressed, so deflating only burns CPU.
-    const nodeStream = zip.generateNodeStream({
-      type: 'nodebuffer',
-      streamFiles: true,
-      compression: 'STORE',
+    // A vanished file should not kill the whole archive.
+    archive.on('warning', (err: any) => {
+      if (err?.code !== 'ENOENT') console.error('bulk-download warning:', err);
     });
 
-    const body = new ReadableStream<Uint8Array>({
-      start(controller) {
-        nodeStream.on('data', (chunk: Buffer) => controller.enqueue(new Uint8Array(chunk)));
-        nodeStream.on('end', () => controller.close());
-        nodeStream.on('error', (err: Error) => controller.error(err));
-      },
-      cancel() {
-        // Client aborted the download — stop reading files.
-        (nodeStream as any).destroy?.();
-      },
-    });
+    // Readable.toWeb keeps backpressure intact, so a slow client throttles the
+    // disk reads instead of the server buffering the archive in memory.
+    const body = Readable.toWeb(archive as unknown as Readable) as ReadableStream<Uint8Array>;
+    archive.finalize();
 
     const zipName = `bulk-images-${filter.label}-${entries.length}.zip`;
 

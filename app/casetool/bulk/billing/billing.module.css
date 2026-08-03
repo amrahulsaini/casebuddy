@@ -101,6 +101,7 @@
   cursor: pointer; white-space: nowrap;
 }
 .dlSmall:hover:not(:disabled) { background: #f2f3f5; }
+a.dlSmall { text-decoration: none; }
 .dlSmall:disabled { opacity: .5; cursor: not-allowed; }
 
 .tableWrap { overflow-x: auto; margin-top: 10px; }

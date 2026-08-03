@@ -42,6 +42,7 @@ export default function BulkBillingPage() {
   const [dl, setDl] = useState<string | null>(null);
   const [dlError, setDlError] = useState('');
   const [dlNote, setDlNote] = useState('');
+  const [selected, setSelected] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     if (typeof window !== 'undefined' && sessionStorage.getItem('bulk_auth') === 'yes') setAuthed(true);
@@ -102,6 +103,50 @@ export default function BulkBillingPage() {
       setDl(null);
     }
   }, []);
+
+  /**
+   * Downloads a hand-picked set of calls. Sent as a POST form into a hidden
+   * iframe: hundreds of ids will not fit in a URL, and the browser still
+   * handles the response as a normal streamed download.
+   */
+  const downloadSelected = useCallback((ids: number[]) => {
+    if (ids.length === 0) return;
+    setDlError('');
+    setDlNote('');
+
+    const frame = document.createElement('iframe');
+    frame.name = `dl-${Date.now()}`;
+    frame.style.display = 'none';
+    document.body.appendChild(frame);
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/casetool/api/bulk-download';
+    form.target = frame.name;
+    form.style.display = 'none';
+    const input = document.createElement('input');
+    input.name = 'ids';
+    input.value = ids.join(',');
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+    form.remove();
+    setTimeout(() => frame.remove(), 10 * 60 * 1000);
+
+    setDlNote(`Downloading ${ids.length} selected image${ids.length === 1 ? '' : 's'} — check your browser downloads.`);
+  }, []);
+
+  const toggleOne = (id: number) => setSelected(prev => {
+    const next = new Set(prev);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
+
+  // Only calls that actually produced an image can be downloaded.
+  const selectable = (data?.recent ?? []).filter(r => r.genUrl).map(r => r.id);
+  const allSelected = selectable.length > 0 && selectable.every(id => selected.has(id));
+
+  const toggleAll = () => setSelected(allSelected ? new Set() : new Set(selectable));
 
   const dayKey = (d: string | Date) => {
     const dt = new Date(d);
@@ -268,15 +313,56 @@ export default function BulkBillingPage() {
       <section className={styles.panel}>
         <h2>All API calls ({data?.recent.length ?? 0})</h2>
         <p className={styles.note}>Every image API call ever made, newest first — including retries and regenerations.</p>
+
+        <div className={styles.selBar}>
+          <label className={styles.selAll}>
+            <input
+              type="checkbox"
+              checked={allSelected}
+              disabled={selectable.length === 0}
+              onChange={toggleAll}
+            />
+            Select all with an image ({selectable.length})
+          </label>
+          <span className={styles.selCount}>{selected.size} selected</span>
+          <button
+            className={`${styles.dlBtn} ${styles.dlPrimary}`}
+            disabled={selected.size === 0}
+            onClick={() => downloadSelected(selectable.filter(id => selected.has(id)))}
+          >
+            <Download size={14} /> Download selected
+          </button>
+          <button
+            className={styles.dlBtn}
+            disabled={selected.size === 0}
+            onClick={() => setSelected(new Set())}
+          >
+            Clear
+          </button>
+        </div>
         {data && data.recent.length > 0 ? (
           <div className={styles.tableWrap}>
             <table className={styles.table}>
               <thead>
-                <tr><th>#</th><th>Reference</th><th>Generated</th><th>Model</th><th>Image model</th><th>Status</th><th>Billed</th><th>When</th><th>Save</th></tr>
+                <tr>
+                  <th className={styles.checkCol}>
+                    <input type="checkbox" checked={allSelected} disabled={selectable.length === 0} onChange={toggleAll} />
+                  </th>
+                  <th>#</th><th>Reference</th><th>Generated</th><th>Model</th><th>Image model</th>
+                  <th>Status</th><th>Billed</th><th>When</th><th>Save</th>
+                </tr>
               </thead>
               <tbody>
                 {data.recent.map(r => (
-                  <tr key={r.id} className={styles.callRow}>
+                  <tr key={r.id} className={`${styles.callRow} ${selected.has(r.id) ? styles.rowSel : ''}`}>
+                    <td className={styles.checkCol}>
+                      <input
+                        type="checkbox"
+                        checked={selected.has(r.id)}
+                        disabled={!r.genUrl}
+                        onChange={() => toggleOne(r.id)}
+                      />
+                    </td>
                     <td>{r.id}</td>
                     <td>
                       <img className={styles.thumb} src={refUrl(r.fileName, r.caseType)} alt="ref" loading="lazy" decoding="async"

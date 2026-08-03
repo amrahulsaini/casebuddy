@@ -1,13 +1,20 @@
 /**
  * API Route: /casetool/api/bulk-download?range=today|week|month|all&day=YYYY-MM-DD
  *
- * Zips up every generated bulk image for the requested period and streams it
- * back. Each file inside the zip is named after the phone model it was
- * generated for, so the archive is usable without touching the database.
+ * Streams a zip of every generated bulk image for the requested period. Each
+ * file inside the zip is named after the phone model it was generated for.
+ *
+ * The zip is streamed, never buffered: entries are read off disk lazily and
+ * pushed to the client as they are packed, so the browser's download starts
+ * within a second regardless of how many thousands of images are in the
+ * archive, and the server never holds more than one file in memory.
+ *
+ * `?count=1` returns just the number of downloadable images, so the UI can
+ * fail fast (and show a real error) before kicking off the native download.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { readFile } from 'fs/promises';
+import { createReadStream } from 'fs';
 import { join, extname } from 'path';
 import { existsSync } from 'fs';
 import JSZip from 'jszip';
@@ -15,7 +22,8 @@ import pool from '@/lib/db';
 import { ensureBulkTable } from '@/lib/bulk-table';
 
 export const runtime = 'nodejs';
-export const maxDuration = 300;
+export const dynamic = 'force-dynamic';
+export const maxDuration = 3600;
 
 const BULK_DIR = join(process.cwd(), 'public', 'output', 'bulk');
 
@@ -36,87 +44,114 @@ function diskName(genFile: string | null, genUrl: string | null): string | null 
   return null;
 }
 
-export async function GET(request: NextRequest) {
-  const sp = request.nextUrl.searchParams;
+/** Builds the WHERE clause for the requested period. */
+function periodFilter(sp: URLSearchParams) {
   const range = (sp.get('range') || 'all').toLowerCase();
   const day = sp.get('day') || '';
   const caseType = sp.get('case_type') || '';
 
   const where: string[] = ["status = 'success'"];
   const args: any[] = [];
+  let label = 'all-time';
 
   if (caseType) { where.push('case_type = ?'); args.push(caseType); }
 
-  let periodLabel = 'all-time';
   if (day) {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) {
-      return NextResponse.json({ error: 'Invalid day' }, { status: 400 });
-    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return null;
     where.push('DATE(created_at) = ?');
     args.push(day);
-    periodLabel = day;
+    label = day;
   } else if (range === 'today') {
     where.push('DATE(created_at) = CURDATE()');
-    periodLabel = 'today';
+    label = 'today';
   } else if (range === 'week') {
     where.push('created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)');
-    periodLabel = 'last-7-days';
+    label = 'last-7-days';
   } else if (range === 'month') {
     where.push('created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)');
-    periodLabel = 'last-30-days';
+    label = 'last-30-days';
   }
+
+  return { where: where.join(' AND '), args, label };
+}
+
+export async function GET(request: NextRequest) {
+  const sp = request.nextUrl.searchParams;
+  const filter = periodFilter(sp);
+  if (!filter) return NextResponse.json({ error: 'Invalid day' }, { status: 400 });
 
   try {
     await ensureBulkTable(pool);
 
     const [rows]: any = await pool.query(
-      `SELECT id, model_name, file_name, gen_file, gen_url, created_at
+      `SELECT id, model_name, gen_file, gen_url
          FROM bulk_api_calls
-        WHERE ${where.join(' AND ')}
+        WHERE ${filter.where}
         ORDER BY id ASC`,
-      args
+      filter.args
     );
 
-    if (!rows || rows.length === 0) {
-      return NextResponse.json({ error: 'No images found for this period' }, { status: 404 });
-    }
-
-    const zip = new JSZip();
+    // Resolve every row to a file that actually exists before promising a zip —
+    // once bytes start streaming there is no way to report an error.
     const used = new Map<string, number>();
-    let added = 0;
-    let missing = 0;
+    const entries: { path: string; entry: string }[] = [];
 
-    for (const r of rows) {
+    for (const r of rows || []) {
       const name = diskName(r.gen_file, r.gen_url);
-      if (!name) { missing++; continue; }
-      const filePath = join(BULK_DIR, name);
-      if (!existsSync(filePath)) { missing++; continue; }
+      if (!name) continue;
+      const path = join(BULK_DIR, name);
+      if (!existsSync(path)) continue;
 
-      const ext = extname(name) || '.png';
       const stem = safeName(r.model_name, `image-${r.id}`);
       const count = (used.get(stem) || 0) + 1;
       used.set(stem, count);
-      const entry = count === 1 ? `${stem}${ext}` : `${stem} (${count})${ext}`;
-
-      zip.file(entry, await readFile(filePath));
-      added++;
+      const ext = extname(name) || '.png';
+      entries.push({ path, entry: count === 1 ? `${stem}${ext}` : `${stem} (${count})${ext}` });
     }
 
-    if (added === 0) {
-      return NextResponse.json({ error: 'Images are no longer on disk' }, { status: 404 });
+    // Cheap pre-flight so the UI can show a real error instead of a broken file.
+    if (sp.get('count')) {
+      return NextResponse.json({ success: true, count: entries.length, label: filter.label });
     }
 
-    const buffer = await zip.generateAsync({ type: 'nodebuffer', compression: 'STORE' });
-    const zipName = `bulk-images-${periodLabel}-${added}.zip`;
+    if (entries.length === 0) {
+      return NextResponse.json({ error: 'No images found on disk for this period' }, { status: 404 });
+    }
 
-    return new NextResponse(new Uint8Array(buffer), {
+    const zip = new JSZip();
+    for (const e of entries) {
+      // Lazy read streams — JSZip pulls each file only when it packs it.
+      zip.file(e.entry, createReadStream(e.path));
+    }
+
+    // STORE: PNG/JPEG are already compressed, so deflating only burns CPU.
+    const nodeStream = zip.generateNodeStream({
+      type: 'nodebuffer',
+      streamFiles: true,
+      compression: 'STORE',
+    });
+
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        nodeStream.on('data', (chunk: Buffer) => controller.enqueue(new Uint8Array(chunk)));
+        nodeStream.on('end', () => controller.close());
+        nodeStream.on('error', (err: Error) => controller.error(err));
+      },
+      cancel() {
+        // Client aborted the download — stop reading files.
+        (nodeStream as any).destroy?.();
+      },
+    });
+
+    const zipName = `bulk-images-${filter.label}-${entries.length}.zip`;
+
+    return new NextResponse(body, {
       headers: {
         'Content-Type': 'application/zip',
         'Content-Disposition': `attachment; filename="${zipName}"`,
-        'Content-Length': String(buffer.length),
-        'X-Images-Added': String(added),
-        'X-Images-Missing': String(missing),
         'Cache-Control': 'no-store',
+        // Stops nginx from buffering the whole archive before sending a byte.
+        'X-Accel-Buffering': 'no',
       },
     });
   } catch (e: any) {

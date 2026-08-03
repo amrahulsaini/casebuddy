@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { IndianRupee, RotateCcw, Lock, ArrowLeft, Activity } from 'lucide-react';
+import { IndianRupee, RotateCcw, Lock, ArrowLeft, Activity, Download } from 'lucide-react';
 import { RATE_INR, IMAGE_MODELS } from '@/lib/image-pricing';
 import styles from './billing.module.css';
 
@@ -35,6 +35,8 @@ export default function BulkBillingPage() {
   const [passError, setPassError] = useState('');
   const [data, setData] = useState<Billing | null>(null);
   const [loading, setLoading] = useState(false);
+  const [dl, setDl] = useState<string | null>(null);
+  const [dlError, setDlError] = useState('');
 
   useEffect(() => {
     if (typeof window !== 'undefined' && sessionStorage.getItem('bulk_auth') === 'yes') setAuthed(true);
@@ -58,6 +60,44 @@ export default function BulkBillingPage() {
   }, []);
 
   useEffect(() => { if (authed) load(); }, [authed, load]);
+
+  /**
+   * Pulls a zip of every generated image for the period. Files inside are named
+   * after the phone model, so the archive is usable as-is.
+   */
+  const download = useCallback(async (key: string, params: string) => {
+    setDl(key);
+    setDlError('');
+    try {
+      const res = await fetch(`/casetool/api/bulk-download?${params}`);
+      if (!res.ok) {
+        const j = await res.json().catch(() => null);
+        setDlError(j?.error || 'Download failed');
+        return;
+      }
+      const blob = await res.blob();
+      const disp = res.headers.get('Content-Disposition') || '';
+      const name = disp.match(/filename="([^"]+)"/)?.[1] || 'bulk-images.zip';
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+    } catch {
+      setDlError('Download failed');
+    } finally {
+      setDl(null);
+    }
+  }, []);
+
+  const dayKey = (d: string | Date) => {
+    const dt = new Date(d);
+    const p = (n: number) => String(n).padStart(2, '0');
+    return `${dt.getFullYear()}-${p(dt.getMonth() + 1)}-${p(dt.getDate())}`;
+  };
 
   const fmt = (n: number) => '₹' + n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -121,6 +161,29 @@ export default function BulkBillingPage() {
       </section>
 
       <section className={styles.panel}>
+        <h2><Download size={15} /> Download images</h2>
+        <p className={styles.note}>
+          Downloads a zip of every successfully generated image for the period. Each file inside is
+          named after the phone model it was generated for.
+        </p>
+        <div className={styles.dlRow}>
+          <button className={styles.dlBtn} disabled={!!dl} onClick={() => download('today', 'range=today')}>
+            <Download size={14} /> {dl === 'today' ? 'Zipping…' : 'Today'}
+          </button>
+          <button className={styles.dlBtn} disabled={!!dl} onClick={() => download('week', 'range=week')}>
+            <Download size={14} /> {dl === 'week' ? 'Zipping…' : 'This week'}
+          </button>
+          <button className={styles.dlBtn} disabled={!!dl} onClick={() => download('month', 'range=month')}>
+            <Download size={14} /> {dl === 'month' ? 'Zipping…' : 'Last 30 days'}
+          </button>
+          <button className={`${styles.dlBtn} ${styles.dlPrimary}`} disabled={!!dl} onClick={() => download('all', 'range=all')}>
+            <Download size={14} /> {dl === 'all' ? 'Zipping…' : 'All time'}
+          </button>
+        </div>
+        {dlError && <p className={styles.dlErr}>{dlError}</p>}
+      </section>
+
+      <section className={styles.panel}>
         <h2><Activity size={15} /> Rate card</h2>
         <p className={styles.note}>Every image API call is billed at this fixed rate, including retries and regenerations.</p>
         <div className={styles.tableWrap}>
@@ -167,13 +230,22 @@ export default function BulkBillingPage() {
         {data && data.daily.length > 0 ? (
           <div className={styles.tableWrap}>
             <table className={styles.table}>
-              <thead><tr><th>Date</th><th>Calls</th><th>Billed</th></tr></thead>
+              <thead><tr><th>Date</th><th>Calls</th><th>Billed</th><th>Images</th></tr></thead>
               <tbody>
                 {data.daily.map(d => (
                   <tr key={String(d.day)}>
                     <td>{new Date(d.day).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
                     <td>{d.calls}</td>
                     <td><b>{fmt(d.inr)}</b></td>
+                    <td>
+                      <button
+                        className={styles.dlSmall}
+                        disabled={!!dl}
+                        onClick={() => download(`day-${dayKey(d.day)}`, `day=${dayKey(d.day)}`)}
+                      >
+                        <Download size={12} /> {dl === `day-${dayKey(d.day)}` ? 'Zipping…' : 'Download'}
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

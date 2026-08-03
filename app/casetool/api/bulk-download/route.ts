@@ -44,17 +44,29 @@ function diskName(genFile: string | null, genUrl: string | null): string | null 
   return null;
 }
 
-/** Builds the WHERE clause for the requested period. */
+/**
+ * Builds the WHERE clause for the request: either an explicit list of call ids
+ * (a hand-picked selection) or a time period.
+ */
 function periodFilter(sp: URLSearchParams) {
   const range = (sp.get('range') || 'all').toLowerCase();
   const day = sp.get('day') || '';
   const caseType = sp.get('case_type') || '';
+  const idsRaw = sp.get('ids') || '';
 
   const where: string[] = ["status = 'success'"];
   const args: any[] = [];
   let label = 'all-time';
 
   if (caseType) { where.push('case_type = ?'); args.push(caseType); }
+
+  if (idsRaw) {
+    const ids = idsRaw.split(',').map(s => Number(s.trim())).filter(n => Number.isInteger(n) && n > 0);
+    if (ids.length === 0) return null;
+    where.push(`id IN (${ids.map(() => '?').join(',')})`);
+    args.push(...ids);
+    return { where: where.join(' AND '), args, label: `selected-${ids.length}` };
+  }
 
   if (day) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return null;
@@ -75,10 +87,9 @@ function periodFilter(sp: URLSearchParams) {
   return { where: where.join(' AND '), args, label };
 }
 
-export async function GET(request: NextRequest) {
-  const sp = request.nextUrl.searchParams;
+async function handle(sp: URLSearchParams) {
   const filter = periodFilter(sp);
-  if (!filter) return NextResponse.json({ error: 'Invalid day' }, { status: 400 });
+  if (!filter) return NextResponse.json({ error: 'Invalid selection' }, { status: 400 });
 
   try {
     await ensureBulkTable(pool);
@@ -149,4 +160,20 @@ export async function GET(request: NextRequest) {
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || 'download failed' }, { status: 500 });
   }
+}
+
+export async function GET(request: NextRequest) {
+  return handle(request.nextUrl.searchParams);
+}
+
+/**
+ * Same as GET, but takes its parameters as a form body. A hand-picked
+ * selection of a few hundred images would otherwise blow past URL length
+ * limits, so the page submits those as a POST form.
+ */
+export async function POST(request: NextRequest) {
+  const form = await request.formData();
+  const sp = new URLSearchParams();
+  for (const [k, v] of form.entries()) if (typeof v === 'string') sp.append(k, v);
+  return handle(sp);
 }

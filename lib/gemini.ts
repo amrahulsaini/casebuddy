@@ -164,7 +164,7 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
   ],
 
   transparent: [
-    'PANEL 1 (Pure white background, no cream or beige tint) — this is ONE single cell containing both phones together as a single photo, do NOT split into separate cells: TWO phones standing perfectly STRAIGHT and upright, facing the camera head-on (no tilt, no 3/4 angle, no leaning), photographed straight-on at eye level. The FRONT phone is centered and fully visible and shows its BACK inside the exact transparent case from reference, revealing the authentic phone body finish through the clear case with cameras matching specs exactly. There is EXACTLY ONE other phone, placed BEHIND it and shifted LEFT, showing its FRONT screen. The two overlap VERY HEAVILY: the front phone hides about three quarters of it. The two phones must NOT sit side by side, must NOT each take half the frame, must NOT be separated by a gap, and the back phone must NOT be half visible — it is mostly buried behind the front phone, showing just a thin strip of its screen edge. The RIGHT side of the front phone has NOTHING behind it: just clean empty white background, no second phone. The visible screen shows realistic front glass, correct bezel and punch-hole or notch, and a tasteful unbranded abstract wallpaper, never blank white or solid black. Both phones share the same scale, lighting, and floor. Do not change case appearance. Fill the phone body seen through the case with ONE single even solid color — blue, green, or yellow, pick one — applied flat and uniform edge to edge with nothing else: no diagonal marks, no streaks, no gradient, no shading, no pattern.',
+    'PANEL 1 (Pure white background, no cream or beige tint) — this is ONE single cell containing both phones together as a single photo, do NOT split into separate cells: TWO phones standing perfectly STRAIGHT and upright, facing the camera head-on (no tilt, no 3/4 angle, no leaning), photographed straight-on at eye level. The FRONT phone is centered and fully visible and shows its BACK inside the exact transparent case from reference, revealing the authentic phone body finish through the clear case with cameras matching specs exactly. There is EXACTLY ONE other phone, placed BEHIND it and shifted LEFT, showing its FRONT screen. The two overlap VERY HEAVILY: the front phone hides about three quarters of it. The two phones must NOT sit side by side, must NOT each take half the frame, must NOT be separated by a gap, and the back phone must NOT be half visible — it is mostly buried behind the front phone, showing just a thin strip of its screen edge. The RIGHT side of the front phone has NOTHING behind it: just clean empty white background, no second phone. The visible screen shows realistic front glass, correct bezel and punch-hole or notch, and a tasteful unbranded abstract wallpaper, never blank white or solid black. Both phones share the same scale, lighting, and floor. Do not change case appearance. The phone body seen through the clear case must look like a REAL phone, NOT painted: reproduce this exact model\'s authentic factory back — its genuine colour and real material finish (glossy glass, matte, or metallic, exactly as the real phone has), photographed cleanly under soft even studio light. Choose ONE of the model\'s real attractive launch colours (avoid plain white or silver). It must read as an actual phone back, never flat poster paint or a solid colour sticker, and never a harsh diagonal glare streak or bright reflection band.',
 
     'PANEL 2 (Pure white background, no cream or beige tint): The exact EMPTY transparent case from reference, standing upright and shown from its BACK side only, with NO phone inside it — just the bare clear case shell by itself, exactly the same case as in Panel 1, and no hands. Preserve the case shape, camera cutout, and the raised camera-protection lip exactly. The whole case must be fully visible from top to bottom, centered in the panel, nothing cropped. Do not insert any phone and do not alter the case.',
   ],
@@ -196,15 +196,15 @@ export function buildCaseTypePrompt(
     let panelList = panels.map((d, i) => `${i + 1}) ${d}`).join('\n\n');
     const bc = backColor.trim();
     if (bc) {
-      // Use the exact requested colour instead of the "pick one" default.
+      // Use the exact requested colour instead of picking one automatically.
       panelList = panelList.replace(
-        'ONE single even solid color — blue, green, or yellow, pick one —',
-        `ONE single even solid "${bc}" color —`
+        "Choose ONE of the model's real attractive launch colours (avoid plain white or silver).",
+        `The phone back colour must be "${bc}".`
       );
     }
     let prompt = `Create 2-panel grid (1x2 horizontal layout) with these exact panels:\n${panelList}`;
     if (bc) {
-      prompt += `\n\nBACK COLOR (MANDATORY): the phone body seen through the clear case in Panel 1 must be exactly "${bc}" — one flat, even, uniform "${bc}" fill edge to edge, with no other colour, no gradient, no shading, and no pattern.`;
+      prompt += `\n\nBACK COLOR (MANDATORY): render the phone body seen through the clear case in Panel 1 as a REAL phone back in "${bc}" — the authentic realistic finish of a genuine phone in that colour (real material and only soft even studio light), evenly the same "${bc}" across the whole back. Not flat poster paint, no diagonal glare streak, no other colour.`;
     }
     return prompt;
   }

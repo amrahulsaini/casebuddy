@@ -193,8 +193,20 @@ export function buildCaseTypePrompt(
   // rules wrapped around them. The panels themselves carry every requirement.
   if (caseType === 'transparent') {
     const panels = getAngleDescriptions('transparent');
-    const panelList = panels.map((d, i) => `${i + 1}) ${d}`).join('\n\n');
-    return `Create 2-panel grid (1x2 horizontal layout) with these exact panels:\n${panelList}`;
+    let panelList = panels.map((d, i) => `${i + 1}) ${d}`).join('\n\n');
+    const bc = backColor.trim();
+    if (bc) {
+      // Use the exact requested colour instead of the "pick one" default.
+      panelList = panelList.replace(
+        'ONE single even solid color — blue, green, or yellow, pick one —',
+        `ONE single even solid "${bc}" color —`
+      );
+    }
+    let prompt = `Create 2-panel grid (1x2 horizontal layout) with these exact panels:\n${panelList}`;
+    if (bc) {
+      prompt += `\n\nBACK COLOR (MANDATORY): the phone body seen through the clear case in Panel 1 must be exactly "${bc}" — one flat, even, uniform "${bc}" fill edge to edge, with no other colour, no gradient, no shading, and no pattern.`;
+    }
+    return prompt;
   }
 
   // Matte and transparent only need 2 panels (1x2 horizontal layout)

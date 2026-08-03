@@ -37,6 +37,7 @@ export default function BulkBillingPage() {
   const [loading, setLoading] = useState(false);
   const [dl, setDl] = useState<string | null>(null);
   const [dlError, setDlError] = useState('');
+  const [dlNote, setDlNote] = useState('');
 
   useEffect(() => {
     if (typeof window !== 'undefined' && sessionStorage.getItem('bulk_auth') === 'yes') setAuthed(true);
@@ -62,32 +63,37 @@ export default function BulkBillingPage() {
   useEffect(() => { if (authed) load(); }, [authed, load]);
 
   /**
-   * Pulls a zip of every generated image for the period. Files inside are named
-   * after the phone model, so the archive is usable as-is.
+   * Downloads a zip of every generated image for the period. Files inside are
+   * named after the phone model, so the archive is usable as-is.
+   *
+   * A quick count request first, so a bad period fails instantly with a real
+   * message; then the URL is handed to the browser's own downloader. The zip is
+   * streamed straight to disk with a native progress bar — nothing is held in
+   * the tab's memory, so thousands of images download fine.
    */
   const download = useCallback(async (key: string, params: string) => {
     setDl(key);
     setDlError('');
+    setDlNote('');
     try {
-      const res = await fetch(`/casetool/api/bulk-download?${params}`);
-      if (!res.ok) {
-        const j = await res.json().catch(() => null);
-        setDlError(j?.error || 'Download failed');
+      const res = await fetch(`/casetool/api/bulk-download?${params}&count=1`);
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.success) {
+        setDlError(json?.error || 'Could not start download');
         return;
       }
-      const blob = await res.blob();
-      const disp = res.headers.get('Content-Disposition') || '';
-      const name = disp.match(/filename="([^"]+)"/)?.[1] || 'bulk-images.zip';
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = name;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      if (!json.count) {
+        setDlError('No images found for this period');
+        return;
+      }
+      const frame = document.createElement('iframe');
+      frame.style.display = 'none';
+      frame.src = `/casetool/api/bulk-download?${params}`;
+      document.body.appendChild(frame);
+      setTimeout(() => frame.remove(), 10 * 60 * 1000);
+      setDlNote(`Downloading ${json.count} image${json.count === 1 ? '' : 's'} — check your browser downloads.`);
     } catch {
-      setDlError('Download failed');
+      setDlError('Could not start download');
     } finally {
       setDl(null);
     }
@@ -168,19 +174,20 @@ export default function BulkBillingPage() {
         </p>
         <div className={styles.dlRow}>
           <button className={styles.dlBtn} disabled={!!dl} onClick={() => download('today', 'range=today')}>
-            <Download size={14} /> {dl === 'today' ? 'Zipping…' : 'Today'}
+            <Download size={14} /> {dl === 'today' ? 'Starting…' : 'Today'}
           </button>
           <button className={styles.dlBtn} disabled={!!dl} onClick={() => download('week', 'range=week')}>
-            <Download size={14} /> {dl === 'week' ? 'Zipping…' : 'This week'}
+            <Download size={14} /> {dl === 'week' ? 'Starting…' : 'This week'}
           </button>
           <button className={styles.dlBtn} disabled={!!dl} onClick={() => download('month', 'range=month')}>
-            <Download size={14} /> {dl === 'month' ? 'Zipping…' : 'Last 30 days'}
+            <Download size={14} /> {dl === 'month' ? 'Starting…' : 'Last 30 days'}
           </button>
           <button className={`${styles.dlBtn} ${styles.dlPrimary}`} disabled={!!dl} onClick={() => download('all', 'range=all')}>
-            <Download size={14} /> {dl === 'all' ? 'Zipping…' : 'All time'}
+            <Download size={14} /> {dl === 'all' ? 'Starting…' : 'All time'}
           </button>
         </div>
         {dlError && <p className={styles.dlErr}>{dlError}</p>}
+        {dlNote && <p className={styles.dlOk}>{dlNote}</p>}
       </section>
 
       <section className={styles.panel}>
@@ -243,7 +250,7 @@ export default function BulkBillingPage() {
                         disabled={!!dl}
                         onClick={() => download(`day-${dayKey(d.day)}`, `day=${dayKey(d.day)}`)}
                       >
-                        <Download size={12} /> {dl === `day-${dayKey(d.day)}` ? 'Zipping…' : 'Download'}
+                        <Download size={12} /> {dl === `day-${dayKey(d.day)}` ? 'Starting…' : 'Download'}
                       </button>
                     </td>
                   </tr>

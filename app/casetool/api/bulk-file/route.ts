@@ -30,10 +30,20 @@ export async function GET(request: NextRequest) {
   }
   const buffer = await readFile(filePath);
   const ext = m[1].toLowerCase();
-  return new NextResponse(buffer, {
-    headers: {
-      'Content-Type': MIME[ext] || 'application/octet-stream',
-      'Cache-Control': 'public, max-age=31536000, immutable',
-    },
-  });
+  const headers: Record<string, string> = {
+    'Content-Type': MIME[ext] || 'application/octet-stream',
+    'Cache-Control': 'public, max-age=31536000, immutable',
+  };
+
+  // ?download=<phone model> saves the file under that name instead of the
+  // internal generated file name.
+  const download = request.nextUrl.searchParams.get('download');
+  if (download) {
+    const stem = download.replace(/\.[a-z0-9]+$/i, '').replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim();
+    const safe = (stem || 'image') + '.' + ext;
+    headers['Content-Disposition'] =
+      `attachment; filename="${safe.replace(/[^\x20-\x7E]/g, '_')}"; filename*=UTF-8''${encodeURIComponent(safe)}`;
+  }
+
+  return new NextResponse(new Uint8Array(buffer), { headers });
 }

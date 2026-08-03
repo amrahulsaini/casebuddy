@@ -29,6 +29,10 @@ interface Billing {
 const refUrl = (fileName: string, caseType: string) =>
   `/casetool/api/bulk-thumb?name=${encodeURIComponent(fileName)}&case_type=${encodeURIComponent(caseType || 'transparent')}`;
 
+/** Single-image download URL — saves the file under the phone model's name. */
+const oneUrl = (genUrl: string, modelName: string) =>
+  `${genUrl}${genUrl.includes('?') ? '&' : '?'}download=${encodeURIComponent(modelName || 'image')}`;
+
 export default function BulkBillingPage() {
   const [authed, setAuthed] = useState(false);
   const [passInput, setPassInput] = useState('');
@@ -268,7 +272,7 @@ export default function BulkBillingPage() {
           <div className={styles.tableWrap}>
             <table className={styles.table}>
               <thead>
-                <tr><th>#</th><th>Reference</th><th>Generated</th><th>Model</th><th>Image model</th><th>Status</th><th>Billed</th><th>When</th></tr>
+                <tr><th>#</th><th>Reference</th><th>Generated</th><th>Model</th><th>Image model</th><th>Status</th><th>Billed</th><th>When</th><th>Save</th></tr>
               </thead>
               <tbody>
                 {data.recent.map(r => (
@@ -290,6 +294,13 @@ export default function BulkBillingPage() {
                     <td><span className={r.status === 'success' ? styles.pillOk : styles.pillBad}>{r.status}</span></td>
                     <td><b>{fmt(r.costInr)}</b></td>
                     <td>{new Date(r.createdAt).toLocaleString('en-IN')}</td>
+                    <td>
+                      {r.genUrl
+                        ? <a className={styles.dlSmall} href={oneUrl(r.genUrl, r.modelName)} download>
+                            <Download size={12} /> Save
+                          </a>
+                        : <span className={styles.dash}>—</span>}
+                    </td>
                   </tr>
                 ))}
               </tbody>

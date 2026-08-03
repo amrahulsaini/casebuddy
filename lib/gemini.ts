@@ -202,10 +202,14 @@ export function buildCaseTypePrompt(
         `The phone back colour must be "${bc}".`
       );
     }
-    let prompt = `Create 2-panel grid (1x2 horizontal layout) with these exact panels:\n${panelList}`;
+    let prompt = `Create 2-panel grid (1x2 horizontal layout) for the phone "${phoneModel}" with these exact panels:\n${panelList}`;
     if (bc) {
       prompt += `\n\nBACK COLOR (MANDATORY): render the phone body seen through the clear case in Panel 1 as a REAL phone back in "${bc}" — a soft even MATTE "${bc}" finish under flat head-on light, the same uniform "${bc}" across the whole back edge to edge. NO diagonal light streak, NO slanted bright band, NO crossing X glare, NO mirror reflection, NO gradient, no other colour, and not flat poster paint.`;
+    } else {
+      prompt += `\n\nPHONE COLOR (IMPORTANT): the phone in the case is "${phoneModel}". Use the REAL signature factory back colour that THIS specific model actually ships in — every brand and model has its own real colour (green, black, graphite, mint, coral, purple, gold, teal, etc.), so the colour must vary per model and match "${phoneModel}". Do NOT default to blue every time. If the model's only real colours are plain white or silver, use its darkest real colour instead. Keep it a soft even MATTE finish, one uniform shade edge to edge, with no diagonal streak or glare.`;
     }
+    prompt += `\n\nNO LOGOS OR TEXT: the phone back, camera module, and screen must be completely clean — NO brand name, NO brand logo (no Google "G", no "HONOR", no Asus/ROG logo, no Samsung/Vivo/Realme/etc.), NO model number, NO regulatory text, nothing written anywhere on the phone or case.`;
+    prompt += `\n\nLAYOUT: the final image is a SINGLE horizontal row of exactly TWO panels side by side — Panel 1 on the LEFT, Panel 2 on the RIGHT — in landscape orientation. Do NOT stack them vertically, do NOT make a second row, do NOT add extra panels.`;
     return prompt;
   }
 

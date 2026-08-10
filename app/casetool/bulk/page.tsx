@@ -426,7 +426,7 @@ export default function BulkPage() {
   };
 
   const clearAll = async () => {
-    if (!confirm('Clear all uploaded images and saved results for this category?')) return;
+    if (!confirm('Clear all uploaded images and generated results for this category?\n\nBilling and the All API calls log are NOT affected — every past call and its image stay there.')) return;
     items.forEach(i => i.srcUrl && URL.revokeObjectURL(i.srcUrl));
     setItems([]);
     lastIndexRef.current = 0;

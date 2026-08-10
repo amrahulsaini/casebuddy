@@ -31,6 +31,10 @@ const TEXT_MODEL = process.env.TEXT_MODEL || 'gemini-pro-latest';
 export const runtime = 'nodejs';
 export const maxDuration = 300;
 
+// Case types with a clear window: they need literal reproduction (temperature 0)
+// and a background whitening pass to kill the faint grey wash the model adds.
+const CLEAR_CASE_TYPES = new Set(['transparent', 'doyers', 'bulk_doyers']);
+
 function sanitizeFileName(name: string) {
   return name
     .replace(/\.[a-z0-9]{2,5}$/i, '')
@@ -128,7 +132,7 @@ export async function POST(request: NextRequest) {
       generationConfig: {
         // Clear cases need literal reproduction, not creative lighting — any
         // freedom here shows up as invented streaks/shading on the shell.
-        temperature: caseType === 'transparent' || caseType === 'doyers' ? 0 : 0.2,
+        temperature: CLEAR_CASE_TYPES.has(caseType) ? 0 : 0.2,
         topP: 0.9,
         topK: 40,
         candidateCount: 1,
@@ -186,7 +190,7 @@ export async function POST(request: NextRequest) {
     // Clear cases: the model still intermittently renders an off-white
     // background and a faint grey wash over the empty shell even at
     // temperature 0, so snap near-white neutral pixels to true white.
-    if (caseType === 'transparent' || caseType === 'doyers') {
+    if (CLEAR_CASE_TYPES.has(caseType)) {
       try {
         genBuffer = await whitenBackground(genBuffer);
       } catch (e) {

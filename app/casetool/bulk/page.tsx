@@ -574,8 +574,12 @@ export default function BulkPage() {
         </button>
 
         {items.length > 0 && (
-          <button className={styles.btnGhost} onClick={clearAll} title="Clear all">
-            <Trash2 size={15} />
+          <button
+            className={styles.btnDanger}
+            onClick={clearAll}
+            title="Delete all uploaded and generated images for this category (billing is kept)"
+          >
+            <Trash2 size={15} /> Clear All ({items.length})
           </button>
         )}
       </section>

@@ -85,13 +85,18 @@ export default function BulkPage() {
   const stopRef = useRef(false);
   const lastIndexRef = useRef(0);
 
-  // Restore previously generated results + marks from the database on mount.
+  // Restore previously generated results + marks from the database, and reload
+  // whenever the category changes — each category has its own set of rows, so
+  // the grid must never keep showing another category's images.
   useEffect(() => {
+    let cancelled = false;
     (async () => {
       try {
         const res = await fetch(`/casetool/api/bulk-list?case_type=${encodeURIComponent(category)}`);
         const data = await res.json();
-        if (data.success && Array.isArray(data.rows) && data.rows.length) {
+        if (cancelled) return;
+        lastIndexRef.current = 0;
+        if (data.success && Array.isArray(data.rows)) {
           setItems(data.rows.map((r: any, idx: number) => ({
             id: `db_${r.id ?? idx}_${r.file_name}`,
             file: null,
@@ -108,11 +113,13 @@ export default function BulkPage() {
             resolution: r.resolution || undefined,
             costInr: r.cost_inr != null ? Number(r.cost_inr) : undefined,
           })));
+        } else {
+          setItems([]);
         }
       } catch { /* offline / not migrated yet */ }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    return () => { cancelled = true; };
+  }, [category]);
 
   // ---- Range inputs ----
   const [rangeFrom, setRangeFrom] = useState('');
@@ -427,14 +434,23 @@ export default function BulkPage() {
 
   const clearAll = async () => {
     if (!confirm('Clear all uploaded images and generated results for this category?\n\nBilling and the All API calls log are NOT affected — every past call and its image stay there.')) return;
-    items.forEach(i => i.srcUrl && URL.revokeObjectURL(i.srcUrl));
-    setItems([]);
-    lastIndexRef.current = 0;
+    // Delete server-side FIRST and only empty the grid once the server confirms
+    // — otherwise a failed delete looks cleared until the next reload brings
+    // every row back.
     try {
       const fd = new FormData();
       fd.append('case_type', category);
-      await fetch('/casetool/api/bulk-clear', { method: 'POST', body: fd });
-    } catch { /* ignore */ }
+      const res = await fetch('/casetool/api/bulk-clear', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'clear failed');
+      alert(`Cleared ${data.deleted ?? 0} row(s) for "${category}". Billing is untouched.`);
+    } catch (e: any) {
+      alert(`Clear failed: ${e?.message || e}. Nothing was deleted.`);
+      return;
+    }
+    items.forEach(i => i.file && i.srcUrl && URL.revokeObjectURL(i.srcUrl));
+    setItems([]);
+    lastIndexRef.current = 0;
   };
 
   // ============ RENDER ============

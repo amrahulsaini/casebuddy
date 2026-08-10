@@ -14,8 +14,12 @@ export async function POST(request: NextRequest) {
     const form = await request.formData();
     const caseType = (form.get('case_type') as string) || 'transparent';
     await ensureBulkTable(pool);
-    await pool.execute(`DELETE FROM bulk_generations WHERE case_type = ?`, [caseType]);
-    return NextResponse.json({ success: true });
+    // Only bulk_generations is touched: the bulk_api_calls billing log and the
+    // generated PNGs on disk stay, so past billing keeps its images.
+    const [res]: any = await pool.execute(
+      `DELETE FROM bulk_generations WHERE case_type = ?`, [caseType]
+    );
+    return NextResponse.json({ success: true, deleted: res?.affectedRows ?? 0 });
   } catch (e: any) {
     return NextResponse.json({ success: false, error: e?.message || 'clear failed' }, { status: 500 });
   }

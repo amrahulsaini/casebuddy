@@ -497,6 +497,7 @@ export default function BulkPage() {
             <label>Category</label>
             <select value={category} onChange={e => setCategory(e.target.value)}>
               <option value="transparent">Transparent</option>
+              <option value="bulk_doyers">Doyers</option>
             </select>
           </div>
           <div className={styles.field}>
@@ -684,7 +685,7 @@ export default function BulkPage() {
               <b>Steer AI — {editItem.name}</b>
               <button onClick={() => setEditItem(null)}><X size={18} /></button>
             </div>
-            <p className={styles.modalNote}>Add an extra instruction sent to the AI on top of the transparent prompt, then regenerate this one image.</p>
+            <p className={styles.modalNote}>Add an extra instruction sent to the AI on top of the category prompt, then regenerate this one image.</p>
             <textarea
               className={styles.editArea}
               value={editText}

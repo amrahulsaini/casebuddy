@@ -135,7 +135,7 @@
 .divider { width: 1px; height: 26px; background: #e2e4e8; }
 .savingTag { font-size: 12px; color: #b45309; font-weight: 600; }
 
-.uploadBtn, .btn, .btnPrimary, .btnStop, .btnExport, .btnGhost {
+.uploadBtn, .btn, .btnPrimary, .btnStop, .btnExport, .btnGhost, .btnDanger {
   display: inline-flex; align-items: center; gap: 7px;
   padding: 9px 14px; border-radius: 9px; font-size: 13px; font-weight: 600;
   cursor: pointer; border: 1px solid transparent; white-space: nowrap;
@@ -157,6 +157,8 @@
 .btnExport:disabled { opacity: .5; cursor: not-allowed; }
 .btnGhost { background: #fff; color: #6b7280; border-color: #d7dade; }
 .btnGhost:hover { color: #111; border-color: #c4c8cd; }
+.btnDanger { background: #fff; color: #dc2626; border-color: #f0c4c4; }
+.btnDanger:hover { background: #fef2f2; border-color: #dc2626; }
 
 .rangeBox {
   display: flex; align-items: center; gap: 6px; font-size: 12px; color: #6b7280; font-weight: 500;

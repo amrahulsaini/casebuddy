@@ -514,6 +514,7 @@ export default function BulkPage() {
             <select value={category} onChange={e => setCategory(e.target.value)}>
               <option value="transparent">Transparent</option>
               <option value="bulk_doyers">Doyers</option>
+              <option value="black">Black</option>
             </select>
           </div>
           <div className={styles.field}>

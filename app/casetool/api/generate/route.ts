@@ -261,7 +261,7 @@ IMPORTANT: DO NOT RECREATE OR REDESIGN THE CASE. Use the EXACT case from the ref
           // 2. Analyze image and build final prompt (first time only)
           writer.send('status', 'AI analyzing geometry & building master prompt...', 25);
 
-          const analysisPrompt = buildAnalysisPrompt(phoneModel);
+          const analysisPrompt = buildAnalysisPrompt(phoneModel, caseType);
 
           const payload = {
             contents: [

@@ -38,7 +38,21 @@ export async function callGemini(
   return response.json();
 }
 
-export function buildAnalysisPrompt(phoneModel: string): string {
+// Clear-window case types. Everything else (black, matte, printed…) is opaque
+// and must be analysed by COPYING the case's real colour and material.
+const CLEAR_CASE_TYPES = new Set(['transparent', 'doyers', 'bulk_doyers']);
+
+export function isClearCaseType(caseType: string): boolean {
+  return CLEAR_CASE_TYPES.has(caseType);
+}
+
+export function buildAnalysisPrompt(phoneModel: string, caseType: string = 'transparent'): string {
+  // Opaque cases: the clear-case analysis below tells the model the case is
+  // "colorless water-clear plastic", which made black cases come out
+  // see-through. They get their own analysis that reads colour from the photo.
+  if (!isClearCaseType(caseType)) {
+    return buildOpaqueAnalysisPrompt(phoneModel);
+  }
   return `You are preparing a master prompt for premium ecommerce phone-case mockups.
 
 Context:
@@ -108,6 +122,76 @@ Return strict JSON:
   "screen_treatment": "Front display uses realistic dark glass with a subtle premium abstract gradient wallpaper, not plain white or solid black.",
   "case_description": "Detailed case description with exact frame color, transparent panel behavior, material finish, and camera cutout geometry.",
   "final_generation_prompt": "Exact prompt text that combines the phone specs, phone finish, case appearance, screen treatment, and hard constraints above."
+}
+
+Make case_description very detailed and color-accurate.`;
+}
+
+// Analysis for OPAQUE cases (black, matte, printed). The case has its own real
+// colour, material, and artwork, and all of it is copied from the reference —
+// the opposite of the clear-case analysis above.
+function buildOpaqueAnalysisPrompt(phoneModel: string): string {
+  return `You are preparing a master prompt for premium ecommerce phone-case mockups.
+
+Context:
+- The uploaded image is the seller's real physical case reference.
+- HOW TO READ IT: it may be a casual snapshot, possibly held in a hand against a plain wall. Ignore the hand, fingers, skin, and the wall — they are not part of the product. Everything else you see IS the case.
+- THIS CASE IS OPAQUE. It is NOT transparent, NOT clear, NOT see-through, and NOT water-clear plastic. It has its own solid colour, material, and finish, and the phone inside it is completely hidden by the case except where the case has a real physical opening (camera cutout, button cutouts, port cutout, screen side).
+- Final images must show "${phoneModel}" fitted into this exact case.
+- Main failure to avoid: describing or rendering this opaque case as transparent, clear, tinted, or showing the phone body through its back.
+
+STEP 1: Determine "${phoneModel}" hardware and authentic appearance
+- Rear camera count
+- Torch / flash presence
+- Camera arrangement
+- Camera module position
+- Front camera style (punch-hole, notch, bezel)
+- Note: the phone's own body colour is mostly IRRELEVANT here, because the opaque case covers the back. Only the parts visible through the camera cutout and around the edges matter.
+
+STEP 2: Analyze the uploaded case reference — COLOR, MATERIAL AND GEOMETRY
+Describe the case exactly as photographed:
+- Its exact colour (and every colour, if multi-tone), reported faithfully — if it is black, say black
+- Its material and surface finish: matte, glossy, soft-touch, rubberised, frosted, leather, silicone, hard polycarbonate, metallic, etc.
+- Any print, artwork, pattern, texture, embossing, or two-tone split, and exactly where it sits
+- Camera cutout shape, size, and placement, and the raised camera-protection lip around it
+- Corner shape and thickness, side lip thickness, button cutouts, and port cutout
+- Outer silhouette and proportions
+- Any interior lining or contrasting inner colour visible in the photo
+
+CRITICAL:
+- Report the case's REAL colour and material from the photo. Never call it colorless, clear, transparent, or untinted unless the case genuinely has a transparent section, and then say precisely which section.
+- Do not mention the hand, fingers, skin, or the background anywhere in your output.
+- The case's back covers the phone completely: do NOT describe the phone's back panel as visible through it.
+
+STEP 3: Create the generation prompt
+Hard requirements for final_generation_prompt:
+- State the exact camera count and camera layout for ${phoneModel}
+- State the case's exact colour, material, finish, and any artwork, and require them reproduced identically in every panel
+- State explicitly that the case is OPAQUE and that the phone's back is NOT visible through it
+- State that the case colour, artwork, geometry, cutouts, camera lip, and lip thickness must match the uploaded reference exactly
+- State that any front-facing phone screen must show realistic front glass with a tasteful neutral abstract wallpaper or lockscreen gradient
+- Explicitly forbid a blank white screen and a solid black screen
+- State that all panels must reuse one identical phone-and-case asset, changing only angle, crop, or hand pose
+- Forbid logos, brand names, watermarks, and phone model text anywhere on the case or screen
+
+Return strict JSON:
+
+{
+  "phone_model_camera_specs": {
+    "model_name": "${phoneModel}",
+    "rear_camera_count": 3,
+    "has_torch_light": true,
+    "camera_arrangement": "vertical",
+    "camera_island_shape": "rectangular",
+    "camera_module_position": "top-left",
+    "front_camera_style": "center punch-hole",
+    "lens_sizes": "main + ultrawide + macro"
+  },
+  "phone_model_description": "${phoneModel} has 3 rear cameras in a top-left rectangular module with flash.",
+  "phone_finish_description": "Not visible — the opaque case covers the phone's back panel entirely.",
+  "screen_treatment": "Front display uses realistic dark glass with a subtle premium abstract gradient wallpaper, not plain white or solid black.",
+  "case_description": "Detailed case description with exact colour, material, finish, artwork, and camera cutout geometry, copied faithfully from the reference.",
+  "final_generation_prompt": "Exact prompt text that combines the phone specs, the opaque case appearance, screen treatment, and hard constraints above."
 }
 
 Make case_description very detailed and color-accurate.`;

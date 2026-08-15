@@ -46,6 +46,8 @@ export async function POST(request: NextRequest) {
     const modelKey = (form.get('image_model') as string) || 'nano';
     const resolution = ((form.get('resolution') as string) || '1k') as Resolution;
     const runAnalysis = (form.get('run_analysis') as string) === 'true';
+    // Opaque case types need the opaque analysis, or the case comes out clear.
+    const caseType = ((form.get('case_type') as string) || 'transparent').trim();
     const applyWhiten = (form.get('whiten') as string) !== 'false';
     const temperature = parseFloat((form.get('temperature') as string) || '0');
     const apiKey = ((form.get('api_key') as string) || '').trim() || ENV_GEMINI_API_KEY;
@@ -66,7 +68,7 @@ export async function POST(request: NextRequest) {
         `https://generativelanguage.googleapis.com/v1beta/models/${TEXT_MODEL}:generateContent`,
         {
           contents: [{ role: 'user', parts: [
-            { text: buildAnalysisPrompt(phoneModel) },
+            { text: buildAnalysisPrompt(phoneModel, caseType) },
             { inlineData: { mimeType, data: imgB64 } },
           ] }],
           generationConfig: { responseMimeType: 'application/json' },

@@ -15,6 +15,7 @@ import {
   buildAnalysisPrompt,
   getAngleDescriptions,
   buildCaseTypePrompt,
+  isClearCaseType,
 } from '@/lib/gemini';
 import pool from '@/lib/db';
 import { ensureBulkTable } from '@/lib/bulk-table';
@@ -30,10 +31,6 @@ const TEXT_MODEL = process.env.TEXT_MODEL || 'gemini-pro-latest';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
-
-// Case types with a clear window: they need literal reproduction (temperature 0)
-// and a background whitening pass to kill the faint grey wash the model adds.
-const CLEAR_CASE_TYPES = new Set(['transparent', 'doyers', 'bulk_doyers']);
 
 function sanitizeFileName(name: string) {
   return name
@@ -76,7 +73,7 @@ export async function POST(request: NextRequest) {
     if (reusePrompt) {
       finalPrompt = reusePrompt;
     } else {
-      const analysisPrompt = buildAnalysisPrompt(phoneModel);
+      const analysisPrompt = buildAnalysisPrompt(phoneModel, caseType);
       const payload = {
         contents: [
           {
@@ -132,7 +129,7 @@ export async function POST(request: NextRequest) {
       generationConfig: {
         // Clear cases need literal reproduction, not creative lighting — any
         // freedom here shows up as invented streaks/shading on the shell.
-        temperature: CLEAR_CASE_TYPES.has(caseType) ? 0 : 0.2,
+        temperature: isClearCaseType(caseType) ? 0 : 0.2,
         topP: 0.9,
         topK: 40,
         candidateCount: 1,
@@ -190,7 +187,7 @@ export async function POST(request: NextRequest) {
     // Clear cases: the model still intermittently renders an off-white
     // background and a faint grey wash over the empty shell even at
     // temperature 0, so snap near-white neutral pixels to true white.
-    if (CLEAR_CASE_TYPES.has(caseType)) {
+    if (isClearCaseType(caseType)) {
       try {
         genBuffer = await whitenBackground(genBuffer);
       } catch (e) {

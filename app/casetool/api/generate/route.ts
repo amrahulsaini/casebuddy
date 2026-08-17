@@ -13,6 +13,7 @@ import {
   callGemini,
   buildAnalysisPrompt,
   getAngleDescriptions,
+  SHARPNESS_LOCK,
 } from '@/lib/gemini';
 import { StreamWriter } from '@/lib/stream-helpers';
 import { whitenBackground } from '@/lib/whiten';
@@ -108,7 +109,7 @@ function buildCaseTypePrompt(
     ? angleListText.replace(/back panel/gi, `back panel (solid uniform ${trimmedBackColor})`)
     : angleListText;
 
-  const mainPrompt = `${streakLock}${cornerLock}${colorLock}Create a premium ${gridLayout} ecommerce collage for "${phoneModel}" using the uploaded reference image as the non-negotiable case template.
+  const mainPrompt = `${SHARPNESS_LOCK}\n\n${streakLock}${cornerLock}${colorLock}Create a premium ${gridLayout} ecommerce collage for "${phoneModel}" using the uploaded reference image as the non-negotiable case template.
 
 MASTER CASE ANALYSIS:
 ${finalPrompt}

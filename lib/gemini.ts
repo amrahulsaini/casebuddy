@@ -70,9 +70,9 @@ STEP 1: Determine "${phoneModel}" hardware and authentic appearance
 - Camera module position
 - Front camera style (punch-hole, notch, bezel)
 - A REAL factory color for THIS exact model, reproduced as a SOLID, OPAQUE back panel of one definite color
-- COLOR CHOICE RULE (IMPORTANT): Almost every model ships in several official colors. From that model's REAL official color options, choose a RICH, SATURATED, ATTRACTIVE one — for example deep green, deep blue, purple, teal, or a true deep black. NEVER choose white, silver, light grey, titanium, graphite, gunmetal, beige, or any pale/washed-out neutral, even if such a color exists for the model: those look washed out through a clear case and are not wanted. If the model genuinely only ships in pale neutrals, use a deep black instead.
+- COLOR CHOICE RULE (IMPORTANT — REPORT THE PHONE'S ACTUAL COLOR): Report the colour "${phoneModel}" ACTUALLY has — its primary/signature launch colour, exactly as it appears in the manufacturer's own product photos of this model. Name that real colour precisely (for example "pearl white", "champagne gold", "lavender purple", "titanium grey", "midnight black", "mint green"). Pale and neutral colours are CORRECT when they are the model's real colour: white, off-white, silver, light grey, champagne, beige and titanium must be reported as such and NEVER swapped for a darker or more vivid colour. Do NOT choose a colour because it looks attractive, rich, or saturated. Do NOT default to green — green belongs only to models that genuinely ship in green. Different models must yield different colours; if two different models get the same colour from you, you are guessing instead of recalling the real product.
 - Do NOT add any pattern, print, weave, carbon-fiber look, or surface texture the real phone does not have. The back is one smooth, solid, evenly-coloured panel.
-- The back must read as a solid, smooth, opaque panel in one vivid color. Avoid a translucent see-through smoky-grey gradient with no solid color behind the glass.
+- The back must read as a solid, smooth, opaque panel in the model's one true real colour. Avoid a translucent see-through smoky-grey gradient with no solid color behind the glass.
 
 STEP 2: Analyze the uploaded case reference — GEOMETRY ONLY
 Describe ONLY physical shape facts, ignoring the hand and the wall behind the case:
@@ -89,7 +89,7 @@ CRITICAL:
 STEP 3: Create the generation prompt
 Hard requirements for final_generation_prompt:
 - State the exact camera count and camera layout for ${phoneModel}
-- State the chosen RICH SATURATED factory phone color (never white/silver/grey/titanium/graphite) and require it consistently in every panel
+- State the model's ACTUAL factory phone colour by name — whatever it really is, pale neutrals included — and require that exact colour consistently in every panel
 - State that any transparent or open case area must reveal the actual phone body beneath it
 - State that the phone seen through any clear/transparent case area is a SOLID, OPAQUE back panel in the phone's TRUE real color that fills the entire window, with the clear case acting only as colorless glass on top (it adds no tint of its own)
 - State that the back must use the phone's real factory color and real smooth finish; explicitly forbid inventing colors, patterns, prints, weaves, carbon-fiber, or textures the real phone does not have
@@ -118,7 +118,7 @@ Return strict JSON:
     "lens_sizes": "main + ultrawide + macro"
   },
   "phone_model_description": "${phoneModel} has 3 rear cameras in a top-left rectangular module with flash.",
-  "phone_finish_description": "A rich saturated REAL factory color for this model reproduced as a SOLID OPAQUE smooth back panel (e.g., deep forest green, deep blue, purple, or true deep black — never white, silver, grey, titanium, or graphite), with no invented pattern or texture and no translucent smoke-grey see-through gradient.",
+  "phone_finish_description": "The model's ACTUAL factory colour, named precisely, reproduced as a SOLID OPAQUE smooth back panel (whatever it really is — pearl white, champagne, silver, titanium grey, black, purple, green…), with no invented pattern or texture and no translucent smoke-grey see-through gradient.",
   "screen_treatment": "Front display uses realistic dark glass with a subtle premium abstract gradient wallpaper, not plain white or solid black.",
   "case_description": "Detailed case description with exact frame color, transparent panel behavior, material finish, and camera cutout geometry.",
   "final_generation_prompt": "Exact prompt text that combines the phone specs, phone finish, case appearance, screen treatment, and hard constraints above."
@@ -303,7 +303,7 @@ export function buildCaseTypePrompt(
     const bc = backColor.trim();
     if (bc) {
       panelList = panelList.replace(
-        "Choose ONE of the model's real attractive launch colours (avoid plain white or silver).",
+        "Use the ACTUAL factory body colour that this exact model really ships in, including pale ones such as white, silver, champagne or light grey when that is its real colour, and never default to green.",
         `The phone back colour must be "${bc}".`
       );
     }
@@ -323,11 +323,14 @@ export function buildCaseTypePrompt(
     if (bc) {
       prompt += `\n\nBACK COLOR (MANDATORY): render the phone body seen through the clear window in every panel as a REAL phone back in "${bc}" — a soft even MATTE "${bc}" finish under flat head-on light, the same uniform "${bc}" across the whole back edge to edge. NO diagonal light streak, NO slanted bright band, NO crossing X glare, NO mirror reflection, NO gradient, no other colour, and not flat poster paint.`;
     } else {
-      prompt += `\n\nPHONE COLOR (IMPORTANT): the phone in the case is "${phoneModel}". Use the REAL signature factory back colour that THIS specific model actually ships in — every brand and model has its own real colour (green, black, graphite, mint, coral, purple, gold, teal, etc.), so the colour must vary per model and match "${phoneModel}". Do NOT default to blue every time. If the model's only real colours are plain white or silver, use its darkest real colour instead. Keep it a soft even MATTE finish, one uniform shade edge to edge, with no diagonal streak or glare.`;
+      prompt += `\n\nPHONE COLOR — RENDER THE REAL BODY COLOUR OF "${phoneModel}" (MANDATORY): Recall how "${phoneModel}" actually looks in the manufacturer's own product photos and paint its back panel THAT colour. The colour comes from the real product, never from what looks good. DO NOT DEFAULT TO GREEN: green is currently being produced for almost every model and that is WRONG — use green ONLY if "${phoneModel}" genuinely ships in green, and the same applies to blue. PALE AND NEUTRAL COLOURS ARE CORRECT WHEN REAL: if this model is white, off-white, pearl, silver, champagne, gold, light grey or titanium, render exactly that pale colour — do NOT darken it, do NOT saturate it, and do NOT substitute a vivid colour for it. Two different phone models must not come out the same colour unless they really are the same colour. Keep it a soft even MATTE finish, one uniform shade edge to edge, with no diagonal streak or glare.`;
     }
     // Each panel is rendered semi-independently, so without an explicit lock the
     // model picks a different phone colour per cell.
     prompt += `\n\nONE COLOUR ACROSS ALL PANELS — HARD REQUIREMENT: All four panels show the SAME SINGLE physical phone in the SAME SINGLE physical case, photographed four times from different angles. It is ONE product, not four variants. Decide the phone's back colour ONCE${bc ? ` — it is "${bc}"` : ''}, then paint it the IDENTICAL colour in every panel that shows a phone (panels 1, 3 and 4): the same hue, the same saturation, the same brightness, the same matte finish, pixel-matched between panels. If you sampled the phone's back in panel 1, panel 3 and panel 4, all three must return the same colour value. Do NOT show a green phone in one panel and a blue, black, grey, purple or silver one in another. Do NOT vary the shade, tone, or lighting of the colour between panels. The case's bumper frame is likewise the SAME single colour from the reference in ALL FOUR panels, including the empty case in panel 2 — never black in one cell and grey, white or silver in another. Any colour difference between panels is a hard defect and makes the image unusable.`;
+    if (!bc) {
+      prompt += `\n\nRESEARCHED PHONE REFERENCE — the real appearance of this phone, researched for this exact model. Take the phone body colour, finish, and camera layout from it, and ignore anything in it about the case, panels, layout, or background (the rules above win on those):\n${finalPrompt}`;
+    }
     prompt += `\n\nNO LOGOS OR TEXT: the phone back, camera module, screen, and case must be completely clean — NO brand name, NO brand logo (no Google "G", no "HONOR", no Asus/ROG logo, no Samsung/Vivo/Realme/etc.), NO model number, NO regulatory text, NO slogan, NO caption, NO watermark, nothing written anywhere in any panel.`;
     prompt += `\n\nLAYOUT: the final image is ONE 2x2 grid of exactly FOUR equal cells — cell 1 = PANEL 1 (top-left), cell 2 = PANEL 2 (top-right), cell 3 = PANEL 3 (bottom-left), cell 4 = PANEL 4 (bottom-right). Every cell is the same size. Do NOT skip, repeat, or add panels, and do NOT make any cell a wider hero banner. A panel that describes two phones or two items is still ONE single cell — keep them together inside that cell as a single photo.`;
     return prompt;
@@ -342,7 +345,7 @@ export function buildCaseTypePrompt(
     if (bc) {
       // Use the exact requested colour instead of picking one automatically.
       panelList = panelList.replace(
-        "Choose ONE of the model's real attractive launch colours (avoid plain white or silver).",
+        "Use the ACTUAL factory body colour that this exact model really ships in, including pale ones such as white, silver, champagne or light grey when that is its real colour, and never default to green.",
         `The phone back colour must be "${bc}".`
       );
     }
@@ -350,7 +353,12 @@ export function buildCaseTypePrompt(
     if (bc) {
       prompt += `\n\nBACK COLOR (MANDATORY): render the phone body seen through the clear case in Panel 1 as a REAL phone back in "${bc}" — a soft even MATTE "${bc}" finish under flat head-on light, the same uniform "${bc}" across the whole back edge to edge. NO diagonal light streak, NO slanted bright band, NO crossing X glare, NO mirror reflection, NO gradient, no other colour, and not flat poster paint.`;
     } else {
-      prompt += `\n\nPHONE COLOR (IMPORTANT): the phone in the case is "${phoneModel}". Use the REAL signature factory back colour that THIS specific model actually ships in — every brand and model has its own real colour (green, black, graphite, mint, coral, purple, gold, teal, etc.), so the colour must vary per model and match "${phoneModel}". Do NOT default to blue every time. If the model's only real colours are plain white or silver, use its darkest real colour instead. Keep it a soft even MATTE finish, one uniform shade edge to edge, with no diagonal streak or glare.`;
+      prompt += `\n\nPHONE COLOR — RENDER THE REAL BODY COLOUR OF "${phoneModel}" (MANDATORY): Recall how "${phoneModel}" actually looks in the manufacturer's own product photos and paint its back panel THAT colour. The colour comes from the real product, never from what looks good. DO NOT DEFAULT TO GREEN: green is currently being produced for almost every model and that is WRONG — use green ONLY if "${phoneModel}" genuinely ships in green, and the same applies to blue. PALE AND NEUTRAL COLOURS ARE CORRECT WHEN REAL: if this model is white, off-white, pearl, silver, champagne, gold, light grey or titanium, render exactly that pale colour — do NOT darken it, do NOT saturate it, and do NOT substitute a vivid colour for it. Two different phone models must not come out the same colour unless they really are the same colour. Keep it a soft even MATTE finish, one uniform shade edge to edge, with no diagonal streak or glare.`;
+    }
+    // The researched analysis was being thrown away here, leaving the image
+    // model to invent a colour (it settled on green for every phone).
+    if (!bc) {
+      prompt += `\n\nRESEARCHED PHONE REFERENCE — the real appearance of this phone, researched for this exact model. Take the phone body colour, finish, and camera layout from it, and ignore anything in it about the case, panels, layout, or background (the rules above win on those):\n${finalPrompt}`;
     }
     prompt += `\n\nNO LOGOS OR TEXT: the phone back, camera module, and screen must be completely clean — NO brand name, NO brand logo (no Google "G", no "HONOR", no Asus/ROG logo, no Samsung/Vivo/Realme/etc.), NO model number, NO regulatory text, nothing written anywhere on the phone or case.`;
     prompt += `\n\n${SHARPNESS_LOCK}`;
@@ -388,7 +396,7 @@ export function buildCaseTypePrompt(
   // plain white/silver/grey. Force a rich saturated factory color instead.
   const noWhiteDefaultConstraint =
     !hasBackColor && (caseType === 'doyers' || caseType === 'transparent')
-      ? '\n- PHONE BODY COLOR (MANDATORY): The phone body seen through the clear case must be a rich, saturated, attractive factory color such as deep green, blue, purple, teal, or black. It must NEVER be plain white, silver, light grey, off-white, cream, or any pale/washed-out color. Pick a vivid non-white color and keep it as ONE flat matte uniform fill across the whole back. If the analysis suggests white/silver/grey, override it with a vivid color instead.\n- BACK SURFACE MUST BE SMOOTH AND PLAIN (MANDATORY): The back panel is one smooth flat matte painted surface. Do NOT invent any texture or pattern: NO leather or faux-leather, NO stitching, NO seams, NO vertical or horizontal divider line down the middle, NO panel split, NO two-tone halves, NO carbon-fiber, NO weave, NO grain, NO ribs, NO frosted pattern, NO logo, NO embossing. It is a clean uniform colored surface edge to edge with nothing printed or molded on it.'
+      ? '\n- PHONE BODY COLOR (MANDATORY): The phone body seen through the clear case must be the REAL factory colour of this exact phone model, as it appears in official manufacturer product photos. Pale and neutral colours are CORRECT when they are the real colour of that model — white, off-white, pearl, silver, champagne, gold, light grey and titanium must be rendered as exactly that, never darkened, never saturated, and never swapped for a vivid colour. DO NOT DEFAULT TO GREEN: use green only for models that genuinely ship in green, and the same for blue. Two different models must not come out the same colour unless they really are the same colour. Keep the real colour as ONE flat matte uniform fill across the whole back.\n- BACK SURFACE MUST BE SMOOTH AND PLAIN (MANDATORY): The back panel is one smooth flat matte painted surface. Do NOT invent any texture or pattern: NO leather or faux-leather, NO stitching, NO seams, NO vertical or horizontal divider line down the middle, NO panel split, NO two-tone halves, NO carbon-fiber, NO weave, NO grain, NO ribs, NO frosted pattern, NO logo, NO embossing. It is a clean uniform colored surface edge to edge with nothing printed or molded on it.'
       : '';
 
   // Stated FIRST so it wins over any finish the analysis invented (e.g. "graphite/black").

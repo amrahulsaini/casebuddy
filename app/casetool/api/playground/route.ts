@@ -100,7 +100,10 @@ export async function POST(request: NextRequest) {
           topP: 0.9,
           topK: 40,
           candidateCount: 1,
-          imageConfig: { imageSize: apiImageSize(wanted) },
+          imageConfig: {
+            imageSize: apiImageSize(wanted),
+            ...(caseType === 'bulk_doyers' ? { aspectRatio: '1:1' } : {}),
+          },
         },
       },
       apiKey

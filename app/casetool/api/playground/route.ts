@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
     }
 
     let outBuffer: Buffer = Buffer.from(genB64, 'base64');
-    if (applyWhiten) {
+    if (applyWhiten && caseType !== 'bulk_doyers') {
       try { outBuffer = await whitenBackground(outBuffer); }
       catch (e) { console.error('whiten failed:', e); }
     }

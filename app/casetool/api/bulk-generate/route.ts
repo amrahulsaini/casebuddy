@@ -190,7 +190,8 @@ export async function POST(request: NextRequest) {
     // Clear cases: the model still intermittently renders an off-white
     // background and a faint grey wash over the empty shell even at
     // temperature 0, so snap near-white neutral pixels to true white.
-    if (isClearCaseType(caseType)) {
+    // Global whitening erases pale phone material detail in Doyers images.
+    if (isClearCaseType(caseType) && caseType !== 'bulk_doyers') {
       try {
         genBuffer = await whitenBackground(genBuffer);
       } catch (e) {

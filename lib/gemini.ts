@@ -270,6 +270,13 @@ export const ANGLE_DESCRIPTIONS: Record<string, string[]> = {
     "PANEL 4 — BOTTOM RIGHT: One fitted phone, complete back visible, held by EXACTLY ONE entirely AI-generated woman's hand, created from scratch from wrist to every fingertip. Treat the uploaded reference as CASE GEOMETRY ONLY: discard ALL source hand, finger, thumb, nail, wrist, arm and skin pixels and shapes. Never trace, reuse, retain, blend, splice or combine any part of the photographed hand with the generated hand. Generate one anatomically coherent hand with five fingers total, consistent skin tone, age, texture, lighting and natural unpainted nails; no second hand, duplicate fingers, extra thumb or disconnected skin fragments. Use a new pose: thumb on the RIGHT side of the image, fingers curling around the LEFT edge, wrist entering from the LOWER RIGHT. Generate wrist, palm and fingers together with new skin texture; never reuse the source grip. Grip from behind and the side edges; visible fingers stay outside the back face and leave the window and camera unobstructed. Keep the complete phone inside the cell.",
   ],
 
+  bulk_black: [
+    "PANEL 1 — TOP LEFT: Two upright phones, both fitted in the reference case, straight-on at eye level with no tilt. The FOREGROUND phone sits right of centre and shows its BACK: the full opaque case back with the phone's real lenses and flash seated inside the case camera openings. The SECOND phone stands directly behind it, shifted LEFT, showing its FRONT: the case bumper wraps a realistic screen with correct bezels and front camera cutout and a soft abstract gradient wallpaper, never blank white or solid black. The foreground phone hides the right two thirds of the second phone, so only a vertical strip of its screen and its left bumper edge shows. Nothing is behind the right side of the foreground phone.",
+    "PANEL 2 — TOP RIGHT: One upright EMPTY reference case viewed straight-on from the back. No phone and no hand. Every camera and flash opening shows the white background straight through. The full case is visible with its side button covers and raised camera rim.",
+    "PANEL 3 — BOTTOM LEFT: The EMPTY reference case bent to prove it is flexible: the soft case is twisted into a smooth S-curve / figure-eight twist, the upper half facing the viewer showing its back and camera openings, the lower half twisted round so its inner side faces the viewer. Same black material, same camera openings, no phone inside, no hand. Above the case, the text \"Flexible Design\" in clean black sans-serif, spelled exactly like that, appearing once.",
+    "PANEL 4 — BOTTOM RIGHT: One fitted phone, complete back visible, held by EXACTLY ONE entirely AI-generated hand with a light natural skin tone, created from scratch from wrist to every fingertip. Treat the uploaded reference as CASE GEOMETRY ONLY: discard ALL source hand, finger, thumb, nail, wrist, arm and skin pixels and shapes, and never reuse, trace or blend any part of the photographed hand. Generate one anatomically coherent hand with five fingers total and natural unpainted nails; no second hand, duplicate fingers or extra thumb. Pose: thumb on the RIGHT edge of the phone, four fingers curling around the LEFT edge, wrist entering from the LOWER RIGHT. Fingers stay on the edges and leave the camera and case back unobstructed. Keep the complete phone inside the cell.",
+  ],
+
   matte: [
     'PANEL 1 (Pure White Background): CRITICAL COLOR MATCH: Use exact colors, exact materials, and exact design from the reference image with pixel-accurate color reproduction. Do not alter colors even slightly. Same phone case from reference image at tilted 45-degree angle. No phone inside. Case positioned on a white cylindrical pedestal. Pedestal is a flat white shape with no physical interaction. Ultra high-key overexposed studio lighting. Even lighting from all directions. No highlights, no reflections, no shading. Pure #FFFFFF infinite background. No gradients, no tonal variation. Ecommerce catalog cutout style. Photoshop background-removed packshot. Negative constraints: no shadows of any kind, no contact shadow, no grounding shadow, no soft shadow, no pedestal shadow, no ambient occlusion, no depth cues, no realism grounding, no vignette, no lighting falloff, no gradient under object, no base shadow, no color changes, no color shifts, no color adjustments. If any shadow appears or colors change, image is incorrect.',
 
@@ -320,6 +327,25 @@ PHONE REFERENCE DATA (use only model hardware and body colour; ignore lighting, 
 ${finalPrompt}
 
 FINAL CHECK: Four equal cells; complete uncropped products; reference-accurate sharp cameras; realistic factory phone materials with natural fine detail and gentle tonal variation, never flat painted fills. No diagonal glare bands or shadow overlays. Panel 4 contains one wholly new generated hand with no retained reference skin. These material rules override any flat-fill, uniform-pixel, matte-swatch or no-shading instruction in the phone reference data above.`;
+  }
+
+  if (caseType === 'bulk_black') {
+    return `Create ONE square ecommerce image for "${phoneModel}": exactly four equal square cells in a 2x2 grid, on pure white #FFFFFF.
+
+REFERENCE: The uploaded photo shows the real case held in a hand. Copy the case exactly: its colour, matte soft-touch material, silhouette, thickness, corners, side button covers, port cutout, raised camera rim and every camera and flash opening with its exact number, shape, size and placement. Ignore the hand, skin and background in that photo. The case is fully OPAQUE: the phone's back is never visible through it. Keep the case one even colour and finish in every cell; do not turn it glossy, grey, transparent or textured.
+
+CAMERA: In fitted views the phone's real lenses, lens rings and flash sit inside the reference camera openings, one per opening, matching "${phoneModel}". In empty-case views every opening shows the white background. Camera openings, lens rings and case rims are crisp and in focus in every cell. Use deep depth of field throughout; no bokeh, blur, haze or focus falloff.
+
+FRAMING: Every phone and case is fully visible, including its top, bottom and all four corners. Leave at least 8% clear margin between products and each cell boundary. Keep consistent scale and realistic proportions. No cropped case, stretched body, inset, extra cell or item crossing into another cell. No drawn grid lines or borders; separate cells with white space.
+
+${getAngleDescriptions('bulk_black').join('\n')}
+
+All four cells use consistent soft diffuse studio lighting that shows the case's edges and depth against white. Keep the background white and free of cast shadows beyond a faint contact shadow. The only text in the whole image is "Flexible Design" in panel 3; no logos, brand names, model text or watermarks on the phone, case or screen.
+
+PHONE REFERENCE DATA (use only camera and screen hardware for "${phoneModel}"; ignore lighting, layout and panel instructions in this data):
+${finalPrompt}
+
+FINAL CHECK: Four equal cells in order; complete uncropped products; the same opaque case in every cell with reference-accurate camera openings; panel 3 twisted and labelled "Flexible Design"; panel 4 contains one wholly new generated hand with no retained reference skin.`;
   }
 
   // TRANSPARENT: use ONLY the two panel instructions, with no extra global

@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
           candidateCount: 1,
           imageConfig: {
             imageSize: apiImageSize(wanted),
-            ...(caseType === 'bulk_doyers' ? { aspectRatio: '1:1' } : {}),
+            ...(caseType === 'bulk_doyers' || caseType === 'bulk_black' ? { aspectRatio: '1:1' } : {}),
           },
         },
       },

@@ -24,6 +24,7 @@ import {
 } from '@/lib/image-pricing';
 import sharp from 'sharp';
 import { whitenBackground } from '@/lib/whiten';
+import { refineBlackGrid } from '@/lib/bulk-black-post';
 
 const ENV_GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 // 'gemini-3-pro-preview' was retired and 404s; use the non-expiring alias.
@@ -198,6 +199,23 @@ export async function POST(request: NextRequest) {
         console.error('whitenBackground failed, using raw output:', e);
       }
     }
+
+    let extraCalls = 0;
+    if (caseType === 'bulk_black') {
+      try {
+        const refined = await refineBlackGrid(genBuffer, {
+          apiKey,
+          modelId: selectedImageModel,
+          refB64: imgB64,
+          refMime: mimeType,
+        });
+        genBuffer = refined.buffer;
+        extraCalls = refined.twistCalls;
+        for (let i = 0; i < extraCalls; i++) await logCall('twist_panel');
+      } catch (e) {
+        console.error('bulk black refine failed, using raw grid:', e);
+      }
+    }
     await writeFile(filePath, genBuffer);
 
     // Measure what was ACTUALLY produced so billing reflects reality rather
@@ -220,7 +238,7 @@ export async function POST(request: NextRequest) {
     await logCall('success', fileName, imageUrl);
 
     // Billed at the fixed per-call rate for the selected model.
-    const cost = { totalInr: callRate, totalUsd: 0 };
+    const cost = { totalInr: callRate * (1 + extraCalls), totalUsd: 0 };
 
     // Persist/Upsert the result. Keep any existing right/wrong mark intact.
     try {
